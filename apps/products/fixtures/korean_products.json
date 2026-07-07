@@ -1,0 +1,54 @@
+[
+  {
+    "model": "products.product",
+    "pk": 1,
+    "fields": {
+      "name": "Green Tea Fresh Cleanser",
+      "brand": "Innisfree",
+      "category": "cleanser",
+      "product_range": "korean",
+      "description": "Gentle cleanser with Jeju green tea extract",
+      "key_ingredients": "Green tea extract, glycerin, water",
+      "full_ingredients": "",
+      "price": "12.99",
+      "sku": "INF-GTC-001",
+      "image_url": "",
+      "suitable_for_skin_types": ["oily", "combination", "normal"],
+      "targets": ["cleansing", "oil-control"],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 2,
+    "fields": {
+      "name": "Snail Mucin Essence",
+      "brand": "COSRX",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "96% snail secretion filtrate for hydration and repair",
+      "key_ingredients": "Snail secretion filtrate, sodium hyaluronate",
+      "full_ingredients": "",
+      "price": "24.99",
+      "sku": "CRX-SNL-001",
+      "image_url": "",
+      "suitable_for_skin_types": ["dry", "combination", "normal"],
+      "targets": ["hydration", "repair", "anti-aging"],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

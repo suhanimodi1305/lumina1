@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% block title %}{{ employee.get_full_name|default:employee.username }} — Employee Detail{% endblock %}
+{% block page_title %}Employee Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Profile Card ── */
+.ep-hero {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
+  border-radius: 20px; padding: 1.75rem 1.5rem;
+  margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  border: 1px solid rgba(13,148,136,.22);
+}
+.ep-hero::before {
+  content: ''; position: absolute; top: -20%; right: -10%; width: 45%; height: 140%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.2) 0%, transparent 65%);
+  pointer-events: none;
+}
+.ep-hero-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.ep-avatar {
+  width: 68px; height: 68px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem; font-weight: 700; color: #fff;
+  border: 3px solid rgba(255,255,255,.15);
+}
+.ep-hero-name  { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: .1rem; }
+.ep-hero-user  { font-size: .82rem; color: rgba(255,255,255,.5); margin-bottom: .4rem; }
+.ep-role-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .22rem .8rem; border-radius: 20px; font-size: .65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.role-super  { background: rgba(201,169,110,.2); color: #c9a96e; border: 1px solid rgba(201,169,110,.35); }
+.role-staff  { background: rgba(13,148,136,.2);  color: #5eead4; border: 1px solid rgba(13,148,136,.3); }
+.role-member { background: rgba(255,255,255,.1); color: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.15); }
+
+/* Stats strip */
+.ep-stats {
+  display: flex; border-top: 1px solid rgba(255,255,255,.07);
+  position: relative; z-index: 1; margin-top: 1.25rem;
+}
+.ep-stat-cell {
+  flex: 1; padding: .85rem .5rem; text-align: center;
+  border-right: 1px solid rgba(255,255,255,.07);
+}
+.ep-stat-cell:last-child { border-right: none; }
+.ep-stat-cell .sv {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; margin-bottom: .18rem;
+}
+.ep-stat-cell .sl { font-size: .58rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.38); }
+
+/* ── Info Card ── */
+.ep-info-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.ep-section-title {
+  font-size: .62rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--muted); margin-bottom: .85rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+.ep-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.ep-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.ep-info-row  { display: flex; flex-direction: column; gap: .2rem; }
+.ep-info-row .lbl {
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted);
+}
+.ep-info-row .val { font-size: .85rem; font-weight: 600; color: var(--text); }
+
+/* Permissions chips */
+.ep-perm-row { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.ep-perm {
+  padding: .2rem .65rem; border-radius: 20px; font-size: .68rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: .3rem;
+}
+.perm-on  { background: rgba(34,197,94,.1);  color: #15803d; border: 1px solid rgba(34,197,94,.2); }
+.perm-off { background: rgba(100,116,139,.08); color: #94a3b8; border: 1px solid rgba(100,116,139,.15); }
+[data-theme="dark"] .perm-on  { color: #86efac; }
+[data-theme="dark"] .perm-off { color: rgba(255,255,255,.3); }
+
+/* ── Login Log Table ── */
+.ep-log-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.ep-log-table thead tr { background: var(--page-bg); border-bottom: 1px solid var(--border); }
+.ep-log-table th {
+  padding: .55rem .85rem; text-align: left;
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); white-space: nowrap;
+}
+.ep-log-table tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+.ep-log-table tbody tr:last-child { border-bottom: none; }
+.ep-log-table tbody tr:hover { background: var(--page-bg); }
+.ep-log-table td { padding: .6rem .85rem; vertical-align: middle; }
+
+.event-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .2rem .65rem; border-radius: 20px; font-size: .68rem; font-weight: 700;
+}
+.ev-login  { background: rgba(34,197,94,.1);  color: #15803d; border: 1px solid rgba(34,197,94,.2); }
+.ev-logout { background: rgba(239,68,68,.1);  color: #991b1b; border: 1px solid rgba(239,68,68,.2); }
+[data-theme="dark"] .ev-login  { color: #86efac; }
+[data-theme="dark"] .ev-logout { color: #fca5a5; }
+
+.ep-log-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  margin-bottom: 1.25rem;
+}
+.ep-log-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.1rem; border-bottom: 1px solid var(--border);
+  background: var(--page-bg);
+}
+.ep-log-header-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: .5rem; }
+.ep-log-overflow { overflow-x: auto; }
+
+.ep-empty-log {
+  text-align: center; padding: 2rem;
+  color: var(--muted); font-size: .82rem;
+}
+.ep-empty-log .e-icon { font-size: 2rem; margin-bottom: .5rem; }
+
+@media (max-width: 560px) {
+  .ep-info-grid { grid-template-columns: 1fr; }
+  .ep-stats { flex-wrap: wrap; }
+  .ep-stat-cell { min-width: 33%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Back nav -->
+<div style="margin-bottom:1rem;">
+  <a href="{% url 'employee:employee_list' %}"
+     style="font-size:.82rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;">
+    <i class="bi bi-arrow-left"></i> All Employees
+  </a>
+</div>
+
+<!-- ── HERO PROFILE CARD ── -->
+<div class="ep-hero">
+  <div class="ep-hero-inner">
+    <div class="ep-avatar">{{ employee.username|first|upper }}</div>
+    <div>
+      <div class="ep-hero-name">{{ employee.get_full_name|default:employee.username }}</div>
+      <div class="ep-hero-user">@{{ employee.username }} &nbsp;·&nbsp; {{ employee.email|default:"No email" }}</div>
+      {% if employee.is_superuser %}
+        <span class="ep-role-badge role-super"><i class="bi bi-shield-fill-check"></i> Superuser</span>
+      {% elif employee.is_staff %}
+        <span class="ep-role-badge role-staff"><i class="bi bi-briefcase-fill"></i> Staff</span>
+      {% else %}
+        <span class="ep-role-badge role-member"><i class="bi bi-person-fill"></i> Member</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="ep-stats">
+    <div class="ep-stat-cell">
+      <div class="sv">{{ total_logins }}</div>
+      <div class="sl">Logins</div>
+    </div>
+    <div class="ep-stat-cell">
+      <div class="sv">{{ total_logouts }}</div>
+      <div class="sl">Logouts</div>
+    </div>
+    <div class="ep-stat-cell">
+      <div class="sv">{{ employee.date_joined|date:"M Y" }}</div>
+      <div class="sl">Joined</div>
+    </div>
+    <div class="ep-stat-cell">
+      <div class="sv">{% if employee.is_active %}<i class="bi bi-check-circle-fill" style="color:#22c55e;font-size:1.5rem;"></i>{% else %}<i class="bi bi-x-circle-fill" style="color:#ef4444;font-size:1.5rem;"></i>{% endif %}</div>
+      <div class="sl">Active</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT INFO ── -->
+<div class="ep-info-card">
+  <div class="ep-section-title">👤 Account Details</div>
+  <div class="ep-info-grid">
+    <div class="ep-info-row">
+      <div class="lbl">Full Name</div>
+      <div class="val">{{ employee.get_full_name|default:"—" }}</div>
+    </div>
+    <div class="ep-info-row">
+      <div class="lbl">Username</div>
+      <div class="val" style="font-family:monospace;">{{ employee.username }}</div>
+    </div>
+    <div class="ep-info-row">
+      <div class="lbl">Email</div>
+      <div class="val">{{ employee.email|default:"—" }}</div>
+    </div>
+    <div class="ep-info-row">
+      <div class="lbl">Date Joined</div>
+      <div class="val">{{ employee.date_joined|date:"M j, Y · g:i A" }}</div>
+    </div>
+    <div class="ep-info-row">
+      <div class="lbl">Last Django Login</div>
+      <div class="val">
+        {% if employee.last_login %}{{ employee.last_login|date:"M j, Y · g:i A" }}{% else %}Never{% endif %}
+      </div>
+    </div>
+    <div class="ep-info-row">
+      <div class="lbl">Last Tracked Login</div>
+      <div class="val">
+        {% if last_login_log %}{{ last_login_log.timestamp|date:"M j, Y · g:i A" }}{% else %}—{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Permissions -->
+  <div style="margin-top:1rem;">
+    <div class="ep-section-title" style="margin-bottom:.6rem;">🔐 Permissions</div>
+    <div class="ep-perm-row">
+      <span class="ep-perm {% if employee.is_active %}perm-on{% else %}perm-off{% endif %}">
+        <i class="bi bi-{% if employee.is_active %}check-circle-fill{% else %}x-circle{% endif %}"></i>
+        Active
+      </span>
+      <span class="ep-perm {% if employee.is_staff %}perm-on{% else %}perm-off{% endif %}">
+        <i class="bi bi-{% if employee.is_staff %}check-circle-fill{% else %}x-circle{% endif %}"></i>
+        Staff
+      </span>
+      <span class="ep-perm {% if employee.is_superuser %}perm-on{% else %}perm-off{% endif %}">
+        <i class="bi bi-{% if employee.is_superuser %}check-circle-fill{% else %}x-circle{% endif %}"></i>
+        Superuser
+      </span>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div style="display:flex;gap:.6rem;margin-top:1.1rem;flex-wrap:wrap;">
+    <a href="{% url 'admin:auth_user_change' employee.pk %}" target="_blank"
+       style="padding:.45rem 1rem;background:#0d9488;color:#fff;border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;">
+      <i class="bi bi-pencil"></i> Edit in Admin
+    </a>
+    <a href="{% url 'employee:employee_list' %}"
+       style="padding:.45rem 1rem;background:var(--page-bg);color:var(--text);border:1px solid var(--border);border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;">
+      <i class="bi bi-people"></i> All Employees
+    </a>
+  </div>
+</div>
+
+<!-- ── LOGIN / LOGOUT LOG ── -->
+<div class="ep-log-wrap">
+  <div class="ep-log-header">
+    <div class="ep-log-header-title">
+      <i class="bi bi-clock-history" style="color:#0d9488;"></i>
+      Login & Logout History
+    </div>
+    <span style="font-size:.72rem;color:var(--muted);">Last {{ logs|length }} events</span>
+  </div>
+
+  {% if logs %}
+  <div class="ep-log-overflow">
+    <table class="ep-log-table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Date & Time</th>
+          <th>IP Address</th>
+          <th>Session</th>
+          <th>Browser / Device</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>
+            {% if log.event == 'login' %}
+              <span class="event-badge ev-login"><i class="bi bi-box-arrow-in-right"></i> Login</span>
+            {% else %}
+              <span class="event-badge ev-logout"><i class="bi bi-box-arrow-left"></i> Logout</span>
+            {% endif %}
+          </td>
+          <td style="white-space:nowrap;">{{ log.timestamp|date:"M j, Y" }}<br>
+            <span style="font-size:.7rem;color:var(--muted);">{{ log.timestamp|date:"g:i:s A" }}</span>
+          </td>
+          <td style="font-family:monospace;font-size:.75rem;">{{ log.ip_address|default:"—" }}</td>
+          <td style="font-family:monospace;font-size:.68rem;color:var(--muted);">
+            {% if log.session_key %}{{ log.session_key|truncatechars:12 }}{% else %}—{% endif %}
+          </td>
+          <td style="font-size:.72rem;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+              title="{{ log.user_agent }}">
+            {{ log.user_agent|truncatechars:60|default:"—" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="ep-empty-log">
+    <div class="e-icon">🔐</div>
+    <p>No login activity recorded yet.<br>
+    <span style="font-size:.72rem;">Activity is tracked from the moment this log was set up.</span></p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

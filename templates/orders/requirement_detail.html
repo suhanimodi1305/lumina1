@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ req.req_id }} — My Requirement{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:14px;}
+.rd-wrap{max-width:780px;margin:0 auto;padding:0 1rem 3rem;}
+.rd-head{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;color:#fff;}
+.rd-head h1{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;color:#fff;margin:0 0 .25rem;}
+.rd-head .sub{font-size:.75rem;color:rgba(255,255,255,.45);}
+.rd-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;}
+.rd-card h3{font-size:.9rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem;}
+.rd-row{display:flex;justify-content:space-between;font-size:.82rem;padding:.35rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.rd-row:last-child{border-bottom:none;}
+.rd-label{color:var(--muted,#64748b);font-weight:600;}
+.rd-val{color:var(--text,#0f172a);font-weight:500;text-align:right;max-width:60%;}
+.sp{padding:.25rem .75rem;border-radius:20px;font-size:.7rem;font-weight:700;}
+.sp-pending{background:rgba(245,158,11,.15);color:#92400e;}
+.sp-accepted{background:#dbeafe;color:#1e40af;}
+.sp-processing{background:#ede9fe;color:#5b21b6;}
+.sp-dispatched{background:#fce7f3;color:#9d174d;}
+.sp-delivered{background:#dcfce7;color:#166534;}
+.sp-rejected,.sp-cancelled{background:#fee2e2;color:#991b1b;}
+.pp{padding:.2rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;}
+.pp-low{background:#f1f5f9;color:#64748b;}
+.pp-normal{background:#dbeafe;color:#1e40af;}
+.pp-high{background:#ffedd5;color:#c2410c;}
+.pp-urgent{background:#fee2e2;color:#991b1b;}
+.prod-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(13,148,136,.1);color:#0d9488;margin:.15rem;}
+.addr-box{background:var(--surface-alt,#f5f3f0);border-radius:10px;padding:.85rem;font-size:.82rem;line-height:1.7;}
+[data-theme="dark"] .rd-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .addr-box{background:#1a1a28;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rd-wrap">
+  <div class="rd-head">
+    <h1><i class="bi bi-clipboard-heart" style="color:#0d9488;margin-right:.4rem;"></i>{{ req.title }}</h1>
+    <div class="sub">ID: <strong style="color:#fff;font-family:monospace;">{{ req.req_id }}</strong>
+      &nbsp;·&nbsp; Submitted {{ req.created_at|date:"d M Y" }}</div>
+  </div>
+
+  <!-- Status -->
+  <div class="rd-card">
+    <h3><i class="bi bi-activity" style="color:var(--teal);"></i> Status</h3>
+    <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+      <span class="sp sp-{{ req.status }}" style="font-size:.82rem;padding:.3rem .9rem;">
+        {{ req.get_status_display }}
+      </span>
+      <span class="pp pp-{{ req.priority }}">{{ req.get_priority_display }} Priority</span>
+      {% if req.assigned_to %}
+      <span style="font-size:.78rem;color:#0d9488;font-weight:600;">
+        <i class="bi bi-person-check"></i> {{ req.assigned_to.get_full_name|default:req.assigned_to.username }}
+      </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Requirement Details -->
+  <div class="rd-card">
+    <h3><i class="bi bi-stars" style="color:var(--gold);"></i> Requirement Details</h3>
+    <div class="rd-row"><span class="rd-label">Quantity</span><span class="rd-val">{{ req.quantity }}</span></div>
+    {% if req.requirement_notes %}
+    <div style="margin-top:.65rem;">
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted,#64748b);margin-bottom:.35rem;">Notes / Skin Concerns</div>
+      <div style="font-size:.82rem;color:var(--text,#0f172a);background:var(--surface-alt,#f5f3f0);border-radius:8px;padding:.65rem;">{{ req.requirement_notes }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Products -->
+  {% if req.products.exists or req.custom_product %}
+  <div class="rd-card">
+    <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Requested Products</h3>
+    {% for p in req.products.all %}
+    <span class="prod-chip"><i class="bi bi-check-circle-fill"></i> {{ p.brand }} — {{ p.name }}{% if p.price %} (₹{{ p.price }}){% endif %}</span>
+    {% endfor %}
+    {% if req.custom_product %}
+    <div style="margin-top:.65rem;font-size:.82rem;color:var(--text,#0f172a);background:rgba(201,169,110,.08);border-radius:8px;padding:.65rem;border:1px solid rgba(201,169,110,.2);">
+      <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--muted,#64748b);display:block;margin-bottom:.2rem;">Custom Description</span>
+      {{ req.custom_product }}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Delivery Address -->
+  <div class="rd-card">
+    <h3><i class="bi bi-geo-alt-fill" style="color:var(--teal);"></i> Delivery Address</h3>
+    <div class="addr-box">
+      <strong>{{ req.full_name }}</strong> · {{ req.phone }}{% if req.email %} · {{ req.email }}{% endif %}<br>
+      {{ req.address_line1 }}{% if req.address_line2 %}, {{ req.address_line2 }}{% endif %}<br>
+      {{ req.city }}, {{ req.state }} — {{ req.pincode }}
+    </div>
+  </div>
+
+  <!-- Employee Notes (if any) -->
+  {% if req.employee_notes %}
+  <div class="rd-card">
+    <h3><i class="bi bi-chat-left-text" style="color:#8b5cf6;"></i> Team Note</h3>
+    <div style="font-size:.82rem;color:var(--text,#0f172a);">{{ req.employee_notes }}</div>
+  </div>
+  {% endif %}
+
+  <!-- Linked Order -->
+  {% if req.linked_order %}
+  <div class="rd-card">
+    <h3><i class="bi bi-bag-check" style="color:var(--teal);"></i> Linked Order</h3>
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <span style="font-family:monospace;font-size:.85rem;font-weight:700;">{{ req.linked_order.order_id }}</span>
+      <a href="{% url 'orders:tracking' order_id=req.linked_order.order_id %}" class="rq-btn" style="padding:.35rem .75rem;border-radius:8px;background:#0d9488;color:#fff;font-size:.75rem;font-weight:700;text-decoration:none;">
+        <i class="bi bi-geo-alt"></i> Track
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Actions -->
+  <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+    <a href="{% url 'orders:my_requirements' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none;">
+      <i class="bi bi-arrow-left"></i> Back to Requirements
+    </a>
+    {% if req.status in 'pending,accepted' %}
+    <form method="post" action="{% url 'orders:requirement_cancel' req_id=req.req_id %}">
+      {% csrf_token %}
+      <button type="submit" onclick="return confirm('Cancel this requirement?')" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;">
+        <i class="bi bi-x-circle"></i> Cancel Requirement
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

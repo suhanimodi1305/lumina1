@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Checkout — Lumina Shop{% endblock %}
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:14px;}
+.ck-wrap{max-width:1000px;margin:0 auto;padding:0 1rem 3rem;}
+.ck-head{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;color:#fff;display:flex;align-items:center;gap:.75rem;}
+.ck-head h1{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:#fff;margin:0;}
+.ck-steps{display:flex;gap:0;margin-bottom:1.5rem;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:100px;padding:4px;width:fit-content;}
+.ck-step{padding:.4rem 1.1rem;border-radius:100px;font-size:.78rem;font-weight:700;color:var(--muted,#64748b);display:flex;align-items:center;gap:.35rem;}
+.ck-step.active{background:var(--teal);color:#fff;}
+.ck-step.done{color:var(--teal);}
+.ck-grid{display:grid;grid-template-columns:1fr 380px;gap:1.25rem;}
+@media(max-width:760px){.ck-grid{grid-template-columns:1fr;}}
+.ck-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;}
+.ck-card h3{font-size:.95rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem;}
+@media(max-width:480px){.form-row{grid-template-columns:1fr;}}
+.form-grp{display:flex;flex-direction:column;gap:.28rem;}
+.form-grp label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted,#64748b);}
+.form-grp input,.form-grp select,.form-grp textarea{padding:.58rem .85rem;border:1.5px solid var(--border,#e2e8f0);border-radius:9px;font-size:.85rem;background:var(--surface,#fff);color:var(--text,#0f172a);font-family:inherit;transition:border-color .15s;}
+.form-grp input:focus,.form-grp select:focus,.form-grp textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+.form-grp .err{border-color:#ef4444;background:#fff8f8;}
+.err-msg{font-size:.68rem;color:#ef4444;margin-top:.15rem;}
+.delivery-option{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;border:1.5px solid var(--border,#e2e8f0);border-radius:10px;cursor:pointer;transition:border-color .15s;margin-bottom:.5rem;}
+.delivery-option:has(input:checked){border-color:var(--teal);background:rgba(13,148,136,.04);}
+.delivery-option input[type=radio]{accent-color:var(--teal);margin-top:.15rem;flex-shrink:0;}
+.delivery-option-body .title{font-size:.85rem;font-weight:700;color:var(--text,#0f172a);}
+.delivery-option-body .sub{font-size:.72rem;color:var(--muted,#64748b);margin-top:.1rem;}
+.ck-summary-item{display:flex;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.ck-summary-item:last-child{border-bottom:none;}
+.ck-summary-img{width:54px;height:54px;border-radius:8px;object-fit:cover;flex-shrink:0;background:linear-gradient(135deg,#fdf2f8,#fce7f3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+.ck-price-row{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted,#64748b);padding:.3rem 0;}
+.ck-price-row.total{font-size:1rem;font-weight:800;color:var(--text,#0f172a);border-top:2px solid var(--border,#e2e8f0);margin-top:.35rem;padding-top:.65rem;}
+.ck-place-btn{width:100%;padding:.85rem;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;transition:background .15s;margin-top:.85rem;}
+.ck-place-btn:hover{background:#0f766e;}
+.cod-highlight{background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:.7rem .9rem;display:flex;gap:.5rem;align-items:center;margin-bottom:.85rem;}
+[data-theme="dark"] .ck-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .form-grp input,[data-theme="dark"] .form-grp select,[data-theme="dark"] .form-grp textarea{background:#1a1a28;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
+[data-theme="dark"] .delivery-option{border-color:rgba(255,255,255,.08);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ck-wrap">
+  <div class="ck-head">
+    <i class="bi bi-bag-check" style="font-size:1.4rem;color:#0d9488;"></i>
+    <h1>Secure Checkout</h1>
+  </div>
+
+  <!-- Progress steps -->
+  <div class="ck-steps">
+    <div class="ck-step active"><i class="bi bi-geo-alt-fill"></i> Address</div>
+    <div class="ck-step"><i class="bi bi-credit-card"></i> Payment</div>
+    <div class="ck-step"><i class="bi bi-check-circle"></i> Confirm</div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if pid %}<input type="hidden" name="product_id" value="{{ pid }}">{% endif %}
+    {% if shade %}<input type="hidden" name="shade" value="{{ shade }}">{% endif %}
+
+    <div class="ck-grid">
+      <!-- LEFT: Address form -->
+      <div>
+        <!-- COD highlight -->
+        <div class="cod-highlight">
+          <span style="font-size:1.3rem;">💵</span>
+          <div style="font-size:.8rem;color:#166534;font-weight:600;">
+            Cash on Delivery available — pay when your order arrives!
+          </div>
+        </div>
+
+        <div class="ck-card">
+          <h3><i class="bi bi-person-fill" style="color:var(--teal);"></i> Contact Details</h3>
+          <div class="form-row">
+            <div class="form-grp">
+              <label>Full Name *</label>
+              <input type="text" name="full_name" value="{{ form_data.full_name|default:'' }}"
+                     class="{% if errors.full_name %}err{% endif %}" placeholder="Aarav Singh" required>
+
+              {% if errors.full_name %}<span class="err-msg">{{ errors.full_name }}</span>{% endif %}
+            </div>
+            <div class="form-grp">
+              <label>Phone Number *</label>
+              <input type="tel" name="phone" value="{{ form_data.phone|default:'' }}"
+
+                     class="{% if errors.phone %}err{% endif %}" placeholder="98XXXXXXXX" required>
+              {% if errors.phone %}<span class="err-msg">{{ errors.phone }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="form-grp">
+            <label>Email (for order updates)</label>
+              <input type="email" name="email" value="{{ form_data.email|default:'' }}" placeholder="you@email.com">
+
+          </div>
+        </div>
+
+        <div class="ck-card" style="margin-top:.85rem;">
+          <h3><i class="bi bi-house-fill" style="color:var(--teal);"></i> Delivery Address</h3>
+          <div class="form-grp" style="margin-bottom:.65rem;">
+            <label>Address Line 1 *</label>
+            <input type="text" name="address_line1" value="{{ form_data.address_line1|default:'' }}"
+                   class="{% if errors.address_line1 %}err{% endif %}" placeholder="House No., Street, Area" required>
+            {% if errors.address_line1 %}<span class="err-msg">{{ errors.address_line1 }}</span>{% endif %}
+          </div>
+          <div class="form-grp" style="margin-bottom:.65rem;">
+            <label>Address Line 2 (Landmark)</label>
+            <input type="text" name="address_line2" value="{{ form_data.address_line2|default:'' }}" placeholder="Near..., Opposite...">
+          </div>
+          <div class="form-row">
+            <div class="form-grp">
+              <label>City *</label>
+              <input type="text" name="city" value="{{ form_data.city|default:'' }}"
+                     class="{% if errors.city %}err{% endif %}" placeholder="Mumbai" required>
+              {% if errors.city %}<span class="err-msg">{{ errors.city }}</span>{% endif %}
+            </div>
+            <div class="form-grp">
+              <label>Pincode *</label>
+              <input type="text" name="pincode" value="{{ form_data.pincode|default:'' }}"
+
+                     class="{% if errors.pincode %}err{% endif %}" placeholder="400001" required maxlength="6">
+              {% if errors.pincode %}<span class="err-msg">{{ errors.pincode }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="form-grp" style="margin-top:.65rem;">
+            <label>State *</label>
+            <select name="state" class="{% if errors.state %}err{% endif %}" required>
+
+              <option value="">— Select State —</option>
+              <option value="Andhra Pradesh" {% if form_data.state == 'Andhra Pradesh' %}selected{% endif %}>Andhra Pradesh</option>
+              <option value="Assam" {% if form_data.state == 'Assam' %}selected{% endif %}>Assam</option>
+              <option value="Bihar" {% if form_data.state == 'Bihar' %}selected{% endif %}>Bihar</option>
+              <option value="Delhi" {% if form_data.state == 'Delhi' %}selected{% endif %}>Delhi</option>
+              <option value="Gujarat" {% if form_data.state == 'Gujarat' %}selected{% endif %}>Gujarat</option>
+              <option value="Haryana" {% if form_data.state == 'Haryana' %}selected{% endif %}>Haryana</option>
+              <option value="Himachal Pradesh" {% if form_data.state == 'Himachal Pradesh' %}selected{% endif %}>Himachal Pradesh</option>
+              <option value="Jharkhand" {% if form_data.state == 'Jharkhand' %}selected{% endif %}>Jharkhand</option>
+              <option value="Karnataka" {% if form_data.state == 'Karnataka' %}selected{% endif %}>Karnataka</option>
+              <option value="Kerala" {% if form_data.state == 'Kerala' %}selected{% endif %}>Kerala</option>
+              <option value="Madhya Pradesh" {% if form_data.state == 'Madhya Pradesh' %}selected{% endif %}>Madhya Pradesh</option>
+              <option value="Maharashtra" {% if form_data.state == 'Maharashtra' %}selected{% endif %}>Maharashtra</option>
+              <option value="Odisha" {% if form_data.state == 'Odisha' %}selected{% endif %}>Odisha</option>
+              <option value="Punjab" {% if form_data.state == 'Punjab' %}selected{% endif %}>Punjab</option>
+              <option value="Rajasthan" {% if form_data.state == 'Rajasthan' %}selected{% endif %}>Rajasthan</option>
+              <option value="Tamil Nadu" {% if form_data.state == 'Tamil Nadu' %}selected{% endif %}>Tamil Nadu</option>
+              <option value="Telangana" {% if form_data.state == 'Telangana' %}selected{% endif %}>Telangana</option>
+              <option value="Uttar Pradesh" {% if form_data.state == 'Uttar Pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+              <option value="Uttarakhand" {% if form_data.state == 'Uttarakhand' %}selected{% endif %}>Uttarakhand</option>
+              <option value="West Bengal" {% if form_data.state == 'West Bengal' %}selected{% endif %}>West Bengal</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ck-card" style="margin-top:.85rem;">
+          <h3><i class="bi bi-truck" style="color:var(--teal);"></i> Delivery Options</h3>
+          <label class="delivery-option">
+            <input type="radio" name="delivery_type" value="standard" checked>
+            <div class="delivery-option-body">
+              <div class="title">🚚 Standard Delivery — <span style="color:var(--teal);">{% if total >= 499 %}FREE{% else %}₹49{% endif %}</span></div>
+              <div class="sub">Estimated 3–5 business days</div>
+            </div>
+          </label>
+          <label class="delivery-option">
+            <input type="radio" name="delivery_type" value="express">
+            <div class="delivery-option-body">
+              <div class="title">⚡ Express Delivery — <span style="color:var(--teal);">₹99</span></div>
+              <div class="sub">Estimated 1–2 business days</div>
+            </div>
+          </label>
+          <div class="form-grp" style="margin-top:.75rem;">
+            <label>Order Notes (optional)</label>
+            <textarea name="order_notes" rows="2" placeholder="Special instructions…">{{ form_data.order_notes|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Order summary -->
+      <div>
+        <div class="ck-card" style="position:sticky;top:70px;">
+          <h3><i class="bi bi-receipt" style="color:var(--gold);"></i> Order Summary</h3>
+          {% for item in items %}
+          <div class="ck-summary-item">
+            {% if item.product.image_url %}
+              <img src="{{ item.product.image_url }}" class="ck-summary-img" style="font-size:0;"
+                   onerror="this.innerHTML='{% if item.product.product_range == "makeup" %}💄{% else %}🌿{% endif %}';this.style.fontSize='1.5rem'">
+            {% else %}
+              <div class="ck-summary-img">{% if item.product.product_range == 'makeup' %}💄{% else %}🌿{% endif %}</div>
+            {% endif %}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.82rem;font-weight:700;color:var(--text,#0f172a);line-height:1.3;">{{ item.product.name }}</div>
+              <div style="font-size:.7rem;color:var(--muted,#64748b);">{{ item.product.brand }}</div>
+              {% if item.shade %}<div style="font-size:.68rem;color:var(--teal);">Shade: {{ item.shade }}</div>{% endif %}
+              <div style="font-size:.72rem;color:var(--muted,#64748b);margin-top:.2rem;">Qty: {{ item.qty }}</div>
+            </div>
+            <div style="font-size:.875rem;font-weight:800;color:var(--teal);white-space:nowrap;">₹{{ item.subtotal }}</div>
+          </div>
+          {% endfor %}
+
+          <div style="margin-top:.5rem;">
+            <div class="ck-price-row"><span>Subtotal</span><span>₹{{ subtotal }}</span></div>
+            <div class="ck-price-row"><span>Delivery</span><span>{% if delivery == 0 %}<span style="color:#16a34a;font-weight:700;">FREE</span>{% else %}₹{{ delivery }}{% endif %}</span></div>
+            <div class="ck-price-row"><span>Discount</span><span style="color:#16a34a;">—</span></div>
+            <div class="ck-price-row total"><span>Total Payable</span><span>₹{{ total }}</span></div>
+          </div>
+
+          <button type="submit" class="ck-place-btn">
+            Continue to Payment <i class="bi bi-arrow-right"></i>
+          </button>
+
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.85rem;">
+            <span style="font-size:.65rem;color:var(--muted,#64748b);display:flex;align-items:center;gap:.25rem;"><i class="bi bi-shield-check" style="color:#16a34a;"></i> Secure Checkout</span>
+            <span style="font-size:.65rem;color:var(--muted,#64748b);display:flex;align-items:center;gap:.25rem;"><i class="bi bi-lock" style="color:var(--teal);"></i> SSL Encrypted</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /grid -->
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order Placed! {{ order.order_id }} — Lumina{% endblock %}
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:14px;}
+.sc-wrap{max-width:720px;margin:0 auto;padding:0 1rem 3rem;}
+/* ── Confetti hero ── */
+.sc-hero{background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#0d9488 100%);border-radius:var(--radius);padding:2rem 1.5rem;text-align:center;margin-bottom:1.25rem;position:relative;overflow:hidden;}
+.sc-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 30%,rgba(255,255,255,.12) 0%,transparent 70%);}
+.sc-hero-icon{font-size:3.5rem;margin-bottom:.75rem;position:relative;z-index:1;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) forwards;}
+@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.sc-hero h1{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:#fff;margin-bottom:.35rem;position:relative;z-index:1;}
+.sc-hero p{font-size:.85rem;color:rgba(255,255,255,.75);margin:0;position:relative;z-index:1;}
+/* ── Order card ── */
+.sc-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;}
+.sc-card h3{font-size:.9rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem;}
+.sc-id-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface-alt,#f5f3f0);border-radius:10px;padding:.7rem .9rem;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem;}
+.sc-id-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted,#64748b);}
+.sc-id-value{font-family:monospace;font-size:.9rem;font-weight:700;color:var(--text,#0f172a);display:flex;align-items:center;gap:.4rem;}
+.copy-btn{background:transparent;border:none;color:var(--teal);cursor:pointer;font-size:.9rem;padding:0;}
+/* ── Delivery date strip ── */
+.delivery-strip{background:linear-gradient(135deg,rgba(13,148,136,.08),rgba(8,145,178,.06));border:1.5px solid rgba(13,148,136,.25);border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;margin-bottom:.85rem;}
+.delivery-strip-icon{font-size:2rem;flex-shrink:0;}
+.delivery-strip-date{font-size:1.1rem;font-weight:800;color:var(--teal);}
+.delivery-strip-sub{font-size:.72rem;color:var(--muted,#64748b);}
+/* ── Items ── */
+.sc-item{display:flex;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.sc-item:last-child{border-bottom:none;}
+.sc-item-img{width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;background:linear-gradient(135deg,#fdf2f8,#fce7f3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+.sc-price-row{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted,#64748b);padding:.28rem 0;}
+.sc-price-row.total{font-weight:800;color:var(--text,#0f172a);border-top:2px solid var(--border,#e2e8f0);padding-top:.6rem;margin-top:.3rem;font-size:.95rem;}
+/* ── Action buttons ── */
+.sc-actions{display:flex;gap:.65rem;flex-wrap:wrap;margin-top:.85rem;}
+.sc-btn{flex:1;min-width:140px;padding:.7rem 1rem;border-radius:10px;font-size:.85rem;font-weight:700;border:none;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:all .15s;}
+.sc-btn-primary{background:var(--teal);color:#fff;}
+.sc-btn-primary:hover{background:#0f766e;color:#fff;}
+.sc-btn-outline{background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);}
+.sc-btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+/* ── COD note ── */
+.cod-note{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:.75rem .9rem;display:flex;gap:.6rem;align-items:flex-start;}
+[data-theme="dark"] .sc-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .sc-id-row{background:#1a1a28;}
+[data-theme="dark"] .sc-btn-outline{background:#1a1a28;border-color:rgba(255,255,255,.1);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sc-wrap">
+  <!-- Hero -->
+  <div class="sc-hero">
+    <div class="sc-hero-icon">🎉</div>
+    <h1>Order Placed Successfully!</h1>
+    <p>Thank you, <strong style="color:#fff;">{{ order.full_name }}</strong>! Your order is confirmed and being processed.</p>
+  </div>
+
+  <!-- Order IDs -->
+  <div class="sc-card">
+    <h3><i class="bi bi-receipt-cutoff" style="color:var(--gold);"></i> Order Details</h3>
+
+    <div class="sc-id-row">
+      <div>
+        <div class="sc-id-label">Order ID</div>
+        <div class="sc-id-value" id="orderId">
+          {{ order.order_id }}
+          <button class="copy-btn" onclick="copyText('{{ order.order_id }}','copyOrdIcon')" title="Copy"><i class="bi bi-copy" id="copyOrdIcon"></i></button>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="sc-id-label">Date</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--text,#0f172a);">{{ order.created_at|date:"d M Y, g:i A" }}</div>
+      </div>
+    </div>
+
+    <div class="sc-id-row">
+      <div>
+        <div class="sc-id-label">Tracking ID</div>
+        <div class="sc-id-value" id="trackId">
+          {{ order.tracking_id }}
+          <button class="copy-btn" onclick="copyText('{{ order.tracking_id }}','copyTrkIcon')" title="Copy"><i class="bi bi-copy" id="copyTrkIcon"></i></button>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="sc-id-label">Payment</div>
+        <div style="font-size:.82rem;font-weight:600;color:{% if order.is_cod %}#166534{% else %}var(--teal){% endif %};">
+          {% if order.is_cod %}💵 Cash on Delivery{% else %}{{ order.get_payment_method_display }}{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Estimated delivery -->
+    {% if order.estimated_delivery %}
+    <div class="delivery-strip" style="margin-top:.75rem;">
+      <div class="delivery-strip-icon">📦</div>
+      <div>
+        <div class="delivery-strip-sub">Estimated Delivery</div>
+        <div class="delivery-strip-date">{{ order.estimated_delivery|date:"l, d F Y" }}</div>
+        <div class="delivery-strip-sub">Delivering to {{ order.city }}, {{ order.state }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if order.is_cod %}
+    <div class="cod-note">
+      <span style="font-size:1.2rem;flex-shrink:0;">💵</span>
+      <div style="font-size:.78rem;color:#166534;line-height:1.5;">
+        <strong>Cash on Delivery:</strong> Please keep ₹{{ order.total }} ready in cash when the delivery executive arrives. Exact amount preferred.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Items -->
+  <div class="sc-card">
+    <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Items Ordered ({{ order.items.count }})</h3>
+    {% for item in order.items.all %}
+    <div class="sc-item">
+      {% if item.image_url %}
+        <img src="{{ item.image_url }}" class="sc-item-img" style="font-size:0;"
+             onerror="this.innerHTML='💄';this.style.fontSize='1.4rem'">
+      {% else %}
+        <div class="sc-item-img">💄</div>
+      {% endif %}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--text,#0f172a);line-height:1.3;">{{ item.name }}</div>
+        <div style="font-size:.7rem;color:var(--muted,#64748b);">{{ item.brand }}</div>
+        {% if item.shade %}<div style="font-size:.68rem;color:var(--teal);">Shade: {{ item.shade }}</div>{% endif %}
+        <div style="font-size:.7rem;color:var(--muted,#64748b);">Qty: {{ item.quantity }}</div>
+      </div>
+      <div style="font-size:.875rem;font-weight:800;color:var(--teal);">₹{{ item.line_total }}</div>
+    </div>
+    {% endfor %}
+    <div style="margin-top:.35rem;">
+      <div class="sc-price-row"><span>Subtotal</span><span>₹{{ order.subtotal }}</span></div>
+      <div class="sc-price-row"><span>Delivery</span><span>{% if order.delivery_charge == 0 %}<span style="color:#16a34a;font-weight:700;">FREE</span>{% else %}₹{{ order.delivery_charge }}{% endif %}</span></div>
+      <div class="sc-price-row total"><span>Total Paid</span><span style="color:var(--teal);">₹{{ order.total }}</span></div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="sc-actions">
+    <a href="{% url 'orders:tracking' order_id=order.order_id %}" class="sc-btn sc-btn-primary">
+      <i class="bi bi-geo-alt-fill"></i> Track Order
+    </a>
+    <a href="{% url 'products:list' %}" class="sc-btn sc-btn-outline">
+      <i class="bi bi-shop"></i> Continue Shopping
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'orders:my_orders' %}" class="sc-btn sc-btn-outline">
+      <i class="bi bi-bag-heart"></i> My Orders
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyText(text, iconId) {
+  navigator.clipboard.writeText(text).then(() => {
+    const icon = document.getElementById(iconId);
+    icon.className = 'bi bi-check-lg';
+    icon.style.color = '#16a34a';
+    setTimeout(() => { icon.className = 'bi bi-copy'; icon.style.color = ''; }, 2000);
+  });
+}
+</script>
+{% endblock %}

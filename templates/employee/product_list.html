@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Products — Employee Portal{% endblock %}
+{% block page_title %}Product Management{% endblock %}
+
+{% block extra_css %}
+<style>
+.emp-toolbar {
+  display:flex; gap:.65rem; align-items:center; flex-wrap:wrap;
+  margin-bottom:1.25rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:.65rem .85rem;
+}
+.emp-search-input {
+  flex:1; min-width:180px; padding:.48rem .9rem;
+  border:1.5px solid var(--border); border-radius:8px;
+  font-family:inherit; font-size:.84rem; background:var(--surface); color:var(--text);
+}
+.emp-search-input:focus { outline:none; border-color:#0d9488; }
+.emp-filter-sel {
+  padding:.48rem .75rem; border:1.5px solid var(--border); border-radius:8px;
+  font-size:.8rem; background:var(--surface); color:var(--text);
+}
+.emp-submit-btn {
+  padding:.48rem 1rem; background:#0d9488; color:#fff;
+  border:none; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer;
+}
+.emp-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
+.emp-table {
+  width:100%; border-collapse:collapse; background:var(--surface); font-size:.82rem;
+}
+.emp-table thead tr { background:var(--page-bg); border-bottom:1px solid var(--border); }
+.emp-table th {
+  padding:.6rem .9rem; text-align:left; font-size:.62rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--muted); white-space:nowrap;
+}
+.emp-table tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+.emp-table tbody tr:last-child { border-bottom:none; }
+.emp-table tbody tr:hover { background:var(--page-bg); }
+.emp-table td { padding:.65rem .9rem; vertical-align:middle; }
+.emp-td-img {
+  width:36px; height:36px; border-radius:8px; object-fit:cover;
+  background:#f1f5f9; display:inline-flex; align-items:center;
+  justify-content:center; font-size:1.1rem;
+}
+.range-badge {
+  padding:.18rem .55rem; border-radius:20px; font-size:.65rem; font-weight:600;
+  display:inline-block;
+}
+.rb-korean { background:#ccfbf1; color:#065f46; }
+.rb-makeup { background:#fce7f3; color:#9d174d; }
+.rb-other  { background:#f1f5f9; color:#475569; }
+.price-val { font-weight:700; color:#0d9488; }
+.emp-view-btn {
+  padding:.25rem .65rem; background:#0d9488; color:#fff;
+  border:none; border-radius:20px; font-size:.68rem; font-weight:600;
+  cursor:pointer; text-decoration:none; transition:background .12s;
+}
+.emp-view-btn:hover { background:#0f766e; color:#fff; }
+.result-count { font-size:.78rem; color:var(--muted); margin-bottom:.65rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Toolbar -->
+<form method="get" class="emp-toolbar">
+  <a href="{% url 'employee:product_add' %}" style="padding:.48rem 1rem;background:#0d9488;color:#fff;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:.4rem;white-space:nowrap;">
+    <i class="bi bi-plus-circle"></i> Add Product
+  </a>
+  <input type="text" name="q" value="{{ q }}" placeholder="Search name, brand, SKU…" class="emp-search-input">
+  <select name="range" class="emp-filter-sel">
+    <option value="all" {% if range_ == 'all' %}selected{% endif %}>All ranges</option>
+    <option value="korean" {% if range_ == 'korean' %}selected{% endif %}>K-Beauty</option>
+    <option value="makeup"  {% if range_ == 'makeup' %}selected{% endif %}>Makeup</option>
+  </select>
+  <select name="category" class="emp-filter-sel">
+    <option value="all">All categories</option>
+    <option value="cleanser">Cleanser</option>
+    <option value="toner">Toner</option>
+    <option value="serum">Serum</option>
+    <option value="moisturizer">Moisturiser</option>
+    <option value="sunscreen">Sunscreen</option>
+    <option value="foundation">Foundation</option>
+    <option value="lipstick">Lipstick</option>
+  </select>
+  <button type="submit" class="emp-submit-btn"><i class="bi bi-search"></i> Search</button>
+  <a href="{% url 'employee:export_products' %}{% if q or range_ != 'all' %}?q={{ q }}&range={{ range_ }}{% endif %}"
+     style="padding:.48rem 1rem;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;">
+    <i class="bi bi-download"></i> Export
+  </a>
+</form>
+
+<div class="result-count">Showing {{ total }} product{{ total|pluralize }}</div>
+
+<!-- Table -->
+<div class="emp-table-wrap">
+  <table class="emp-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Brand</th>
+        <th>SKU</th>
+        <th>Range</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Rating</th>
+        <th>Link</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>
+          {% if p.image_url %}
+            <img src="{{ p.image_url }}" alt="{{ p.name }}" class="emp-td-img">
+          {% else %}
+            <div class="emp-td-img">🌿</div>
+          {% endif %}
+        </td>
+        <td style="font-weight:600;max-width:180px;">{{ p.name }}</td>
+        <td>{{ p.brand }}</td>
+        <td style="font-family:monospace;font-size:.75rem;color:var(--muted);">{{ p.sku }}</td>
+        <td>
+          <span class="range-badge {% if p.product_range == 'korean' %}rb-korean{% elif p.product_range == 'makeup' %}rb-makeup{% else %}rb-other{% endif %}">
+            {{ p.get_product_range_display }}
+          </span>
+        </td>
+        <td>{{ p.get_category_display }}</td>
+        <td class="price-val">{% if p.price %}₹{{ p.price }}{% else %}—{% endif %}</td>
+        <td>
+          <span style="color:#f59e0b;">★★★★</span><span style="color:#d1d5db;">★</span>
+          <span style="font-size:.68rem;color:var(--muted);"> 4.0</span>
+        </td>
+        <td>
+          {% if p.image_url %}
+            <a href="{{ p.image_url }}" target="_blank" style="font-size:.72rem;color:#0d9488;">
+              <i class="bi bi-box-arrow-up-right"></i> View
+            </a>
+          {% else %}
+            <span style="font-size:.72rem;color:var(--muted);">N/A</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'employee:product_detail' pk=p.pk %}" class="emp-view-btn">Details</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--muted);">No products found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} — Employee Portal{% endblock %}
+{% block page_title %}Product Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+.pd-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+.pd-header { display:flex; gap:1.25rem; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; }
+.pd-img { width:120px; height:120px; border-radius:14px; object-fit:cover; background:#f1f5f9; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:3rem; border:1px solid var(--border); }
+.pd-title { font-size:1.3rem; font-weight:700; color:var(--text); margin-bottom:.2rem; }
+.pd-brand { font-size:.9rem; color:var(--muted); margin-bottom:.5rem; }
+.pd-price { font-size:1.5rem; font-weight:800; color:#0d9488; margin-bottom:.5rem; }
+.pd-sku   { font-size:.72rem; font-family:monospace; color:var(--muted); background:var(--page-bg); padding:.2rem .6rem; border-radius:6px; display:inline-block; }
+.pd-row   { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem; }
+.pd-field label { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); display:block; margin-bottom:.25rem; }
+.pd-field .fv  { font-size:.875rem; color:var(--text); font-weight:500; }
+.ing-chip { display:inline-block; padding:.2rem .6rem; background:#ccfbf1; color:#065f46; border-radius:20px; font-size:.7rem; font-weight:600; margin:.15rem; }
+.stars { color:#f59e0b; font-size:1rem; }
+.pd-actions { display:flex; gap:.65rem; margin-top:1.25rem; flex-wrap:wrap; }
+.pd-btn { padding:.5rem 1.1rem; border-radius:20px; font-size:.8rem; font-weight:600; border:none; cursor:pointer; text-decoration:none; transition:background .12s; display:inline-flex; align-items:center; gap:.4rem; }
+.pd-btn-teal { background:#0d9488; color:#fff; }
+.pd-btn-teal:hover { background:#0f766e; color:#fff; }
+.pd-btn-gray { background:var(--page-bg); color:var(--text); border:1px solid var(--border); }
+@media (max-width:580px) { .pd-row { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:.75rem;">
+  <a href="{% url 'employee:product_list' %}" style="font-size:.82rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;">
+    <i class="bi bi-arrow-left"></i> Back to Products
+  </a>
+</div>
+
+<div class="pd-card">
+  <div class="pd-header">
+    <div class="pd-img">
+      {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:120px;height:120px;border-radius:14px;object-fit:cover;">
+      {% else %}🌿{% endif %}
+    </div>
+    <div style="flex:1;">
+      <div class="pd-title">{{ product.name }}</div>
+      <div class="pd-brand">{{ product.brand }}</div>
+      <div class="pd-price">{% if product.price %}₹{{ product.price }}{% else %}Price on request{% endif %}</div>
+      <div class="stars">
+        <i class="bi bi-star-fill" style="color:#f59e0b;"></i>
+        <i class="bi bi-star-fill" style="color:#f59e0b;"></i>
+        <i class="bi bi-star-fill" style="color:#f59e0b;"></i>
+        <i class="bi bi-star-fill" style="color:#f59e0b;"></i>
+        <i class="bi bi-star" style="color:#d1d5db;"></i>
+        <span style="font-size:.75rem;color:var(--muted);">4.0 / 5</span>
+      </div>
+      <div style="margin-top:.5rem;"><span class="pd-sku">SKU: {{ product.sku }}</span></div>
+    </div>
+  </div>
+
+  <div class="pd-row">
+    <div class="pd-field">
+      <label>Category</label>
+      <div class="fv">{{ product.get_category_display }}</div>
+    </div>
+    <div class="pd-field">
+      <label>Range</label>
+      <div class="fv">{{ product.get_product_range_display }}</div>
+    </div>
+    {% if product.coverage %}
+    <div class="pd-field">
+      <label>Coverage</label>
+      <div class="fv">{{ product.coverage }}</div>
+    </div>
+    {% endif %}
+    {% if product.finish %}
+    <div class="pd-field">
+      <label>Finish</label>
+      <div class="fv">{{ product.finish }}</div>
+    </div>
+    {% endif %}
+    {% if product.undertone_match %}
+    <div class="pd-field">
+      <label>Undertone Match</label>
+      <div class="fv">{{ product.get_undertone_match_display }}</div>
+    </div>
+    {% endif %}
+    {% if product.skin_tone_match %}
+    <div class="pd-field">
+      <label>Skin Tone Match</label>
+      <div class="fv">{{ product.get_skin_tone_match_display }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if product.description %}
+  <div style="margin-top:1rem;">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem;">Description</div>
+    <p style="font-size:.875rem;color:var(--muted);line-height:1.65;margin:0;">{{ product.description }}</p>
+  </div>
+  {% endif %}
+
+  {% if product.key_ingredients %}
+  <div style="margin-top:1rem;">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem;">Key Ingredients</div>
+    {% for ing in product.get_key_ingredients_list %}
+      <span class="ing-chip">{{ ing }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if product.suitable_for_skin_types %}
+  <div style="margin-top:1rem;">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem;">Suitable For</div>
+    {% for st in product.suitable_for_skin_types %}
+      <span class="ing-chip" style="background:#dbeafe;color:#1e40af;">{{ st }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="pd-actions">
+    <a href="{% url 'employee:product_edit' pk=product.pk %}" class="pd-btn pd-btn-teal">
+      <i class="bi bi-pencil"></i> Edit Product
+    </a>
+    {% if product.image_url %}
+    <a href="{{ product.image_url }}" target="_blank" class="pd-btn pd-btn-teal">
+      <i class="bi bi-box-arrow-up-right"></i> View Image
+    </a>
+    {% endif %}
+    <a href="https://sasglobal.biz" target="_blank" class="pd-btn pd-btn-teal">
+      <i class="bi bi-shop"></i> sasglobal.biz
+    </a>
+    <a href="{% url 'employee:product_list' %}" class="pd-btn pd-btn-gray">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <a href="{% url 'employee:product_delete' pk=product.pk %}" class="pd-btn" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">
+      <i class="bi bi-trash"></i> Delete
+    </a>
+  </div>
+</div>
+{% endblock %}

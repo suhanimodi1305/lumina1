@@ -1,0 +1,885 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Face Scan — Lumina{% endblock %}
+{% block page_title %}AI Face Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─────────────────────────────────────────
+   SCANNER PAGE — bold text + dark mode fix
+   ───────────────────────────────────────── */
+
+/* Gender selection step */
+.gender-step {
+  display: none;
+  animation: fadeSlideUp .3s ease;
+}
+.gender-step.active { display: block; }
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.gender-card {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 2rem 1.5rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,.08);
+  border: 1.5px solid var(--border);
+  text-align: center;
+}
+.gender-card .gc-eyebrow {
+  font-size: .65rem; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #c9a96e; margin-bottom: .5rem;
+}
+.gender-card .gc-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem; font-weight: 700; color: var(--text);
+  margin-bottom: .35rem;
+}
+.gender-card .gc-sub {
+  font-size: .82rem; color: var(--text-muted);
+  margin-bottom: 1.75rem; line-height: 1.5;
+}
+
+.gender-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.gender-opt {
+  position: relative;
+  cursor: pointer;
+}
+.gender-opt input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.gender-opt-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .6rem;
+  padding: 1.5rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface-alt, #f8fafc);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+.gender-opt input:checked + .gender-opt-label {
+  border-color: #0d9488;
+  background: rgba(13,148,136,.07);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.15);
+}
+.gender-opt-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; transition: all .2s;
+}
+.gender-opt-icon.male-icon {
+  background: rgba(59,130,246,.12);
+  color: #3b82f6;
+}
+.gender-opt-icon.female-icon {
+  background: rgba(244,63,94,.12);
+  color: #f43f5e;
+}
+.gender-opt input:checked + .gender-opt-label .gender-opt-icon.male-icon {
+  background: rgba(59,130,246,.2);
+  box-shadow: 0 4px 14px rgba(59,130,246,.25);
+}
+.gender-opt input:checked + .gender-opt-label .gender-opt-icon.female-icon {
+  background: rgba(244,63,94,.2);
+  box-shadow: 0 4px 14px rgba(244,63,94,.25);
+}
+.gender-opt-name {
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  letter-spacing: .02em;
+}
+.gender-opt-desc {
+  font-size: .72rem; color: var(--text-muted); text-align: center; line-height: 1.4;
+}
+.gender-check-icon {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #0d9488; color: #fff;
+  display: none; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700;
+  position: absolute; top: 10px; right: 10px;
+}
+.gender-opt input:checked ~ .gender-check-icon { display: flex; }
+
+.gender-continue-btn {
+  width: 100%; padding: .85rem 1.5rem;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  color: #fff; border: none; border-radius: 100px;
+  font-size: .95rem; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  transition: all .2s; box-shadow: 0 4px 16px rgba(13,148,136,.35);
+}
+.gender-continue-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(13,148,136,.45); }
+.gender-continue-btn:disabled {
+  opacity: .5; cursor: not-allowed; transform: none;
+  box-shadow: none;
+}
+
+/* Gender badge on scan card */
+.scan-gender-badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .8rem; border-radius: 100px;
+  font-size: .72rem; font-weight: 700;
+  margin-bottom: 1rem;
+}
+.scan-gender-badge.male-badge   { background: rgba(59,130,246,.12); color: #3b82f6; }
+.scan-gender-badge.female-badge { background: rgba(244,63,94,.12);  color: #f43f5e; }
+.scan-gender-badge.other-badge  { background: rgba(139,92,246,.12); color: #8b5cf6; }
+
+/* Dark mode gender */
+[data-theme="dark"] .gender-card { background: #1a1a28; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .gender-opt-label { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .gender-opt input:checked + .gender-opt-label { background: rgba(13,148,136,.15); border-color: #0d9488; }
+[data-theme="dark"] .gender-opt-name { color: rgba(255,255,255,.88); }
+[data-theme="dark"] .gender-opt-desc { color: rgba(255,255,255,.4); }
+[data-theme="dark"] .gc-title { color: #f0f0f8; }
+[data-theme="dark"] .gc-sub { color: rgba(255,255,255,.45); }
+.scanner-wrap {
+  max-width: 580px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+/* Force all text in scanner to respect theme */
+.scanner-wrap h1,
+.scanner-wrap h2,
+.scanner-wrap .uc-title { color: var(--text); font-weight: 800; }
+.scanner-wrap p,
+.scanner-wrap span,
+.scanner-wrap label { color: var(--text-muted); }
+[data-theme="dark"] .scanner-wrap h1,
+[data-theme="dark"] .scanner-wrap h2,
+[data-theme="dark"] .scanner-wrap .uc-title { color: #ffffff; }
+[data-theme="dark"] .scanner-wrap p,
+[data-theme="dark"] .scanner-wrap .uc-check-item span,
+[data-theme="dark"] .scanner-wrap .scan-status-text { color: rgba(255,255,255,.65); }
+
+/* Hero banner */
+.scan-hero-banner {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(13,148,136,.25);
+}
+.scan-hero-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(13,148,136,.18) 0%, transparent 70%);
+}
+.scan-hero-banner .hero-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: #0d9488; margin-bottom: .5rem;
+  position: relative; z-index: 1;
+}
+.scan-hero-banner h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700;
+  color: #fff; margin-bottom: .5rem;
+  position: relative; z-index: 1;
+}
+.scan-hero-banner p {
+  font-size: .875rem; color: rgba(255,255,255,.55);
+  margin: 0; position: relative; z-index: 1;
+}
+
+/* Scanner toggle */
+.scanner-mode-toggle {
+  display: flex; gap: 4px;
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: 100px; padding: 4px;
+  margin: 0 auto 1.5rem; width: fit-content;
+}
+.smt-btn {
+  padding: .55rem 1.4rem; border-radius: 100px; border: none;
+  background: transparent; color: var(--text-muted);
+  font-size: .85rem; font-weight: 500; cursor: pointer;
+  transition: all .15s; display: flex; align-items: center; gap: .4rem;
+}
+.smt-btn.active { background: #0d9488; color: #fff; box-shadow: 0 2px 10px rgba(13,148,136,.35); }
+
+/* ── Upload card ── */
+.upload-card {
+  background: var(--surface);
+  border: 2px dashed #0d9488;
+  border-radius: 20px;
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+  position: relative;
+}
+.upload-card.scanning-state { border-style: solid; }
+.upload-card.error-state { border-color: #ef4444; background: var(--surface); }
+
+.uc-badge {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: .8rem; letter-spacing: .15em; text-transform: uppercase;
+  color: #c9a96e; margin-bottom: .6rem;
+}
+.uc-icon { font-size: 3rem; color: #0d9488; margin-bottom: .75rem; }
+.uc-icon.error { color: #ef4444; }
+.uc-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem;
+}
+
+/* Checklist */
+.uc-checklist { text-align: left; margin: 1.25rem 0; }
+.uc-check-item {
+  display: flex; align-items: center; gap: .75rem; margin-bottom: .65rem;
+}
+.uc-check-dot {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(13,148,136,.12); border: 1.5px solid rgba(13,148,136,.3);
+  color: #0d9488; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.uc-check-item span { font-size: .875rem; color: var(--text-muted); }
+
+/* Upload buttons */
+.uc-btn-row { display: flex; gap: .75rem; margin: 1.5rem 0; flex-wrap: wrap; }
+.uc-btn-primary {
+  flex: 1; min-width: 140px; padding: .75rem 1rem;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  color: #fff; border: none; border-radius: 100px;
+  font-size: .9rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  transition: all .15s; box-shadow: 0 3px 14px rgba(13,148,136,.35);
+}
+.uc-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(13,148,136,.45); }
+.uc-btn-secondary {
+  flex: 1; min-width: 140px; padding: .75rem 1rem;
+  background: transparent; color: #0d9488;
+  border: 2px solid #0d9488; border-radius: 100px;
+  font-size: .9rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  transition: all .15s;
+}
+.uc-btn-secondary:hover { background: #0d9488; color: #fff; }
+
+/* Scanning animation */
+.scan-ring-wrap { position: relative; width: 110px; margin: 1.5rem auto; }
+.scan-ring-outer {
+  width: 110px; height: 110px; border-radius: 50%;
+  border: 3px solid rgba(13,148,136,.2);
+  border-top-color: #0d9488;
+  animation: spin 1s linear infinite;
+  position: relative; z-index: 1;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.scan-preview-circle {
+  width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  border: 2px solid #0d9488; display: none; z-index: 2;
+}
+.scan-progress-wrap { margin: 1rem 0; }
+.scan-prog-bar {
+  width: 100%; height: 6px; background: var(--surface-alt);
+  border-radius: 100px; overflow: hidden;
+}
+.scan-prog-fill {
+  height: 100%; background: linear-gradient(90deg, #0d9488, #0891b2);
+  border-radius: 100px; transition: width .3s ease; width: 0;
+}
+.scan-status-text { font-size: .82rem; color: var(--text-muted); margin-top: .5rem; }
+.scan-note-text  { font-size: .72rem; color: var(--text-light); font-style: italic; margin-top: .5rem; }
+
+/* Demo section */
+.demo-divider {
+  display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0;
+}
+.demo-divider::before, .demo-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.demo-divider span { font-size: .72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .07em; }
+
+.demo-profiles { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-bottom: 1rem; }
+.demo-profile-opt {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .55rem .75rem; border: 1.5px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all .12s; background: var(--surface-alt);
+}
+.demo-profile-opt:has(input:checked) { border-color: #0d9488; background: rgba(13,148,136,.08); }
+.demo-profile-opt input { cursor: pointer; accent-color: #0d9488; }
+.demo-profile-opt label { font-size: .78rem; cursor: pointer; color: var(--text-muted); margin: 0; line-height: 1.3; }
+.demo-try-btn {
+  padding: .55rem 1.4rem; background: rgba(13,148,136,.12); color: #0d9488;
+  border: 1.5px solid rgba(13,148,136,.3); border-radius: 100px;
+  font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .12s;
+}
+.demo-try-btn:hover { background: #0d9488; color: #fff; }
+
+/* Demo badge */
+.uc-demo-badge {
+  position: absolute; top: 1rem; right: 1rem;
+  background: #c9a96e; color: #0a0a0f;
+  padding: .2rem .7rem; border-radius: 100px;
+  font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+}
+
+/* Error tips */
+.error-tips-box {
+  background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+  border-radius: 12px; padding: .9rem 1rem; text-align: left; margin: 1rem 0;
+}
+.error-tips-box strong { font-size: .8rem; color: var(--text); display: block; margin-bottom: .4rem; }
+.error-tips-box li { font-size: .78rem; color: var(--text-muted); padding: .2rem 0; }
+
+/* ── Scan states — hidden by default, JS reveals the active one ── */
+.scan-state          { display: none; }
+.scan-state.active   { display: block; }
+#videoFeed { width: 100%; border-radius: 14px; margin-bottom: .75rem; }
+
+/* Camera section — hidden until camera opened */
+#cameraSection { display: none; }
+
+/* Coming soon */
+.coming-soon-box {
+  background: var(--surface); border-radius: 20px; padding: 2.5rem 1.5rem;
+  text-align: center; border: 2px dashed var(--border);
+  box-shadow: 0 2px 14px rgba(0,0,0,.05);
+}
+.coming-soon-box .csb-icon { font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem; }
+.coming-soon-box h2 { font-family: 'Cormorant Garamond',serif; font-size: 1.5rem; margin-bottom: .5rem; }
+
+/* ── DARK MODE OVERRIDES ── */
+[data-theme="dark"] .upload-card {
+  background: #1a1a28;
+  border-color: rgba(13,148,136,.5);
+  box-shadow: 0 4px 24px rgba(0,0,0,.3);
+}
+[data-theme="dark"] .upload-card.error-state {
+  background: rgba(239,68,68,.06);
+  border-color: rgba(239,68,68,.4);
+}
+[data-theme="dark"] .uc-title { color: #f0f0f8; }
+[data-theme="dark"] .uc-check-item span { color: rgba(255,255,255,.6); }
+[data-theme="dark"] .demo-profile-opt { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .demo-profile-opt:has(input:checked) { background: rgba(13,148,136,.15); border-color: #0d9488; }
+[data-theme="dark"] .demo-profile-opt label { color: rgba(255,255,255,.55); }
+[data-theme="dark"] .demo-divider::before,
+[data-theme="dark"] .demo-divider::after { background: rgba(255,255,255,.1); }
+[data-theme="dark"] .demo-divider span { color: rgba(255,255,255,.3); }
+[data-theme="dark"] .demo-try-btn { background: rgba(13,148,136,.15); border-color: rgba(13,148,136,.4); color: #5eead4; }
+[data-theme="dark"] .uc-btn-secondary { border-color: #0d9488; color: #5eead4; }
+[data-theme="dark"] .uc-btn-secondary:hover { background: #0d9488; color: #fff; }
+[data-theme="dark"] .scan-note-text { color: rgba(255,255,255,.3); }
+[data-theme="dark"] .error-tips-box { background: rgba(239,68,68,.06); }
+[data-theme="dark"] .error-tips-box strong { color: rgba(255,255,255,.8); }
+[data-theme="dark"] .error-tips-box li { color: rgba(255,255,255,.5); }
+[data-theme="dark"] .coming-soon-box { background: #1a1a28; border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .scanner-mode-toggle { background: #1a1a28; border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .smt-btn { color: rgba(255,255,255,.4); }
+[data-theme="dark"] .smt-btn.active { background: #0d9488; color: #fff; }
+
+/* Camera-error inline banner */
+.camera-error-banner {
+  display: none;
+  align-items: center; gap: .6rem;
+  background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+  border-radius: 12px; padding: .7rem 1rem; margin: .75rem 0;
+  font-size: .82rem; color: #ef4444; text-align: left;
+  animation: fadeInDown .25s ease;
+}
+.camera-error-banner.visible { display: flex; }
+.camera-error-banner i { flex-shrink: 0; font-size: 1.1rem; }
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+[data-theme="dark"] .camera-error-banner {
+  background: rgba(239,68,68,.08);
+  border-color: rgba(239,68,68,.25);
+}
+
+@media (max-width: 480px) {
+  .uc-btn-row { flex-direction: column; }
+  .demo-profiles { grid-template-columns: 1fr; }
+  .scanner-mode-toggle { width: 100%; justify-content: center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scanner-wrap">
+
+  <!-- Hero banner -->
+  <div class="scan-hero-banner">
+    <div class="hero-label">Lumina AI · Vision Analysis</div>
+    <h1>AI Skin Scanner</h1>
+    <p>Upload or take a photo · Get instant clinical-grade skin analysis</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       STEP 1 — GENDER SELECTION
+       ══════════════════════════════════════════ -->
+  <div id="gender-step" class="gender-step active">
+    <div class="gender-card">
+      <div class="gc-eyebrow">Step 1 of 2</div>
+      <div class="gc-title">Who is this scan for?</div>
+      <p class="gc-sub">We personalise your skincare &amp; makeup recommendations based on your gender.</p>
+
+      <div class="gender-options">
+        <!-- Male -->
+        <div class="gender-opt">
+          <input type="radio" name="gender_select" id="gender-male" value="male">
+          <label class="gender-opt-label" for="gender-male">
+            <div class="gender-opt-icon male-icon"><i class="bi bi-gender-male"></i></div>
+            <span class="gender-opt-name">Male</span>
+            <span class="gender-opt-desc">Skincare tailored for men's skin needs</span>
+          </label>
+          <div class="gender-check-icon"><i class="bi bi-check"></i></div>
+        </div>
+
+        <!-- Female -->
+        <div class="gender-opt">
+          <input type="radio" name="gender_select" id="gender-female" value="female" checked>
+          <label class="gender-opt-label" for="gender-female">
+            <div class="gender-opt-icon female-icon"><i class="bi bi-gender-female"></i></div>
+            <span class="gender-opt-name">Female</span>
+            <span class="gender-opt-desc">Full skincare + makeup recommendations</span>
+          </label>
+          <div class="gender-check-icon"><i class="bi bi-check"></i></div>
+        </div>
+      </div>
+
+      <!-- Other / prefer not to say (subtle link) -->
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.78rem;color:var(--text-muted);">
+          <input type="radio" name="gender_select" value="other" style="accent-color:#8b5cf6;">
+          Prefer not to say / Other
+        </label>
+      </div>
+
+      <button id="genderContinueBtn" class="gender-continue-btn">
+        <i class="bi bi-arrow-right-circle"></i> Continue to Scan
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       STEP 2 — SCANNER (hidden until gender chosen)
+       ══════════════════════════════════════════ -->
+  <div id="scanner-step" style="display:none;">
+
+  <!-- Mode toggle -->
+  <div class="scanner-mode-toggle">
+    <button id="toggle-face" class="smt-btn active" onclick="switchScanner('face')">
+      <i class="bi bi-camera-fill"></i> Face Scanner
+    </button>
+    <button id="toggle-body" class="smt-btn" onclick="switchScanner('body')">
+      <i class="bi bi-person"></i> Body Scanner
+    </button>
+  </div>
+
+  <!-- FACE SCANNER -->
+  <div id="face-scanner-section">
+
+    <!-- DEFAULT STATE -->
+    <div id="state-default" class="scan-state">      <!-- JS activates this on clean load -->
+      <div class="upload-card">
+        <div class="uc-badge">Lumina</div>
+        <!-- Gender badge (filled by JS) -->
+        <div id="scanGenderBadge" class="scan-gender-badge" style="display:none;"></div>
+        <div class="uc-icon"><i class="bi bi-camera-fill"></i></div>
+        <div class="uc-title">Take Your Skin Scan</div>
+
+        <div class="uc-checklist">
+          <div class="uc-check-item"><div class="uc-check-dot"><i class="bi bi-check"></i></div><span>Natural daylight or bright indoor light</span></div>
+          <div class="uc-check-item"><div class="uc-check-dot"><i class="bi bi-check"></i></div><span>No makeup or minimal makeup only</span></div>
+          <div class="uc-check-item"><div class="uc-check-dot"><i class="bi bi-check"></i></div><span>No filters — bare skin only</span></div>
+          <div class="uc-check-item"><div class="uc-check-dot"><i class="bi bi-check"></i></div><span>Face fills most of the frame</span></div>
+          <div class="uc-check-item"><div class="uc-check-dot"><i class="bi bi-check"></i></div><span>Look directly at camera</span></div>
+        </div>
+
+        <div id="cameraErrorBanner" class="camera-error-banner" role="alert">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          <span id="cameraErrorMsg">Camera unavailable. Please use Upload Photo instead.</span>
+        </div>
+
+        <div class="uc-btn-row">
+          <button id="openCameraBtn" class="uc-btn-primary" type="button">
+            <i class="bi bi-camera-video"></i> Open Camera
+          </button>
+          <button id="uploadPhotoBtn" class="uc-btn-secondary" type="button">
+            <i class="bi bi-upload"></i> Upload Photo
+          </button>
+        </div>
+
+        <form id="scanForm" method="post" enctype="multipart/form-data" action="{% url 'scanner:upload' %}">
+          {% csrf_token %}
+          <input type="file" id="photoInput" name="scan_image" accept="image/*" style="display:none;">
+          <input type="hidden" id="genderInput" name="gender" value="female">
+        </form>
+
+        <!-- Demo -->
+        <div class="demo-divider"><span>or try a demo</span></div>
+        <div class="demo-profiles">
+          <label class="demo-profile-opt">
+            <input type="radio" name="demo_profile" value="combination_warm" checked>
+            <label>Combination · Warm (Medium)</label>
+          </label>
+          <label class="demo-profile-opt">
+            <input type="radio" name="demo_profile" value="dry_cool">
+            <label>Dry · Cool (Fair)</label>
+          </label>
+          <label class="demo-profile-opt">
+            <input type="radio" name="demo_profile" value="oily_warm">
+            <label>Oily · Warm (Tan)</label>
+          </label>
+          <label class="demo-profile-opt">
+            <input type="radio" name="demo_profile" value="mature_neutral">
+            <label>Mature · Neutral (Light)</label>
+          </label>
+        </div>
+        <div style="text-align:center;margin-top:.75rem;">
+          <button id="demoBtn" class="demo-try-btn">
+            <i class="bi bi-play-circle"></i> Try Demo Scan
+          </button>
+        </div>
+
+        <div style="margin-top:1.25rem;font-size:.7rem;color:#94a3b8;line-height:1.5;">
+          <i class="bi bi-cpu"></i> Powered by <strong>GPT-4o Vision</strong> · OpenAI
+        </div>
+      </div>
+    </div>
+
+    <!-- NO FACE STATE -->
+    <div id="state-no-face" class="scan-state">
+      <div class="upload-card error-state">
+        <div class="uc-icon error"><i class="bi bi-emoji-frown"></i></div>
+        <div class="uc-title" style="color:#ef4444;">No Face Detected</div>
+        <p id="no-face-msg" style="color:#ef4444;font-size:.875rem;margin-bottom:1rem;min-height:1.2em;"></p>
+        <div class="error-tips-box">
+          <strong>How to fix:</strong>
+          <div style="margin-top:.4rem;display:flex;flex-direction:column;gap:.25rem;">
+            <div style="display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text-muted);">
+              <i class="bi bi-brightness-high" style="color:#ef4444;flex-shrink:0;margin-top:.1rem;"></i>
+              <span>Use bright, even lighting — avoid dark rooms</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text-muted);">
+              <i class="bi bi-eyeglasses" style="color:#ef4444;flex-shrink:0;margin-top:.1rem;"></i>
+              <span>Remove glasses, masks, or face coverings</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text-muted);">
+              <i class="bi bi-camera" style="color:#ef4444;flex-shrink:0;margin-top:.1rem;"></i>
+              <span>Look directly at the camera</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text-muted);">
+              <i class="bi bi-arrows-fullscreen" style="color:#ef4444;flex-shrink:0;margin-top:.1rem;"></i>
+              <span>Move closer — your face should fill most of the frame</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text-muted);">
+              <i class="bi bi-person-bounding-box" style="color:#ef4444;flex-shrink:0;margin-top:.1rem;"></i>
+              <span>Use a plain background with no other faces</span>
+            </div>
+          </div>
+        </div>
+        <button class="uc-btn-primary" onclick="showScanState('default')" style="width:100%;margin-top:.5rem;">
+          <i class="bi bi-arrow-clockwise"></i> Try Again
+        </button>
+      </div>
+    </div>
+
+    <!-- SCANNING STATE -->
+    <div id="state-scanning" class="scan-state">
+      <div class="upload-card scanning-state">
+        <div class="uc-badge">Analyzing</div>
+        <div class="scan-ring-wrap">
+          <div class="scan-ring-outer"></div>
+          <img id="scanPreview" class="scan-preview-circle" alt="Preview">
+        </div>
+        <div class="uc-title">Analyzing Your Skin…</div>
+        <div class="scan-progress-wrap">
+          <div class="scan-prog-bar"><div id="progressFill" class="scan-prog-fill"></div></div>
+          <p id="scanStatus" class="scan-status-text">Preparing analysis…</p>
+        </div>
+        <p class="scan-note-text"><i class="bi bi-hourglass-split"></i> Vision AI analysis — may take 15-25 seconds</p>
+      </div>
+    </div>
+
+    <!-- DEMO STATE -->
+    <div id="state-demo" class="scan-state">
+      <div class="upload-card scanning-state">
+        <div class="uc-demo-badge">DEMO</div>
+        <div class="uc-badge">Loading Demo</div>
+        <div class="scan-ring-wrap"><div class="scan-ring-outer"></div></div>
+        <div class="uc-title">Loading Demo Profile…</div>
+        <div class="scan-progress-wrap">
+          <div class="scan-prog-bar"><div id="progressFillDemo" class="scan-prog-fill"></div></div>
+        </div>
+        <p class="scan-status-text">Preparing your demo analysis…</p>
+      </div>
+    </div>
+
+    <!-- CAMERA STATE -->
+    <div id="cameraSection">
+      <div class="upload-card">
+        <div class="uc-badge">Camera</div>
+        <video id="videoFeed" autoplay playsinline></video>
+        <canvas id="captureCanvas" style="display:none;"></canvas>
+        <div class="uc-btn-row">
+          <button id="captureBtn" class="uc-btn-primary">
+            <i class="bi bi-camera"></i> Capture Photo
+          </button>
+          <button id="cancelCameraBtn" class="uc-btn-secondary">
+            <i class="bi bi-x-circle"></i> Cancel
+          </button>
+        </div>
+        <p style="font-size:.72rem;color:var(--text-muted);margin-top:.5rem;">
+          <i class="bi bi-info-circle"></i> Position your face in the centre and tap Capture
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /face-scanner-section -->
+
+  <!-- BODY SCANNER -->
+  <div id="body-scanner-section" style="display:none;">
+    <div class="coming-soon-box">
+      <div class="csb-icon"><i class="bi bi-person"></i></div>
+      <h2>Body Analysis — Coming Soon</h2>
+      <p style="color:var(--text-muted);margin-bottom:1.5rem;">AI-powered body skin analysis for eczema, psoriasis & more.</p>
+      <form style="display:flex;gap:.5rem;max-width:380px;margin:0 auto;flex-wrap:wrap;" onsubmit="return false;">
+        <input type="email" placeholder="Your email" style="flex:1;min-width:160px;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-size:.875rem;">
+        <button type="submit" class="uc-btn-primary" style="flex:0 0 auto;">Notify Me</button>
+      </form>
+    </div>
+  </div>
+
+  </div><!-- /scanner-step -->
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# Server tells JS which state to boot into — no DOM guessing #}
+<script>
+const INITIAL_STATE = "{{ initial_state|default:'default' }}";
+const NO_FACE_MSG   = "{{ no_face_message|escapejs }}";
+</script>
+
+<script>
+'use strict';
+let videoStream = null;
+let selectedGender = 'female'; // default
+
+/* ══════════════════════════════════════════
+   GENDER STEP LOGIC
+   ══════════════════════════════════════════ */
+function updateGenderBadge() {
+  const badge = document.getElementById('scanGenderBadge');
+  if (!badge) return;
+  const icons = { male: '♂', female: '♀', other: '⚧' };
+  const labels = { male: 'Male', female: 'Female', other: 'Other' };
+  const classes = { male: 'male-badge', female: 'female-badge', other: 'other-badge' };
+  badge.className = 'scan-gender-badge ' + (classes[selectedGender] || 'other-badge');
+  badge.innerHTML = `<span>${icons[selectedGender] || '⚧'}</span> ${labels[selectedGender] || 'Other'}`;
+  badge.style.display = 'inline-flex';
+  // Also sync the hidden form field
+  const genderInput = document.getElementById('genderInput');
+  if (genderInput) genderInput.value = selectedGender;
+}
+
+document.getElementById('genderContinueBtn')?.addEventListener('click', () => {
+  const checked = document.querySelector('input[name="gender_select"]:checked');
+  selectedGender = checked ? checked.value : 'female';
+  updateGenderBadge();
+
+  // Animate gender step out, scanner step in
+  const genderStep  = document.getElementById('gender-step');
+  const scannerStep = document.getElementById('scanner-step');
+  genderStep.style.opacity = '0';
+  genderStep.style.transform = 'translateY(-12px)';
+  genderStep.style.transition = 'opacity .25s ease, transform .25s ease';
+  setTimeout(() => {
+    genderStep.style.display = 'none';
+    scannerStep.style.display = 'block';
+    scannerStep.style.opacity = '0';
+    scannerStep.style.transform = 'translateY(12px)';
+    scannerStep.style.transition = 'opacity .3s ease, transform .3s ease';
+    requestAnimationFrame(() => {
+      scannerStep.style.opacity = '1';
+      scannerStep.style.transform = 'translateY(0)';
+    });
+    // Show correct state
+    if (INITIAL_STATE === 'no-face') {
+      if (NO_FACE_MSG) {
+        const msgEl = document.getElementById('no-face-msg');
+        if (msgEl) msgEl.textContent = NO_FACE_MSG;
+      }
+      showScanState('no-face');
+    } else {
+      showScanState('default');
+    }
+  }, 260);
+});
+
+/* ── State machine ───────────────────────────────────────────────────── */
+function showScanState(name) {
+  document.querySelectorAll('.scan-state').forEach(el => {
+    el.classList.remove('active');
+    el.style.display = 'none';
+  });
+  const target = document.getElementById('state-' + name);
+  if (target) {
+    target.classList.add('active');
+    target.style.display = 'block';
+  }
+  if (name === 'scanning' || name === 'demo') startScanAnim(name === 'demo');
+}
+
+/* ── Progress animation ──────────────────────────────────────────────── */
+function startScanAnim(isDemo) {
+  const msgs = [
+    'Detecting your face…',
+    'Mapping 468 facial landmarks…',
+    'Calculating face geometry…',
+    'Determining face shape…',
+    'Running AI vision analysis…',
+    'Assessing acne severity…',
+    'Classifying skin type & undertone…',
+    'Mapping facial zones…',
+    'Matching skincare concerns…',
+    'Preparing your full report…'
+  ];
+  let prog = 0, mi = 0;
+  const fill = document.getElementById(isDemo ? 'progressFillDemo' : 'progressFill');
+  const stat = document.getElementById('scanStatus');
+  if (fill) fill.style.width = '0%';
+  if (stat) stat.textContent = msgs[0];
+
+  const iv = setInterval(() => {
+    prog += 0.75;
+    if (fill && prog <= 90) fill.style.width = prog + '%';
+    const idx = Math.min(Math.floor(prog / 10), msgs.length - 1);
+    if (idx !== mi) { mi = idx; if (stat) stat.textContent = msgs[mi]; }
+  }, 150);
+
+  const duration = isDemo ? 2400 : 21000;
+  setTimeout(() => {
+    clearInterval(iv);
+    if (fill) fill.style.width = '100%';
+    if (stat) stat.textContent = 'Analysis complete — loading results…';
+    if (!isDemo) {
+      setTimeout(() => { document.getElementById('scanForm')?.submit(); }, 400);
+    }
+  }, duration);
+}
+
+/* ── Scanner mode toggle ─────────────────────────────────────────────── */
+function switchScanner(type) {
+  document.querySelectorAll('.smt-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('toggle-' + type).classList.add('active');
+  document.getElementById('face-scanner-section').style.display = type === 'face' ? 'block' : 'none';
+  document.getElementById('body-scanner-section').style.display = type === 'body'  ? 'block' : 'none';
+}
+
+/* ── Camera error helper ─────────────────────────────────────────────── */
+function showCameraError(msg) {
+  const banner = document.getElementById('cameraErrorBanner');
+  const msgEl  = document.getElementById('cameraErrorMsg');
+  if (msgEl)  msgEl.textContent = msg;
+  if (banner) banner.classList.add('visible');
+  // Auto-dismiss after 6 s
+  setTimeout(() => { if (banner) banner.classList.remove('visible'); }, 6000);
+}
+
+/* ── Camera ──────────────────────────────────────────────────────────── */
+document.getElementById('openCameraBtn')?.addEventListener('click', async () => {
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+    document.getElementById('videoFeed').srcObject = videoStream;
+    // Hide all scan states and show the camera section
+    document.querySelectorAll('.scan-state').forEach(el => {
+      el.classList.remove('active'); el.style.display = 'none';
+    });
+    document.getElementById('cameraSection').style.display = 'block';
+  } catch (e) {
+    // Show a soft inline banner instead of a blocking alert
+    showCameraError(
+      e && e.name === 'NotAllowedError'
+        ? 'Camera permission was denied. Please use Upload Photo instead.'
+        : 'Camera is unavailable on this device. Please use Upload Photo instead.'
+    );
+  }
+});
+
+document.getElementById('captureBtn')?.addEventListener('click', () => {
+  const v = document.getElementById('videoFeed');
+  const c = document.getElementById('captureCanvas');
+  c.width  = v.videoWidth;
+  c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  c.toBlob(blob => {
+    const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+    const dt   = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('photoInput').files = dt.files;
+    // Show preview in the scanning ring
+    const prev = document.getElementById('scanPreview');
+    if (prev) { prev.src = c.toDataURL(); prev.style.display = 'block'; }
+    // Stop camera and hide camera section
+    if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+    document.getElementById('cameraSection').style.display = 'none';
+    showScanState('scanning');
+  }, 'image/jpeg', 0.92);
+});
+
+document.getElementById('cancelCameraBtn')?.addEventListener('click', () => {
+  if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+  document.getElementById('cameraSection').style.display = 'none';
+  showScanState('default');
+});
+
+/* ── File upload ─────────────────────────────────────────────────────── */
+document.getElementById('uploadPhotoBtn')?.addEventListener('click', () => {
+  document.getElementById('photoInput').click();
+});
+
+document.getElementById('photoInput')?.addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const p = document.getElementById('scanPreview');
+    p.src = ev.target.result; p.style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+  showScanState('scanning');
+});
+
+/* ── Demo ────────────────────────────────────────────────────────────── */
+document.getElementById('demoBtn')?.addEventListener('click', () => {
+  const p = document.querySelector('input[name="demo_profile"]:checked')?.value || 'combination_warm';
+  showScanState('demo');
+  setTimeout(() => { window.location.href = '/scan/?demo=true&profile=' + p + '&gender=' + selectedGender; }, 2200);
+});
+
+/* ── BOOT: decide which state to show on page load ───────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  if (INITIAL_STATE === 'no-face') {
+    // If there's an error, skip gender step and show scanner directly with error
+    document.getElementById('gender-step').style.display = 'none';
+    document.getElementById('scanner-step').style.display = 'block';
+    if (NO_FACE_MSG) {
+      const msgEl = document.getElementById('no-face-msg');
+      if (msgEl) msgEl.textContent = NO_FACE_MSG;
+    }
+    showScanState('no-face');
+  }
+  // else: gender step is already shown (active by default)
+});
+</script>
+{% endblock %}

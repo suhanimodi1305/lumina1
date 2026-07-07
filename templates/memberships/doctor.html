@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}VIP 1:1 Doctor — Lumina{% endblock %}
+{% block page_title %}VIP Doctor Consultation{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Override accent to gold for VIP Doctor page */
+  :root { --sb-teal: var(--sb-gold, #c9a96e); }
+  .lux-content { padding: 0 !important; }
+  .vip-doctor-shell {
+    display: flex;
+    height: calc(100vh - var(--top-h, 52px));
+    overflow: hidden;
+    background: var(--page-bg);
+  }
+  /* Sidebar quick prompts */
+  .vip-sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  .vip-sidebar h6 {
+    font-size: .7rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: .75rem;
+  }
+  .vip-quick-btn {
+    display: block; width: 100%; text-align: left;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: var(--r-lg, 12px); padding: .5rem .75rem;
+    font-size: .8rem; color: var(--text); cursor: pointer;
+    margin-bottom: .4rem;
+    transition: background .15s, border-color .15s;
+  }
+  .vip-quick-btn:hover {
+    background: rgba(201,169,110,.1);
+    border-color: rgba(201,169,110,.4);
+    color: #c9a96e;
+  }
+  /* Chat main */
+  .vip-chat-main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+  /* VIP badge header */
+  .vip-header {
+    padding: .75rem 1.25rem;
+    background: var(--surface);
+    border-bottom: 1px solid rgba(201,169,110,.25);
+    display: flex; align-items: center; gap: .75rem; flex-shrink: 0;
+  }
+  .vip-badge {
+    background: linear-gradient(135deg, #c9a96e, #e2c080);
+    color: #0a0a0f; font-size: .65rem; font-weight: 800;
+    letter-spacing: .12em; padding: .25rem .65rem;
+    border-radius: 100px; text-transform: uppercase;
+  }
+  .vip-header-title {
+    font-size: .95rem; font-weight: 700; color: #c9a96e;
+  }
+  .vip-header-sub {
+    font-size: .75rem; color: var(--muted); margin-left: auto;
+  }
+  /* Messages area */
+  .vip-messages {
+    flex: 1; overflow-y: auto; padding: 1rem 1.25rem;
+    display: flex; flex-direction: column; gap: .75rem;
+  }
+  .msg-bubble {
+    max-width: 75%; padding: .65rem 1rem;
+    border-radius: 16px; font-size: .875rem; line-height: 1.55;
+    word-break: break-word;
+  }
+  .msg-user {
+    align-self: flex-end;
+    background: #c9a96e; color: #0a0a0f;
+    border-bottom-right-radius: 4px;
+  }
+  .msg-assistant {
+    align-self: flex-start;
+    background: var(--surface); border: 1px solid rgba(201,169,110,.2);
+    color: var(--text); border-bottom-left-radius: 4px;
+  }
+  .msg-meta {
+    font-size: .68rem; color: var(--muted); margin-top: .25rem;
+    text-align: right;
+  }
+  .msg-assistant .msg-meta { text-align: left; }
+  /* Input area */
+  .vip-input-area {
+    padding: .75rem 1.25rem;
+    background: var(--surface);
+    border-top: 1px solid rgba(201,169,110,.2);
+    display: flex; gap: .5rem; align-items: flex-end; flex-shrink: 0;
+  }
+  .vip-input {
+    flex: 1; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--page-bg); color: var(--text);
+    padding: .55rem 1rem; font-size: .875rem; resize: none;
+    max-height: 100px; min-height: 40px; overflow-y: auto;
+    transition: border-color .15s;
+  }
+  .vip-input:focus {
+    outline: none;
+    border-color: rgba(201,169,110,.6);
+    box-shadow: 0 0 0 3px rgba(201,169,110,.12);
+  }
+  .vip-send-btn {
+    background: #c9a96e; border: none; border-radius: 50%;
+    width: 40px; height: 40px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .15s, transform .1s;
+    color: #0a0a0f;
+  }
+  .vip-send-btn:hover  { background: #b8934c; }
+  .vip-send-btn:active { transform: scale(.93); }
+  .vip-photo-btn {
+    background: transparent; border: 1.5px solid rgba(201,169,110,.3);
+    border-radius: 50%; width: 40px; height: 40px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #c9a96e; transition: background .15s;
+  }
+  .vip-photo-btn:hover { background: rgba(201,169,110,.1); }
+  /* Loading dots */
+  .typing-dots span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #c9a96e; margin: 0 2px;
+    animation: blink 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .typing-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+  @media (max-width: 640px) {
+    .vip-sidebar { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vip-doctor-shell">
+
+  <!-- Sidebar: quick prompts -->
+  <aside class="vip-sidebar">
+    <h6><i class="bi bi-lightning-charge-fill" style="color:#c9a96e;"></i> Quick Topics</h6>
+    {% for prompt in mode_prompts %}
+    <button class="vip-quick-btn" onclick="fillPrompt(this)">{{ prompt }}</button>
+    {% endfor %}
+
+    <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);">
+      <div style="font-size:.72rem;color:var(--muted);line-height:1.5;">
+        <i class="bi bi-shield-lock-fill" style="color:#c9a96e;"></i>
+        Private VIP consultation. Responses are for informational purposes only.
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main chat area -->
+  <div class="vip-chat-main">
+
+    <!-- Gold VIP header -->
+    <div class="vip-header">
+      <span class="vip-badge">VIP</span>
+      <div>
+        <div class="vip-header-title">🩺 1:1 AI Doctor Consultation</div>
+      </div>
+      <span class="vip-header-sub">Exclusive · Private · Unlimited</span>
+    </div>
+
+    <!-- Messages -->
+    <div class="vip-messages" id="vipMessages">
+      {% if not messages %}
+      <div class="msg-bubble msg-assistant">
+        <strong>Hello! 👋</strong> I'm Dr. Lumina, your personal VIP AI skin specialist.<br><br>
+        As a VIP member, you have exclusive private access to detailed consultations. I'll provide in-depth analysis, premium product recommendations, and personalised treatment plans.<br><br>
+        What's been going on with your skin lately?
+      </div>
+      {% endif %}
+
+      {% for msg in messages %}
+      <div class="msg-bubble msg-{{ msg.role }}">
+        {% if msg.image_data %}
+        <img src="data:image/jpeg;base64,{{ msg.image_data }}" alt="Uploaded photo"
+             style="max-width:220px;border-radius:8px;display:block;margin-bottom:.4rem;">
+        {% endif %}
+        {{ msg.content|linebreaksbr }}
+        <div class="msg-meta">{{ msg.created_at|date:"g:i A" }}</div>
+      </div>
+      {% endfor %}
+
+      <!-- Typing indicator (hidden by default) -->
+      <div id="typingIndicator" class="msg-bubble msg-assistant" style="display:none;">
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="vip-input-area">
+      <button class="vip-photo-btn" title="Upload skin photo" onclick="document.getElementById('photoInput').click()">
+        <i class="bi bi-camera-fill"></i>
+      </button>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="sendPhoto(this)">
+
+      <textarea class="vip-input" id="vipMessageInput" rows="1"
+                placeholder="Describe your skin concern…"
+                onkeydown="handleKey(event)"></textarea>
+
+      <button class="vip-send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+        <i class="bi bi-send-fill" style="font-size:.875rem;"></i>
+      </button>
+    </div>
+
+  </div><!-- end vip-chat-main -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CONV_ID   = "{{ conversation.id }}";
+const SEND_URL  = "{% url 'chat:send_message' conversation.id %}";
+const PHOTO_URL = "{% url 'chat:send_photo' conversation.id %}";
+const CSRF      = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+function scrollBottom() {
+  const el = document.getElementById('vipMessages');
+  el.scrollTop = el.scrollHeight;
+}
+scrollBottom();
+
+function fillPrompt(btn) {
+  document.getElementById('vipMessageInput').value = btn.textContent.trim();
+  document.getElementById('vipMessageInput').focus();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function appendBubble(role, html, time) {
+  const wrap = document.getElementById('vipMessages');
+  const div  = document.createElement('div');
+  div.className = 'msg-bubble msg-' + role;
+  div.innerHTML  = html + (time ? `<div class="msg-meta">${time}</div>` : '');
+  wrap.insertBefore(div, document.getElementById('typingIndicator'));
+  scrollBottom();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('vipMessageInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('sendBtn').disabled = true;
+  appendBubble('user', escapeHtml(text).replace(/\n/g,'<br>'), now());
+  document.getElementById('typingIndicator').style.display = '';
+  scrollBottom();
+  try {
+    const res  = await fetch(SEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    document.getElementById('typingIndicator').style.display = 'none';
+    if (data.reply) appendBubble('assistant', formatReply(data.reply), data.timestamp);
+    else            appendBubble('assistant', 'An error occurred. Please try again.', now());
+  } catch (e) {
+    document.getElementById('typingIndicator').style.display = 'none';
+    appendBubble('assistant', 'Connection error. Please try again.', now());
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+}
+
+async function sendPhoto(input) {
+  if (!input.files.length) return;
+  const file = input.files[0];
+  appendBubble('user', '📷 <em>Photo sent for analysis</em>', now());
+  document.getElementById('typingIndicator').style.display = '';
+  scrollBottom();
+  const fd = new FormData();
+  fd.append('photo', file);
+  try {
+    const res  = await fetch(PHOTO_URL, { method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd });
+    const data = await res.json();
+    document.getElementById('typingIndicator').style.display = 'none';
+    if (data.image_url) {
+      appendBubble('user', `<img src="${data.image_url}" alt="Uploaded" style="max-width:220px;border-radius:8px;">`, now());
+    }
+    if (data.reply) appendBubble('assistant', formatReply(data.reply), data.timestamp);
+  } catch (e) {
+    document.getElementById('typingIndicator').style.display = 'none';
+    appendBubble('assistant', 'Photo upload failed. Please try again.', now());
+  }
+  input.value = '';
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function formatReply(text) {
+  return escapeHtml(text).replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
+}
+function now() {
+  return new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+</script>
+{% endblock %}

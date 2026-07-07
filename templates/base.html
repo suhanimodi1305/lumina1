@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>{% block title %}Lumina AI{% endblock %}</title>
+  <meta name="description" content="{% block description %}AI-powered skin specialist{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons — self-hosted (no CDN dependency) -->
+  <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+  {# Apply saved theme before first paint — prevents flash #}
+  <script>
+    (function(){
+      var t = localStorage.getItem('lux_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <style>
+    /* ── APP-LIKE PAGE TRANSITIONS ── */
+    .lux-content { animation: lux-fadein .18s ease; }
+    @keyframes lux-fadein {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    /* Hide footer on all inner pages by default */
+    .lux-footer { display: none; }
+  </style>
+<style>
+/* ═══════════════════════════════════════════════════
+   LUMINA — VERTICAL SIDEBAR LAYOUT
+   Full responsive: Desktop sidebar + Mobile bottom nav
+   ═══════════════════════════════════════════════════ */
+:root {
+  --sb-w:       240px;
+  --sb-w-col:    64px;
+  --top-h:       52px;
+  --mob-bot-h:   58px;
+  --sb-bg:       #0a0a0f;
+  --sb-border:   rgba(255,255,255,.07);
+  --sb-text:     rgba(255,255,255,.45);
+  --sb-text-act: #ffffff;
+  --sb-gold:     #c9a96e;
+  --sb-teal:     #0d9488;
+  --sb-hover:    rgba(255,255,255,.06);
+  --sb-active:   rgba(13,148,136,.18);
+  --page-bg:     #f5f3f0;
+  --surface:     #ffffff;
+  --border:      #e8e4df;
+  --text:        #1a1a2e;
+  --muted:       #64748b;
+  --font-serif:  'Cormorant Garamond', Georgia, serif;
+  --font-sans:   'Inter', system-ui, sans-serif;
+}
+[data-theme="dark"] {
+  --page-bg: #0d0d14;
+  --surface:  #12121a;
+  --border:   rgba(255,255,255,.08);
+  --text:     rgba(255,255,255,.9);
+  --muted:    rgba(255,255,255,.45);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{
+  scroll-behavior:smooth;
+  zoom:0.9;
+  font-size:14px;
+}
+body{
+  font-family:var(--font-sans);
+  background:var(--page-bg);
+  color:var(--text);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── LAYOUT SHELL ── */
+.lux-shell {
+  display:flex;
+  min-height:100vh;
+}
+
+/* ═══════════════════════
+   SIDEBAR (desktop left)
+   ═══════════════════════ */
+.lux-sidebar {
+  width: var(--sb-w);
+  flex-shrink: 0;
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 200;
+  transition: width .25s ease;
+  overflow: hidden;
+}
+.lux-sidebar.collapsed {
+  width: var(--sb-w-col);
+}
+
+/* Brand */
+.sb-brand {
+  padding: 1.1rem 1rem .9rem;
+  display: flex; align-items: center; gap: .65rem;
+  border-bottom: 1px solid var(--sb-border);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sb-brand-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--sb-teal), #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 1rem; color: #fff; font-weight: 700;
+}
+.sb-brand-text {
+  font-family: var(--font-serif);
+  font-size: 1.35rem; font-weight: 700;
+  color: var(--sb-gold); letter-spacing: .04em;
+  white-space: nowrap; overflow: hidden;
+  transition: opacity .2s;
+}
+.sb-brand-wordmark {
+  height: 22px; width: auto; object-fit: contain;
+  white-space: nowrap; overflow: hidden;
+  transition: opacity .2s, width .2s;
+  flex-shrink: 0;
+}
+.lux-sidebar.collapsed .sb-brand-wordmark { opacity: 0; width: 0; }
+.lux-sidebar.collapsed .sb-brand-text { opacity: 0; width: 0; }
+
+/* Nav sections */
+.sb-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: .5rem 0; scrollbar-width: none; }
+.sb-nav::-webkit-scrollbar { display: none; }
+
+.sb-section-label {
+  font-size: .58rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: rgba(255,255,255,.25);
+  padding: .7rem 1rem .3rem;
+  white-space: nowrap; overflow: hidden;
+  transition: opacity .2s;
+}
+.lux-sidebar.collapsed .sb-section-label { opacity: 0; }
+
+.sb-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .55rem 1rem; margin: .1rem .5rem;
+  border-radius: 9px;
+  color: var(--sb-text); font-size: .825rem; font-weight: 500;
+  text-decoration: none; cursor: pointer; border: none;
+  background: transparent; width: calc(100% - 1rem);
+  transition: background .12s, color .12s;
+  white-space: nowrap; overflow: hidden;
+}
+.sb-item:hover { background: var(--sb-hover); color: var(--sb-text-act); }
+.sb-item.active {
+  background: var(--sb-active); color: var(--sb-teal);
+  font-weight: 600;
+}
+.sb-item.active .sb-icon { color: var(--sb-teal); }
+.sb-item .sb-icon {
+  font-size: 1rem; flex-shrink: 0; width: 18px; text-align: center;
+  color: rgba(255,255,255,.35); transition: color .12s;
+}
+.sb-item:hover .sb-icon { color: rgba(255,255,255,.7); }
+.sb-item .sb-label { overflow: hidden; transition: opacity .2s, width .2s; white-space: nowrap; }
+.lux-sidebar.collapsed .sb-label { opacity: 0; width: 0; }
+
+.sb-badge {
+  margin-left: auto; padding: .12rem .45rem;
+  background: var(--sb-teal); color: #fff;
+  border-radius: 20px; font-size: .6rem; font-weight: 700;
+  flex-shrink: 0; transition: opacity .2s;
+}
+.lux-sidebar.collapsed .sb-badge { opacity: 0; width: 0; padding: 0; }
+
+/* Premium badge */
+.sb-premium-badge {
+  margin-left: auto; padding: .12rem .45rem;
+  background: var(--sb-gold); color: #0a0a0f;
+  border-radius: 20px; font-size: .58rem; font-weight: 700;
+  flex-shrink: 0; transition: opacity .2s;
+}
+.lux-sidebar.collapsed .sb-premium-badge { opacity: 0; width: 0; padding: 0; }
+
+/* Sub-items (collapse expand) */
+.sb-sub { overflow: hidden; max-height: 0; transition: max-height .25s ease; }
+.sb-sub.open { max-height: 300px; }
+.sb-sub-item {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .42rem .9rem .42rem 2.7rem;
+  margin: .05rem .5rem;
+  border-radius: 8px; color: rgba(255,255,255,.35);
+  font-size: .78rem; text-decoration: none;
+  transition: background .12s, color .12s;
+}
+.sb-sub-item:hover { background: var(--sb-hover); color: rgba(255,255,255,.7); }
+.sb-sub-item.active { color: var(--sb-teal); }
+
+/* Sidebar footer */
+.sb-footer {
+  padding: .75rem .5rem;
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.sb-user-card {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .55rem .65rem; border-radius: 9px;
+  background: rgba(255,255,255,.04); overflow: hidden;
+}
+.sb-user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--sb-teal), #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.sb-user-name  { font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.8); white-space: nowrap; overflow: hidden; }
+.sb-user-role  { font-size: .62rem; color: rgba(255,255,255,.35); white-space: nowrap; }
+.lux-sidebar.collapsed .sb-user-name,
+.lux-sidebar.collapsed .sb-user-role { display: none; }
+
+/* ═══════════════════════
+   MAIN CONTENT AREA
+   ═══════════════════════ */
+.lux-main {
+  flex: 1;
+  margin-left: var(--sb-w);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left .25s ease;
+}
+.lux-main.sb-collapsed { margin-left: var(--sb-w-col); }
+
+/* Top bar */
+.lux-topbar {
+  height: var(--top-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: .75rem;
+  padding: 0 1.25rem;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.tb-toggle {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.1rem; cursor: pointer; padding: .3rem;
+  border-radius: 6px; transition: background .12s;
+}
+.tb-toggle:hover { background: var(--page-bg); }
+.tb-title {
+  font-size: .95rem; font-weight: 700; color: var(--text); flex: 1;
+}
+.tb-actions { display: flex; align-items: center; gap: .5rem; }
+.tb-icon-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: none; border: 1px solid var(--border);
+  color: var(--muted); font-size: .9rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.tb-icon-btn:hover { background: var(--page-bg); color: var(--text); }
+
+/* Page content */
+.lux-content {
+  flex: 1;
+  padding: 1.5rem clamp(.75rem, 3vw, 1.75rem);
+}
+
+/* Messages */
+.lux-messages { padding: .75rem 1.25rem 0; }
+.lux-alert {
+  padding: .7rem 1rem; border-radius: 10px; font-size: .82rem;
+  display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem;
+}
+.lux-alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.lux-alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.lux-alert-warning { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+.lux-alert-info    { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+
+/* ═══════════════════════
+   MOBILE BOTTOM NAV
+   ═══════════════════════ */
+.lux-mob-overlay {
+  display: none; position: fixed; inset: 0; z-index: 290;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+}
+.lux-mob-overlay.open { display: block; }
+
+/* Mobile sidebar = full-height drawer */
+@media (max-width: 991px) {
+  body { padding-bottom: var(--mob-bot-h); }
+  .lux-sidebar {
+    transform: translateX(-100%);
+    transition: transform .28s ease, width .28s ease;
+    width: var(--sb-w) !important;
+    z-index: 300;
+  }
+  .lux-sidebar.mob-open { transform: translateX(0); }
+  .lux-main { margin-left: 0 !important; }
+  .lux-topbar { padding: 0 .85rem; }
+}
+
+/* Mobile bottom bar */
+.lux-bottom-bar {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  height: var(--mob-bot-h);
+  background: var(--sb-bg);
+  border-top: 1px solid var(--sb-border);
+  align-items: center; justify-content: space-around;
+}
+@media (max-width: 991px) { .lux-bottom-bar { display: flex; } }
+.bbar-item {
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  padding: .35rem .5rem; border-radius: 9px;
+  color: var(--sb-text); font-size: .56rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .04em;
+  text-decoration: none; background: none; border: none;
+  cursor: pointer; min-width: 52px;
+  transition: color .12s;
+}
+.bbar-item .bi { font-size: 1.1rem; }
+.bbar-item:hover,.bbar-item.active { color: var(--sb-teal); }
+.bbar-scan {
+  width: 46px; height: 46px; border-radius: 13px; margin-top: -10px;
+  background: linear-gradient(135deg, var(--sb-teal), #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.45);
+  text-decoration: none;
+}
+
+/* Footer */
+.lux-footer {
+  background: var(--sb-bg); border-top: 1px solid var(--sb-border);
+  padding: 2rem 1.25rem 1.5rem; color: rgba(255,255,255,.4); font-size: .78rem;
+  text-align: center;
+}
+
+/* ── AI MODE LOGOS (used in chat avatars, mode cards, tabs) ── */
+.ai-mode-logo {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  display: block;
+}
+.ai-mode-logo-sm {
+  width: 28px; height: 28px;
+  object-fit: contain;
+  border-radius: 50%;
+  vertical-align: middle;
+  display: inline-block;
+}
+.ai-mode-logo-xs {
+  width: 22px; height: 22px;
+  object-fit: contain;
+  border-radius: 50%;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* ── PREMIUM LOCK OVERLAY ── */
+.premium-lock-overlay {
+  position: relative; border-radius: 14px; overflow: hidden;
+}
+.premium-lock-overlay::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, rgba(10,10,15,.92) 70%);
+  pointer-events: none;
+}
+.premium-lock-badge {
+  position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
+  background: var(--sb-gold); color: #0a0a0f;
+  padding: .45rem 1.25rem; border-radius: 20px;
+  font-size: .78rem; font-weight: 700; white-space: nowrap;
+  z-index: 10;
+}
+</style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="lux-shell">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="lux-sidebar" id="lux-sidebar">
+
+  <!-- Brand -->
+  <div class="sb-brand">
+    <img src="{% static 'images/lumina-icon.svg' %}" alt="Lumina" class="sb-brand-icon" style="width:34px;height:34px;flex-shrink:0;">
+    <img src="{% static 'images/lumina-wordmark.svg' %}" alt="Lumina" class="sb-brand-wordmark">
+  </div>
+
+  <!-- Nav -->
+  <nav class="sb-nav">
+
+    <!-- MAIN -->
+    <div class="sb-section-label">Main</div>
+    <a href="{% url 'core:home' %}" class="sb-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+      <i class="bi bi-house sb-icon"></i>
+      <span class="sb-label">Home</span>
+    </a>
+    <a href="{% url 'scanner:upload' %}" class="sb-item {% if 'scanner' in request.path %}active{% endif %}">
+      <i class="bi bi-camera-fill sb-icon"></i>
+      <span class="sb-label">Face Scan</span>
+    </a>
+
+    <!-- AI CONSULTANTS -->
+    <div class="sb-section-label">AI Consultants</div>
+    <a href="{% url 'chat:create' %}?mode=doctor" class="sb-item {% if 'chat' in request.path and request.GET.mode == 'doctor' %}active{% endif %}">
+      <i class="bi bi-heart-pulse sb-icon"></i>
+      <span class="sb-label">AI Doctor</span>
+    </a>
+    <a href="{% url 'chat:create' %}?mode=makeup" class="sb-item {% if 'chat' in request.path and request.GET.mode == 'makeup' %}active{% endif %}">
+      <i class="bi bi-palette sb-icon"></i>
+      <span class="sb-label">Makeup AI</span>
+      {% if user_tier == 'normal' %}
+        <span class="sb-premium-badge">PRO</span>
+      {% endif %}
+    </a>
+    <a href="{% url 'chat:create' %}?mode=kbeauty" class="sb-item {% if 'chat' in request.path and request.GET.mode == 'kbeauty' %}active{% endif %}">
+      <i class="bi bi-flower1 sb-icon"></i>
+      <span class="sb-label">K-Beauty AI</span>
+      {% if user_tier == 'normal' %}
+        <span class="sb-premium-badge">PRO</span>
+      {% endif %}
+    </a>
+    <a href="{% url 'chat:index' %}" class="sb-item {% if 'chat' in request.path and 'create' not in request.path %}active{% endif %}">
+      <i class="bi bi-chat-heart sb-icon"></i>
+      <span class="sb-label">All Chats</span>
+    </a>
+    {% if user_tier == 'vip' %}
+    <a href="{% url 'memberships:doctor' %}" class="sb-item {% if 'doctor' in request.path %}active{% endif %}" style="color: var(--sb-gold);">
+      <i class="bi bi-heart-pulse-fill sb-icon" style="color: var(--sb-gold);"></i>
+      <span class="sb-label">VIP Doctor</span>
+    </a>
+    {% endif %}
+
+    <!-- MY RESULTS -->
+    {% if user.is_authenticated %}
+    <div class="sb-section-label">My Account</div>
+    <a href="{% url 'user_home' %}" class="sb-item {% if '/me/' in request.path %}active{% endif %}">
+      <i class="bi bi-person-circle sb-icon"></i>
+      <span class="sb-label">My Home</span>
+    </a>
+    <a href="{% url 'dashboard:dashboard' %}" class="sb-item {% if 'dashboard' in request.path %}active{% endif %}">
+      <i class="bi bi-clock-history sb-icon"></i>
+      <span class="sb-label">Scan History</span>
+      {% if user_real_scan_count %}<span class="sb-badge">{{ user_real_scan_count }}</span>{% endif %}
+    </a>
+    {% if user_latest_real_scan %}
+    <a href="{% url 'results:detail' scan_id=user_latest_real_scan.id %}" class="sb-item {% if 'results' in request.path %}active{% endif %}">
+      <i class="bi bi-bar-chart-line sb-icon"></i>
+      <span class="sb-label">Latest Results</span>
+    </a>
+    {% endif %}
+    {% endif %}
+
+    <!-- SHOP -->
+    <div class="sb-section-label">Shop</div>
+    <a href="{% url 'products:list' %}?product_range=korean" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'korean' %}active{% endif %}">
+      <i class="bi bi-stars sb-icon"></i>
+      <span class="sb-label">K-Beauty</span>
+    </a>
+    <a href="{% url 'products:list' %}?product_range=makeup" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'makeup' %}active{% endif %}">
+      <i class="bi bi-palette2 sb-icon"></i>
+      <span class="sb-label">Makeup</span>
+    </a>
+    <a href="{% url 'products:list' %}?product_range=ayurvedic" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'ayurvedic' %}active{% endif %}">
+      <i class="bi bi-flower2 sb-icon"></i>
+      <span class="sb-label">Ayurvedic</span>
+    </a>
+    <a href="{% url 'products:list' %}?product_range=pharmacy" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'pharmacy' %}active{% endif %}">
+      <i class="bi bi-capsule sb-icon"></i>
+      <span class="sb-label">Pharmacy</span>
+    </a>
+    <a href="{% url 'products:list' %}" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and not request.GET.product_range %}active{% endif %}">
+      <i class="bi bi-grid sb-icon"></i>
+      <span class="sb-label">All Products</span>
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'orders:my_orders' %}" class="sb-item {% if 'orders/my-orders' in request.path %}active{% endif %}">
+      <i class="bi bi-bag-heart sb-icon"></i>
+      <span class="sb-label">My Orders</span>
+    </a>
+    <a href="{% url 'orders:my_requirements' %}" class="sb-item {% if 'orders/requirements' in request.path %}active{% endif %}">
+      <i class="bi bi-clipboard-heart sb-icon"></i>
+      <span class="sb-label">My Requirements</span>
+    </a>
+    {% endif %}
+    <a href="{% url 'orders:checkout' %}" class="sb-item {% if 'orders/checkout' in request.path %}active{% endif %}">
+      <i class="bi bi-cart sb-icon"></i>
+      <span class="sb-label">Cart {% if request.session.cart %}<span style="background:#0d9488;color:#fff;font-size:.58rem;padding:.08rem .35rem;border-radius:20px;font-weight:700;margin-left:.2rem;">{{ request.session.cart|length }}</span>{% endif %}</span>
+    </a>
+
+    <!-- ADMIN / EMPLOYEE -->
+    {% if user.is_staff or user.is_superuser %}
+    <div class="sb-section-label">Admin</div>
+    <a href="{% url 'employee:portal' %}" class="sb-item {% if 'employee' in request.path %}active{% endif %}">
+      <i class="bi bi-briefcase sb-icon"></i>
+      <span class="sb-label">Employee Portal</span>
+    </a>
+    <a href="{% url 'employee:order_list' %}" class="sb-item {% if 'employee/orders' in request.path %}active{% endif %}">
+      <i class="bi bi-bag-check sb-icon"></i>
+      <span class="sb-label">Orders</span>
+    </a>
+    <a href="{% url 'employee:requirement_list' %}" class="sb-item {% if 'employee/requirements' in request.path %}active{% endif %}">
+      <i class="bi bi-clipboard-heart sb-icon"></i>
+      <span class="sb-label">Requirements</span>
+    </a>
+    <a href="{% url 'employee:employee_list' %}" class="sb-item {% if 'team' in request.path %}active{% endif %}">
+      <i class="bi bi-people sb-icon"></i>
+      <span class="sb-label">Team</span>
+    </a>
+    <a href="{% url 'employee:product_list' %}" class="sb-item">
+      <i class="bi bi-box-seam sb-icon"></i>
+      <span class="sb-label">Manage Products</span>
+    </a>
+    <a href="{% url 'employee:bulk_import' %}" class="sb-item">
+      <i class="bi bi-upload sb-icon"></i>
+      <span class="sb-label">Bulk Import</span>
+    </a>
+    <a href="{% url 'employee:export_products' %}" class="sb-item">
+      <i class="bi bi-download sb-icon"></i>
+      <span class="sb-label">Export CSV</span>
+    </a>
+    <a href="{% url 'admin:index' %}" class="sb-item">
+      <i class="bi bi-shield-lock sb-icon"></i>
+      <span class="sb-label">Django Admin</span>
+    </a>
+    {% endif %}
+
+  </nav>
+
+  <!-- Footer user card -->
+  <div class="sb-footer">
+    {% if user.is_authenticated %}
+    <div class="sb-user-card">
+      <div class="sb-user-avatar">{{ user.username|first|upper }}</div>
+      <div>
+        <div class="sb-user-name">{{ user.get_full_name|default:user.username }}</div>
+        <div class="sb-user-role">
+          <a href="{% url 'memberships:upgrade' %}" style="text-decoration:none;">
+            {% if user_tier == 'vip' %}<span class="tier-badge tier-vip">VIP</span>
+            {% elif user_tier == 'medium' %}<span class="tier-badge tier-medium">PLUS</span>
+            {% else %}<span class="tier-badge tier-normal">FREE</span>{% endif %}
+          </a>
+          <span style="margin-left:.35rem;">{% if user_tier == 'vip' %}VIP Member{% elif user_tier == 'medium' %}Plus Member{% else %}Free Member{% endif %}</span>
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'accounts:logout' %}" class="sb-item" style="margin-top:.4rem;">
+      <i class="bi bi-box-arrow-left sb-icon"></i>
+      <span class="sb-label">Logout</span>
+    </a>
+    {% else %}
+    <a href="{% url 'accounts:login' %}" class="sb-item">
+      <i class="bi bi-box-arrow-in-right sb-icon"></i>
+      <span class="sb-label">Sign In</span>
+    </a>
+    {% endif %}
+  </div>
+
+</aside>
+
+<!-- Mobile overlay -->
+<div class="lux-mob-overlay" id="mob-overlay"></div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="lux-main" id="lux-main">
+
+  <!-- Top bar -->
+  <div class="lux-topbar">
+    <button class="tb-toggle" id="sb-toggle" title="Toggle sidebar">
+      <i class="bi bi-layout-sidebar"></i>
+    </button>
+    <div class="tb-title">{% block page_title %}Lumina AI{% endblock %}</div>
+    <div class="tb-actions">
+      <button class="tb-icon-btn" id="theme-btn" title="Toggle theme">
+        <i class="bi bi-moon-stars" id="theme-icon"></i>
+      </button>
+      {% if user.is_authenticated %}
+      <a href="{% url 'scanner:upload' %}" class="tb-icon-btn" title="New scan" style="text-decoration:none;">
+        <i class="bi bi-camera-fill"></i>
+      </a>
+      {% else %}
+      <a href="{% url 'accounts:login' %}" class="tb-icon-btn" style="text-decoration:none;">
+        <i class="bi bi-person-circle"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="lux-messages">
+    {% for message in messages %}
+      <div class="lux-alert lux-alert-{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">
+        <i class="bi bi-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% else %}info-circle{% endif %}"></i>
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Content -->
+  <main class="lux-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer — only on public landing, not on inner app pages -->
+  {% block footer %}
+  <footer class="lux-footer">
+    &copy; 2025 Lumina by SAS Global &nbsp;·&nbsp;
+    <a href="https://sasglobal.biz" target="_blank" style="color:var(--sb-teal);">sasglobal.biz</a> &nbsp;·&nbsp;
+    Informational only. Consult a dermatologist for medical advice.
+  </footer>
+  {% endblock %}
+
+</div><!-- /lux-main -->
+
+<!-- ═══════════════ MOBILE BOTTOM BAR ═══════════════ -->
+<div class="lux-bottom-bar">
+  <a href="{% url 'core:home' %}" class="bbar-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+    <i class="bi bi-house"></i> Home
+  </a>
+  <a href="{% url 'chat:index' %}" class="bbar-item {% if 'chat' in request.path %}active{% endif %}">
+    <i class="bi bi-heart-pulse"></i> Doctor
+  </a>
+  <a href="{% url 'scanner:upload' %}" class="bbar-scan">
+    <i class="bi bi-camera-fill"></i>
+  </a>
+  {% if user.is_authenticated %}
+    {% with ls=user.scans.first %}
+    <a href="{% if ls %}{% url 'results:detail' scan_id=ls.id %}{% else %}{% url 'scanner:upload' %}{% endif %}" class="bbar-item {% if 'results' in request.path %}active{% endif %}">
+      <i class="bi bi-bar-chart-line"></i> Results
+    </a>
+    {% endwith %}
+  {% else %}
+    <a href="{% url 'products:list' %}" class="bbar-item">
+      <i class="bi bi-grid"></i> Shop
+    </a>
+  {% endif %}
+  <button class="bbar-item" id="mob-menu-btn">
+    <i class="bi bi-list"></i> Menu
+  </button>
+</div>
+
+</div><!-- /lux-shell -->
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script>
+// ── SIDEBAR TOGGLE
+const sidebar   = document.getElementById('lux-sidebar');
+const main      = document.getElementById('lux-main');
+const overlay   = document.getElementById('mob-overlay');
+const sbToggle  = document.getElementById('sb-toggle');
+const mobMenu   = document.getElementById('mob-menu-btn');
+
+function isMobile() { return window.innerWidth < 992; }
+
+function openMobileSidebar() {
+  sidebar.classList.add('mob-open');
+  overlay.classList.add('open');
+}
+function closeMobileSidebar() {
+  sidebar.classList.remove('mob-open');
+  overlay.classList.remove('open');
+}
+function toggleDesktopSidebar() {
+  const collapsed = sidebar.classList.toggle('collapsed');
+  main.classList.toggle('sb-collapsed', collapsed);
+  localStorage.setItem('sb_collapsed', collapsed ? '1' : '0');
+}
+
+sbToggle?.addEventListener('click', () => {
+  if (isMobile()) openMobileSidebar();
+  else toggleDesktopSidebar();
+});
+mobMenu?.addEventListener('click', openMobileSidebar);
+overlay?.addEventListener('click', closeMobileSidebar);
+
+// Restore sidebar state on desktop
+if (!isMobile() && localStorage.getItem('sb_collapsed') === '1') {
+  sidebar.classList.add('collapsed');
+  main.classList.add('sb-collapsed');
+}
+// Close sidebar on mobile navigation
+document.querySelectorAll('.sb-item, .sb-sub-item').forEach(el => {
+  el.addEventListener('click', () => { if (isMobile()) closeMobileSidebar(); });
+});
+
+// ── SUB-NAV TOGGLE
+document.querySelectorAll('[data-sb-toggle]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.getElementById(btn.dataset.sbToggle);
+    if (target) target.classList.toggle('open');
+  });
+});
+
+// ── THEME
+const themeBtn  = document.getElementById('theme-btn');
+const themeIcon = document.getElementById('theme-icon');
+// Apply theme before first paint to avoid flash
+const savedTheme = localStorage.getItem('lux_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeIcon.className = savedTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+
+themeBtn?.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  themeIcon.className = next === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+  localStorage.setItem('lux_theme', next);
+});
+
+// ── SESSION EXPIRY — countdown modal with auto-logout
+(function() {
+  const SESSION_SECONDS = {{ request.session.SESSION_COOKIE_AGE|default:7200 }};
+  {% if user.is_authenticated %}
+
+  // Inject modal HTML once
+  const MODAL_HTML = `
+  <div id="lux-session-modal" style="
+    display:none;position:fixed;inset:0;z-index:99999;
+    background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;
+  ">
+    <div style="
+      background:#12121a;border:1px solid rgba(255,255,255,.1);
+      border-radius:20px;padding:2rem 2.25rem;max-width:420px;width:90%;
+      box-shadow:0 24px 80px rgba(0,0,0,.7);text-align:center;
+      animation:lux-modal-in .2s ease;
+    ">
+      <div style="
+        width:64px;height:64px;border-radius:50%;margin:0 auto .9rem;
+        background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(239,68,68,.2));
+        border:2px solid rgba(245,158,11,.4);
+        display:flex;align-items:center;justify-content:center;font-size:1.75rem;
+      ">⏱</div>
+      <h3 style="color:#fff;font-size:1.2rem;font-weight:700;margin-bottom:.4rem;">
+        Session Expiring Soon
+      </h3>
+      <p style="color:rgba(255,255,255,.5);font-size:.85rem;margin-bottom:1.25rem;line-height:1.5;">
+        Your session will expire in&nbsp;<strong id="lux-session-countdown" style="color:#f59e0b;font-size:1.1rem;"></strong>.
+        <br>Stay logged in or your work may be lost.
+      </p>
+      <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+        <button id="lux-session-stay" style="
+          padding:.65rem 1.5rem;background:#0d9488;color:#fff;border:none;
+          border-radius:100px;font-size:.88rem;font-weight:700;cursor:pointer;
+          transition:background .15s;
+        ">Stay Logged In</button>
+        <a id="lux-session-logout" href="/accounts/logout/" style="
+          padding:.65rem 1.5rem;background:rgba(239,68,68,.12);color:#ef4444;
+          border:1px solid rgba(239,68,68,.25);
+          border-radius:100px;font-size:.88rem;font-weight:700;
+          text-decoration:none;display:inline-flex;align-items:center;
+        ">Logout Now</a>
+      </div>
+      <div id="lux-session-bar-wrap" style="margin-top:1.25rem;height:3px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;">
+        <div id="lux-session-bar" style="height:100%;background:#0d9488;transition:width 1s linear;border-radius:4px;"></div>
+      </div>
+    </div>
+  </div>
+  <style>
+  @keyframes lux-modal-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+  </style>`;
+
+  document.body.insertAdjacentHTML('beforeend', MODAL_HTML);
+
+  const modal      = document.getElementById('lux-session-modal');
+  const countdown  = document.getElementById('lux-session-countdown');
+  const bar        = document.getElementById('lux-session-bar');
+  const stayBtn    = document.getElementById('lux-session-stay');
+  const logoutLink = document.getElementById('lux-session-logout');
+
+  // Determine logout URL based on current path (admin vs app)
+  const isAdminPath = window.location.pathname.startsWith('/admin/');
+  if (isAdminPath) {
+    logoutLink.href = '/admin/logout/';
+  }
+
+  const WARN_AT_SECONDS = 120;   // show modal when 2 min left
+  const POLL_INTERVAL   = 30000; // ask server every 30 s
+
+  let secondsLeft = 0;
+  let tickInterval = null;
+  let modalVisible = false;
+
+  function fmtTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0
+      ? `${m}m ${String(sec).padStart(2,'0')}s`
+      : `${sec}s`;
+  }
+
+  function showModal(secs) {
+    if (modalVisible) return;
+    modalVisible = true;
+    modal.style.display = 'flex';
+    countdown.textContent = fmtTime(secs);
+    bar.style.width = '100%';
+  }
+
+  function hideModal() {
+    modalVisible = false;
+    modal.style.display = 'none';
+  }
+
+  function startTick(secs) {
+    clearInterval(tickInterval);
+    secondsLeft = secs;
+    tickInterval = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+        clearInterval(tickInterval);
+        // Force logout — session is gone server-side
+        window.location.href = isAdminPath
+          ? '/admin/login/?expired=1'
+          : '/accounts/login/?expired=1';
+        return;
+      }
+      if (modalVisible) {
+        countdown.textContent = fmtTime(secondsLeft);
+        // Progress bar: percentage of WARN_AT_SECONDS remaining
+        const pct = Math.min(100, (secondsLeft / WARN_AT_SECONDS) * 100);
+        bar.style.width = pct + '%';
+        // Colour shifts red as time runs out
+        bar.style.background = secondsLeft < 30 ? '#ef4444' : secondsLeft < 60 ? '#f59e0b' : '#0d9488';
+      }
+    }, 1000);
+  }
+
+  function pollServer() {
+    fetch('/accounts/session-status/', {credentials:'same-origin'})
+      .then(r => r.json())
+      .then(data => {
+        if (!data.authenticated) {
+          // Already logged out server-side
+          window.location.href = isAdminPath
+            ? '/admin/login/?expired=1'
+            : '/accounts/login/?expired=1';
+          return;
+        }
+        const secs = data.seconds_left;
+        if (secs <= 0) {
+          window.location.href = isAdminPath
+            ? '/admin/login/?expired=1'
+            : '/accounts/login/?expired=1';
+          return;
+        }
+        if (secs <= WARN_AT_SECONDS) {
+          showModal(secs);
+          startTick(secs);
+        } else {
+          hideModal();
+          // Schedule next check close to when warn threshold hits
+          clearInterval(tickInterval);
+          const nextPoll = Math.min(POLL_INTERVAL, (secs - WARN_AT_SECONDS) * 1000 - 5000);
+          if (nextPoll > 0) setTimeout(pollServer, nextPoll);
+        }
+      })
+      .catch(() => {}); // Silently ignore network errors
+  }
+
+  // Stay logged in
+  stayBtn.addEventListener('click', () => {
+    const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+    fetch('/accounts/session-ping/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'X-CSRFToken': csrfToken, 'Content-Type': 'application/json'},
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        hideModal();
+        clearInterval(tickInterval);
+        // Restart poll cycle for the full session window
+        setTimeout(pollServer, (data.seconds_left - WARN_AT_SECONDS) * 1000);
+      }
+    })
+    .catch(() => {});
+  });
+
+  // Cross-tab sync: if another tab logs out, redirect this one too
+  window.addEventListener('storage', e => {
+    if (e.key === 'lux_session_expired' && e.newValue === '1') {
+      window.location.href = isAdminPath
+        ? '/admin/login/?expired=1'
+        : '/accounts/login/?expired=1';
+    }
+  });
+
+  // Initial poll on page load
+  pollServer();
+  // Periodic background poll to stay in sync
+  setInterval(pollServer, POLL_INTERVAL);
+
+  // When tab becomes visible again, re-check immediately
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) pollServer();
+  });
+
+  {% endif %}
+})();
+
+// ── ACTIVE NAV HIGHLIGHT
+const path = window.location.pathname;
+document.querySelectorAll('.sb-item[href]').forEach(a => {
+  if (a.getAttribute('href') !== '/' && path.startsWith(a.pathname || '')) {
+    a.classList.add('active');
+  }
+});
+</script>
+{% block extra_js %}{% endblock %}
+
+{% if request.path != '/orders/checkout/' %}
+
+<!-- ═══════════════ FLOATING HELP WIDGET ═══════════════ -->
+
+<style>
+.help-fab{position:fixed;bottom:calc(var(--mob-bot-h,58px) + 1rem);right:1rem;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:.5rem;}
+
+@media(min-width:992px){.help-fab{bottom:1.5rem;}}
+.help-fab-btn{width:50px;height:50px;border-radius:50%;background:var(--sb-teal,#0d9488);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(13,148,136,.45);font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+.help-fab-btn:hover{transform:scale(1.1);}
+.help-panel{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);width:310px;max-height:460px;overflow-y:auto;display:none;flex-direction:column;}
+.help-panel.open{display:flex;}
+.help-panel-hdr{background:linear-gradient(135deg,#0d9488,#0891b2);padding:1rem 1.1rem;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;justify-content:space-between;}
+.help-panel-hdr h4{font-size:.95rem;font-weight:700;margin:0;}
+.help-close{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:1.2rem;cursor:pointer;}
+.help-body{padding:.85rem;flex:1;}
+.help-topic{display:flex;align-items:flex-start;gap:.65rem;padding:.6rem .7rem;border-radius:10px;cursor:pointer;transition:background .12s;text-decoration:none;}
+.help-topic:hover{background:#f1faf9;}
+.help-topic-icon{font-size:1.3rem;flex-shrink:0;margin-top:.05rem;}
+.help-topic-title{font-size:.82rem;font-weight:700;color:#0f172a;line-height:1.3;}
+.help-topic-desc{font-size:.72rem;color:#64748b;line-height:1.4;margin-top:.1rem;}
+.help-divider{height:1px;background:#e2e8f0;margin:.5rem 0;}
+[data-theme="dark"] .help-panel{background:#12121a;}
+[data-theme="dark"] .help-topic:hover{background:rgba(13,148,136,.1);}
+[data-theme="dark"] .help-topic-title{color:rgba(255,255,255,.85);}
+[data-theme="dark"] .help-topic-desc{color:rgba(255,255,255,.4);}
+[data-theme="dark"] .help-divider{background:rgba(255,255,255,.08);}
+</style>
+<div class="help-fab">
+  <div class="help-panel" id="helpPanel">
+    <div class="help-panel-hdr">
+      <h4>🤝 Help & Support</h4>
+      <button class="help-close" onclick="toggleHelp()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="help-body">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:.5rem;">Quick Help</div>
+      <a href="{% url 'scanner:upload' %}" class="help-topic">
+        <div class="help-topic-icon">📸</div>
+        <div><div class="help-topic-title">How to do a Face Scan</div><div class="help-topic-desc">Upload your selfie to get AI skin analysis results.</div></div>
+      </a>
+      <a href="{% url 'products:list' %}" class="help-topic">
+        <div class="help-topic-icon">🛍️</div>
+        <div><div class="help-topic-title">Browse Products</div><div class="help-topic-desc">View Makeup & K-Beauty products personalised for your skin.</div></div>
+      </a>
+      <a href="{% url 'chat:create' %}?mode=kbeauty" class="help-topic">
+        <div class="help-topic-icon">🌸</div>
+        <div><div class="help-topic-title">K-Beauty AI Consultant</div><div class="help-topic-desc">Chat with our AI for a personalised K-Beauty skincare routine.</div></div>
+      </a>
+      <a href="{% url 'chat:create' %}?mode=doctor" class="help-topic">
+        <div class="help-topic-icon">🩺</div>
+        <div><div class="help-topic-title">AI Doctor Consultation</div><div class="help-topic-desc">Get dermatologist-grade skin analysis and treatment advice.</div></div>
+      </a>
+      <div class="help-divider"></div>
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:.5rem;">Shop Help</div>
+      <div class="help-topic" style="cursor:default;">
+        <div class="help-topic-icon">💵</div>
+        <div><div class="help-topic-title">Cash on Delivery</div><div class="help-topic-desc">Pay when your order arrives. Available on orders up to ₹10,000.</div></div>
+      </div>
+      <div class="help-topic" style="cursor:default;">
+        <div class="help-topic-icon">↩️</div>
+        <div><div class="help-topic-title">Returns & Refunds</div><div class="help-topic-desc">Return unopened products within 7 days for a full refund.</div></div>
+      </div>
+      <div class="help-topic" style="cursor:default;">
+        <div class="help-topic-icon">🚚</div>
+        <div><div class="help-topic-title">Shipping</div><div class="help-topic-desc">Free delivery on orders above ₹499. Delivered in 3–7 days.</div></div>
+      </div>
+      <div class="help-divider"></div>
+      <a href="https://wa.me/919999999999" target="_blank" class="help-topic">
+        <div class="help-topic-icon">💬</div>
+        <div><div class="help-topic-title">WhatsApp Support</div><div class="help-topic-desc">Chat with us on WhatsApp — 9 AM to 7 PM IST.</div></div>
+      </a>
+      <a href="mailto:support@sasglobal.biz" class="help-topic">
+        <div class="help-topic-icon">✉️</div>
+        <div><div class="help-topic-title">Email Support</div><div class="help-topic-desc">support@sasglobal.biz — We reply within 24 hours.</div></div>
+      </a>
+    </div>
+  </div>
+  <button class="help-fab-btn" onclick="toggleHelp()" title="Help & Support">
+    <i class="bi bi-question-lg" id="helpFabIcon"></i>
+  </button>
+</div>
+<script>
+function toggleHelp(){
+  var p=document.getElementById('helpPanel');
+  var i=document.getElementById('helpFabIcon');
+  var open=p.classList.toggle('open');
+  i.className=open?'bi bi-x-lg':'bi bi-question-lg';
+}
+</script>
+
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>AOS.init({ once: true, duration: 400 });</script>
+</body>
+</html>
+

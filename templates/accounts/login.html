@@ -1,0 +1,350 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block title %}Sign In — Lumina{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════
+   LUMINA — PREMIUM LOGIN  (Qoves-inspired editorial)
+   Full-bleed split layout on desktop, stacked on mobile
+   ═══════════════════════════════════════════════════ */
+
+/* Override auth-shell for our custom split layout */
+.auth-shell { padding: 0 !important; align-items: stretch; justify-content: stretch; }
+
+/* ── SPLIT WRAPPER ── */
+.lx-login-wrap {
+  display: flex; min-height: 100vh; width: 100%;
+}
+
+/* ── LEFT PANEL — editorial image / brand story ── */
+.lx-panel-left {
+  flex: 1.1;
+  background: #0a0a0f;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem 3.5rem;
+  min-height: 100vh;
+}
+/* Subtle grain overlay */
+.lx-panel-left::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 60% 30%, rgba(13,148,136,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 20% 80%, rgba(201,169,110,.12) 0%, transparent 60%),
+    linear-gradient(160deg, #0a0a0f 0%, #12121f 50%, #0a0a0f 100%);
+  pointer-events: none;
+}
+/* Large serif editorial number / letter */
+.lx-editorial-bg {
+  position: absolute; top: -0.15em; right: -0.05em;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(14rem, 28vw, 22rem);
+  font-weight: 700; line-height: 1;
+  color: rgba(255,255,255,.03);
+  pointer-events: none; user-select: none;
+  letter-spacing: -.04em;
+}
+/* Teal accent line */
+.lx-accent-line {
+  position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, #0d9488 30%, #c9a96e 70%, transparent 100%);
+  opacity: .6;
+}
+
+/* Brand logo area */
+.lx-brand {
+  position: relative; z-index: 2;
+  margin-bottom: auto; padding-top: 72px;   /* push below nav */
+}
+.lx-brand-icon {
+  width: 52px; height: 52px; border-radius: 14px; margin-bottom: .9rem;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 700; color: #fff;
+}
+.lx-brand-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.6rem; font-weight: 700; color: #fff;
+  letter-spacing: .04em; line-height: 1; margin-bottom: .4rem;
+}
+.lx-brand-tagline {
+  font-size: .85rem; color: rgba(255,255,255,.4);
+  font-weight: 400; letter-spacing: .04em;
+}
+
+/* Editorial copy block at bottom */
+.lx-editorial-copy { position: relative; z-index: 2; }
+.lx-quote {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 600; color: #fff; line-height: 1.25;
+  margin-bottom: 1.25rem;
+  letter-spacing: .01em;
+}
+.lx-quote em { color: #0d9488; font-style: italic; }
+.lx-features-list {
+  display: flex; flex-direction: column; gap: .55rem;
+}
+.lx-feat {
+  display: flex; align-items: center; gap: .75rem;
+  font-size: .82rem; color: rgba(255,255,255,.5);
+}
+.lx-feat-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #0d9488; flex-shrink: 0;
+}
+
+/* ── RIGHT PANEL — auth form ── */
+.lx-panel-right {
+  flex: .9;
+  background: var(--page-bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 5rem 3rem 3rem;
+  position: relative;
+}
+[data-theme="dark"] .lx-panel-right { background: #0d0d14; }
+
+/* Auth card */
+.lx-auth-card {
+  width: 100%; max-width: 400px;
+}
+
+/* Header */
+.lx-auth-header { margin-bottom: 2.25rem; }
+.lx-auth-header h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem; font-weight: 700; color: var(--text);
+  letter-spacing: .02em; line-height: 1.1; margin-bottom: .4rem;
+}
+.lx-auth-header p { font-size: .85rem; color: var(--muted); }
+
+/* Fields */
+.lx-field { margin-bottom: 1.2rem; }
+.lx-label {
+  display: block; font-size: .75rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .45rem;
+}
+.auth-input {
+  width: 100%; padding: .85rem 1.1rem;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: .9rem; font-family: inherit;
+  background: var(--surface); color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance: none;
+}
+.auth-input:focus {
+  outline: none; border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+}
+[data-theme="dark"] .auth-input {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.9);
+}
+[data-theme="dark"] .auth-input:focus { border-color: #0d9488; }
+
+/* Field error */
+.lx-field-error {
+  list-style: none; padding: 0; margin: .3rem 0 0;
+}
+.lx-field-error li { font-size: .75rem; color: #dc2626; }
+
+/* Non-field error */
+.lx-form-error {
+  padding: .75rem 1rem; border-radius: 10px;
+  background: rgba(220,38,38,.07); border: 1px solid rgba(220,38,38,.2);
+  color: #dc2626; font-size: .82rem; margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+
+/* Forgot password link row */
+.lx-forgot-row {
+  display: flex; justify-content: flex-end; margin-top: -.5rem; margin-bottom: 1.25rem;
+}
+.lx-forgot-link {
+  font-size: .78rem; color: var(--muted);
+  text-decoration: none; transition: color .15s;
+}
+.lx-forgot-link:hover { color: #0d9488; }
+
+/* Submit button */
+.lx-submit {
+  width: 100%; padding: .9rem 1.5rem;
+  background: #0d9488; color: #fff; border: none;
+  border-radius: 100px; font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: background .15s, transform .12s, box-shadow .15s;
+  letter-spacing: .03em;
+}
+.lx-submit:hover {
+  background: #0f766e; transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13,148,136,.35);
+}
+.lx-submit:active { transform: translateY(0); }
+
+/* Divider */
+.lx-divider {
+  display: flex; align-items: center; gap: .75rem;
+  margin: 1.5rem 0; font-size: .75rem; color: var(--muted);
+}
+.lx-divider::before, .lx-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Bottom links */
+.lx-bottom-links {
+  text-align: center; font-size: .82rem;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.lx-bottom-links a { color: var(--muted); text-decoration: none; transition: color .15s; }
+.lx-bottom-links a:hover { color: #0d9488; }
+.lx-bottom-links .primary { color: #0d9488; font-weight: 700; }
+
+/* Demo pill */
+.lx-demo-pill {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .55rem 1.2rem; border-radius: 100px;
+  border: 1.5px solid rgba(13,148,136,.35);
+  color: #0d9488; font-size: .82rem; font-weight: 600;
+  text-decoration: none; transition: all .15s;
+  background: rgba(13,148,136,.05);
+}
+.lx-demo-pill:hover { background: rgba(13,148,136,.12); border-color: #0d9488; color: #0d9488; }
+
+/* Benefits */
+.lx-benefits {
+  margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+  display: flex; gap: 1.1rem; flex-wrap: wrap; justify-content: center;
+}
+.lx-benefit {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .72rem; color: var(--muted);
+}
+.lx-benefit i { color: #0d9488; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .lx-panel-left { display: none; }
+  .lx-panel-right { padding: 5rem 1.5rem 2.5rem; flex: 1; }
+  .lx-auth-card { max-width: 440px; }
+}
+@media (max-width: 480px) {
+  .lx-panel-right { padding: 5rem 1.1rem 2rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lx-login-wrap">
+
+  <!-- ═══ LEFT: EDITORIAL PANEL ═══ -->
+  <div class="lx-panel-left">
+    <div class="lx-accent-line"></div>
+    <div class="lx-editorial-bg">L</div>
+
+    <!-- Brand -->
+    <div class="lx-brand">
+      <div class="lx-brand-icon">L</div>
+      <div class="lx-brand-name">Lumina</div>
+      <div class="lx-brand-tagline">by SAS Global · AI Skin Intelligence</div>
+    </div>
+
+    <!-- Editorial quote -->
+    <div class="lx-editorial-copy">
+      <div class="lx-quote">
+        Your skin, <em>understood</em><br>at a molecular level.
+      </div>
+      <div class="lx-features-list">
+        <div class="lx-feat"><div class="lx-feat-dot"></div>AI face scan in under 30 seconds</div>
+        <div class="lx-feat"><div class="lx-feat-dot"></div>Korean skincare matched to your skin DNA</div>
+        <div class="lx-feat"><div class="lx-feat-dot"></div>24 / 7 dermatologist-grade AI consultation</div>
+        <div class="lx-feat"><div class="lx-feat-dot"></div>Shade-perfect makeup recommendations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT: FORM PANEL ═══ -->
+  <div class="lx-panel-right">
+    <div class="lx-auth-card">
+
+      <div class="lx-auth-header">
+        <h1>Welcome back</h1>
+        <p>Sign in to continue your skin journey with Lumina.</p>
+      </div>
+
+      {# ── Session expired banner ── #}
+      {% if request.GET.expired %}
+      <div style="
+        background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);
+        border-radius:12px;padding:.8rem 1rem;margin-bottom:1.25rem;
+        display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:#92400e;
+      ">
+        <span style="font-size:1.15rem;flex-shrink:0;">⏱</span>
+        <span><strong>Session expired</strong> — please sign in again to continue.</span>
+      </div>
+      {% endif %}
+
+      {% if form.non_field_errors %}
+      <div class="lx-form-error">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" autocomplete="on">
+        {% csrf_token %}
+
+        <div class="lx-field">
+          <label class="lx-label" for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <ul class="lx-field-error">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="lx-field">
+          <label class="lx-label" for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <ul class="lx-field-error">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="lx-forgot-row">
+          <a href="{% url 'accounts:password_reset' %}" class="lx-forgot-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="lx-submit">
+          Sign In &nbsp;→
+        </button>
+      </form>
+
+      <div class="lx-divider">or</div>
+
+      <div class="lx-bottom-links">
+        <a href="{% url 'accounts:signup' %}">
+          New to Lumina? <span class="primary">Create a free account</span>
+        </a>
+        <a href="{% url 'scanner:upload' %}?demo=true" class="lx-demo-pill" style="margin-top:.35rem;display:inline-flex;width:fit-content;align-self:center;">
+          <i class="bi bi-star-fill" style="font-size:.72rem;"></i> Try demo — no account needed
+        </a>
+      </div>
+
+      <div class="lx-benefits">
+        <div class="lx-benefit"><i class="bi bi-camera-fill"></i> Free AI scanning</div>
+        <div class="lx-benefit"><i class="bi bi-stars"></i> K-Beauty matching</div>
+        <div class="lx-benefit"><i class="bi bi-heart-pulse"></i> AI Doctor chat</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

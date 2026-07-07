@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+
+{% block title %}AI Consultants — Lumina{% endblock %}
+
+{% block page_title %}AI Consultants{% endblock %}
+
+
+
+{% block extra_css %}
+
+<style>
+
+.ci-wrap { max-width: 900px; margin: 0 auto; }
+
+
+
+/* ── MODE SELECTION CARDS ── */
+
+.ci-modes {
+
+  display: grid; grid-template-columns: repeat(3, 1fr);
+
+  gap: 1rem; margin-bottom: 1.75rem;
+
+}
+
+.ci-mode-card {
+
+  border-radius: 20px; padding: 0; text-align: center;
+
+  border: 1.5px solid transparent; text-decoration: none;
+
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+
+  display: flex; flex-direction: column; align-items: center;
+
+  overflow: hidden; position: relative;
+
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+
+}
+
+.ci-mode-card:hover { transform: translateY(-5px); box-shadow: 0 10px 32px rgba(0,0,0,.15); }
+
+.ci-mode-card.mode-doctor  { border-color: rgba(13,148,136,.35); background: #f0fdfa; }
+
+.ci-mode-card.mode-makeup  { border-color: rgba(236,72,153,.35); background: linear-gradient(135deg, #fff0f6, #fdf2f8); }
+
+.ci-mode-card.mode-kbeauty { border-color: rgba(240,98,146,.35); background: #fff5f7; }
+
+[data-theme="dark"] .ci-mode-card.mode-doctor  { background: rgba(13,148,136,.08); }
+
+[data-theme="dark"] .ci-mode-card.mode-makeup  { background: rgba(236,72,153,.08); }
+
+[data-theme="dark"] .ci-mode-card.mode-kbeauty { background: rgba(240,98,146,.08); }
+
+/* Logo image area — full width, circular logo centred */
+
+.ci-mode-logo-wrap {
+
+  width: 100%; padding: 1.4rem 1rem 0.6rem;
+
+  display: flex; align-items: center; justify-content: center;
+
+  position: relative;
+
+}
+
+.ci-mode-logo-wrap img {
+
+  width: 110px; height: 110px;
+
+  object-fit: contain;
+
+  border-radius: 50%;
+
+  box-shadow: 0 4px 18px rgba(0,0,0,.14);
+
+  transition: transform .2s;
+
+}
+
+.ci-mode-card:hover .ci-mode-logo-wrap img { transform: scale(1.06); }
+
+/* Text area below logo */
+
+.ci-mode-body {
+
+  width: 100%; padding: .65rem 1rem 1.1rem;
+
+}
+
+.ci-mode-icon { display: none; } /* hide old icon div */
+
+.ci-mode-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: .25rem; }
+
+.ci-mode-desc  { font-size: .73rem; color: var(--muted); line-height: 1.45; margin-bottom: .5rem; }
+
+.ci-mode-badge {
+
+  display: inline-block;
+
+  padding: .22rem .7rem; border-radius: 20px; font-size: .65rem; font-weight: 700;
+
+  background: #0d9488; color: #fff;
+
+}
+
+@media (max-width: 580px) {
+
+  .ci-mode-logo-wrap img { width: 80px; height: 80px; }
+
+}
+
+
+
+/* ── SECTION LABEL ── */
+
+.ci-section-label {
+
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+
+  display: flex; align-items: center; gap: .4rem;
+
+}
+
+
+
+/* ── CONVERSATION CARDS ── */
+
+.ci-conv-grid {
+
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+
+  gap: .85rem;
+
+}
+
+.ci-conv-card {
+
+  background: var(--surface); border: 1px solid var(--border);
+
+  border-radius: 14px; padding: 1.1rem;
+
+  box-shadow: 0 1px 8px rgba(0,0,0,.05);
+
+  transition: transform .15s, box-shadow .15s;
+
+}
+
+.ci-conv-card:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+
+
+
+.ci-conv-hdr { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+
+.ci-conv-mode-dot {
+
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+
+}
+
+.ci-conv-mode-dot.doctor  { background: rgba(13,148,136,.1); }
+
+.ci-conv-mode-dot.makeup  { background: rgba(236,72,153,.08); }
+
+.ci-conv-mode-dot.kbeauty { background: rgba(240,98,146,.08); }
+
+.ci-conv-mode-dot img { width: 36px; height: 36px; object-fit: contain; border-radius: 50%; }
+
+
+
+.ci-conv-title { font-size: .875rem; font-weight: 700; color: var(--text); line-height: 1.3; flex: 1; min-width: 0; }
+
+.ci-conv-count {
+
+  padding: .15rem .5rem; border-radius: 20px; font-size: .62rem; font-weight: 700;
+
+  background: rgba(13,148,136,.1); color: #0d9488; flex-shrink: 0;
+
+}
+
+.ci-conv-last {
+
+  font-size: .75rem; color: var(--muted); line-height: 1.5;
+
+  margin-bottom: .6rem;
+
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+
+}
+
+.ci-conv-footer {
+
+  display: flex; justify-content: space-between; align-items: center;
+
+  font-size: .68rem; color: var(--muted); margin-bottom: .75rem;
+
+}
+
+.ci-scan-badge {
+
+  padding: .15rem .5rem; border-radius: 20px; font-size: .62rem; font-weight: 600;
+
+  background: rgba(201,169,110,.12); color: #c9a96e; border: 1px solid rgba(201,169,110,.2);
+
+}
+
+.ci-conv-actions { display: flex; gap: .4rem; }
+
+.ci-open-btn {
+
+  flex: 1; padding: .38rem .5rem; border-radius: 20px;
+
+  background: #0d9488; color: #fff; font-size: .72rem; font-weight: 600;
+
+  text-decoration: none; text-align: center; transition: background .12s;
+
+}
+
+.ci-open-btn:hover { background: #0f766e; color: #fff; }
+
+.ci-del-btn {
+
+  padding: .38rem .7rem; border-radius: 20px;
+
+  background: #fee2e2; color: #991b1b;
+
+  border: 1px solid #fecaca; font-size: .72rem; font-weight: 600;
+
+  cursor: pointer; transition: background .12s;
+
+}
+
+.ci-del-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+
+
+/* ── EMPTY STATE ── */
+
+.ci-empty {
+
+  text-align: center; padding: 3rem 1.5rem;
+
+  background: var(--surface); border: 2px dashed var(--border);
+
+  border-radius: 16px;
+
+}
+
+.ci-empty .e-icon { font-size: 2.75rem; margin-bottom: .85rem; }
+
+.ci-empty h3 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+
+.ci-empty p  { font-size: .82rem; color: var(--muted); margin-bottom: 1rem; }
+
+
+
+@media (max-width: 580px) {
+
+  .ci-modes { grid-template-columns: 1fr; }
+
+  .ci-conv-grid { grid-template-columns: 1fr; }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="ci-wrap">
+
+
+
+  {# ── Mode selection ── #}
+
+  <div class="ci-section-label">⚡ Start a New Consultation</div>
+
+  <div class="ci-modes">
+
+    <a href="{% url 'chat:create' %}?mode=doctor" class="ci-mode-card mode-doctor">
+
+      <div class="ci-mode-logo-wrap">
+        <img src="{% static 'images/doctor_ai.png' %}" alt="Doctor AI">
+      </div>
+      <div class="ci-mode-body">
+        <div class="ci-mode-title">AI Doctor</div>
+
+        <div class="ci-mode-desc">Skin concerns, conditions, ingredient advice, treatment guidance</div>
+
+        <span class="ci-mode-badge">Free</span>
+      </div>
+
+    </a>
+
+    <a href="{% url 'chat:create' %}?mode=makeup" class="ci-mode-card mode-makeup">
+
+      <div class="ci-mode-logo-wrap">
+        <img src="{% static 'images/makeup_ai.png' %}" alt="Makeup AI">
+      </div>
+      <div class="ci-mode-body">
+        <div class="ci-mode-title">Makeup AI</div>
+
+        <div class="ci-mode-desc">Foundation shades, looks, colour matching for your undertone</div>
+
+        {% if not user.is_staff and user.username != 'suhani' %}
+
+          <span class="ci-mode-badge" style="background:#c9a96e;color:#0a0a0f;">PRO</span>
+
+        {% else %}
+
+          <span class="ci-mode-badge">Free</span>
+
+        {% endif %}
+      </div>
+
+    </a>
+
+    <a href="{% url 'chat:create' %}?mode=kbeauty" class="ci-mode-card mode-kbeauty">
+
+      <div class="ci-mode-logo-wrap">
+        <img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty AI">
+      </div>
+      <div class="ci-mode-body">
+        <div class="ci-mode-title">K-Beauty AI</div>
+
+        <div class="ci-mode-desc">Korean skincare routines, product picks, glass skin guidance</div>
+
+        {% if not user.is_staff and user.username != 'suhani' %}
+
+          <span class="ci-mode-badge" style="background:#c9a96e;color:#0a0a0f;">PRO</span>
+
+        {% else %}
+
+          <span class="ci-mode-badge">Free</span>
+
+        {% endif %}
+      </div>
+
+    </a>
+
+  </div>
+
+
+
+  {# ── Conversations ── #}
+
+  {% if conversations %}
+
+  <div class="ci-section-label">💬 Your Conversations ({{ conversations|length }})</div>
+
+  <div class="ci-conv-grid">
+
+    {% for conv in conversations %}
+
+    <div class="ci-conv-card">
+
+      <div class="ci-conv-hdr">
+
+        <div class="ci-conv-mode-dot {{ conv.mode }}">
+
+          {% if conv.mode == 'doctor' %}<img src="{% static 'images/doctor_ai.png' %}" alt="Dr" class="ai-mode-logo-xs">{% elif conv.mode == 'makeup' %}<img src="{% static 'images/makeup_ai.png' %}" alt="Makeup" class="ai-mode-logo-xs">{% else %}<img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty" class="ai-mode-logo-xs">{% endif %}
+
+        </div>
+
+        <div class="ci-conv-title">{{ conv.title|truncatechars:50 }}</div>
+
+        <span class="ci-conv-count">{{ conv.message_count }}</span>
+
+      </div>
+
+      <div class="ci-conv-last">
+
+        {% if conv.last_message %}{{ conv.last_message.content|truncatechars:110 }}{% else %}No messages yet{% endif %}
+
+      </div>
+
+      <div class="ci-conv-footer">
+
+        <span>{{ conv.created_at|date:"M d, Y" }}</span>
+
+        {% if conv.skin_scan %}
+
+          <span class="ci-scan-badge"><i class="bi bi-check-circle"></i> Scan linked</span>
+
+        {% endif %}
+
+      </div>
+
+      <div class="ci-conv-actions">
+
+        <a href="{% url 'chat:room' pk=conv.id %}" class="ci-open-btn">
+
+          <i class="bi bi-chat"></i> Open
+
+        </a>
+
+        <form method="post" action="{% url 'chat:delete' pk=conv.id %}" onsubmit="return confirm('Delete this conversation?');">
+
+          {% csrf_token %}
+
+          <button type="submit" class="ci-del-btn">
+
+            <i class="bi bi-trash"></i>
+
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+
+
+  {% else %}
+
+  <div class="ci-empty">
+
+    <div class="e-icon">💬</div>
+
+    <h3>No conversations yet</h3>
+
+    <p>Start a consultation above to chat with your AI skin specialist.</p>
+
+  </div>
+
+  {% endif %}
+
+
+
+</div>
+
+{% endblock %}
+

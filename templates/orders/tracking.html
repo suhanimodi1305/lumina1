@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Track Order {{ order.order_id }} — Lumina{% endblock %}
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:14px;}
+.tk-wrap{max-width:780px;margin:0 auto;padding:0 1rem 3rem;}
+.tk-head{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;color:#fff;}
+.tk-head h1{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:#fff;margin:0 0 .25rem;}
+.tk-head .sub{font-size:.75rem;color:rgba(255,255,255,.5);}
+.tk-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;}
+.tk-card h3{font-size:.9rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem;}
+/* ── STATUS BAR ── */
+.tk-progress{display:flex;align-items:flex-start;gap:0;margin:1rem 0 1.5rem;overflow-x:auto;padding-bottom:.5rem;}
+.tk-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:70px;position:relative;}
+.tk-step:not(:last-child)::after{content:'';position:absolute;top:20px;left:calc(50% + 20px);right:calc(-50% + 20px);height:3px;background:var(--border,#e2e8f0);z-index:0;}
+.tk-step.done:not(:last-child)::after,.tk-step.active:not(:last-child)::after{background:var(--teal);}
+.tk-step-dot{width:40px;height:40px;border-radius:50%;border:3px solid var(--border,#e2e8f0);background:var(--surface,#fff);display:flex;align-items:center;justify-content:center;font-size:1.1rem;z-index:1;transition:all .3s;}
+.tk-step.done .tk-step-dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 0 4px rgba(13,148,136,.15);}
+.tk-step.active .tk-step-dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 0 6px rgba(13,148,136,.2);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 6px rgba(13,148,136,.2);}50%{box-shadow:0 0 0 10px rgba(13,148,136,.08);}}
+.tk-step-label{font-size:.63rem;font-weight:700;text-align:center;margin-top:.5rem;color:var(--muted,#64748b);line-height:1.3;}
+.tk-step.done .tk-step-label,.tk-step.active .tk-step-label{color:var(--teal);}
+/* ── STATUS BADGE ── */
+.status-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:20px;font-size:.78rem;font-weight:700;}
+.sb-confirmed{background:#dbeafe;color:#1e40af;}
+.sb-packed{background:#fef9c3;color:#854d0e;}
+.sb-shipped,.sb-out_for_delivery{background:#fce7f3;color:#9d174d;}
+.sb-delivered{background:#dcfce7;color:#166534;}
+.sb-cancelled,.sb-returned{background:#fee2e2;color:#991b1b;}
+/* ── TIMELINE ── */
+.tk-timeline{margin-top:.5rem;}
+.tk-event{display:flex;gap:.85rem;padding:.6rem 0;position:relative;}
+.tk-event:not(:last-child)::before{content:'';position:absolute;left:15px;top:38px;bottom:-6px;width:2px;background:var(--border,#e2e8f0);}
+.tk-event-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;border:2px solid var(--border,#e2e8f0);background:var(--surface,#fff);z-index:1;}
+.tk-event.latest .tk-event-dot{background:var(--teal);border-color:var(--teal);color:#fff;}
+.tk-event-body .evt-msg{font-size:.82rem;font-weight:600;color:var(--text,#0f172a);}
+.tk-event-body .evt-loc{font-size:.72rem;color:var(--muted,#64748b);}
+.tk-event-body .evt-time{font-size:.67rem;color:var(--muted,#64748b);margin-top:.1rem;}
+/* ── ADDRESS ── */
+.addr-box{background:var(--surface-alt,#f5f3f0);border-radius:10px;padding:.85rem;line-height:1.6;}
+/* ── ITEMS ── */
+.tk-item{display:flex;gap:.65rem;padding:.5rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.tk-item:last-child{border-bottom:none;}
+[data-theme="dark"] .tk-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .addr-box{background:#1a1a28;}
+[data-theme="dark"] .tk-step-dot{background:#12121a;border-color:rgba(255,255,255,.15);}
+[data-theme="dark"] .tk-event-dot{background:#12121a;border-color:rgba(255,255,255,.12);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tk-wrap">
+  <!-- Header -->
+  <div class="tk-head">
+    <h1><i class="bi bi-geo-alt-fill" style="color:#0d9488;margin-right:.4rem;"></i>Order Tracking</h1>
+    <div class="sub">Order ID: <strong style="color:#fff;font-family:monospace;">{{ order.order_id }}</strong></div>
+  </div>
+
+  <!-- Status overview -->
+  <div class="tk-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted,#64748b);margin-bottom:.25rem;">Current Status</div>
+        <span class="status-badge sb-{{ order.status }}">
+          {% if order.status == 'confirmed' %}✅ Order Confirmed
+          {% elif order.status == 'packed' %}📦 Packed
+          {% elif order.status == 'shipped' %}🚚 Shipped
+          {% elif order.status == 'out_for_delivery' %}🏃 Out for Delivery
+          {% elif order.status == 'delivered' %}🎉 Delivered
+          {% elif order.status == 'cancelled' %}❌ Cancelled
+          {% else %}{{ order.get_status_display }}{% endif %}
+        </span>
+      </div>
+      {% if order.estimated_delivery and order.status != 'delivered' %}
+      <div style="text-align:right;">
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted,#64748b);margin-bottom:.25rem;">Est. Delivery</div>
+        <div style="font-size:.95rem;font-weight:800;color:var(--teal);">{{ order.estimated_delivery|date:"d M Y" }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Progress bar -->
+    <div class="tk-progress">
+      {% for slug, label, icon in steps %}
+      <div class="tk-step {% if forloop.counter0 < current_step %}done{% elif forloop.counter0 == current_step %}active{% endif %}">
+        <div class="tk-step-dot">
+          {% if forloop.counter0 < current_step %}<i class="bi bi-check-lg" style="color:#fff;font-size:.85rem;"></i>
+          {% else %}{{ icon }}{% endif %}
+        </div>
+        <div class="tk-step-label">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="tk-card">
+    <h3><i class="bi bi-clock-history" style="color:var(--teal);"></i> Shipment Timeline</h3>
+    {% if logs %}
+    <div class="tk-timeline">
+      {% for log in logs %}
+      <div class="tk-event {% if forloop.first %}latest{% endif %}">
+        <div class="tk-event-dot">
+          {% if log.status == 'confirmed' %}✅
+          {% elif log.status == 'packed' %}📦
+          {% elif log.status == 'shipped' %}🚚
+          {% elif log.status == 'out_for_delivery' %}🏃
+          {% elif log.status == 'delivered' %}🎉
+          {% else %}📍{% endif %}
+        </div>
+        <div class="tk-event-body">
+          <div class="evt-msg">{{ log.message }}</div>
+          {% if log.location %}<div class="evt-loc"><i class="bi bi-geo-alt"></i> {{ log.location }}</div>{% endif %}
+          <div class="evt-time">{{ log.timestamp|date:"d M Y, g:i A" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:1rem;color:var(--muted,#64748b);font-size:.85rem;">
+      <i class="bi bi-hourglass-split" style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
+      Tracking updates will appear here once your order is dispatched.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Order info -->
+  <div class="tk-card">
+    <h3><i class="bi bi-info-circle" style="color:var(--gold);"></i> Order Information</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.25rem;">Tracking ID</div>
+        <div style="font-family:monospace;font-size:.85rem;font-weight:700;color:var(--text,#0f172a);">{{ order.tracking_id }}</div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.25rem;">Payment</div>
+        <div style="font-size:.85rem;font-weight:600;color:var(--text,#0f172a);">{{ order.get_payment_method_display }}</div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.25rem;">Order Date</div>
+        <div style="font-size:.82rem;color:var(--text,#0f172a);">{{ order.created_at|date:"d M Y" }}</div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.25rem;">Order Total</div>
+        <div style="font-size:.95rem;font-weight:800;color:var(--teal);">₹{{ order.total }}</div>
+      </div>
+    </div>
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.35rem;">Delivering To</div>
+    <div class="addr-box">
+      <strong style="font-size:.85rem;">{{ order.full_name }}</strong> · {{ order.phone }}<br>
+      <span style="font-size:.8rem;color:var(--muted,#64748b);">
+        {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}<br>
+        {{ order.city }}, {{ order.state }} — {{ order.pincode }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Items -->
+  <div class="tk-card">
+    <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Items ({{ order.items.count }})</h3>
+    {% for item in order.items.all %}
+    <div class="tk-item">
+      <div style="width:46px;height:46px;border-radius:8px;background:linear-gradient(135deg,#fdf2f8,#fce7f3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;overflow:hidden;">
+        {% if item.image_url %}<img src="{{ item.image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentNode.innerHTML='💄'">{% else %}💄{% endif %}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.82rem;font-weight:700;color:var(--text,#0f172a);">{{ item.name }}</div>
+        <div style="font-size:.68rem;color:var(--muted,#64748b);">{{ item.brand }} · SKU: {{ item.sku }}</div>
+        {% if item.shade %}<div style="font-size:.67rem;color:var(--teal);">Shade: {{ item.shade }}</div>{% endif %}
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:.85rem;font-weight:800;color:var(--teal);">₹{{ item.line_total }}</div>
+        <div style="font-size:.68rem;color:var(--muted,#64748b);">Qty: {{ item.quantity }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Actions -->
+  <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+    <a href="{% url 'products:list' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:var(--teal);color:#fff;border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none;">
+      <i class="bi bi-shop"></i> Continue Shopping
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'orders:my_orders' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none;">
+      <i class="bi bi-bag-heart"></i> My Orders
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

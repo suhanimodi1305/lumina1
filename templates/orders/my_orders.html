@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Orders — Lumina{% endblock %}
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:14px;}
+.mo-wrap{max-width:860px;margin:0 auto;padding:0 1rem 3rem;}
+.mo-head{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;color:#fff;}
+.mo-head h1{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:#fff;margin:0;}
+.order-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);margin-bottom:1rem;overflow:hidden;transition:box-shadow .15s;}
+.order-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);}
+.order-card-head{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;background:var(--surface-alt,#f5f3f0);flex-wrap:wrap;gap:.5rem;}
+.order-id{font-family:monospace;font-size:.82rem;font-weight:700;color:var(--text,#0f172a);}
+.order-date{font-size:.72rem;color:var(--muted,#64748b);}
+.status-pill{padding:.25rem .75rem;border-radius:20px;font-size:.7rem;font-weight:700;}
+.sp-confirmed{background:#dbeafe;color:#1e40af;}
+.sp-shipped,.sp-out_for_delivery{background:#fce7f3;color:#9d174d;}
+.sp-delivered{background:#dcfce7;color:#166534;}
+.sp-cancelled{background:#fee2e2;color:#991b1b;}
+.sp-packed{background:#fef9c3;color:#854d0e;}
+.sp-pending{background:rgba(13,148,136,.1);color:#065f46;}
+.order-card-body{padding:.85rem 1.1rem;display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;}
+.order-items-thumb{display:flex;gap:.35rem;}
+.order-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;background:linear-gradient(135deg,#fdf2f8,#fce7f3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.order-meta{flex:1;min-width:180px;}
+.order-total{font-size:1rem;font-weight:800;color:var(--teal);}
+.order-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
+.oa-btn{padding:.4rem .85rem;border-radius:8px;font-size:.75rem;font-weight:700;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;transition:all .12s;}
+.oa-btn-teal{background:var(--teal);color:#fff;}
+.oa-btn-teal:hover{background:#0f766e;color:#fff;}
+.oa-btn-outline{background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);}
+.oa-btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+[data-theme="dark"] .order-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .order-card-head{background:#1a1a28;}
+[data-theme="dark"] .oa-btn-outline{background:#1a1a28;border-color:rgba(255,255,255,.1);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mo-wrap">
+  <div class="mo-head">
+    <h1><i class="bi bi-bag-heart" style="color:#0d9488;margin-right:.5rem;"></i>My Orders</h1>
+  </div>
+
+  {% if orders %}
+  {% for order in orders %}
+  <div class="order-card">
+    <div class="order-card-head">
+      <div>
+        <div class="order-id">{{ order.order_id }}</div>
+        <div class="order-date">Placed on {{ order.created_at|date:"d M Y" }}</div>
+      </div>
+      <span class="status-pill sp-{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+    <div class="order-card-body">
+      <!-- Item thumbnails -->
+      <div class="order-items-thumb">
+        {% for item in order.items.all|slice:":3" %}
+        <div class="order-thumb">
+          {% if item.image_url %}<img src="{{ item.image_url }}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentNode.innerHTML='💄'">{% else %}💄{% endif %}
+        </div>
+        {% endfor %}
+        {% if order.items.count > 3 %}<div class="order-thumb" style="font-size:.72rem;font-weight:700;color:var(--muted,#64748b);">+{{ order.items.count|add:"-3" }}</div>{% endif %}
+      </div>
+      <div class="order-meta">
+        <div style="font-size:.82rem;color:var(--text,#0f172a);margin-bottom:.15rem;">
+          {{ order.items.count }} item{{ order.items.count|pluralize }}
+          {% if order.estimated_delivery and order.status != 'delivered' %}
+          · <span style="color:var(--teal);font-weight:600;">Est. {{ order.estimated_delivery|date:"d M" }}</span>
+          {% endif %}
+        </div>
+        <div class="order-total">₹{{ order.total }}</div>
+        <div style="font-size:.7rem;color:var(--muted,#64748b);">{{ order.get_payment_method_display }}</div>
+      </div>
+      <div class="order-actions">
+        <a href="{% url 'orders:tracking' order_id=order.order_id %}" class="oa-btn oa-btn-teal">
+          <i class="bi bi-geo-alt"></i> Track
+        </a>
+        <a href="{% url 'orders:success' order_id=order.order_id %}" class="oa-btn oa-btn-outline">
+          <i class="bi bi-receipt"></i> Details
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div style="text-align:center;padding:3rem 1rem;background:var(--surface,#fff);border:2px dashed var(--border,#e2e8f0);border-radius:var(--radius);">
+    <div style="font-size:3rem;margin-bottom:.75rem;">🛍️</div>
+    <div style="font-size:1rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.35rem;">No orders yet</div>
+    <div style="font-size:.82rem;color:var(--muted,#64748b);margin-bottom:1rem;">Explore our Makeup &amp; K-Beauty collection and place your first order!</div>
+    <a href="{% url 'products:list' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;background:var(--teal);color:#fff;border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none;">
+      <i class="bi bi-shop"></i> Shop Now
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

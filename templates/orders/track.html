@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Track Your Order — Lumina{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto;padding:0 1rem 3rem;">
+  <div style="background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:1.25rem;color:#fff;">
+    <div style="font-size:2.5rem;margin-bottom:.5rem;">📦</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#fff;margin:0;">Track Your Order</h1>
+    <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin:.3rem 0 0;">Enter your Order ID or Tracking ID below</p>
+  </div>
+
+  <form method="get" style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:1.25rem;margin-bottom:1rem;">
+    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted,#64748b);display:block;margin-bottom:.4rem;">Order ID or Tracking ID</label>
+    <div style="display:flex;gap:.5rem;">
+      <input type="text" name="q" value="{{ q }}" placeholder="OD260621… or TRACK123…"
+             style="flex:1;padding:.65rem .9rem;border:1.5px solid var(--border,#e2e8f0);border-radius:9px;font-size:.88rem;background:var(--surface,#fff);color:var(--text,#0f172a);" required>
+      <button type="submit" style="padding:.65rem 1.2rem;background:#0d9488;color:#fff;border:none;border-radius:9px;font-size:.88rem;font-weight:700;cursor:pointer;">
+        <i class="bi bi-search"></i> Track
+      </button>
+    </div>
+  </form>
+
+  {% if error %}
+  <div style="background:#fff1f2;border:1px solid #fecaca;border-radius:10px;padding:.85rem 1rem;color:#9f1239;font-size:.82rem;font-weight:600;margin-bottom:1rem;">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+  </div>
+  {% endif %}
+
+  {% if order %}
+  <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:1.25rem;text-align:center;">
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted,#64748b);margin-bottom:.35rem;">Order Found</div>
+    <div style="font-family:monospace;font-size:1rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.5rem;">{{ order.order_id }}</div>
+    <a href="{% url 'orders:tracking' order_id=order.order_id %}"
+       style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;background:#0d9488;color:#fff;border-radius:10px;font-size:.875rem;font-weight:700;text-decoration:none;">
+      <i class="bi bi-geo-alt-fill"></i> View Full Tracking
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

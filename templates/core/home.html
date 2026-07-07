@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home — Lumina{% endblock %}
+{% block page_title %}Home{% endblock %}
+
+{# Show footer on the public home page only #}
+{% block footer %}
+<footer class="lux-footer" style="display:block;">
+  &copy; 2025 Lumina by SAS Global &nbsp;·&nbsp;
+  <a href="https://sasglobal.biz" target="_blank" style="color:var(--sb-teal);">sasglobal.biz</a> &nbsp;·&nbsp;
+  Informational only. Consult a dermatologist for medical advice.
+</footer>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.home-wrap { max-width: 900px; margin: 0 auto; }
+
+/* ── WELCOME BANNER ── */
+.home-banner {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
+  border-radius: 18px; padding: 1.75rem 1.5rem;
+  margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  border: 1px solid rgba(13,148,136,.2);
+}
+.home-banner::before {
+  content: ''; position: absolute; top: -20%; right: -8%; width: 40%; height: 140%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.22) 0%, transparent 65%);
+  pointer-events: none;
+}
+.home-banner-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+}
+.home-avatar {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 700; color: #fff;
+  border: 2px solid rgba(255,255,255,.15);
+}
+.home-banner-text h2 { color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: .15rem; }
+.home-banner-text p  { color: rgba(255,255,255,.45); font-size: .8rem; margin: 0; }
+.home-scan-btn {
+  margin-left: auto; flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .6rem 1.25rem; background: #0d9488; color: #fff;
+  border-radius: 100px; font-size: .82rem; font-weight: 700;
+  text-decoration: none; transition: background .15s, transform .15s;
+  border: none; cursor: pointer;
+}
+.home-scan-btn:hover { background: #0f766e; color: #fff; transform: translateY(-1px); }
+
+/* ── STAT STRIP ── */
+.home-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.home-stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: .9rem; text-align: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.home-stat .sv {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem; font-weight: 700; color: #0d9488; line-height: 1; margin-bottom: .2rem;
+}
+.home-stat .sl {
+  font-size: .62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted);
+}
+
+/* ── SECTION LABEL ── */
+.home-section-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+
+/* ── ACTION CARDS ── */
+.home-actions {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.home-action {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.1rem; text-decoration: none; color: var(--text);
+  display: flex; align-items: center; gap: .85rem;
+  transition: box-shadow .15s, transform .15s;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.home-action:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); color: var(--text); }
+.home-action-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+.home-action .ac-title { font-size: .875rem; font-weight: 700; color: var(--text); margin-bottom: .1rem; }
+.home-action .ac-sub   { font-size: .7rem; color: var(--muted); }
+
+/* ── LATEST SCAN CARD ── */
+.home-latest {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  display: flex; align-items: center; gap: 1rem;
+}
+.home-scan-face {
+  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+  border: 2px solid #0d9488; flex-shrink: 0;
+}
+.home-scan-face-ph {
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(13,148,136,.1); border: 2px solid #0d9488;
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+}
+.home-latest-info { flex: 1; min-width: 0; }
+.home-latest-info .li-title { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; }
+.home-latest-info .li-sub   { font-size: .72rem; color: var(--muted); }
+.home-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.home-chip {
+  padding: .15rem .5rem; border-radius: 20px; font-size: .62rem; font-weight: 600;
+  background: rgba(13,148,136,.1); color: #0d9488;
+}
+.home-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 700; color: #0d9488;
+  flex-shrink: 0; line-height: 1; text-align: center;
+}
+.home-score span { font-size: .6rem; font-weight: 400; color: var(--muted); display: block; }
+
+/* ── FEATURE PILLS (guest) ── */
+.home-features {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: .65rem; margin-bottom: 1.5rem;
+}
+.home-feature {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1rem;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: .45rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.home-feature-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(13,148,136,.1); color: #0d9488;
+  display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+}
+.home-feature .hf-title { font-size: .82rem; font-weight: 700; color: var(--text); }
+.home-feature .hf-sub   { font-size: .7rem; color: var(--muted); line-height: 1.4; }
+
+/* ── PRODUCT TEASERS ── */
+.home-product-strip {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.home-product-tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1rem;
+  display: flex; align-items: center; gap: .85rem;
+  text-decoration: none; color: var(--text);
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  transition: box-shadow .15s, transform .15s;
+}
+.home-product-tile:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); color: var(--text); }
+.home-product-tile-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.hpt-title { font-size: .85rem; font-weight: 700; color: var(--text); }
+.hpt-count { font-size: .72rem; color: var(--muted); }
+
+/* ── CTA (empty state) ── */
+.home-empty {
+  text-align: center; padding: 2.5rem 1.5rem;
+  background: var(--surface); border: 2px dashed var(--border);
+  border-radius: 16px; margin-bottom: 1.5rem;
+}
+.home-empty .e-icon { font-size: 2.75rem; margin-bottom: .85rem; }
+.home-empty h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .4rem; }
+.home-empty p  { font-size: .82rem; color: var(--muted); margin-bottom: 1.1rem; }
+.home-cta {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .6rem 1.35rem; background: #0d9488; color: #fff;
+  border-radius: 100px; font-size: .82rem; font-weight: 700;
+  text-decoration: none; transition: background .15s;
+}
+.home-cta:hover { background: #0f766e; color: #fff; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .home-actions  { grid-template-columns: 1fr; }
+  .home-features { grid-template-columns: repeat(2, 1fr); }
+  .home-product-strip { grid-template-columns: 1fr; }
+}
+@media (max-width: 380px) {
+  .home-stats    { grid-template-columns: repeat(3, 1fr); }
+  .home-features { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-wrap">
+
+  {% if user.is_authenticated %}
+
+  <div class="home-banner">
+    <div class="home-banner-inner">
+      <div class="home-avatar">{{ user.username|first|upper }}</div>
+      <div class="home-banner-text">
+        <h2>Hello, {{ user.first_name|default:user.username }} 👋</h2>
+        <p>Member since {{ user.date_joined|date:"M Y" }} &nbsp;·&nbsp; Free Plan</p>
+      </div>
+      <a href="{% url 'scanner:upload' %}" class="home-scan-btn">
+        <i class="bi bi-camera-fill"></i> New Scan
+      </a>
+    </div>
+  </div>
+
+  {# Stats #}
+  <div class="home-stats">
+    <div class="home-stat">
+      <div class="sv">{{ user_real_scan_count|default:"0" }}</div>
+      <div class="sl">Scans</div>
+    </div>
+    <div class="home-stat">
+      <div class="sv">{{ user.conversations.count|default:"0" }}</div>
+      <div class="sl">AI Chats</div>
+    </div>
+    <div class="home-stat">
+      <div class="sv">{% if user_latest_real_scan %}{{ user_latest_real_scan.harmony_score }}{% else %}—{% endif %}</div>
+      <div class="sl">Harmony</div>
+    </div>
+  </div>
+
+  <div class="home-section-label">⚡ Quick Actions</div>
+  <div class="home-actions">
+    <a href="{% url 'scanner:upload' %}" class="home-action">
+      <div class="home-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
+        <i class="bi bi-camera-fill"></i>
+      </div>
+      <div>
+        <div class="ac-title">New Face Scan</div>
+        <div class="ac-sub">AI skin analysis</div>
+      </div>
+    </a>
+    <a href="{% url 'chat:create' %}?mode=doctor{% if user_latest_real_scan %}&scan_id={{ user_latest_real_scan.id }}{% endif %}" class="home-action">
+      <div class="home-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
+        <i class="bi bi-heart-pulse"></i>
+      </div>
+      <div>
+        <div class="ac-title">Ask AI Doctor</div>
+        <div class="ac-sub">Skin concern advice</div>
+      </div>
+    </a>
+    <a href="{% url 'products:list' %}?range=korean" class="home-action">
+      <div class="home-action-icon" style="background:rgba(236,72,153,.1);color:#ec4899;">
+        <i class="bi bi-stars"></i>
+      </div>
+      <div>
+        <div class="ac-title">K-Beauty Shop</div>
+        <div class="ac-sub">SAS Global products</div>
+      </div>
+    </a>
+    <a href="{% url 'dashboard:dashboard' %}" class="home-action">
+      <div class="home-action-icon" style="background:rgba(201,169,110,.12);color:#c9a96e;">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div>
+        <div class="ac-title">Scan History</div>
+        <div class="ac-sub">Track your progress</div>
+      </div>
+    </a>
+  </div>
+
+  {% with latest=user_latest_real_scan %}
+  {% if latest %}
+  <div class="home-section-label">✦ Latest Scan</div>
+  <div class="home-latest">
+    {% if latest.scan_image %}
+      <img src="{{ latest.scan_image.url }}" alt="scan" class="home-scan-face">
+    {% else %}
+      <div class="home-scan-face-ph">👤</div>
+    {% endif %}
+    <div class="home-latest-info">
+      <div class="li-title">{{ latest.skin_type|title }} · {{ latest.undertone|title }} Undertone</div>
+      <div class="li-sub">{{ latest.created_at|date:"M j, Y · g:i A" }}</div>
+      <div class="home-chips">
+        <span class="home-chip">{{ latest.skin_tone|title }} Tone</span>
+        <span class="home-chip">Acne: {{ latest.hf_acne_severity|title }}</span>
+        {% for c in latest.detected_concerns.all|slice:":2" %}
+          <span class="home-chip">{{ c.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="home-score">{{ latest.harmony_score }}<span>Harmony</span></div>
+  </div>
+  <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;">
+    <a href="{% url 'results:detail' scan_id=latest.id %}" class="home-cta">
+      <i class="bi bi-bar-chart-line"></i> Full Results
+    </a>
+    <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ latest.id }}"
+       class="home-cta" style="background:rgba(13,148,136,.12);color:#0d9488;border:1px solid rgba(13,148,136,.2);">
+      🩺 Consult AI
+    </a>
+  </div>
+  {% else %}
+  <div class="home-empty">
+    <div class="e-icon">📸</div>
+    <h3>Take your first scan</h3>
+    <p>Upload a selfie and get your complete AI skin analysis in under 30 seconds.</p>
+    <a href="{% url 'scanner:upload' %}" class="home-cta">
+      <i class="bi bi-camera-fill"></i> Start Scan
+    </a>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  {% else %}
+
+  <div class="home-banner">
+    <div class="home-banner-inner">
+      <div class="home-avatar" style="font-size:1.1rem;">✦</div>
+      <div class="home-banner-text">
+        <h2>Your AI Skin Specialist</h2>
+        <p>Instant analysis · Korean skincare · Makeup shade matching</p>
+      </div>
+      <a href="{% url 'scanner:upload' %}" class="home-scan-btn">
+        <i class="bi bi-camera-fill"></i> Start Free Scan
+      </a>
+    </div>
+  </div>
+
+  <div class="home-section-label">✦ What Lumina Does</div>
+  <div class="home-features">
+    {% for feature in features %}
+    <div class="home-feature">
+      <div class="home-feature-icon"><i class="{{ feature.icon }}"></i></div>
+      <div class="hf-title">{{ feature.title }}</div>
+      <div class="hf-sub">{{ feature.description|truncatewords:10 }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="home-empty">
+    <div class="e-icon">👤</div>
+    <h3>Create a free account</h3>
+    <p>Save your scan history, track progress, and get personalised product recommendations.</p>
+    <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'accounts:signup' %}" class="home-cta">Sign Up Free</a>
+      <a href="{% url 'accounts:login' %}" class="home-cta" style="background:var(--surface);color:#0d9488;border:1.5px solid #0d9488;">Sign In</a>
+    </div>
+  </div>
+
+  {% endif %}
+
+  {# ── PRODUCT SHORTCUTS (everyone) ── #}
+  <div class="home-section-label">🛍 Shop</div>
+  <div class="home-product-strip">
+    <a href="{% url 'products:list' %}?range=korean" class="home-product-tile">
+      <div class="home-product-tile-icon" style="background:rgba(13,148,136,.1);">🌸</div>
+      <div>
+        <div class="hpt-title">K-Beauty</div>
+        <div class="hpt-count">{{ korean_count }} products · SAS Global</div>
+      </div>
+    </a>
+    <a href="{% url 'products:list' %}?range=makeup" class="home-product-tile">
+      <div class="home-product-tile-icon" style="background:rgba(236,72,153,.08);">💄</div>
+      <div>
+        <div class="hpt-title">Makeup</div>
+        <div class="hpt-count">{{ makeup_count }} products</div>
+      </div>
+    </a>
+  </div>
+
+</div>
+{% endblock %}

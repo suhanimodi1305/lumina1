@@ -1,0 +1,122 @@
+[
+  {
+    "model": "products.skinconcern",
+    "pk": 1,
+    "fields": {
+      "name": "Acne",
+      "slug": "acne",
+      "description": "Active acne breakouts and blemishes",
+      "icon": "bi-circle-fill"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 2,
+    "fields": {
+      "name": "Dark Circles",
+      "slug": "dark_circles",
+      "description": "Under-eye darkness and puffiness",
+      "icon": "bi-eye"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 3,
+    "fields": {
+      "name": "Pigmentation",
+      "slug": "pigmentation",
+      "description": "Dark spots and uneven skin tone",
+      "icon": "bi-palette"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 4,
+    "fields": {
+      "name": "Blackheads",
+      "slug": "blackheads",
+      "description": "Clogged pores with oxidized sebum",
+      "icon": "bi-circle"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 5,
+    "fields": {
+      "name": "Dryness",
+      "slug": "dryness",
+      "description": "Dehydrated and flaky skin",
+      "icon": "bi-droplet"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 6,
+    "fields": {
+      "name": "Redness",
+      "slug": "redness",
+      "description": "Inflammation and irritation",
+      "icon": "bi-exclamation-circle"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 7,
+    "fields": {
+      "name": "Fine Lines",
+      "slug": "fine_lines",
+      "description": "Early signs of aging",
+      "icon": "bi-graph-up"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 8,
+    "fields": {
+      "name": "Large Pores",
+      "slug": "large_pores",
+      "description": "Enlarged and visible pores",
+      "icon": "bi-grid-3x3"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 9,
+    "fields": {
+      "name": "Aging",
+      "slug": "aging",
+      "description": "Wrinkles and loss of elasticity",
+      "icon": "bi-clock-history"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 10,
+    "fields": {
+      "name": "Oiliness",
+      "slug": "oiliness",
+      "description": "Excess sebum production",
+      "icon": "bi-droplet-fill"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 11,
+    "fields": {
+      "name": "Dullness",
+      "slug": "dullness",
+      "description": "Lackluster and tired-looking skin",
+      "icon": "bi-moon"
+    }
+  },
+  {
+    "model": "products.skinconcern",
+    "pk": 12,
+    "fields": {
+      "name": "Sensitivity",
+      "slug": "sensitivity",
+      "description": "Reactive and easily irritated skin",
+      "icon": "bi-shield-exclamation"
+    }
+  }
+]

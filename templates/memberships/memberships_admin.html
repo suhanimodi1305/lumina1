@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Membership Admin — Lumina{% endblock %}
+{% block page_title %}Membership Management{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:1100px;padding-block:1.5rem;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+    <div>
+      <h2 style="margin-bottom:.25rem;">Membership Management</h2>
+      <p style="color:var(--muted);font-size:.85rem;margin:0;">
+        {% if is_admin %}Admin view — you can modify tiers{% else %}Marketing view — read only{% endif %}
+      </p>
+    </div>
+    <span style="background:{% if is_admin %}rgba(13,148,136,.15){% else %}rgba(201,169,110,.15){% endif %};
+           color:{% if is_admin %}var(--sb-teal){% else %}var(--sb-gold){% endif %};
+           padding:.3rem .9rem;border-radius:100px;font-size:.75rem;font-weight:700;">
+      {% if is_admin %}Admin{% else %}Marketing{% endif %}
+    </span>
+  </div>
+
+  {% if messages %}
+  <div style="margin-bottom:1rem;">
+    {% for message in messages %}
+    <div style="padding:.75rem 1rem;border-radius:var(--r-md);margin-bottom:.5rem;
+         background:{% if message.tags == 'error' %}rgba(239,68,68,.12){% else %}rgba(13,148,136,.12){% endif %};
+         border:1px solid {% if message.tags == 'error' %}rgba(239,68,68,.25){% else %}rgba(13,148,136,.25){% endif %};
+         color:{% if message.tags == 'error' %}#ef4444{% else %}var(--sb-teal){% endif %};
+         font-size:.85rem;">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div style="background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);">
+    <div style="overflow-x:auto;">
+      <table class="table table-hover mb-0" style="font-size:.85rem;">
+        <thead style="background:var(--page-bg);">
+          <tr>
+            <th style="padding:.85rem 1rem;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">User</th>
+            <th style="padding:.85rem 1rem;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Tier</th>
+            <th style="padding:.85rem 1rem;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Points</th>
+            <th style="padding:.85rem 1rem;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Referral Code</th>
+            <th style="padding:.85rem 1rem;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Expires</th>
+            {% if is_admin %}<th style="padding:.85rem 1rem;font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Action</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in all_profiles %}
+          <tr>
+            <td style="padding:.85rem 1rem;">
+              <div style="font-weight:600;color:var(--text);">{{ profile.user.username }}</div>
+              <div style="font-size:.75rem;color:var(--muted);">{{ profile.user.email }}</div>
+            </td>
+            <td style="padding:.85rem 1rem;">
+              <span class="tier-badge tier-{{ profile.effective_tier }}">
+                {% if profile.effective_tier == 'vip' %}VIP{% elif profile.effective_tier == 'medium' %}PLUS{% else %}FREE{% endif %}
+              </span>
+            </td>
+            <td style="padding:.85rem 1rem;font-weight:600;color:var(--sb-teal);">{{ profile.loyalty_points }}</td>
+            <td style="padding:.85rem 1rem;font-family:monospace;font-size:.82rem;color:var(--muted);">{{ profile.referral_code }}</td>
+            <td style="padding:.85rem 1rem;font-size:.8rem;color:var(--muted);">
+              {% if profile.subscription_expires_at %}
+                {{ profile.subscription_expires_at|date:"d M Y" }}
+              {% else %}
+                <span style="color:rgba(255,255,255,.2);">—</span>
+              {% endif %}
+            </td>
+            {% if is_admin %}
+            <td style="padding:.85rem 1rem;">
+              <form method="post" action="{% url 'employee:memberships_admin' %}" style="display:flex;gap:.5rem;align-items:center;">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ profile.pk }}">
+                <select name="tier" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:.78rem;">
+                  <option value="normal" {% if profile.tier == 'normal' %}selected{% endif %}>Normal</option>
+                  <option value="medium" {% if profile.tier == 'medium' %}selected{% endif %}>Medium</option>
+                  <option value="vip" {% if profile.tier == 'vip' %}selected{% endif %}>VIP</option>
+                </select>
+                <button type="submit" style="padding:.3rem .7rem;background:var(--sb-teal);color:#fff;border:none;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;">Save</button>
+              </form>
+            </td>
+            {% endif %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if is_admin %}6{% else %}5{% endif %}" style="text-align:center;padding:2rem;color:var(--muted);">
+              No user profiles found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

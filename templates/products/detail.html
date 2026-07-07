@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} — {{ product.brand }} | Lumina Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --teal:#0d9488;--teal-lt:#ccfbf1;--gold:#c9a96e;--gold-lt:#fef9ec;
+  --radius:14px;--shadow:0 2px 12px rgba(0,0,0,.07);
+}
+/* ── BREADCRUMB ── */
+.pd-breadcrumb{font-size:.72rem;color:var(--muted,#64748b);display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+.pd-breadcrumb a{color:var(--teal);text-decoration:none;}
+.pd-breadcrumb a:hover{text-decoration:underline;}
+/* ── MAIN GRID ── */
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+@media(max-width:700px){.pd-grid{grid-template-columns:1fr;}}
+/* ── IMAGE PANEL ── */
+.pd-img-panel{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);overflow:hidden;}
+.pd-main-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;}
+.pd-img-placeholder{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,#fdf2f8,#fce7f3);}
+.pd-thumb-row{display:flex;gap:.5rem;padding:.75rem;overflow-x:auto;}
+.pd-thumb{width:60px;height:60px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:border-color .15s;}
+.pd-thumb.active,.pd-thumb:hover{border-color:var(--teal);}
+/* ── INFO PANEL ── */
+.pd-info{display:flex;flex-direction:column;gap:.85rem;}
+.pd-range-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .7rem;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.rb-makeup{background:rgba(236,72,153,.12);color:#9d174d;border:1px solid rgba(236,72,153,.2);}
+.rb-korean{background:rgba(13,148,136,.12);color:#065f46;border:1px solid rgba(13,148,136,.2);}
+.pd-name{font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,3vw,1.9rem);font-weight:700;color:var(--text,#0f172a);line-height:1.25;margin:0;}
+.pd-brand{font-size:.8rem;color:var(--teal);font-weight:600;letter-spacing:.03em;}
+.pd-rating-row{display:flex;align-items:center;gap:.5rem;}
+.pd-stars{color:#f59e0b;font-size:.9rem;}
+.pd-rating-count{font-size:.75rem;color:var(--muted,#64748b);}
+.pd-price-block{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;}
+.pd-price{font-size:1.8rem;font-weight:800;color:var(--teal);}
+.pd-price-mrp{font-size:.9rem;color:var(--muted,#64748b);text-decoration:line-through;}
+.pd-discount{font-size:.82rem;font-weight:700;color:#16a34a;background:#dcfce7;padding:.15rem .5rem;border-radius:20px;}
+/* ── SHADE SELECTOR ── */
+.pd-shade-label{font-size:.75rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.4rem;}
+.pd-shade-grid{display:flex;flex-wrap:wrap;gap:.4rem;}
+.pd-shade-swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.pd-shade-swatch:hover{transform:scale(1.2);z-index:2;}
+.pd-shade-swatch.active{border-color:#0f172a;transform:scale(1.15);}
+.pd-shade-name{font-size:.72rem;color:var(--muted,#64748b);margin-top:.35rem;min-height:1em;}
+/* ── ACTION BUTTONS ── */
+.pd-actions{display:flex;flex-direction:column;gap:.6rem;}
+.pd-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1rem;border-radius:10px;font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .15s;text-decoration:none;}
+.pd-btn-cart{background:var(--gold);color:#0a0a0f;}
+.pd-btn-cart:hover{background:#b8943f;color:#0a0a0f;}
+.pd-btn-buy{background:var(--teal);color:#fff;}
+.pd-btn-buy:hover{background:#0f766e;color:#fff;}
+.pd-btn-wish{background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);}
+.pd-btn-wish:hover{border-color:var(--teal);color:var(--teal);}
+/* ── COD BADGE ── */
+.cod-badge{display:flex;align-items:center;gap:.6rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:.65rem .85rem;}
+.cod-icon{font-size:1.3rem;flex-shrink:0;}
+.cod-text{font-size:.78rem;color:#166534;font-weight:600;line-height:1.4;}
+/* ── DELIVERY ROW ── */
+.pd-delivery-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+.pd-delivery-chip{display:flex;align-items:center;gap:.35rem;background:var(--surface-alt,#f5f3f0);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:.4rem .7rem;font-size:.72rem;font-weight:600;color:var(--text,#0f172a);}
+/* ── TABS ── */
+.pd-tabs{display:flex;gap:0;border-bottom:2px solid var(--border,#e2e8f0);margin-bottom:1rem;overflow-x:auto;}
+.pd-tab{padding:.6rem 1.1rem;border:none;background:transparent;font-size:.82rem;font-weight:600;color:var(--muted,#64748b);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;}
+.pd-tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+.pd-tab-pane{display:none;}.pd-tab-pane.active{display:block;}
+/* ── INGREDIENT CHIPS ── */
+.pd-ingredient-chip{display:inline-flex;align-items:center;gap:.3rem;background:rgba(13,148,136,.08);color:#065f46;border:1px solid rgba(13,148,136,.2);padding:.25rem .65rem;border-radius:20px;font-size:.72rem;font-weight:600;margin:.2rem;}
+/* ── POLICY CARDS ── */
+.pd-policy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-top:.75rem;}
+.pd-policy-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:.85rem;text-align:center;}
+.pd-policy-icon{font-size:1.6rem;margin-bottom:.4rem;}
+.pd-policy-title{font-size:.72rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.15rem;}
+.pd-policy-desc{font-size:.67rem;color:var(--muted,#64748b);line-height:1.4;}
+/* ── RELATED ── */
+.pd-related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;}
+.pd-related-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;overflow:hidden;text-decoration:none;transition:transform .15s,box-shadow .15s;}
+.pd-related-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.1);}
+.pd-related-img{width:100%;aspect-ratio:1/1;object-fit:cover;}
+.pd-related-placeholder{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,#fdf2f8,#fce7f3);}
+.pd-related-body{padding:.6rem .7rem;}
+.pd-related-name{font-size:.75rem;font-weight:700;color:var(--text,#0f172a);line-height:1.3;margin-bottom:.2rem;}
+.pd-related-price{font-size:.78rem;font-weight:800;color:var(--teal);}
+[data-theme="dark"] .pd-img-panel,[data-theme="dark"] .pd-policy-card,[data-theme="dark"] .pd-related-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .cod-badge{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.2);}
+[data-theme="dark"] .pd-delivery-chip{background:#1a1a28;border-color:rgba(255,255,255,.08);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:0 1rem 3rem;">
+
+  <!-- Breadcrumb -->
+  <div class="pd-breadcrumb">
+    <a href="{% url 'core:home' %}"><i class="bi bi-house"></i> Home</a>
+    <i class="bi bi-chevron-right"></i>
+    <a href="{% url 'products:list' %}">Products</a>
+    <i class="bi bi-chevron-right"></i>
+    <span>{{ product.name }}</span>
+  </div>
+
+  <!-- ═══ MAIN PRODUCT GRID ═══ -->
+  <div class="pd-grid">
+
+    <!-- LEFT: Image Panel -->
+    <div class="pd-img-panel">
+      {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.name }}"
+             class="pd-main-img" id="pdMainImg"
+             onerror="this.style.display='none';document.getElementById('pdImgPlaceholder').style.display='flex';">
+        <div class="pd-img-placeholder" id="pdImgPlaceholder" style="display:none;">
+          {% if product.product_range == 'makeup' %}💄{% else %}🌿{% endif %}
+        </div>
+      {% else %}
+        <div class="pd-img-placeholder">
+          {% if product.category == 'cleanser' %}🫧{% elif product.category == 'toner' %}💧
+          {% elif product.category == 'serum' or product.category == 'essence' %}✨
+          {% elif product.category == 'sunscreen' %}☀️{% elif product.category == 'mask' %}🎭
+          {% elif product.category == 'lipstick' or product.category == 'lip_gloss' %}💋
+          {% elif product.category == 'foundation' %}🎨{% elif product.category == 'eyeshadow' %}👁️
+          {% elif product.product_range == 'makeup' %}💄{% else %}🌿{% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: Info Panel -->
+    <div class="pd-info">
+      <!-- Range + Category badges -->
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        <span class="pd-range-badge {% if product.product_range == 'makeup' %}rb-makeup{% else %}rb-korean{% endif %}">
+          {% if product.product_range == 'makeup' %}💄 Makeup{% else %}🌸 K-Beauty{% endif %}
+        </span>
+        <span class="pd-range-badge" style="background:var(--surface-alt,#f5f3f0);color:var(--muted,#64748b);border:1px solid var(--border,#e2e8f0);">
+          {{ product.get_category_display }}
+        </span>
+        {% if product.is_featured %}
+        <span class="pd-range-badge" style="background:#fef9ec;color:#92400e;border:1px solid #fde68a;">★ Featured</span>
+        {% endif %}
+      </div>
+
+      <h1 class="pd-name">{{ product.name }}</h1>
+      <div class="pd-brand">by {{ product.brand }}</div>
+
+      <!-- Rating (static display) -->
+      <div class="pd-rating-row">
+        <div class="pd-stars">★★★★<span style="color:#d1d5db;">★</span></div>
+        <span class="pd-rating-count">4.2 · 128 reviews</span>
+      </div>
+
+      <!-- Price -->
+      <div class="pd-price-block">
+        {% if product.price %}
+          <span class="pd-price">₹{{ product.price }}</span>
+          <span class="pd-price-mrp">₹{{ product.price|floatformat:0 }}</span>
+          <span class="pd-discount">Authentic Price</span>
+        {% else %}
+          <span class="pd-price" style="font-size:1.1rem;color:var(--muted,#64748b);">Price on request</span>
+        {% endif %}
+      </div>
+
+      <!-- Shade Selector (makeup only) -->
+      {% if product.shades_available %}
+      <div>
+        <div class="pd-shade-label">Select Shade: <span id="pdSelectedShade" style="color:var(--teal);font-weight:700;">{{ product.shades_available.0.name }}</span></div>
+        <div class="pd-shade-grid">
+          {% for shade in product.shades_available %}
+          <span class="pd-shade-swatch {% if forloop.first %}active{% endif %}"
+                style="background:{{ shade.hex }};"
+                title="{{ shade.name }}"
+                data-name="{{ shade.name }}"
+                onclick="selectShade(this)"></span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Skin type tags -->
+      {% if product.suitable_for_skin_types %}
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted,#64748b);">For:</span>
+        {% for st in product.suitable_for_skin_types %}
+        <span style="background:rgba(13,148,136,.08);color:#065f46;border:1px solid rgba(13,148,136,.2);padding:.18rem .55rem;border-radius:20px;font-size:.68rem;font-weight:600;">
+          {% if st == 'all' %}All Skin Types{% else %}{{ st|title }}{% endif %}
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- COD Badge -->
+      <div class="cod-badge">
+        <div class="cod-icon">💵</div>
+        <div class="cod-text">
+          <strong>Cash on Delivery Available</strong><br>
+          Pay when your order arrives at your doorstep
+        </div>
+      </div>
+
+      <!-- Delivery chips -->
+      <div class="pd-delivery-row">
+        <div class="pd-delivery-chip"><i class="bi bi-truck" style="color:var(--teal);"></i> Free Delivery ₹499+</div>
+        <div class="pd-delivery-chip"><i class="bi bi-arrow-return-left" style="color:#f59e0b;"></i> 7-Day Returns</div>
+        <div class="pd-delivery-chip"><i class="bi bi-shield-check" style="color:#16a34a;"></i> 100% Authentic</div>
+        <div class="pd-delivery-chip"><i class="bi bi-box-seam" style="color:#6366f1;"></i> Secure Packaging</div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pd-actions">
+        <form method="post" action="{% url 'orders:cart_add' pk=product.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="shade" id="cartShadeInput" value="{% if product.shades_available %}{{ product.shades_available.0.name }}{% endif %}">
+          <button type="submit" class="pd-btn pd-btn-cart" style="width:100%;">
+            <i class="bi bi-cart-plus"></i> Add to Cart
+          </button>
+        </form>
+        <a href="{% url 'orders:checkout' %}?product_id={{ product.pk }}&shade={% if product.shades_available %}{{ product.shades_available.0.name }}{% endif %}" class="pd-btn pd-btn-buy">
+          <i class="bi bi-lightning-fill"></i> Buy Now
+        </a>
+        <button class="pd-btn pd-btn-wish" onclick="toggleWishlist(this)">
+          <i class="bi bi-heart"></i> <span>Add to Wishlist</span>
+        </button>
+      </div>
+
+      <!-- SKU -->
+      <div style="font-size:.65rem;color:var(--muted,#64748b);font-family:monospace;">
+        SKU: {{ product.sku }}
+      </div>
+
+    </div><!-- /info panel -->
+  </div><!-- /main grid -->
+
+  <!-- ═══ DETAIL TABS ═══ -->
+  <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem;">
+    <div class="pd-tabs">
+      <button class="pd-tab active" data-pane="pane-desc" onclick="switchTab(this)">Description</button>
+      <button class="pd-tab" data-pane="pane-ingredients" onclick="switchTab(this)">Ingredients</button>
+      <button class="pd-tab" data-pane="pane-howto" onclick="switchTab(this)">How to Use</button>
+      <button class="pd-tab" data-pane="pane-policy" onclick="switchTab(this)">Shop Policy</button>
+    </div>
+
+    <!-- Description -->
+    <div class="pd-tab-pane active" id="pane-desc">
+      {% if product.description %}
+        <p style="font-size:.85rem;line-height:1.8;color:var(--text,#0f172a);">{{ product.description }}</p>
+      {% else %}
+        <p style="font-size:.85rem;color:var(--muted,#64748b);">No description available for this product.</p>
+      {% endif %}
+      {% if product.coverage or product.finish %}
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;">
+        {% if product.coverage %}<span style="background:rgba(13,148,136,.08);color:#065f46;border:1px solid rgba(13,148,136,.2);padding:.25rem .7rem;border-radius:20px;font-size:.75rem;font-weight:600;">{{ product.coverage|title }} Coverage</span>{% endif %}
+        {% if product.finish %}<span style="background:rgba(201,169,110,.12);color:#92400e;border:1px solid rgba(201,169,110,.25);padding:.25rem .7rem;border-radius:20px;font-size:.75rem;font-weight:600;">{{ product.finish|title }} Finish</span>{% endif %}
+      </div>
+      {% endif %}
+      {% if range_meta %}
+      <div style="background:linear-gradient(135deg,rgba(13,148,136,.06),rgba(8,145,178,.04));border:1px solid rgba(13,148,136,.18);border-radius:10px;padding:.85rem 1rem;margin-top:.85rem;">
+        <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:.3rem;">{{ range_meta.icon }} {{ product.brand }}</div>
+        <div style="font-size:.75rem;color:var(--text,#0f172a);line-height:1.6;">{{ range_meta.desc }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Ingredients -->
+    <div class="pd-tab-pane" id="pane-ingredients">
+      {% if ingredients_list %}
+      <div style="margin-bottom:.75rem;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Key Ingredients</div>
+        {% for ing in ingredients_list %}
+        <span class="pd-ingredient-chip"><i class="bi bi-leaf"></i> {{ ing }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if product.full_ingredients %}
+      <div>
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Full Ingredients List</div>
+        <p style="font-size:.75rem;color:var(--muted,#64748b);line-height:1.7;">{{ product.full_ingredients }}</p>
+      </div>
+      {% endif %}
+      {% if not ingredients_list and not product.full_ingredients %}
+      <p style="font-size:.85rem;color:var(--muted,#64748b);">Ingredient information not available.</p>
+      {% endif %}
+    </div>
+
+    <!-- How to Use -->
+    <div class="pd-tab-pane" id="pane-howto">
+      <div style="display:flex;flex-direction:column;gap:.85rem;">
+        {% if product.category == 'cleanser' or product.category == 'toner' or product.category == 'serum' or product.category == 'essence' or product.category == 'moisturizer' or product.category == 'cream' or product.category == 'sunscreen' %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">1</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Cleanse face with warm water.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">2</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Apply a small amount evenly.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">3</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Gently massage in circular motions.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">4</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Allow to absorb fully.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">5</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Follow with next step in routine.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">6</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Use morning and/or evening as directed.</div></div>
+        {% elif product.category == 'foundation' or product.category == 'concealer' or product.category == 'primer' or product.category == 'setting_powder' or product.category == 'blush' or product.category == 'bronzer' or product.category == 'highlighter' %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">1</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Start with moisturised, primed skin.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">2</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Apply with brush, sponge, or fingertips.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">3</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Build coverage as desired.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">4</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Blend edges for a seamless finish.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">5</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Set with powder if needed.</div></div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;">6</div><div style="font-size:.82rem;color:var(--text,#0f172a);padding-top:.25rem;">Remove thoroughly at end of day.</div></div>
+        {% else %}
+        <p style="font-size:.85rem;color:var(--muted,#64748b);">Apply as directed on packaging. Patch test before first use.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Shop Policy -->
+    <div class="pd-tab-pane" id="pane-policy">
+      <div class="pd-policy-grid">
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">💵</div>
+          <div class="pd-policy-title">Cash on Delivery</div>
+          <div class="pd-policy-desc">Pay when your order arrives. Available on orders up to ₹10,000.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">🚚</div>
+          <div class="pd-policy-title">Free Shipping</div>
+          <div class="pd-policy-desc">Free delivery on orders above ₹499. Estimated 3–7 business days.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">↩️</div>
+          <div class="pd-policy-title">7-Day Returns</div>
+          <div class="pd-policy-desc">Return unopened products within 7 days for a full refund or exchange.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">✅</div>
+          <div class="pd-policy-title">100% Authentic</div>
+          <div class="pd-policy-desc">Sourced directly from brand partners. Certified authentic products only.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">🔒</div>
+          <div class="pd-policy-title">Secure Payments</div>
+          <div class="pd-policy-desc">UPI, Net Banking, Cards, COD. All transactions are SSL encrypted.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">📦</div>
+          <div class="pd-policy-title">Careful Packaging</div>
+          <div class="pd-policy-desc">All products are bubble-wrapped and sealed in tamper-proof packaging.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">📞</div>
+          <div class="pd-policy-title">Customer Support</div>
+          <div class="pd-policy-desc">Reach us via WhatsApp or email. Support available 9 AM – 7 PM IST.</div>
+        </div>
+        <div class="pd-policy-card">
+          <div class="pd-policy-icon">🌿</div>
+          <div class="pd-policy-title">Dermatologist Tested</div>
+          <div class="pd-policy-desc">Korean formulations tested by certified dermatologists. Safe for daily use.</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tabs card -->
+
+  <!-- ═══ RELATED PRODUCTS ═══ -->
+  {% if related %}
+  <div style="margin-bottom:1.5rem;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">
+      <i class="bi bi-grid" style="color:var(--teal);"></i> Similar Products
+    </div>
+    <div class="pd-related-grid">
+      {% for rp in related %}
+      <a href="{% url 'products:detail' pk=rp.pk %}" class="pd-related-card">
+        {% if rp.image_url %}
+          <img src="{{ rp.image_url }}" alt="{{ rp.name }}" class="pd-related-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="pd-related-placeholder" style="display:none;">{% if rp.product_range == 'makeup' %}💄{% else %}🌿{% endif %}</div>
+        {% else %}
+          <div class="pd-related-placeholder">{% if rp.product_range == 'makeup' %}💄{% else %}🌿{% endif %}</div>
+        {% endif %}
+        <div class="pd-related-body">
+          <div class="pd-related-name">{{ rp.name }}</div>
+          <div style="font-size:.65rem;color:var(--muted,#64748b);margin-bottom:.25rem;">{{ rp.brand }}</div>
+          {% if rp.price %}<div class="pd-related-price">₹{{ rp.price }}</div>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ═══ SAME BRAND ═══ -->
+  {% if same_brand %}
+  <div style="margin-bottom:1.5rem;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">
+      <i class="bi bi-collection" style="color:var(--gold);"></i> More from {{ product.brand }}
+    </div>
+    <div class="pd-related-grid">
+      {% for sp in same_brand %}
+      <a href="{% url 'products:detail' pk=sp.pk %}" class="pd-related-card">
+        {% if sp.image_url %}
+          <img src="{{ sp.image_url }}" alt="{{ sp.name }}" class="pd-related-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="pd-related-placeholder" style="display:none;">🌿</div>
+        {% else %}
+          <div class="pd-related-placeholder">🌿</div>
+        {% endif %}
+        <div class="pd-related-body">
+          <div class="pd-related-name">{{ sp.name }}</div>
+          {% if sp.price %}<div class="pd-related-price">₹{{ sp.price }}</div>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /container -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Shade selector
+function selectShade(el) {
+  document.querySelectorAll('.pd-shade-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const name = el.dataset.name;
+  document.getElementById('pdSelectedShade').textContent = name;
+  // Update cart + buy now shade inputs
+  const cartInput = document.getElementById('cartShadeInput');
+  if (cartInput) cartInput.value = name;
+  const buyLink = document.querySelector('.pd-btn-buy');
+  if (buyLink) {
+    const url = new URL(buyLink.href);
+    url.searchParams.set('shade', name);
+    buyLink.href = url.toString();
+  }
+}
+
+// Tab switching
+function switchTab(btn) {
+  document.querySelectorAll('.pd-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pd-tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.pane).classList.add('active');
+}
+
+// Wishlist toggle
+function toggleWishlist(btn) {
+  const span = btn.querySelector('span');
+  const icon = btn.querySelector('i');
+  const inList = btn.dataset.active === '1';
+  if (inList) {
+    icon.className = 'bi bi-heart';
+    span.textContent = 'Add to Wishlist';
+    btn.dataset.active = '0';
+  } else {
+    icon.className = 'bi bi-heart-fill';
+    icon.style.color = '#e11d48';
+    span.textContent = 'Saved to Wishlist';
+    btn.dataset.active = '1';
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,578 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Dashboard — Lumina{% endblock %}
+{% block page_title %}Welcome back, {{ user.first_name|default:user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════
+   USER HOME — Limited Access Dashboard
+   ═══════════════════════════════════════ */
+.uh-wrap { max-width: 820px; margin: 0 auto; }
+
+/* Welcome hero */
+.uh-hero {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
+  border-radius: 18px; padding: 1.75rem 1.5rem;
+  margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  border: 1px solid rgba(13,148,136,.22);
+}
+.uh-hero::before {
+  content: ''; position: absolute; top: -20%; right: -10%; width: 45%; height: 140%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.2) 0%, transparent 65%);
+  pointer-events: none;
+}
+.uh-hero-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.uh-avatar {
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 700; color: #fff;
+  border: 2px solid rgba(255,255,255,.15);
+}
+.uh-hero-text h2 { color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: .15rem; }
+.uh-hero-text p  { color: rgba(255,255,255,.5); font-size: .8rem; margin: 0; }
+.uh-hero-badge {
+  margin-left: auto; padding: .3rem .85rem;
+  background: rgba(201,169,110,.18); color: #c9a96e;
+  border: 1px solid rgba(201,169,110,.3);
+  border-radius: 20px; font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+}
+
+/* Stats row */
+.uh-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-bottom: 1.5rem; }
+.uh-stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: .9rem; text-align: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.uh-stat .sv {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem; font-weight: 700; color: #0d9488; line-height: 1; margin-bottom: .2rem;
+}
+.uh-stat .sl { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+
+/* Section title */
+.uh-sec-title {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+
+/* Quick actions grid */
+.uh-actions { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; margin-bottom: 1.5rem; }
+.uh-action-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.1rem; text-decoration: none; color: var(--text);
+  display: flex; align-items: center; gap: .85rem;
+  transition: box-shadow .15s, transform .15s;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.uh-action-card:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); color: var(--text); }
+.uh-action-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+.uh-action-card .ac-title { font-size: .875rem; font-weight: 700; color: var(--text); margin-bottom: .1rem; }
+.uh-action-card .ac-sub   { font-size: .7rem; color: var(--muted); }
+
+/* Latest scan card */
+.uh-latest-scan {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  display: flex; align-items: center; gap: 1rem;
+}
+.uh-scan-img {
+  width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  border: 2px solid #0d9488;
+}
+.uh-scan-ph {
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(13,148,136,.1); border: 2px solid #0d9488;
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+}
+.uh-scan-info { flex: 1; min-width: 0; }
+.uh-scan-info .si-title { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; }
+.uh-scan-info .si-sub   { font-size: .72rem; color: var(--muted); }
+.uh-scan-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.uh-chip {
+  padding: .15rem .5rem; border-radius: 20px; font-size: .62rem; font-weight: 600;
+  background: rgba(13,148,136,.1); color: #0d9488;
+}
+.uh-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 700; color: #0d9488;
+  flex-shrink: 0; line-height: 1; text-align: center;
+}
+.uh-score span { font-size: .6rem; font-weight: 400; color: var(--muted); display: block; }
+
+/* Recent scans list */
+.uh-scan-list { display: flex; flex-direction: column; gap: .55rem; margin-bottom: 1.5rem; }
+.uh-scan-row {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: .75rem 1rem; display: flex; align-items: center; gap: .85rem;
+  text-decoration: none; color: var(--text); transition: background .12s;
+}
+.uh-scan-row:hover { background: var(--surface-alt); color: var(--text); }
+.uh-scan-row-img {
+  width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  border: 1.5px solid #0d9488;
+}
+.uh-scan-row-ph {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(13,148,136,.1); border: 1.5px solid #0d9488;
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+}
+.uh-scan-row-info { flex: 1; min-width: 0; }
+.uh-scan-row-info .r-title { font-size: .82rem; font-weight: 600; color: var(--text); }
+.uh-scan-row-info .r-sub   { font-size: .7rem; color: var(--muted); }
+.uh-scan-row-score { font-size: .9rem; font-weight: 700; color: #0d9488; flex-shrink: 0; }
+
+/* Premium lock */
+.uh-premium-card {
+  background: linear-gradient(135deg, #1a1a2e, #0d1f3c);
+  border: 1px solid rgba(201,169,110,.25); border-radius: 14px;
+  padding: 1.25rem; margin-bottom: 1.5rem; position: relative; overflow: hidden;
+}
+.uh-premium-card::before {
+  content: ''; position: absolute; top: -20%; right: -10%; width: 40%; height: 140%;
+  background: radial-gradient(ellipse, rgba(201,169,110,.12) 0%, transparent 65%);
+}
+.uh-premium-card h4 { color: #c9a96e; font-size: 1rem; font-weight: 700; margin-bottom: .35rem; position: relative; z-index: 1; }
+.uh-premium-card p  { color: rgba(255,255,255,.5); font-size: .78rem; margin-bottom: .85rem; position: relative; z-index: 1; }
+.uh-premium-features { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .9rem; position: relative; z-index: 1; }
+.uh-pf { padding: .2rem .6rem; border-radius: 20px; font-size: .65rem; font-weight: 600; background: rgba(201,169,110,.15); color: #c9a96e; border: 1px solid rgba(201,169,110,.25); }
+.uh-upgrade-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem 1.2rem; background: linear-gradient(135deg, #c9a96e, #d4b87e);
+  color: #0a0a0f; border-radius: 20px; font-size: .8rem; font-weight: 700;
+  text-decoration: none; transition: all .12s; position: relative; z-index: 1;
+}
+.uh-upgrade-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,169,110,.4); color: #0a0a0f; }
+
+/* ── MEMBERSHIP CARD ── */
+.uh-membership-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.1rem 1.2rem; margin-bottom: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.uh-membership-header {
+  display: flex; align-items: center; gap: .6rem; margin-bottom: .85rem;
+}
+.uh-membership-header .mh-icon {
+  font-size: 1.1rem;
+}
+.uh-membership-header .mh-title {
+  font-size: .88rem; font-weight: 700; color: var(--text); flex: 1;
+}
+.uh-points-row {
+  display: flex; align-items: baseline; gap: .35rem; margin-bottom: .65rem;
+}
+.uh-points-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem; font-weight: 700; color: #0d9488; line-height: 1;
+}
+.uh-points-label { font-size: .7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Progress bar */
+.uh-progress-wrap { margin-bottom: .5rem; }
+.uh-progress-meta {
+  display: flex; justify-content: space-between; font-size: .65rem;
+  color: var(--muted); margin-bottom: .3rem;
+}
+.uh-progress-track {
+  height: 6px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden;
+}
+.uh-progress-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, #0d9488, #0891b2);
+  transition: width .4s ease;
+}
+.uh-progress-fill.vip-fill {
+  background: linear-gradient(90deg, #c9a96e, #d4b87e);
+}
+.uh-progress-caption {
+  font-size: .66rem; color: var(--muted); margin-top: .35rem;
+}
+.uh-membership-actions {
+  display: flex; gap: .5rem; margin-top: .9rem; flex-wrap: wrap;
+}
+.uh-mem-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .4rem .9rem; border-radius: 20px; font-size: .75rem; font-weight: 600;
+  text-decoration: none; transition: all .12s;
+}
+.uh-mem-btn-primary {
+  background: linear-gradient(135deg, #c9a96e, #d4b87e); color: #0a0a0f;
+}
+.uh-mem-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,169,110,.35); color: #0a0a0f; }
+.uh-mem-btn-secondary {
+  background: rgba(13,148,136,.12); color: #0d9488; border: 1px solid rgba(13,148,136,.25);
+}
+.uh-mem-btn-secondary:hover { background: rgba(13,148,136,.2); color: #0d9488; }
+.uh-vip-max {
+  font-size: .75rem; color: #c9a96e; font-weight: 600;
+  display: flex; align-items: center; gap: .3rem; padding: .25rem 0;
+}
+
+/* Empty state */
+.uh-empty {
+  text-align: center; padding: 2rem; background: var(--surface);
+  border: 2px dashed var(--border); border-radius: 14px; margin-bottom: 1.5rem;
+}
+.uh-empty .e-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+.uh-empty h4 { font-size: 1rem; margin-bottom: .35rem; }
+.uh-empty p  { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+.uh-cta {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .55rem 1.25rem; background: #0d9488; color: #fff;
+  border-radius: 20px; font-size: .82rem; font-weight: 600; text-decoration: none;
+  transition: background .12s;
+}
+.uh-cta:hover { background: #0f766e; color: #fff; }
+
+@media (max-width: 480px) {
+  .uh-stats   { grid-template-columns: repeat(3,1fr); }
+  .uh-actions { grid-template-columns: 1fr; }
+  .uh-latest-scan { flex-wrap: wrap; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="uh-wrap">
+
+  <!-- ── WELCOME HERO ── -->
+  <div class="uh-hero">
+    <div class="uh-hero-inner">
+      <div class="uh-avatar">{{ user.username|first|upper }}</div>
+      <div class="uh-hero-text">
+        <h2>Hello, {{ user.first_name|default:user.username }} 👋</h2>
+        <p>{{ user.email }} &nbsp;·&nbsp; Member since {{ user.date_joined|date:"M Y" }}</p>
+      </div>
+      {% if user_tier == 'vip' %}
+        <div class="uh-hero-badge" style="background:rgba(201,169,110,.18);color:#c9a96e;border-color:rgba(201,169,110,.3);">⭐ VIP</div>
+      {% elif user_tier == 'medium' %}
+        <div class="uh-hero-badge" style="background:rgba(13,148,136,.18);color:#0d9488;border-color:rgba(13,148,136,.3);">✦ PLUS</div>
+      {% else %}
+        <div class="uh-hero-badge">Free Plan</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="uh-stats">
+    <div class="uh-stat">
+      <div class="sv">{{ total_scans }}</div>
+      <div class="sl">Scans Done</div>
+    </div>
+    <div class="uh-stat">
+      <div class="sv">{{ user.conversations.count|default:"0" }}</div>
+      <div class="sl">AI Chats</div>
+    </div>
+    <div class="uh-stat">
+      <div class="sv">{% if latest_scan %}{{ latest_scan.harmony_score }}%{% else %}—{% endif %}</div>
+      <div class="sl">Last Harmony</div>
+    </div>
+  </div>
+
+  <!-- ── MEMBERSHIP ── -->
+  {% with points=user_profile.loyalty_points %}
+  <div class="uh-membership-card">
+    <div class="uh-membership-header">
+      <span class="mh-icon">
+        {% if user_tier == 'vip' %}⭐{% elif user_tier == 'medium' %}✦{% else %}🌿{% endif %}
+      </span>
+      <span class="mh-title">Membership</span>
+      {% if user_tier == 'vip' %}
+        <span class="tier-badge tier-vip">VIP</span>
+      {% elif user_tier == 'medium' %}
+        <span class="tier-badge tier-medium">PLUS</span>
+      {% else %}
+        <span class="tier-badge tier-normal">FREE</span>
+      {% endif %}
+    </div>
+
+    <!-- Loyalty points balance -->
+    <div class="uh-points-row">
+      <span class="uh-points-value">{{ points }}</span>
+      <span class="uh-points-label">loyalty points</span>
+    </div>
+
+    <!-- Progress bar toward next tier -->
+    {% if user_tier == 'vip' %}
+      <div class="uh-vip-max">
+        <i class="bi bi-stars"></i> Maximum tier reached — you're on VIP!
+      </div>
+    {% elif user_tier == 'medium' %}
+      {% with threshold=1500 pct=points|floatformat:"0" %}
+      <div class="uh-progress-wrap">
+        <div class="uh-progress-meta">
+          <span>Progress to VIP</span>
+          <span>{{ points }} / 1500 pts</span>
+        </div>
+        <div class="uh-progress-track">
+          {% widthratio points 1500 100 as bar_pct %}
+          <div class="uh-progress-fill vip-fill" style="width:{% if bar_pct > 100 %}100{% else %}{{ bar_pct }}{% endif %}%;"></div>
+        </div>
+        <div class="uh-progress-caption">Earn points by shopping and referring friends.</div>
+      </div>
+      {% endwith %}
+    {% else %}
+      <div class="uh-progress-wrap">
+        <div class="uh-progress-meta">
+          <span>Progress to PLUS</span>
+          <span>{{ points }} / 500 pts</span>
+        </div>
+        <div class="uh-progress-track">
+          {% widthratio points 500 100 as bar_pct %}
+          <div class="uh-progress-fill" style="width:{% if bar_pct > 100 %}100{% else %}{{ bar_pct }}{% endif %}%;"></div>
+        </div>
+        <div class="uh-progress-caption">Earn points by shopping and referring friends.</div>
+      </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="uh-membership-actions">
+      <a href="{% url 'memberships:upgrade' %}" class="uh-mem-btn uh-mem-btn-primary">
+        <i class="bi bi-arrow-up-circle-fill"></i>
+        {% if user_tier == 'vip' %}Manage Plan{% else %}Upgrade Tier{% endif %}
+      </a>
+      <a href="{% url 'memberships:redeem' %}" class="uh-mem-btn uh-mem-btn-secondary">
+        <i class="bi bi-gift-fill"></i> Redeem Points
+      </a>
+    </div>
+  </div>
+  {% endwith %}
+
+  <!-- ── QUICK ACTIONS ── -->
+  <div class="uh-sec-title">⚡ Quick Actions</div>
+  <div class="uh-actions">
+    <a href="{% url 'scanner:upload' %}" class="uh-action-card">
+      <div class="uh-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
+        <i class="bi bi-camera-fill"></i>
+      </div>
+      <div>
+        <div class="ac-title">New Face Scan</div>
+        <div class="ac-sub">AI skin analysis</div>
+      </div>
+    </a>
+    <a href="{% url 'chat:create' %}?mode=doctor{% if latest_scan %}&scan_id={{ latest_scan.id }}{% endif %}" class="uh-action-card">
+      <div class="uh-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
+        <i class="bi bi-heart-pulse"></i>
+      </div>
+      <div>
+        <div class="ac-title">Ask AI Doctor</div>
+        <div class="ac-sub">Skin concern advice</div>
+      </div>
+    </a>
+    <a href="{% url 'products:list' %}?range=korean" class="uh-action-card">
+      <div class="uh-action-icon" style="background:rgba(236,72,153,.1);color:#ec4899;">
+        <i class="bi bi-stars"></i>
+      </div>
+      <div>
+        <div class="ac-title">K-Beauty Shop</div>
+        <div class="ac-sub">SAS Global products</div>
+      </div>
+    </a>
+    <a href="{% url 'dashboard:dashboard' %}" class="uh-action-card">
+      <div class="uh-action-icon" style="background:rgba(201,169,110,.12);color:#c9a96e;">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div>
+        <div class="ac-title">Scan History</div>
+        <div class="ac-sub">View all your scans</div>
+      </div>
+    </a>
+    <a href="{% url 'orders:my_requirements' %}" class="uh-action-card">
+      <div class="uh-action-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6;">
+        <i class="bi bi-clipboard-heart"></i>
+      </div>
+      <div>
+        <div class="ac-title">My Requirements</div>
+        <div class="ac-sub">Product requests &amp; status</div>
+      </div>
+    </a>
+    <a href="{% url 'orders:my_orders' %}" class="uh-action-card">
+      <div class="uh-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
+        <i class="bi bi-bag-heart"></i>
+      </div>
+      <div>
+        <div class="ac-title">My Orders</div>
+        <div class="ac-sub">Track your orders</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── LATEST SCAN ── -->
+  {% if latest_scan %}
+  <div class="uh-sec-title">✦ Latest Scan</div>
+  <div class="uh-latest-scan">
+    {% if latest_scan.scan_image %}
+      <img src="{{ latest_scan.scan_image.url }}" alt="scan" class="uh-scan-img">
+    {% else %}
+      <div class="uh-scan-ph">👤</div>
+    {% endif %}
+    <div class="uh-scan-info">
+      <div class="si-title">{{ latest_scan.skin_type|title }} · {{ latest_scan.undertone|title }} Undertone</div>
+      <div class="si-sub">{{ latest_scan.created_at|date:"M j, Y · g:i A" }}</div>
+      <div class="uh-scan-chips">
+        <span class="uh-chip">{{ latest_scan.skin_tone|title }} Tone</span>
+        <span class="uh-chip">Acne: {{ latest_scan.hf_acne_severity|title }}</span>
+        {% for c in latest_scan.detected_concerns.all|slice:":2" %}
+          <span class="uh-chip">{{ c.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="uh-score">{{ latest_scan.harmony_score }}<span>Harmony</span></div>
+  </div>
+
+  <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <a href="{% url 'results:detail' scan_id=latest_scan.id %}" class="uh-cta">
+      <i class="bi bi-bar-chart-line"></i> Full Results
+    </a>
+    <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ latest_scan.id }}"
+       class="uh-cta" style="background:rgba(13,148,136,.12);color:#0d9488;">
+      🩺 Consult AI
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- ── RECENT SCANS ── -->
+  {% if scans %}
+  <div class="uh-sec-title">📋 Recent Scans</div>
+  <div class="uh-scan-list">
+    {% for scan in scans %}
+    <a href="{% url 'results:detail' scan_id=scan.id %}" class="uh-scan-row">
+      {% if scan.scan_image %}
+        <img src="{{ scan.scan_image.url }}" alt="scan" class="uh-scan-row-img">
+      {% else %}
+        <div class="uh-scan-row-ph">👤</div>
+      {% endif %}
+      <div class="uh-scan-row-info">
+        <div class="r-title">{{ scan.skin_type|title }} · {{ scan.undertone|title }} · {{ scan.skin_tone|title }}</div>
+        <div class="r-sub">{{ scan.created_at|date:"M j, Y · g:i A" }} · {{ scan.detected_concerns.count }} concern{{ scan.detected_concerns.count|pluralize }}</div>
+      </div>
+      <div class="uh-scan-row-score">{{ scan.harmony_score }}%</div>
+      <i class="bi bi-chevron-right" style="color:var(--muted);font-size:.8rem;"></i>
+    </a>
+    {% endfor %}
+    <a href="{% url 'dashboard:dashboard' %}" style="text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">
+      View all scans →
+    </a>
+  </div>
+  {% else %}
+  <div class="uh-empty">
+    <div class="e-icon">📸</div>
+    <h4>No scans yet</h4>
+    <p>Take your first AI skin scan to get your personalised skin report.</p>
+    <a href="{% url 'scanner:upload' %}" class="uh-cta">
+      <i class="bi bi-camera-fill"></i> Start First Scan
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- ── PREMIUM UPGRADE CTA ── -->
+  {% if user_tier == 'normal' %}
+  <div class="uh-premium-card">
+    <h4>✦ Unlock Premium Features</h4>
+    <p>Get unlimited makeup AI, K-Beauty routine builder, and priority AI Doctor access.</p>
+    <div class="uh-premium-features">
+      <span class="uh-pf">💄 Makeup AI (unlimited)</span>
+      <span class="uh-pf">🌸 K-Beauty Routines</span>
+      <span class="uh-pf">🩺 Priority Doctor</span>
+      <span class="uh-pf">📊 Advanced Analytics</span>
+    </div>
+    <a href="{% url 'memberships:upgrade' %}" class="uh-upgrade-btn">
+      ✦ Upgrade to Pro
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% if request.session.tier_just_upgraded %}
+<canvas id="confetti-canvas"></canvas>
+<script>
+(function () {
+  'use strict';
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', function () {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  const COLORS = ['#c9a96e', '#0d9488', '#ffffff', '#f59e0b', '#e2c080', '#38bdf8', '#f472b6'];
+  const PIECE_COUNT = 120;
+
+  const pieces = Array.from({ length: PIECE_COUNT }, function () {
+    return {
+      x:          Math.random() * canvas.width,
+      y:          Math.random() * -canvas.height,   // start above viewport
+      r:          Math.random() * 6 + 4,
+      d:          Math.random() * PIECE_COUNT,
+      color:      COLORS[Math.floor(Math.random() * COLORS.length)],
+      tilt:       Math.random() * 10 - 10,
+      tiltAngle:  0,
+      tiltSpeed:  Math.random() * 0.1 + 0.05,
+    };
+  });
+
+  var rafId = null;
+  var startTime = null;
+  var DURATION = 3500;  // ms
+
+  function draw(timestamp) {
+    if (!startTime) startTime = timestamp;
+    var elapsed = timestamp - startTime;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    pieces.forEach(function (p) {
+      p.tiltAngle += p.tiltSpeed;
+      p.y += (Math.cos(p.d) + 1 + p.r / 2) * 0.9;
+      p.x += Math.sin(p.d) * 0.7;
+      p.tilt = Math.sin(p.tiltAngle) * 15;
+
+      // Reset piece to top when it exits bottom
+      if (p.y > canvas.height) {
+        p.y = -10;
+        p.x = Math.random() * canvas.width;
+      }
+
+      ctx.beginPath();
+      ctx.lineWidth   = p.r / 2;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+      ctx.stroke();
+    });
+
+    if (elapsed < DURATION) {
+      rafId = requestAnimationFrame(draw);
+    } else {
+      canvas.remove();
+    }
+  }
+
+  rafId = requestAnimationFrame(draw);
+
+  // Clear session flag so confetti doesn't replay on refresh
+  var csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
+  var csrfToken = csrfMatch ? csrfMatch[1] : '';
+  fetch('{% url "memberships:upgrade_confirm" %}', {
+    method:  'POST',
+    headers: {
+      'X-CSRFToken':  csrfToken,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ clear_confetti: true }),
+  }).catch(function () {});
+})();
+</script>
+{% endif %}
+{% endblock %}

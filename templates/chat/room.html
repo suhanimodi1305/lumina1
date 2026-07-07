@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  {% if conversation.mode == 'doctor' %}AI Doctor — Dr. Lumina
+  {% elif conversation.mode == 'makeup' %}Lumina Glam — Makeup AI
+  {% elif conversation.mode == 'kbeauty' %}Lumina K — K-Beauty AI
+  {% else %}Dr. Lumina Chat{% endif %}
+{% endblock %}
+{% block page_title %}
+  {% if conversation.mode == 'doctor' %}<img src="{% static 'images/doctor_ai.png' %}" alt="Dr" class="ai-mode-logo-xs"> AI Doctor
+  {% elif conversation.mode == 'makeup' %}<img src="{% static 'images/makeup_ai.png' %}" alt="Makeup" class="ai-mode-logo-xs"> Makeup AI
+  {% else %}<img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty" class="ai-mode-logo-xs"> K-Beauty AI{% endif %}
+{% endblock %}
+{% block extra_css %}
+<style>
+/* �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
+   CHAT ROOM — fits inside base.html lux-content
+   Full-height chat without duplicate sidebar
+   �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�? */
+/* Override lux-content padding so chat fills exactly */
+.lux-content { padding: 0 !important; }
+.lumina-chat-shell {
+  display: flex;
+  /* subtract topbar (52px) from viewport */
+  height: calc(100vh - var(--top-h, 52px));
+  overflow: hidden;
+  background: var(--page-bg);
+}
+/* ── MODE COLOUR VARIANTS ── */
+.mode-doctor  { --chat-accent: #0d9488; --chat-send-bg: #0d9488; --chat-send-hover: #0f766e; }
+.mode-makeup  { --chat-accent: #ec4899; --chat-send-bg: #ec4899; --chat-send-hover: #db2777; }
+.mode-kbeauty { --chat-accent: #f06292; --chat-send-bg: #f06292; --chat-send-hover: #e91e63; }
+/* ── MAIN PANEL ── */
+.chat-main {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+/* Mode tabs bar */
+.mode-tabs-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+  display: flex; gap: 0; flex-shrink: 0;
+}
+.mode-tab {
+  padding: .55rem 1.1rem; border: none; background: transparent;
+  border-bottom: 3px solid transparent;
+  font-size: .84rem; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: color .15s, border-color .15s;
+  display: flex; align-items: center; gap: .4rem;
+}
+.mode-tab:hover { color: var(--text); }
+.mode-tab.active { color: var(--chat-accent, #0d9488); border-bottom-color: var(--chat-accent, #0d9488); }
+/* Scan banner */
+.scan-banner {
+  background: rgba(201,169,110,.08); border-bottom: 1px solid rgba(201,169,110,.2);
+  padding: .55rem 1rem; font-size: .8rem; color: #92400e;
+  display: flex; align-items: center; gap: .55rem; flex-shrink: 0;
+}
+[data-theme="dark"] .scan-banner { color: #c9a96e; background: rgba(201,169,110,.07); border-color: rgba(201,169,110,.15); }
+/* Messages area */
+.chat-messages-area {
+  flex: 1; overflow-y: auto;
+  padding: 1.25rem 1rem 1rem;
+  display: flex; flex-direction: column; gap: .25rem;
+  scroll-behavior: smooth;
+}
+.chat-messages-area::-webkit-scrollbar { width: 4px; }
+.chat-messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+/* Welcome state */
+.chat-welcome {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+}
+.chat-welcome-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--chat-accent, #0d9488), #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem; margin: 0 auto 1rem;
+}
+.chat-welcome h3 { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
+.chat-welcome p  { font-size: .875rem; max-width: 360px; color: var(--muted); }
+.suggestion-chips {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  justify-content: center; margin-top: 1.1rem; max-width: 480px;
+}
+.suggestion-chip {
+  padding: .45rem .9rem; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: .8rem; color: var(--text); cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.suggestion-chip:hover {
+  background: var(--surface-alt);
+  border-color: var(--chat-accent, #0d9488);
+  color: var(--chat-accent, #0d9488);
+}
+/* Message rows */
+.msg-row {
+  display: flex; align-items: flex-end; gap: .55rem;
+  animation: slideIn .22s cubic-bezier(.25,.46,.45,.94);
+  margin-bottom: .65rem;
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(8px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+.msg-row.user { flex-direction: row-reverse; }
+/* Avatar */
+.msg-row .msg-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--chat-accent, #0d9488), #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15); overflow: hidden;
+}
+.msg-row .msg-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.msg-row.user .msg-avatar { background: linear-gradient(135deg,#6366f1,#4f46e5); }
+/* Bubble wrapper */
+.msg-bubble-wrap {
+  display: flex; flex-direction: column; max-width: 74%;
+}
+.msg-row.user .msg-bubble-wrap { align-items: flex-end; }
+.msg-row.assistant .msg-bubble-wrap { align-items: flex-start; }
+/* The bubble */
+.msg-bubble {
+  padding: .75rem 1rem; line-height: 1.65; font-size: .875rem;
+  word-break: break-word; position: relative;
+}
+.msg-row.user .msg-bubble {
+  background: linear-gradient(135deg, var(--chat-accent, #0d9488) 0%, color-mix(in srgb, var(--chat-accent, #0d9488) 78%, #000) 100%);
+  color: #fff; border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+}
+.msg-row.user .msg-bubble strong { color: #fff; opacity: .95; }
+.msg-row.user .msg-bubble em { color: rgba(255,255,255,.85); }
+.msg-row.assistant .msg-bubble {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+}
+[data-theme="dark"] .msg-row.assistant .msg-bubble { background: #1e1e2e; border-color: rgba(255,255,255,.1); }
+.msg-bubble img.msg-photo { max-width: 100%; border-radius: 12px; margin-bottom: .6rem; display: block; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.msg-content { word-break: break-word; }
+.msg-content strong { font-weight: 700; }
+.msg-content em { font-style: italic; }
+.msg-content ul, .msg-content ol { padding-left: 1.2rem; margin: .4rem 0; }
+.msg-content li { margin-bottom: .2rem; }
+.msg-meta {
+  font-size: .65rem; margin-top: .3rem;
+  color: var(--muted); opacity: .7;
+  display: flex; align-items: center; gap: .3rem;
+}
+.msg-row.user .msg-meta { justify-content: flex-end; }
+.msg-disclaimer {
+  font-size: .67rem; font-style: italic; color: var(--muted);
+  margin-top: .35rem; padding-top: .3rem; border-top: 1px solid var(--border); opacity: .75;
+}
+.msg-row.user .msg-bubble .msg-disclaimer { border-top-color: rgba(255,255,255,.2); color: rgba(255,255,255,.7); }
+/* Shade swatches */
+.shade-swatch {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .22rem .65rem; border-radius: 20px; font-size: .72rem; font-weight: 600;
+  border: 1px solid rgba(0,0,0,.1); margin: .15rem .1rem; vertical-align: middle;
+}
+.shade-dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); flex-shrink: 0; }
+/* Typing indicator */
+.typing-row { display: flex; align-items: flex-end; gap: .55rem; margin-bottom: .5rem; }
+.typing-bubble {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px 18px 18px 4px;
+  padding: .7rem .9rem; display: flex; gap: 5px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+}
+.t-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--chat-accent, #0d9488);
+  animation: tdot 1.3s infinite; opacity: .4;
+}
+.t-dot:nth-child(2){animation-delay:.2s} .t-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{opacity:.25;transform:translateY(0)} 30%{opacity:1;transform:translateY(-5px)}}
+/* Product scroll */
+.product-scroll-row {
+  display: flex; gap: .75rem; overflow-x: auto;
+  padding: .4rem 0 .6rem; -webkit-overflow-scrolling: touch;
+}
+.product-scroll-row::-webkit-scrollbar { height: 3px; }
+.product-scroll-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.prod-card {
+  flex-shrink: 0; width: 155px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  cursor: pointer; transition: box-shadow .18s, transform .18s;
+}
+.prod-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.12); transform: translateY(-3px); }
+.prod-card-img { width: 100%; height: 110px; object-fit: cover; }
+.prod-card-placeholder {
+  width: 100%; height: 110px; background: linear-gradient(135deg, var(--surface-alt), var(--border));
+  display: flex; align-items: center; justify-content: center; font-size: 1.75rem;
+}
+.prod-card-body { padding: .6rem .7rem; }
+.prod-card-name  { font-size: .78rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; line-height: 1.3; }
+.prod-card-brand { font-size: .68rem; color: var(--muted); margin-bottom: .1rem; }
+.prod-card-sku   { font-size: .62rem; color: var(--chat-accent, #0d9488); font-weight: 600; }
+/* Input zone */
+.chat-input-zone {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: .65rem 1rem .85rem; flex-shrink: 0;
+}
+.chat-input-box {
+  display: flex; align-items: flex-end; gap: .5rem;
+  background: var(--page-bg); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: .55rem .7rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.chat-input-box:focus-within {
+  border-color: var(--chat-accent, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.1);
+}
+.chat-textarea {
+  flex: 1; border: none; background: transparent;
+  font-family: inherit; font-size: .9rem; resize: none;
+  min-height: 38px; max-height: 130px; outline: none; color: var(--text);
+  line-height: 1.5;
+}
+.chat-textarea::placeholder { color: var(--muted); }
+.input-actions { display: flex; align-items: flex-end; gap: .35rem; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; font-size: .95rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.icon-btn:hover {
+  background: var(--surface-alt);
+  color: var(--chat-accent, #0d9488);
+  border-color: var(--chat-accent, #0d9488);
+}
+.send-icon-btn {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--chat-send-bg, #0d9488); border: none; color: #fff;
+  cursor: pointer; font-size: .95rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s, transform .1s;
+}
+.send-icon-btn:hover   { background: var(--chat-send-hover, #0f766e); transform: scale(1.05); }
+.send-icon-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+.input-caption { font-size: .68rem; color: var(--muted); text-align: center; margin-top: .35rem; }
+/* Options dropdown */
+.chat-options-bar {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem 1rem; background: var(--surface);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.chat-options-bar .co-title { font-size: .85rem; font-weight: 700; color: var(--text); flex: 1; }
+.chat-opt-btn {
+  padding: .3rem .75rem; border-radius: 20px; font-size: .72rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); text-decoration: none; cursor: pointer;
+  transition: background .12s, color .12s;
+  display: inline-flex; align-items: center; gap: .3rem;
+}
+.chat-opt-btn:hover { background: var(--surface-alt); color: var(--text); }
+.chat-opt-btn.danger:hover { background: rgba(220,38,38,.08); color: #dc2626; border-color: rgba(220,38,38,.2); }
+/* Responsive */
+@media (max-width: 768px) {
+  .msg-bubble { max-width: 88%; }
+  .lumina-chat-shell { height: calc(100vh - var(--top-h, 52px) - var(--mob-bot-h, 58px)); }
+}
+</style>
+{% endblock %}
+{% block content %}
+{% with mode=conversation.mode %}
+<div class="lumina-chat-shell mode-{{ mode }}" id="chatShell">
+  <div class="chat-main">
+    {# ── Options bar ── #}
+    <div class="chat-options-bar">
+      <span class="co-title">
+        {% if mode == 'doctor' %}<img src="{% static 'images/doctor_ai.png' %}" alt="Dr" class="ai-mode-logo-sm"> Dr. Lumina
+        {% elif mode == 'makeup' %}<img src="{% static 'images/makeup_ai.png' %}" alt="Makeup AI" style="width:40px;height:40px;border-radius:50%;"> Lumina Glam
+        {% else %}<img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty" class="ai-mode-logo-sm"> Lumina K{% endif %}
+        {% if conversation.skin_scan %}
+          <span style="font-size:.7rem;color:var(--muted);font-weight:400;margin-left:.4rem;">
+            · Scan #{{ conversation.skin_scan.id }} linked
+          </span>
+        {% endif %}
+      </span>
+      <a href="{% url 'chat:index' %}" class="chat-opt-btn">
+        <i class="bi bi-arrow-left"></i> All chats
+      </a>
+      {% if conversation.skin_scan %}
+      <a href="{% url 'results:detail' scan_id=conversation.skin_scan.id %}" class="chat-opt-btn">
+        <i class="bi bi-eye"></i> Scan results
+      </a>
+      {% endif %}
+      <a href="{% url 'chat:create' %}?mode={{ mode }}{% if conversation.skin_scan %}&scan_id={{ conversation.skin_scan.id }}{% endif %}" class="chat-opt-btn">
+        <i class="bi bi-plus-circle"></i> New chat
+      </a>
+      <form method="post" action="{% url 'chat:delete' pk=conversation.id %}" id="deleteForm" style="display:inline;">
+        {% csrf_token %}
+        <button type="button" class="chat-opt-btn danger" onclick="confirmDelete()">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </form>
+    </div>
+    {# ── Mode tabs ── #}
+    <div class="mode-tabs-bar">
+      <button class="mode-tab {% if mode == 'doctor' %}active{% endif %}" data-mode="doctor"><img src="{% static 'images/doctor_ai.png' %}" alt="Dr" class="ai-mode-logo-xs"> AI Doctor</button>
+      <button class="mode-tab {% if mode == 'makeup' %}active{% endif %}" data-mode="makeup"><img src="{% static 'images/makeup_ai.png' %}" alt="Makeup" class="ai-mode-logo-xs"> Makeup</button>
+      <button class="mode-tab {% if mode == 'kbeauty' %}active{% endif %}" data-mode="kbeauty"><img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty" class="ai-mode-logo-xs"> K-Beauty</button>
+    </div>
+    {# ── Scan context banner ── #}
+    {% if conversation.skin_scan %}
+    <div class="scan-banner">
+      <i class="bi bi-stars"></i>
+      Personalised to your scan:
+      <strong>{{ conversation.skin_scan.get_skin_tone_display }}</strong>
+      skin ·
+      <strong>{{ conversation.skin_scan.get_undertone_display }}</strong>
+      undertone ·
+      <strong>{{ conversation.skin_scan.get_skin_type_display }}</strong>
+      type
+      {% if conversation.skin_scan.hf_acne_severity and conversation.skin_scan.hf_acne_severity != 'none' %}
+        · Acne: <strong>{{ conversation.skin_scan.hf_acne_severity }}</strong>
+      {% endif %}
+    </div>
+    {% endif %}
+    {# ── Messages ── #}
+    <div class="chat-messages-area" id="chatMessages">
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="msg-row {{ msg.role }}">
+            <div class="msg-avatar">
+              {% if msg.role == 'assistant' %}
+                {% if mode == 'doctor' %}<img src="{% static 'images/doctor_ai.png' %}" alt="Doctor AI" class="ai-mode-logo">{% elif mode == 'makeup' %}<img src="{% static 'images/makeup_ai.png' %}" alt="Makeup" class="ai-mode-logo">{% else %}<img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty AI" class="ai-mode-logo">{% endif %}
+              {% else %}<span style="font-size:.9rem;">👤</span>{% endif %}
+            </div>
+            <div class="msg-bubble-wrap">
+              <div class="msg-bubble">
+                {% if msg.image_data %}
+                  <img src="data:image/jpeg;base64,{{ msg.image_data }}" alt="Photo" class="msg-photo">
+                {% endif %}
+                <div class="msg-content" data-raw="{{ msg.content|escapejs }}"></div>
+                {% if msg.role == 'assistant' %}
+                  <div class="msg-disclaimer">
+                    <i class="bi bi-info-circle"></i> Informational only. Consult a certified dermatologist.
+                  </div>
+                {% endif %}
+              </div>
+              <div class="msg-meta">
+                <i class="bi bi-clock" style="font-size:.6rem;"></i>
+                {{ msg.created_at|date:"g:i A" }}
+                {% if msg.role == 'user' %}<i class="bi bi-check2-all" style="color:var(--chat-accent,#0d9488);"></i>{% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="chat-welcome" id="chatWelcome">
+          <div class="chat-welcome-icon">
+            {% if mode == 'doctor' %}<img src="{% static 'images/doctor_ai.png' %}" alt="Doctor AI" class="ai-mode-logo">{% elif mode == 'makeup' %}<img src="{% static 'images/makeup_ai.png' %}" alt="Makeup AI" style="width:40px;height:40px;border-radius:50%;">{% else %}<img src="{% static 'images/sas-logo.png' %}" alt="K-Beauty AI" class="ai-mode-logo">{% endif %}
+          </div>
+          <h3>
+            {% if mode == 'doctor' %}Hello! I'm Dr. Lumina 👋
+            {% elif mode == 'makeup' %}Hey gorgeous! ✨
+            {% else %}Annyeong! 🌸{% endif %}
+          </h3>
+          <p>
+            {% if mode == 'doctor' %}Your AI skin specialist. Share your concern, upload a photo, or link your face scan.
+            {% elif mode == 'makeup' %}Your personal AI makeup artist. Find perfect shades and build stunning looks.
+            {% else %}Your K-Beauty specialist. Let's build your perfect Korean skincare routine.{% endif %}
+          </p>
+          <div class="suggestion-chips" id="suggestionChips">
+            {% for p in mode_prompts %}
+              <button class="suggestion-chip" data-prompt="{{ p }}">{{ p }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    {# ── Input ── #}
+    <div class="chat-input-zone">
+      <div class="chat-input-box">
+        <textarea id="msgInput" class="chat-textarea" rows="1"
+          placeholder="{% if mode == 'doctor' %}Describe your skin concern…{% elif mode == 'makeup' %}Ask about shades, products, looks…{% else %}Ask about K-Beauty routines…{% endif %}"></textarea>
+        <div class="input-actions">
+          <button class="icon-btn" id="photoBtn" title="Upload photo"><i class="bi bi-image"></i></button>
+          <button class="icon-btn" id="cameraBtn" title="Take photo"><i class="bi bi-camera"></i></button>
+          <button class="send-icon-btn" id="sendBtn"><i class="bi bi-send-fill"></i></button>
+        </div>
+      </div>
+      <div class="input-caption"><i class="bi bi-lock"></i> Powered by Lumina AI · Gemini 1.5 Flash</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none">
+    </div>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}
+{% block extra_js %}
+<script>
+const CONV_ID   = "{{ conversation.id }}";
+const CSRF      = "{{ csrf_token }}";
+let   CURR_MODE = "{{ conversation.mode }}";
+document.addEventListener('DOMContentLoaded', () => {
+const chatMessages = document.getElementById('chatMessages');
+const msgInput     = document.getElementById('msgInput');
+const sendBtn      = document.getElementById('sendBtn');
+const photoBtn     = document.getElementById('photoBtn');
+const cameraBtn    = document.getElementById('cameraBtn');
+const photoInput   = document.getElementById('photoInput');
+if (!msgInput || !sendBtn || !chatMessages) return;
+// Render stored messages
+document.querySelectorAll('.msg-content[data-raw]').forEach(el => {
+  el.innerHTML = renderMarkdown(el.getAttribute('data-raw'));
+  el.removeAttribute('data-raw');
+});
+scrollBottom();
+// Auto-resize
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 140) + 'px';
+});
+// Enter to send
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+});
+sendBtn.addEventListener('click', doSend);
+// Photo
+photoBtn?.addEventListener('click', () => { photoInput.removeAttribute('capture'); photoInput.click(); });
+cameraBtn?.addEventListener('click', () => { photoInput.setAttribute('capture','environment'); photoInput.click(); });
+photoInput?.addEventListener('change', e => {
+  if (e.target.files[0]) { doSendPhoto(e.target.files[0]); e.target.value = ''; }
+});
+// Suggestions
+document.querySelectorAll('.suggestion-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    msgInput.value = btn.dataset.prompt;
+    msgInput.dispatchEvent(new Event('input'));
+    doSend();
+  });
+});
+// Mode tabs
+document.querySelectorAll('.mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+});
+// ── SEND TEXT
+function doSend() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  setInputDisabled(true);
+  removeWelcome();
+  appendBubble('user', text);
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  const typId = appendTyping();
+  fetch(`/chat/${CONV_ID}/send/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ message: text })
+  })
+  .then(r => r.json())
+  .then(data => {
+    removeTyping(typId);
+    if (data.error) appendBubble('assistant', '⚠�? ' + data.error);
+    else {
+      appendBubble('assistant', data.reply, null, data.timestamp);
+      if (data.product_suggestions?.length) appendProductRow(data.product_suggestions);
+      if (data.conversation_title) document.title = data.conversation_title + ' — Lumina';
+    }
+  })
+  .catch(() => { removeTyping(typId); appendBubble('assistant', '⚠�? Connection error. Please try again.'); })
+  .finally(() => setInputDisabled(false));
+}
+// ── SEND PHOTO
+function doSendPhoto(file) {
+  setInputDisabled(true);
+  removeWelcome();
+  const reader = new FileReader();
+  reader.onload = e => appendBubble('user', '[Photo uploaded]', e.target.result);
+  reader.readAsDataURL(file);
+  const typId = appendTyping();
+  const fd = new FormData();
+  fd.append('photo', file);
+  fetch(`/chat/${CONV_ID}/photo/`, {
+    method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd
+  })
+  .then(r => r.json())
+  .then(data => {
+    removeTyping(typId);
+    if (data.error) appendBubble('assistant', '⚠�? ' + data.error);
+    else {
+      appendBubble('assistant', data.reply, null, data.timestamp);
+      if (data.product_suggestions?.length) appendProductRow(data.product_suggestions);
+    }
+  })
+  .catch(() => { removeTyping(typId); appendBubble('assistant', '⚠�? Could not process image.'); })
+  .finally(() => setInputDisabled(false));
+}
+// ── SWITCH MODE
+function switchMode(newMode) {
+  if (newMode === CURR_MODE) return;
+  fetch(`/chat/${CONV_ID}/switch-mode/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ mode: newMode })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      CURR_MODE = newMode;
+      document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === newMode));
+      const shell = document.getElementById('chatShell');
+      if (shell) shell.className = 'lumina-chat-shell mode-' + newMode;
+      const ph = { doctor:'Describe your skin concern…', makeup:'Ask about shades, products, looks…', kbeauty:'Ask about K-Beauty routines…' };
+      msgInput.placeholder = ph[newMode] || 'Ask me anything…';
+      appendSysMsg(`Switched to ${newMode === 'doctor' ? '<img src="/static/images/doctor_ai.png" alt="Dr" class="ai-mode-logo-xs"> AI Doctor' : newMode === 'makeup' ? '<img src="/static/images/makeup_ai.png" alt="Makeup" class="ai-mode-logo-xs"> Makeup' : '<img src="/static/images/sas-logo.png" alt="K-Beauty" class="ai-mode-logo-xs"> K-Beauty'} mode`);
+    }
+  });
+}
+// ── HELPERS
+window.confirmDelete = function() {
+  if (confirm('Delete this conversation? This cannot be undone.')) document.getElementById('deleteForm').submit();
+};
+function appendBubble(role, text, imgSrc=null, ts=null) {
+  const row = document.createElement('div');
+  row.className = `msg-row ${role}`;
+  const icon = role === 'assistant'
+    ? (CURR_MODE==='doctor'
+        ? '<img src="/static/images/doctor_ai.png" alt="Dr" class="ai-mode-logo-xs">'
+        : CURR_MODE==='makeup'
+          ? '<img src="/static/images/makeup_ai.png" alt="Makeup" class="ai-mode-logo-xs">'
+          : '<img src="/static/images/sas-logo.png" alt="K-Beauty" class="ai-mode-logo-xs">')
+    : '<span style="font-size:.9rem;">👤</span>';
+  const timeStr = ts || new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const disclaimer = role==='assistant'
+    ? `<div class="msg-disclaimer"><i class="bi bi-info-circle"></i> Informational only. Consult a certified dermatologist.</div>`
+    : '';
+  const imgHtml = imgSrc ? `<img src="${imgSrc}" alt="Photo" class="msg-photo">` : '';
+  const tick = role==='user' ? `<i class="bi bi-check2-all" style="color:var(--chat-accent,#0d9488);font-size:.6rem;"></i>` : '';
+  row.innerHTML = `
+    <div class="msg-avatar">${icon}</div>
+    <div class="msg-bubble-wrap">
+      <div class="msg-bubble">
+        ${imgHtml}
+        <div class="msg-content">${renderMarkdown(text)}</div>
+        ${disclaimer}
+      </div>
+      <div class="msg-meta">
+        <i class="bi bi-clock" style="font-size:.6rem;"></i> ${timeStr} ${tick}
+      </div>
+    </div>`;
+  chatMessages.appendChild(row);
+  scrollBottom();
+  return row;
+}
+function appendTyping() {
+  const id = 'typ-'+Date.now();
+  const row = document.createElement('div');
+  row.id = id; row.className = 'typing-row';
+  const icon = CURR_MODE==='doctor'
+    ? '<img src="/static/images/doctor_ai.png" alt="Dr" class="ai-mode-logo-xs">'
+    : CURR_MODE==='makeup'
+      ? '<img src="/static/images/makeup_ai.png" alt="Makeup" class="ai-mode-logo-xs">'
+      : '<img src="/static/images/sas-logo.png" alt="K-Beauty" class="ai-mode-logo-xs">';
+  row.innerHTML = `<div class="msg-avatar">${icon}</div><div class="typing-bubble"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+  chatMessages.appendChild(row);
+  scrollBottom();
+  return id;
+}
+function removeTyping(id) { document.getElementById(id)?.remove(); }
+function appendProductRow(products) {
+  const row = document.createElement('div');
+  row.className = 'msg-row assistant';
+  const icon = CURR_MODE==='doctor'
+    ? '<img src="/static/images/doctor_ai.png" alt="Dr" class="ai-mode-logo-xs">'
+    : CURR_MODE==='makeup'
+      ? '<img src="/static/images/makeup_ai.png" alt="Makeup" class="ai-mode-logo-xs">'
+      : '<img src="/static/images/sas-logo.png" alt="K-Beauty" class="ai-mode-logo-xs">';
+  const cards = products.map(p => {
+    const imgHtml = p.image_url
+      ? `<img class="prod-card-img" src="${p.image_url}" alt="${p.name}">`
+      : `<div class="prod-card-placeholder">${CURR_MODE==='makeup'?'💄':'🌿'}</div>`;
+    return `<div class="prod-card" onclick="window.open('/products/${p.sku||''}', '_blank')" style="cursor:pointer;">
+      ${imgHtml}
+      <div class="prod-card-body">
+        <div class="prod-card-name">${p.name}</div>
+        <div class="prod-card-brand">${p.brand||'SAS Global'}</div>
+        <div class="prod-card-sku">${p.sku}</div>
+      </div>
+    </div>`;
+  }).join('');
+  row.innerHTML = `<div class="msg-avatar">${icon}</div><div class="msg-bubble-wrap"><div class="msg-bubble" style="max-width:100%;"><div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.55rem;"><i class="bi bi-box-seam"></i> Recommended Products</div><div class="product-scroll-row">${cards}</div></div></div>`;
+  chatMessages.appendChild(row);
+  scrollBottom();
+}
+function appendSysMsg(text) {
+  const el = document.createElement('div');
+  el.style.cssText = 'text-align:center;font-size:.72rem;color:var(--muted);padding:.4rem;';
+  el.textContent = text;
+  chatMessages.appendChild(el);
+  scrollBottom();
+}
+function removeWelcome() { document.getElementById('chatWelcome')?.remove(); }
+function setInputDisabled(val) { msgInput.disabled=val; sendBtn.disabled=val; if(photoBtn) photoBtn.disabled=val; }
+function scrollBottom() { requestAnimationFrame(()=>{ chatMessages.scrollTop=chatMessages.scrollHeight; }); }
+}); // end DOMContentLoaded
+function renderMarkdown(text) {
+  if (!text) return '';
+  // Bold and italic
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+  // Headings
+  text = text.replace(/^###\s+(.+)$/gm, '<h5 style="margin:.5rem 0 .2rem;font-size:.95rem;">$1</h5>');
+  text = text.replace(/^##\s+(.+)$/gm,  '<h4 style="margin:.5rem 0 .2rem;font-size:1rem;">$1</h4>');
+  text = text.replace(/^#\s+(.+)$/gm,   '<h3 style="margin:.5rem 0 .25rem;font-size:1.05rem;">$1</h3>');
+  // Process lists line-by-line to properly wrap consecutive items in ul/ol
+  const lines = text.split('\n');
+  const out = [];
+  let inUl = false;
+  let inOl = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const ulMatch = line.match(/^[\-\*\u2022]\s+(.+)$/);
+    const olMatch = line.match(/^\d+[\.\)]\s+(.+)$/);
+    if (ulMatch) {
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (!inUl) { out.push('<ul style="margin:.4rem 0 .4rem 1.1rem;padding:0;list-style:disc;">'); inUl = true; }
+      out.push('<li style="margin-bottom:.18rem;">' + ulMatch[1] + '</li>');
+    } else if (olMatch) {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (!inOl) { out.push('<ol style="margin:.4rem 0 .4rem 1.1rem;padding:0;">'); inOl = true; }
+      out.push('<li style="margin-bottom:.18rem;">' + olMatch[1] + '</li>');
+    } else {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      out.push(line);
+    }
+  }
+  if (inUl) out.push('</ul>');
+  if (inOl) out.push('</ol>');
+  // Rejoin: suppress <br> immediately before/after block-level tags
+  text = out.join('\n');
+  text = text.replace(/\n(<\/?(?:ul|ol|li|h[1-6]))/g, '$1');
+  text = text.replace(/(<\/(?:ul|ol|li|h[1-6])>)\n/g, '$1');
+  text = text.replace(/\n/g, '<br>');
+  return text;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Payment — Lumina Shop{% endblock %}
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:14px;}
+.py-wrap{max-width:900px;margin:0 auto;padding:0 1rem 3rem;}
+.py-head{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;color:#fff;display:flex;align-items:center;justify-content:space-between;}
+.py-head h1{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:#fff;margin:0;}
+.ck-steps{display:flex;gap:0;background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:100px;padding:4px;width:fit-content;margin-bottom:1.5rem;}
+.ck-step{padding:.4rem 1.1rem;border-radius:100px;font-size:.78rem;font-weight:700;color:var(--muted,#64748b);display:flex;align-items:center;gap:.35rem;}
+.ck-step.active{background:var(--teal);color:#fff;}
+.ck-step.done{color:var(--teal);}
+.py-grid{display:grid;grid-template-columns:1fr 340px;gap:1.25rem;}
+@media(max-width:720px){.py-grid{grid-template-columns:1fr;}}
+.py-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;}
+.py-card h3{font-size:.95rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;}
+/* Payment method options */
+.pay-option{display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;border:2px solid var(--border,#e2e8f0);border-radius:12px;cursor:pointer;transition:all .15s;margin-bottom:.6rem;position:relative;}
+.pay-option:has(input:checked){border-color:var(--teal);background:rgba(13,148,136,.04);}
+.pay-option input[type=radio]{accent-color:var(--teal);width:18px;height:18px;flex-shrink:0;}
+.pay-option-icon{font-size:1.6rem;flex-shrink:0;}
+.pay-option-body .title{font-size:.9rem;font-weight:700;color:var(--text,#0f172a);}
+.pay-option-body .sub{font-size:.72rem;color:var(--muted,#64748b);margin-top:.15rem;}
+.pay-option-badge{position:absolute;right:.85rem;top:50%;transform:translateY(-50%);padding:.2rem .6rem;border-radius:20px;font-size:.62rem;font-weight:700;text-transform:uppercase;}
+.badge-recommended{background:#dcfce7;color:#166534;}
+.badge-instant{background:#dbeafe;color:#1e40af;}
+/* COD info box */
+.cod-infobox{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:1rem 1.1rem;margin-top:1rem;display:none;}
+.cod-infobox.show{display:block;}
+.cod-infobox ul{padding-left:1.1rem;margin:0;}
+.cod-infobox ul li{font-size:.78rem;color:#166534;padding:.15rem 0;}
+/* Address recap */
+.addr-recap{background:var(--surface-alt,#f5f3f0);border-radius:10px;padding:.85rem;margin-bottom:.85rem;}
+.addr-recap .label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.3rem;}
+.addr-recap .value{font-size:.82rem;color:var(--text,#0f172a);line-height:1.6;}
+/* Summary */
+.ck-summary-item{display:flex;gap:.65rem;padding:.55rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.ck-summary-item:last-child{border-bottom:none;}
+.ck-price-row{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted,#64748b);padding:.28rem 0;}
+.ck-price-row.total{font-size:1rem;font-weight:800;color:var(--text,#0f172a);border-top:2px solid var(--border,#e2e8f0);margin-top:.35rem;padding-top:.65rem;}
+.py-confirm-btn{width:100%;padding:.9rem;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:.85rem;transition:background .15s;}
+.py-confirm-btn:hover{background:#0f766e;}
+.security-row{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:.75rem;}
+.security-badge{font-size:.65rem;color:var(--muted,#64748b);display:flex;align-items:center;gap:.25rem;}
+[data-theme="dark"] .py-card,.py-card,[data-theme="dark"] .addr-recap{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .addr-recap{background:#1a1a28;}
+[data-theme="dark"] .pay-option{border-color:rgba(255,255,255,.08);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="py-wrap">
+  <div class="py-head">
+    <h1><i class="bi bi-credit-card" style="color:var(--teal);margin-right:.5rem;"></i>Payment</h1>
+    <span style="font-size:.78rem;color:rgba(255,255,255,.5);"><i class="bi bi-lock-fill" style="color:#0d9488;"></i> Secured by SSL</span>
+  </div>
+
+  <!-- Steps -->
+  <div class="ck-steps">
+    <div class="ck-step done"><i class="bi bi-check-circle-fill"></i> Address</div>
+    <div class="ck-step active"><i class="bi bi-credit-card-fill"></i> Payment</div>
+    <div class="ck-step"><i class="bi bi-check-circle"></i> Confirm</div>
+  </div>
+
+  <form method="post" id="payForm">
+    {% csrf_token %}
+    <div class="py-grid">
+      <!-- LEFT -->
+      <div>
+        <!-- Address recap -->
+        <div class="py-card">
+          <h3><i class="bi bi-house-fill" style="color:var(--teal);"></i> Delivering To</h3>
+          <div class="addr-recap">
+            <div class="label">Delivery Address</div>
+            <div class="value">
+              <strong>{{ cd.full_name }}</strong> · {{ cd.phone }}<br>
+              {{ cd.address_line1 }}{% if cd.address_line2 %}, {{ cd.address_line2 }}{% endif %}<br>
+              {{ cd.city }}, {{ cd.state }} — {{ cd.pincode }}
+            </div>
+          </div>
+          <a href="{% url 'orders:checkout' %}" style="font-size:.75rem;color:var(--teal);font-weight:600;text-decoration:none;">
+            <i class="bi bi-pencil"></i> Change Address
+          </a>
+        </div>
+
+        <!-- Payment methods -->
+        <div class="py-card">
+          <h3><i class="bi bi-wallet2" style="color:var(--gold);"></i> Choose Payment Method</h3>
+
+          <label class="pay-option">
+            <input type="radio" name="payment_method" value="cod" checked onchange="toggleCodInfo(this)">
+            <div class="pay-option-icon">💵</div>
+            <div class="pay-option-body">
+              <div class="title">Cash on Delivery</div>
+              <div class="sub">Pay in cash when your order arrives at your door</div>
+            </div>
+            <span class="pay-option-badge badge-recommended">Recommended</span>
+          </label>
+
+          <label class="pay-option">
+            <input type="radio" name="payment_method" value="upi" onchange="toggleCodInfo(this)">
+            <div class="pay-option-icon">📱</div>
+            <div class="pay-option-body">
+              <div class="title">UPI</div>
+              <div class="sub">GPay, PhonePe, Paytm, BHIM UPI</div>
+            </div>
+            <span class="pay-option-badge badge-instant">Instant</span>
+          </label>
+
+          <label class="pay-option">
+            <input type="radio" name="payment_method" value="card" onchange="toggleCodInfo(this)">
+            <div class="pay-option-icon">💳</div>
+            <div class="pay-option-body">
+              <div class="title">Credit / Debit Card</div>
+              <div class="sub">Visa, Mastercard, RuPay — all cards accepted</div>
+            </div>
+          </label>
+
+          <label class="pay-option">
+            <input type="radio" name="payment_method" value="netbanking" onchange="toggleCodInfo(this)">
+            <div class="pay-option-icon">🏦</div>
+            <div class="pay-option-body">
+              <div class="title">Net Banking</div>
+              <div class="sub">All major Indian banks supported</div>
+            </div>
+          </label>
+
+          <!-- COD info box -->
+          <div class="cod-infobox show" id="codInfo">
+            <div style="font-weight:700;color:#166534;font-size:.82rem;margin-bottom:.4rem;">💵 How Cash on Delivery Works</div>
+            <ul>
+              <li>Your order will be packed and dispatched.</li>
+              <li>Pay the delivery executive in cash when they arrive.</li>
+              <li>Exact amount preferred — change may not be available.</li>
+              <li>Available on orders up to ₹10,000.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Order summary -->
+      <div>
+        <div class="py-card" style="position:sticky;top:70px;">
+          <h3><i class="bi bi-receipt" style="color:var(--gold);"></i> Order Summary</h3>
+          {% for item in items %}
+          <div class="ck-summary-item">
+            <div style="width:46px;height:46px;border-radius:8px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#fdf2f8,#fce7f3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+              {% if item.product.image_url %}
+              <img src="{{ item.product.image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentNode.innerHTML='{% if item.product.product_range == "makeup" %}💄{% else %}🌿{% endif %}'">
+              {% else %}{% if item.product.product_range == 'makeup' %}💄{% else %}🌿{% endif %}{% endif %}
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.8rem;font-weight:700;color:var(--text,#0f172a);line-height:1.3;">{{ item.product.name }}</div>
+              {% if item.shade %}<div style="font-size:.67rem;color:var(--teal);">{{ item.shade }}</div>{% endif %}
+              <div style="font-size:.7rem;color:var(--muted,#64748b);">Qty: {{ item.qty }}</div>
+            </div>
+            <div style="font-size:.85rem;font-weight:800;color:var(--teal);">₹{{ item.subtotal }}</div>
+          </div>
+          {% endfor %}
+          <div style="margin-top:.4rem;">
+            <div class="ck-price-row"><span>Subtotal</span><span>₹{{ subtotal }}</span></div>
+            <div class="ck-price-row"><span>Delivery</span><span>{% if delivery == 0 %}<span style="color:#16a34a;font-weight:700;">FREE</span>{% else %}₹{{ delivery }}{% endif %}</span></div>
+            <div class="ck-price-row total"><span>Total</span><span style="color:var(--teal);">₹{{ total }}</span></div>
+          </div>
+
+          <button type="submit" class="py-confirm-btn" id="confirmBtn">
+            <i class="bi bi-shield-check"></i> Place Order — ₹{{ total }}
+          </button>
+
+          <div class="security-row">
+            <span class="security-badge"><i class="bi bi-shield-lock-fill" style="color:#16a34a;"></i> 100% Secure</span>
+            <span class="security-badge"><i class="bi bi-arrow-counterclockwise" style="color:#f59e0b;"></i> 7-Day Returns</span>
+            <span class="security-badge"><i class="bi bi-truck" style="color:var(--teal);"></i> Fast Shipping</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleCodInfo(radio) {
+  document.getElementById('codInfo').classList.toggle('show', radio.value === 'cod');
+}
+document.getElementById('payForm').addEventListener('submit', function() {
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Placing Order…';
+});
+</script>
+{% endblock %}

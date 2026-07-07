@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}Employee Portal — Lumina{% endblock %}
+{% block page_title %}Employee Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.emp-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.emp-stat-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:1.1rem; text-align:center; box-shadow:0 1px 6px rgba(0,0,0,.05);
+}
+.emp-stat-card .sv { font-size:2rem; font-weight:700; color:#0d9488; font-family:'Cormorant Garamond',serif; }
+.emp-stat-card .sl { font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:600; }
+.emp-section-title { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:.75rem; margin-top:1.25rem; }
+.emp-product-row {
+  display:flex; align-items:center; gap:.85rem; padding:.7rem .85rem;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  margin-bottom:.5rem; transition:box-shadow .12s;
+}
+.emp-product-row:hover { box-shadow:0 3px 12px rgba(0,0,0,.08); }
+.emp-product-img {
+  width:44px; height:44px; border-radius:8px; object-fit:cover;
+  background:#f1f5f9; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+}
+.emp-product-name { font-weight:600; font-size:.875rem; color:var(--text); }
+.emp-product-sku  { font-size:.72rem; color:var(--muted); }
+.emp-product-price { margin-left:auto; font-weight:700; color:#0d9488; font-size:.9rem; white-space:nowrap; }
+.emp-quick-btn {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.55rem 1.1rem; border-radius:20px; font-size:.8rem; font-weight:600;
+  border:none; cursor:pointer; text-decoration:none; transition:background .12s;
+}
+.emp-btn-teal { background:#0d9488; color:#fff; }
+.emp-btn-teal:hover { background:#0f766e; color:#fff; }
+.emp-btn-gold { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+.emp-btn-gold:hover { background:#fde68a; }
+.emp-btn-purple { background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
+.emp-btn-purple:hover { background:#c4b5fd; }
+.emp-action-row { display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+/* Req/Order mini cards */
+.emp-req-row{display:flex;align-items:center;gap:.75rem;padding:.6rem .85rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:.4rem;text-decoration:none;color:var(--text);transition:box-shadow .12s;}
+.emp-req-row:hover{box-shadow:0 2px 10px rgba(0,0,0,.07);color:var(--text);}
+.sp{padding:.2rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;}
+.sp-pending{background:rgba(245,158,11,.15);color:#92400e;}
+.sp-accepted{background:#dbeafe;color:#1e40af;}
+.sp-processing{background:#ede9fe;color:#5b21b6;}
+.sp-dispatched{background:#fce7f3;color:#9d174d;}
+.sp-delivered{background:#dcfce7;color:#166534;}
+.sp-confirmed{background:#dbeafe;color:#1e40af;}
+.sp-packed{background:#fef9c3;color:#854d0e;}
+.sp-shipped,.sp-out_for_delivery{background:#fce7f3;color:#9d174d;}
+.sp-rejected,.sp-cancelled{background:#fee2e2;color:#991b1b;}
+.pp{padding:.15rem .5rem;border-radius:20px;font-size:.63rem;font-weight:700;}
+.pp-urgent{background:#fee2e2;color:#991b1b;}
+.pp-high{background:#ffedd5;color:#c2410c;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="emp-action-row">
+  <a href="{% url 'employee:product_list' %}" class="emp-quick-btn emp-btn-teal">
+    <i class="bi bi-box-seam"></i> Products
+  </a>
+  <a href="{% url 'employee:order_list' %}" class="emp-quick-btn emp-btn-teal">
+    <i class="bi bi-bag-check"></i> Orders
+  </a>
+  <a href="{% url 'employee:requirement_list' %}" class="emp-quick-btn emp-btn-purple">
+    <i class="bi bi-clipboard-heart"></i> Requirements
+  </a>
+  <a href="{% url 'employee:employee_list' %}" class="emp-quick-btn" style="background:#f1f5f9;color:var(--text);border:1px solid var(--border);">
+    <i class="bi bi-people"></i> Team
+  </a>
+  <a href="{% url 'employee:export_products' %}" class="emp-quick-btn emp-btn-gold">
+    <i class="bi bi-download"></i> Export CSV
+  </a>
+  <a href="{% url 'admin:index' %}" class="emp-quick-btn" style="background:#f1f5f9;color:var(--text);border:1px solid var(--border);">
+    <i class="bi bi-shield-lock"></i> Django Admin
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="emp-stat-grid">
+  <div class="emp-stat-card">
+    <div class="sv">{{ total_products }}</div>
+    <div class="sl">Total Products</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv">{{ total_orders }}</div>
+    <div class="sl">Total Orders</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv" style="color:#f59e0b;">{{ pending_orders }}</div>
+    <div class="sl">Active Orders</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv" style="color:#10b981;">{{ delivered_orders }}</div>
+    <div class="sl">Delivered</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv" style="color:#8b5cf6;">{{ total_reqs }}</div>
+    <div class="sl">Requirements</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv" style="color:#f59e0b;">{{ pending_reqs }}</div>
+    <div class="sl">Pending Reqs</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv">{{ total_korean }}</div>
+    <div class="sl">K-Beauty</div>
+  </div>
+  <div class="emp-stat-card">
+    <div class="sv">{{ total_makeup }}</div>
+    <div class="sl">Makeup</div>
+  </div>
+</div>
+
+<!-- Recent Requirements -->
+{% if recent_reqs %}
+<div class="emp-section-title">📋 Recent Requirements</div>
+{% for req in recent_reqs %}
+<a href="{% url 'employee:requirement_detail' req_id=req.req_id %}" class="emp-req-row">
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:.85rem;font-weight:700;color:var(--text);">{{ req.title|truncatechars:50 }}</div>
+    <div style="font-size:.7rem;color:var(--muted);">{{ req.user.username }} · {{ req.created_at|date:"d M Y" }}</div>
+  </div>
+  <span class="pp {% if req.priority == 'urgent' %}pp-urgent{% elif req.priority == 'high' %}pp-high{% endif %}">
+    {% if req.priority in 'urgent,high' %}{{ req.get_priority_display }}{% endif %}
+  </span>
+  <span class="sp sp-{{ req.status }}">{{ req.get_status_display }}</span>
+  <i class="bi bi-chevron-right" style="color:var(--muted);font-size:.8rem;"></i>
+</a>
+{% endfor %}
+<a href="{% url 'employee:requirement_list' %}" style="display:block;text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">View all requirements <i class="bi bi-arrow-right"></i></a>
+{% endif %}
+
+<!-- Recent Orders -->
+{% if recent_orders %}
+<div class="emp-section-title">🛍️ Recent Orders</div>
+{% for order in recent_orders %}
+<a href="{% url 'employee:order_detail' order_id=order.order_id %}" class="emp-req-row">
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:.82rem;font-weight:700;color:var(--text);font-family:monospace;">{{ order.order_id }}</div>
+    <div style="font-size:.7rem;color:var(--muted);">{{ order.full_name }} · {{ order.items.count }} item{{ order.items.count|pluralize }}</div>
+  </div>
+  <div style="font-size:.88rem;font-weight:800;color:#0d9488;white-space:nowrap;">₹{{ order.total }}</div>
+  <span class="sp sp-{{ order.status }}">{{ order.get_status_display }}</span>
+  <i class="bi bi-chevron-right" style="color:var(--muted);font-size:.8rem;"></i>
+</a>
+{% endfor %}
+<a href="{% url 'employee:order_list' %}" style="display:block;text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">View all orders <i class="bi bi-arrow-right"></i></a>
+{% endif %}
+
+<!-- Recent Products -->
+<div class="emp-section-title">📦 Recent Products</div>
+{% for p in recent_products %}
+<div class="emp-product-row">
+  <div class="emp-product-img">
+    {% if p.image_url %}<img src="{{ p.image_url }}" alt="{{ p.name }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;">{% else %}🌿{% endif %}
+  </div>
+  <div>
+    <div class="emp-product-name">{{ p.name }}</div>
+    <div class="emp-product-sku">{{ p.brand }} · {{ p.sku }} · {{ p.get_category_display }}</div>
+  </div>
+  <div class="emp-product-price">{% if p.price %}₹{{ p.price }}{% else %}—{% endif %}</div>
+  <a href="{% url 'employee:product_detail' pk=p.pk %}" class="emp-quick-btn emp-btn-teal" style="padding:.3rem .75rem;font-size:.72rem;">View</a>
+</div>
+{% endfor %}
+{% endblock %}

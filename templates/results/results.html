@@ -1,0 +1,1182 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Skin Analysis Result — Lumina{% endblock %}
+{% block page_title %}Skin Analysis Result{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   LUMINA — Skin Analysis Results · Dashboard UI v4.0
+   Inspired by SkinSight — Multi-column · Donut charts · Step flow
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --r-purple:   #7c3aed;
+  --r-purple2:  #8b5cf6;
+  --r-purple3:  #a78bfa;
+  --r-teal:     #0d9488;
+  --r-pink:     #ec4899;
+  --r-blue:     #3b82f6;
+  --r-green:    #22c55e;
+  --r-amber:    #f59e0b;
+  --r-red:      #ef4444;
+  --r-orange:   #f97316;
+  --r-bg:       #f4f5fa;
+  --r-surf:     #ffffff;
+  --r-surf2:    #f8f9fc;
+  --r-border:   #e5e7f0;
+  --r-text:     #1a1d2e;
+  --r-muted:    #6b7280;
+  --r-light:    #9ca3af;
+  --r-shadow:   0 2px 12px rgba(0,0,0,.07);
+  --r-shadow2:  0 4px 24px rgba(0,0,0,.10);
+  --r-radius:   16px;
+  --r-radius-sm:12px;
+  --r-pill:     100px;
+  --r-head:     'Cormorant Garamond', Georgia, serif;
+  --r-body:     'Inter', system-ui, sans-serif;
+}
+[data-theme="dark"] {
+  --r-bg:     #0d0f1a;
+  --r-surf:   #161927;
+  --r-surf2:  #1d2035;
+  --r-border: rgba(255,255,255,.08);
+  --r-text:   rgba(255,255,255,.9);
+  --r-muted:  rgba(255,255,255,.45);
+  --r-light:  rgba(255,255,255,.25);
+}
+
+/* Shell */
+.res-shell { font-family: var(--r-body); padding-bottom: 3rem; }
+
+/* Back bar */
+.res-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem;
+}
+.res-back-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 600; color: var(--r-muted);
+  background: var(--r-surf); border: 1.5px solid var(--r-border);
+  border-radius: var(--r-pill); padding: .38rem 1rem;
+  text-decoration: none; transition: all .15s; box-shadow: var(--r-shadow);
+}
+.res-back-btn:hover { color: var(--r-purple); border-color: var(--r-purple); }
+.res-scan-id { font-size: .68rem; color: var(--r-light); font-family: monospace; }
+.res-share-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 600; color: #fff;
+  background: var(--r-purple); border: none;
+  border-radius: var(--r-pill); padding: .38rem 1rem;
+  text-decoration: none; cursor: pointer; transition: all .15s;
+}
+.res-share-btn:hover { background: #6d28d9; color: #fff; }
+</style>
+
+<style>
+/* ══════════════════════════════
+   HERO — TWO-COLUMN SPLIT
+   ══════════════════════════════ */
+.res-hero {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  align-items: start;
+}
+
+/* Left: photo card */
+.res-photo-card {
+  background: var(--r-surf);
+  border-radius: var(--r-radius);
+  border: 1px solid var(--r-border);
+  box-shadow: var(--r-shadow);
+  overflow: hidden;
+}
+.res-photo-wrap {
+  position: relative;
+  height: 260px;
+  background: linear-gradient(135deg,#e8eaf6,#f3f0ff);
+  display: flex; align-items: center; justify-content: center;
+}
+.res-photo-wrap img {
+  width: 100%; height: 260px;
+  object-fit: cover; object-position: center top;
+  display: block;
+}
+.res-photo-placeholder {
+  font-size: 4rem; text-align: center; color: var(--r-purple3);
+}
+.res-photo-placeholder small { display: block; font-size: .75rem; color: var(--r-muted); margin-top: .35rem; font-family: var(--r-body); }
+.res-gender-badge {
+  position: absolute; top: 10px; left: 10px;
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .22rem .65rem; border-radius: var(--r-pill);
+  font-size: .63rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .06em; backdrop-filter: blur(8px);
+}
+.res-gender-badge.male   { background: rgba(59,130,246,.9);  color: #fff; }
+.res-gender-badge.female { background: rgba(236,72,153,.9);  color: #fff; }
+.res-gender-badge.other  { background: rgba(124,58,237,.9);  color: #fff; }
+.res-photo-meta {
+  padding: .85rem 1rem;
+  display: flex; gap: .4rem; flex-wrap: wrap; border-top: 1px solid var(--r-border);
+}
+.res-tag {
+  padding: .2rem .65rem; border-radius: var(--r-pill);
+  font-size: .68rem; font-weight: 700;
+}
+.res-tag-purple { background: rgba(124,58,237,.1); color: var(--r-purple); }
+.res-tag-teal   { background: rgba(13,148,136,.1);  color: var(--r-teal); }
+.res-tag-pink   { background: rgba(236,72,153,.1);  color: var(--r-pink); }
+.res-tag-amber  { background: rgba(245,158,11,.1);  color: #d97706; }
+.res-tag-blue   { background: rgba(59,130,246,.1);  color: var(--r-blue); }
+
+/* Right: overall score + 4 mini metrics */
+.res-scores-panel {
+  background: var(--r-surf);
+  border-radius: var(--r-radius);
+  border: 1px solid var(--r-border);
+  box-shadow: var(--r-shadow);
+  padding: 1.5rem 1.75rem;
+}
+.res-scores-top {
+  display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem;
+}
+.res-overall-wrap { text-align: center; }
+.res-overall-label {
+  font-size: .62rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--r-muted); margin-bottom: .5rem;
+}
+.res-big-ring-wrap { position: relative; width: 120px; height: 120px; margin: 0 auto .65rem; }
+.res-big-ring-svg  { width: 120px; height: 120px; transform: rotate(-90deg); }
+.res-big-ring-bg   { fill: none; stroke: #eef0f8; stroke-width: 10; }
+.res-big-ring-fg   { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1); }
+.res-big-ring-num  {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--r-head); font-size: 2.1rem; font-weight: 700;
+  color: var(--r-text); line-height: 1;
+}
+.res-big-ring-num small { font-size: .6rem; font-weight: 400; color: var(--r-muted); font-family: var(--r-body); }
+.res-overall-grade {
+  font-size: .75rem; color: var(--r-muted);
+  font-weight: 600; text-align: center;
+}
+
+.res-summary-info { flex: 1; }
+.res-summary-info h2 {
+  font-family: var(--r-head); font-size: 1.6rem;
+  color: var(--r-text); margin-bottom: .35rem; font-weight: 700;
+}
+.res-summary-info p { font-size: .85rem; color: var(--r-muted); line-height: 1.6; margin-bottom: 0; }
+.res-skin-props { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; }
+[data-theme="dark"] .res-big-ring-bg { stroke: rgba(255,255,255,.08); }
+[data-theme="dark"] .res-photo-wrap  { background: linear-gradient(135deg,#1d2035,#2a1f4a); }
+</style>
+
+<style>
+/* ══════════════════════════════
+   SKIN METRICS GRID — 5 Donuts
+   ══════════════════════════════ */
+.res-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.res-metric-card {
+  background: var(--r-surf);
+  border-radius: var(--r-radius-sm);
+  border: 1px solid var(--r-border);
+  padding: 1.1rem .85rem;
+  text-align: center;
+  box-shadow: var(--r-shadow);
+  transition: transform .15s, box-shadow .15s;
+}
+.res-metric-card:hover { transform: translateY(-3px); box-shadow: var(--r-shadow2); }
+.res-donut-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto .65rem; }
+.res-donut-svg  { width: 80px; height: 80px; transform: rotate(-90deg); }
+.res-donut-bg   { fill: none; stroke-width: 8; }
+.res-donut-fg   { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1); }
+.res-donut-num  {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 1.15rem; font-weight: 800;
+  line-height: 1; color: var(--r-text);
+}
+.res-donut-num small { font-size: .5rem; color: var(--r-muted); font-weight: 500; }
+.res-metric-name { font-size: .78rem; font-weight: 700; color: var(--r-text); margin-bottom: .2rem; }
+.res-metric-level {
+  font-size: .63rem; font-weight: 700; padding: .15rem .55rem;
+  border-radius: var(--r-pill); text-transform: uppercase; letter-spacing: .04em;
+  display: inline-block;
+}
+.ml-high { background: rgba(239,68,68,.1); color: #dc2626; }
+.ml-med  { background: rgba(245,158,11,.1); color: #d97706; }
+.ml-low  { background: rgba(34,197,94,.1);  color: #16a34a; }
+[data-theme="dark"] .res-donut-bg { stroke: rgba(255,255,255,.08); }
+</style>
+
+<style>
+/* ══════════════════════════════
+   MAIN CONTENT — 2/3 + 1/3
+   ══════════════════════════════ */
+.res-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* Section card */
+.res-card {
+  background: var(--r-surf);
+  border-radius: var(--r-radius);
+  border: 1px solid var(--r-border);
+  box-shadow: var(--r-shadow);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.res-card:last-child { margin-bottom: 0; }
+.res-card-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem .5rem;
+  border-bottom: 1px solid var(--r-border);
+}
+.res-card-title { font-size: .95rem; font-weight: 800; color: var(--r-text); }
+.res-card-sub   { font-size: .72rem; color: var(--r-muted); margin-top: .08rem; }
+.res-card-badge {
+  font-size: .63rem; font-weight: 700; padding: .2rem .65rem;
+  border-radius: var(--r-pill); background: rgba(124,58,237,.1); color: var(--r-purple);
+}
+
+/* ── TAB STRIP ── */
+.res-tabs {
+  display: flex; gap: .3rem;
+  padding: .85rem 1.25rem .3rem;
+  border-bottom: 1.5px solid var(--r-border);
+  overflow-x: auto; scrollbar-width: none;
+}
+.res-tabs::-webkit-scrollbar { display: none; }
+.res-tab {
+  padding: .45rem 1rem; border-radius: var(--r-pill);
+  font-size: .78rem; font-weight: 600; border: none;
+  background: transparent; color: var(--r-muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+  font-family: var(--r-body);
+}
+.res-tab.active  { background: var(--r-purple); color: #fff; }
+.res-tab:hover:not(.active) { background: rgba(124,58,237,.08); color: var(--r-purple); }
+.res-panel { display: none; padding: .75rem 0 0; }
+.res-panel.active { display: block; }
+
+/* ── CONCERN ROWS ── */
+.res-concern-row {
+  display: flex; align-items: center; gap: .9rem;
+  padding: .85rem 1.25rem;
+  border-top: 1px solid var(--r-border);
+  cursor: pointer; transition: background .12s;
+}
+.res-concern-row:hover { background: var(--r-surf2); }
+.res-concern-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+}
+.res-concern-body { flex: 1; min-width: 0; }
+.res-concern-name { font-size: .88rem; font-weight: 700; color: var(--r-text); margin-bottom: .06rem; }
+.res-concern-desc { font-size: .71rem; color: var(--r-muted); line-height: 1.45; }
+.res-sev {
+  font-size: .63rem; font-weight: 800; padding: .18rem .6rem;
+  border-radius: var(--r-pill); text-transform: uppercase; flex-shrink: 0;
+}
+.rsev-mild     { background: rgba(245,158,11,.1); color: #d97706; }
+.rsev-moderate { background: rgba(249,115,22,.1); color: #ea580c; }
+.rsev-severe   { background: rgba(239,68,68,.1);  color: #dc2626; }
+.rsev-none     { background: rgba(34,197,94,.1);  color: #16a34a; }
+.res-concern-chevron { font-size: .72rem; color: var(--r-light); transition: transform .2s; }
+.res-concern-chevron.open { transform: rotate(90deg); }
+
+/* Expand panel */
+.res-concern-expand {
+  display: none; padding: .9rem 1.25rem 1rem;
+  background: var(--r-surf2); border-top: 1px solid var(--r-border);
+}
+.res-concern-expand.open { display: block; }
+.res-exp-label {
+  font-size: .58rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--r-light); margin: .6rem 0 .3rem;
+}
+.res-exp-label:first-child { margin-top: 0; }
+.res-exp-text  { font-size: .78rem; color: var(--r-muted); line-height: 1.65; }
+.res-med-item  { display: flex; gap: .4rem; font-size: .77rem; color: var(--r-text); padding: .2rem 0; }
+.res-med-dot   { width: 5px; height: 5px; border-radius: 50%; background: var(--r-purple); margin-top: .44rem; flex-shrink: 0; }
+.res-ing-pill  {
+  display: inline-block; padding: .15rem .55rem; border-radius: var(--r-pill);
+  font-size: .67rem; font-weight: 600; margin: .1rem;
+}
+.ing-use   { background: rgba(34,197,94,.1); color: #15803d; border: 1px solid rgba(34,197,94,.2); }
+.ing-avoid { background: rgba(239,68,68,.1); color: #991b1b; border: 1px solid rgba(239,68,68,.2); }
+</style>
+
+<style>
+/* ══════════════════════════════════════════
+   SKINCARE ROUTINE FLOW — Step with Arrows
+   ══════════════════════════════════════════ */
+.res-routine-flow {
+  display: flex; align-items: stretch;
+  gap: 0; overflow-x: auto; padding: 1.25rem;
+  scrollbar-width: none;
+}
+.res-routine-flow::-webkit-scrollbar { display: none; }
+.res-step-card {
+  flex-shrink: 0; width: 145px;
+  background: var(--r-surf2);
+  border: 1.5px solid var(--r-border);
+  border-radius: var(--r-radius-sm);
+  text-align: center;
+  transition: all .15s; cursor: default;
+}
+.res-step-card:hover { border-color: var(--r-purple); box-shadow: var(--r-shadow2); transform: translateY(-2px); }
+.res-step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--r-purple); color: #fff;
+  font-size: .72rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin: .75rem auto .4rem;
+}
+.res-step-img {
+  width: 72px; height: 72px; margin: 0 auto .5rem;
+  background: linear-gradient(135deg,#f0ecff,#e8f4f8);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; overflow: hidden;
+}
+.res-step-img img { width: 72px; height: 72px; object-fit: contain; }
+.res-step-type  { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--r-purple); margin-bottom: .15rem; }
+.res-step-name  { font-size: .8rem; font-weight: 700; color: var(--r-text); padding: 0 .5rem; line-height: 1.3; margin-bottom: .12rem; }
+.res-step-brand { font-size: .65rem; color: var(--r-muted); margin-bottom: .2rem; }
+.res-step-price { font-size: .72rem; font-weight: 700; color: var(--r-text); margin-bottom: .6rem; }
+.res-step-freq  { font-size: .6rem; color: var(--r-light); padding: .2rem .5rem .7rem; }
+
+/* Arrow connector */
+.res-step-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 .2rem; color: var(--r-purple3); font-size: 1.2rem;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .res-step-img { background: linear-gradient(135deg,#1d1535,#2a1f4a); }
+[data-theme="dark"] .res-step-card { background: var(--r-surf2); }
+</style>
+
+<style>
+/* ══════════════════════════════
+   RIGHT SIDEBAR CARDS
+   ══════════════════════════════ */
+/* Health bars card */
+.res-bar-card { padding: 1.1rem 1.25rem 1.25rem; }
+.res-bar-row  { display: flex; align-items: center; gap: .75rem; margin-bottom: .6rem; }
+.res-bar-row:last-child { margin-bottom: 0; }
+.res-bar-lbl  { font-size: .75rem; font-weight: 500; color: var(--r-text); width: 90px; flex-shrink: 0; }
+.res-bar-track { flex: 1; height: 7px; background: var(--r-surf2); border-radius: var(--r-pill); overflow: hidden; border: 1px solid var(--r-border); }
+.res-bar-fill  { height: 100%; border-radius: var(--r-pill); transition: width 1.3s cubic-bezier(.4,0,.2,1); width: 0; }
+.res-bar-val   { font-size: .72rem; font-weight: 700; color: var(--r-text); width: 26px; text-align: right; }
+[data-theme="dark"] .res-bar-track { background: rgba(255,255,255,.06); }
+
+/* Tips */
+.res-tips-card { padding: 1rem 1.25rem; }
+.res-tip-item  {
+  display: flex; align-items: center; gap: .55rem;
+  font-size: .78rem; color: var(--r-muted); padding: .35rem 0;
+  border-bottom: 1px solid var(--r-border);
+}
+.res-tip-item:last-child { border-bottom: none; }
+.res-tip-icon  { font-size: 1.1rem; flex-shrink: 0; }
+
+/* AI CTA buttons */
+.res-cta-strip { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .6rem; }
+.res-cta-btn {
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .7rem 1rem; border-radius: var(--r-radius-sm);
+  font-size: .85rem; font-weight: 700; text-decoration: none;
+  border: none; cursor: pointer; transition: all .15s; font-family: var(--r-body);
+}
+.res-cta-purple { background: var(--r-purple); color: #fff; box-shadow: 0 3px 12px rgba(124,58,237,.3); }
+.res-cta-purple:hover { background: #6d28d9; color: #fff; }
+.res-cta-teal   { background: var(--r-teal);   color: #fff; box-shadow: 0 3px 12px rgba(13,148,136,.3); }
+.res-cta-teal:hover   { background: #0f766e; color: #fff; }
+.res-cta-pink   { background: var(--r-pink);   color: #fff; box-shadow: 0 3px 12px rgba(236,72,153,.3); }
+.res-cta-pink:hover   { background: #db2777; color: #fff; }
+
+/* Disclaimer */
+.res-disclaimer { font-size: .65rem; color: var(--r-light); text-align: center; padding: .75rem 1.25rem 1rem; line-height: 1.55; }
+
+/* ── MAKEUP STEP LIST ── */
+.res-mk-step {
+  display: flex; align-items: flex-start; gap: .8rem;
+  padding: .85rem 1.25rem; border-top: 1px solid var(--r-border);
+}
+.res-mk-num  { font-size: .68rem; font-weight: 800; color: var(--r-purple); width: 22px; flex-shrink: 0; padding-top: .12rem; }
+.res-mk-icon { font-size: 1.05rem; flex-shrink: 0; margin-top: .08rem; }
+.res-mk-body { flex: 1; min-width: 0; }
+.res-mk-tag  { font-size: .57rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--r-purple); margin-bottom: .1rem; }
+.res-mk-prod { font-size: .85rem; font-weight: 700; color: var(--r-text); line-height: 1.3; margin-bottom: .04rem; }
+.res-mk-meta { font-size: .7rem; color: var(--r-muted); margin-bottom: .18rem; }
+.res-mk-note { font-size: .72rem; color: var(--r-muted); line-height: 1.5; font-style: italic; }
+.res-shade-tag {
+  display: inline-block; padding: .1rem .48rem;
+  border-radius: var(--r-pill); background: rgba(201,169,110,.1);
+  color: #92400e; border: 1px solid rgba(201,169,110,.2);
+  font-size: .62rem; font-weight: 600; margin-bottom: .12rem;
+}
+[data-theme="dark"] .res-shade-tag { color: #fde047; }
+</style>
+
+<style>
+/* ══════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ══════════════════════════════ */
+@media (max-width: 1199px) {
+  .res-hero { grid-template-columns: 280px 1fr; }
+  .res-main-grid { grid-template-columns: 1fr 320px; }
+  .res-metrics-grid { grid-template-columns: repeat(5, 1fr); gap: .75rem; }
+}
+@media (max-width: 991px) {
+  .res-hero { grid-template-columns: 1fr 1fr; }
+  .res-main-grid { grid-template-columns: 1fr; }
+  .res-metrics-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 767px) {
+  .res-hero { grid-template-columns: 1fr; }
+  .res-photo-wrap { height: 220px; }
+  .res-photo-wrap img { height: 220px; }
+  .res-scores-top { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .res-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .res-step-card { width: 130px; }
+}
+@media (max-width: 479px) {
+  .res-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% with gender=scan.gender|default:"female" %}
+<div class="res-shell">
+
+  <!-- ── TOP BAR ── -->
+  <div class="res-topbar">
+    <a href="{% url 'scanner:upload' %}" class="res-back-btn">
+      <i class="bi bi-arrow-left"></i> New Scan
+    </a>
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <span class="res-scan-id">Scan #{{ scan.id }} · {{ scan.created_at|date:"d M Y" }}</span>
+      <button class="res-share-btn" onclick="window.print()">
+        <i class="bi bi-share"></i> Share
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       HERO — PHOTO + OVERALL SCORE
+       ═══════════════════════════════════════════ -->
+  <div class="res-hero">
+
+    <!-- Left: Photo card -->
+    <div class="res-photo-card">
+      <div class="res-photo-wrap">
+        {% if gender == 'male' %}
+          <span class="res-gender-badge male"><i class="bi bi-gender-male"></i> Male</span>
+        {% elif gender == 'female' %}
+          <span class="res-gender-badge female"><i class="bi bi-gender-female"></i> Female</span>
+        {% else %}
+          <span class="res-gender-badge other"><i class="bi bi-gender-ambiguous"></i> Other</span>
+        {% endif %}
+        {% if scan.scan_image %}
+          <img src="{{ scan.scan_image.url }}" alt="Your scan">
+        {% else %}
+          <div class="res-photo-placeholder">
+            {% if gender == 'male' %}👨{% else %}👩{% endif %}
+            <small>No photo</small>
+          </div>
+        {% endif %}
+      </div>
+      <div class="res-photo-meta">
+        <span class="res-tag res-tag-purple">{{ scan.skin_type|title }} Skin</span>
+        <span class="res-tag res-tag-teal">{{ scan.undertone|title }} Undertone</span>
+        <span class="res-tag res-tag-amber">{{ scan.skin_tone|title }} Tone</span>
+        <span class="res-tag res-tag-blue">{{ scan.face_shape|title }} Face</span>
+        {% if scan.hf_acne_severity != 'none' %}
+        <span class="res-tag res-tag-pink">{{ scan.hf_acne_severity|title }} Acne</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Overall score + summary -->
+    <div class="res-scores-panel">
+      <div class="res-scores-top">
+        <div class="res-overall-wrap">
+          <div class="res-overall-label">Overall Skin Score</div>
+          <div class="res-big-ring-wrap">
+            <svg class="res-big-ring-svg" viewBox="0 0 120 120">
+              <circle class="res-big-ring-bg" cx="60" cy="60" r="50"/>
+              <circle class="res-big-ring-fg" id="mainScoreRing" cx="60" cy="60" r="50"
+                stroke="{% if scan.harmony_score > 70 %}#22c55e{% elif scan.harmony_score > 45 %}#7c3aed{% else %}#ef4444{% endif %}"
+                stroke-dasharray="314.2" stroke-dashoffset="314.2"
+                data-score="{{ scan.harmony_score }}"/>
+            </svg>
+            <div class="res-big-ring-num">{{ scan.harmony_score }}<small>/ 100</small></div>
+          </div>
+          <div class="res-overall-grade">
+            {% if scan.harmony_score > 75 %}✨ Excellent{% elif scan.harmony_score > 55 %}👍 Good{% elif scan.harmony_score > 35 %}⚠️ Fair{% else %}🔴 Needs Care{% endif %}
+          </div>
+        </div>
+        <div class="res-summary-info">
+          <h2>Skin Analysis Result — Lumina</h2>
+          <p>AI-powered analysis of your skin health. Your results are personalised based on your facial scan, skin tone, undertone, and detected concerns.</p>
+          <div class="res-skin-props">
+            <span class="res-tag res-tag-purple">Skin Age: {{ scan.skin_age }}yrs</span>
+            <span class="res-tag res-tag-teal">Real Age: {{ scan.real_age }}yrs</span>
+            <span class="res-tag res-tag-amber">{{ scan.detected_concerns.count }} concern{% if scan.detected_concerns.count != 1 %}s{% endif %} detected</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 quick score cells -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:.25rem;">
+        <div style="text-align:center;padding:.85rem .5rem;background:var(--r-surf2);border-radius:var(--r-radius-sm);border:1px solid var(--r-border);">
+          <div style="font-size:1.4rem;font-weight:800;color:{% if scan.hydration_score > 60 %}#22c55e{% elif scan.hydration_score > 35 %}#f59e0b{% else %}#ef4444{% endif %};">{{ scan.hydration_score }}</div>
+          <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--r-light);font-weight:700;">Hydration</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:var(--r-surf2);border-radius:var(--r-radius-sm);border:1px solid var(--r-border);">
+          <div style="font-size:1.4rem;font-weight:800;color:{% if scan.acne_score < 25 %}#22c55e{% elif scan.acne_score < 55 %}#f59e0b{% else %}#ef4444{% endif %};">{{ scan.acne_score }}</div>
+          <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--r-light);font-weight:700;">Acne</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:var(--r-surf2);border-radius:var(--r-radius-sm);border:1px solid var(--r-border);">
+          <div style="font-size:1.4rem;font-weight:800;color:{% if scan.elasticity_score > 60 %}#22c55e{% elif scan.elasticity_score > 40 %}#f59e0b{% else %}#ef4444{% endif %};">{{ scan.elasticity_score }}</div>
+          <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--r-light);font-weight:700;">Elasticity</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:var(--r-surf2);border-radius:var(--r-radius-sm);border:1px solid var(--r-border);">
+          <div style="font-size:1.4rem;font-weight:800;color:{% if scan.aging_score < 30 %}#22c55e{% elif scan.aging_score < 60 %}#f59e0b{% else %}#ef4444{% endif %};">{{ scan.aging_score }}</div>
+          <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--r-light);font-weight:700;">Aging</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /res-hero -->
+
+  <!-- ═══════════════════════════════════════════════
+       SKIN METRICS GRID — 5 Donut Charts
+       ═══════════════════════════════════════════════ -->
+  {% with cs=condition_cards %}
+  <div class="res-metrics-grid">
+
+    <!-- Acne -->
+    {% with pct=scan.acne_score %}
+    <div class="res-metric-card">
+      <div class="res-donut-wrap">
+        <svg class="res-donut-svg" viewBox="0 0 80 80">
+          <circle class="res-donut-bg" cx="40" cy="40" r="32" stroke="#fecaca"/>
+          <circle class="res-donut-fg" cx="40" cy="40" r="32" stroke="#ef4444"
+            stroke-dasharray="201.1" stroke-dashoffset="201.1" data-pct="{{ pct }}"/>
+        </svg>
+        <div class="res-donut-num">{{ pct }}<small>%</small></div>
+      </div>
+      <div class="res-metric-name">Acne</div>
+      <span class="res-metric-level {% if pct > 60 %}ml-high{% elif pct > 30 %}ml-med{% else %}ml-low{% endif %}">
+        {% if pct > 60 %}High{% elif pct > 30 %}Medium{% else %}Low{% endif %}
+      </span>
+    </div>
+    {% endwith %}
+
+    <!-- Pigmentation / Dark Spots -->
+    {% with pct=scan.pigmentation_score %}
+    <div class="res-metric-card">
+      <div class="res-donut-wrap">
+        <svg class="res-donut-svg" viewBox="0 0 80 80">
+          <circle class="res-donut-bg" cx="40" cy="40" r="32" stroke="#fed7aa"/>
+          <circle class="res-donut-fg" cx="40" cy="40" r="32" stroke="#f97316"
+            stroke-dasharray="201.1" stroke-dashoffset="201.1" data-pct="{{ pct }}"/>
+        </svg>
+        <div class="res-donut-num">{{ pct }}<small>%</small></div>
+      </div>
+      <div class="res-metric-name">Dark Spots</div>
+      <span class="res-metric-level {% if pct > 60 %}ml-high{% elif pct > 30 %}ml-med{% else %}ml-low{% endif %}">
+        {% if pct > 60 %}High{% elif pct > 30 %}Medium{% else %}Low{% endif %}
+      </span>
+    </div>
+    {% endwith %}
+
+    <!-- Oiliness — derived from skin_type + hydration (accurate, not proxy) -->
+    <div class="res-metric-card">
+      <div class="res-donut-wrap">
+        <svg class="res-donut-svg" viewBox="0 0 80 80">
+          <circle class="res-donut-bg" cx="40" cy="40" r="32" stroke="#bfdbfe"/>
+          <circle class="res-donut-fg" cx="40" cy="40" r="32" stroke="#3b82f6"
+            stroke-dasharray="201.1" stroke-dashoffset="201.1" data-pct="{{ oiliness_pct }}"/>
+        </svg>
+        <div class="res-donut-num">{{ oiliness_pct }}<small>%</small></div>
+      </div>
+      <div class="res-metric-name">Oily Skin</div>
+      <span class="res-metric-level {% if oiliness_pct > 65 %}ml-high{% elif oiliness_pct > 35 %}ml-med{% else %}ml-low{% endif %}">
+        {% if oiliness_pct > 65 %}High{% elif oiliness_pct > 35 %}Medium{% else %}Low{% endif %}
+      </span>
+    </div>
+
+    <!-- Large Pores — derived from acne_score + skin_type + elasticity -->
+    <div class="res-metric-card">
+      <div class="res-donut-wrap">
+        <svg class="res-donut-svg" viewBox="0 0 80 80">
+          <circle class="res-donut-bg" cx="40" cy="40" r="32" stroke="#e9d5ff"/>
+          <circle class="res-donut-fg" cx="40" cy="40" r="32" stroke="#7c3aed"
+            stroke-dasharray="201.1" stroke-dashoffset="201.1" data-pct="{{ pore_pct }}"/>
+        </svg>
+        <div class="res-donut-num">{{ pore_pct }}<small>%</small></div>
+      </div>
+      <div class="res-metric-name">Large Pores</div>
+      <span class="res-metric-level {% if pore_pct > 60 %}ml-high{% elif pore_pct > 30 %}ml-med{% else %}ml-low{% endif %}">
+        {% if pore_pct > 60 %}High{% elif pore_pct > 30 %}Medium{% else %}Low{% endif %}
+      </span>
+    </div>
+
+    <!-- Uneven Tone -->
+    {% with pct=scan.harmony_score %}
+    <div class="res-metric-card">
+      <div class="res-donut-wrap">
+        <svg class="res-donut-svg" viewBox="0 0 80 80">
+          <circle class="res-donut-bg" cx="40" cy="40" r="32" stroke="#bbf7d0"/>
+          <circle class="res-donut-fg" cx="40" cy="40" r="32" stroke="#22c55e"
+            stroke-dasharray="201.1" stroke-dashoffset="201.1" data-pct="{{ scan.pigmentation_score }}"/>
+        </svg>
+        <div class="res-donut-num">{{ scan.pigmentation_score }}<small>%</small></div>
+      </div>
+      <div class="res-metric-name">Uneven Tone</div>
+      <span class="res-metric-level {% if scan.pigmentation_score > 60 %}ml-high{% elif scan.pigmentation_score > 30 %}ml-med{% else %}ml-low{% endif %}">
+        {% if scan.pigmentation_score > 60 %}High{% elif scan.pigmentation_score > 30 %}Medium{% else %}Low{% endif %}
+      </span>
+    </div>
+    {% endwith %}
+
+  </div><!-- /metrics-grid -->
+  {% endwith %}
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT — 2/3 LEFT + 1/3 RIGHT
+       ═══════════════════════════════════════════ -->
+  <div class="res-main-grid">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div>
+
+      <!-- TAB NAVIGATION -->
+      <div class="res-card" style="margin-bottom:1.25rem;">
+        <div class="res-tabs">
+          <button class="res-tab active" data-rpanel="rp-diagnosis">🩺 Diagnosis</button>
+          <button class="res-tab" data-rpanel="rp-routine">🌿 Skincare Routine</button>
+          {% if gender == 'female' %}
+          <button class="res-tab" data-rpanel="rp-makeup">💄 Makeup</button>
+          {% endif %}
+          <button class="res-tab" data-rpanel="rp-kbeauty">🌸 K-Beauty</button>
+        </div>
+
+        <!-- ── PANEL: DIAGNOSIS ── -->
+        <div class="res-panel active" id="rp-diagnosis">
+          <div style="padding:.3rem 1.25rem .5rem;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">Identified Skin Concerns</div>
+              <div style="font-size:.68rem;color:var(--r-muted);">{{ scan.detected_concerns.count }} concern{% if scan.detected_concerns.count != 1 %}s{% endif %} detected — tap each for full details</div>
+            </div>
+            <span class="res-card-badge">{{ scan.detected_concerns.count }} Total</span>
+          </div>
+
+          {% for card in condition_cards %}
+          <div class="res-concern-row" onclick="resToggleConcern(this)">
+            <div class="res-concern-icon" style="background:
+              {% if card.severity == 'severe' %}rgba(239,68,68,.1)
+              {% elif card.severity == 'moderate' %}rgba(249,115,22,.1)
+              {% elif card.severity == 'mild' %}rgba(245,158,11,.1)
+              {% else %}rgba(34,197,94,.1){% endif %};">
+              {% if 'acne' in card.concern.slug %}🔴
+              {% elif 'dark' in card.concern.slug or 'pigment' in card.concern.slug %}🟤
+              {% elif 'oil' in card.concern.slug %}💧
+              {% elif 'pore' in card.concern.slug %}🔬
+              {% elif 'dry' in card.concern.slug %}🏜️
+              {% elif 'red' in card.concern.slug %}🌡️
+              {% elif 'age' in card.concern.slug or 'fine' in card.concern.slug %}⏳
+              {% elif 'dull' in card.concern.slug %}🌫️
+              {% elif 'circle' in card.concern.slug %}👁️
+              {% elif 'black' in card.concern.slug %}⚫
+              {% else %}🔍{% endif %}
+            </div>
+            <div class="res-concern-body">
+              <div class="res-concern-name">{{ card.display }}</div>
+              <div class="res-concern-desc">{{ card.description|truncatechars:75 }}</div>
+            </div>
+            <span class="res-sev rsev-{{ card.severity }}">{{ card.severity|title }}</span>
+            <i class="bi bi-chevron-right res-concern-chevron"></i>
+          </div>
+          <div class="res-concern-expand">
+            <div class="res-exp-label">About This Condition</div>
+            <div class="res-exp-text">{{ card.description }}</div>
+            <div class="res-exp-label">💊 OTC Medicine Options</div>
+            {% for med in card.medicine_options %}
+            <div class="res-med-item"><div class="res-med-dot"></div><span>{{ med }}</span></div>
+            {% endfor %}
+            <div class="res-exp-label">✅ Recommended Ingredients</div>
+            <div>{% for ing in card.use_ingredients %}<span class="res-ing-pill ing-use">{{ ing }}</span>{% endfor %}</div>
+            <div class="res-exp-label">🚫 Avoid These</div>
+            <div>{% for ing in card.avoid_ingredients %}<span class="res-ing-pill ing-avoid">{{ ing }}</span>{% endfor %}</div>
+          </div>
+          {% empty %}
+          <div style="padding:2rem;text-align:center;color:var(--r-muted);font-size:.85rem;">
+            ✨ No major concerns detected — your skin looks great!
+          </div>
+          {% endfor %}
+        </div><!-- /rp-diagnosis -->
+
+        <!-- ── PANEL: SKINCARE ROUTINE (Step Flow) ── -->
+        <div class="res-panel" id="rp-routine">
+          <div style="padding:.5rem 1.25rem .2rem;">
+            <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">Recommended Skincare Regimen</div>
+            <div style="font-size:.68rem;color:var(--r-muted);margin-bottom:.5rem;">5-step daily routine personalised for your {{ scan.skin_type }} skin</div>
+          </div>
+
+          <!-- Horizontal step flow with arrows -->
+          <div class="res-routine-flow">
+            {% for step in morning_routine %}
+            <div class="res-step-card">
+              <div class="res-step-num">{{ step.step }}</div>
+              <div class="res-step-img">
+                {% if step.product and step.product.image_url %}
+                  <img src="{{ step.product.image_url }}" alt="{{ step.product.name }}">
+                {% else %}
+                  {% if step.step == 1 %}🧼{% elif step.step == 2 %}💧{% elif step.step == 3 %}✨{% elif step.step == 4 %}🧴{% else %}☀️{% endif %}
+                {% endif %}
+              </div>
+              <div class="res-step-type">{{ step.name }}</div>
+              {% if step.product %}
+              <div class="res-step-name">{{ step.product.name|truncatechars:40 }}</div>
+              <div class="res-step-brand">{{ step.product.brand|default:"SAS Global" }}</div>
+              {% if step.product.price %}<div class="res-step-price">₹{{ step.product.price }}</div>{% endif %}
+              {% else %}
+              <div class="res-step-name">Personalised</div>
+              <div class="res-step-brand">SAS Global</div>
+              {% endif %}
+              <div class="res-step-freq">Twice daily</div>
+            </div>
+            {% if not forloop.last %}
+            <div class="res-step-arrow"><i class="bi bi-arrow-right"></i></div>
+            {% endif %}
+            {% endfor %}
+          </div>
+
+          <!-- Evening routine flow -->
+          {% if evening_routine %}
+          <div style="padding:.25rem 1.25rem .2rem;border-top:1px solid var(--r-border);">
+            <div style="font-size:.75rem;font-weight:700;color:var(--r-text);margin-top:.75rem;">🌙 Evening Routine</div>
+            <div style="font-size:.68rem;color:var(--r-muted);margin-bottom:.5rem;">Double cleanse + targeted treatment</div>
+          </div>
+          <div class="res-routine-flow">
+            {% for step in evening_routine %}
+            <div class="res-step-card" style="border-color:rgba(124,58,237,.2);">
+              <div class="res-step-num" style="background:rgba(124,58,237,.7);">{{ step.step }}</div>
+              <div class="res-step-img" style="background:linear-gradient(135deg,#1d1535,#2a1f4a);">
+                {% if step.product and step.product.image_url %}
+                  <img src="{{ step.product.image_url }}" alt="{{ step.product.name }}">
+                {% else %}
+                  {% if step.step == 1 %}🫧{% elif step.step == 2 %}🧼{% elif step.step == 3 %}💧{% elif step.step == 4 %}💊{% else %}🌙{% endif %}
+                {% endif %}
+              </div>
+              <div class="res-step-type" style="color:var(--r-purple2);">{{ step.name }}</div>
+              {% if step.product %}
+              <div class="res-step-name">{{ step.product.name|truncatechars:40 }}</div>
+              <div class="res-step-brand">{{ step.product.brand|default:"SAS Global" }}</div>
+              {% if step.product.price %}<div class="res-step-price">₹{{ step.product.price }}</div>{% endif %}
+              {% else %}
+              <div class="res-step-name">Personalised</div>
+              <div class="res-step-brand">SAS Global</div>
+              {% endif %}
+              <div class="res-step-freq">Evening only</div>
+            </div>
+            {% if not forloop.last %}
+            <div class="res-step-arrow"><i class="bi bi-arrow-right"></i></div>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div style="padding:.5rem 1.25rem 1rem;">
+            <a href="https://sasglobal.biz" target="_blank"
+               style="display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;color:var(--r-teal);text-decoration:none;">
+              <i class="bi bi-bag-heart"></i> Shop All Routine Products →
+            </a>
+          </div>
+        </div><!-- /rp-routine -->
+
+        <!-- ── PANEL: MAKEUP (female only) ── -->
+        {% if gender == 'female' %}
+        <div class="res-panel" id="rp-makeup">
+          <div style="padding:.5rem 1.25rem .2rem;">
+            <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">8-Step Makeup Routine</div>
+            <div style="font-size:.68rem;color:var(--r-muted);margin-bottom:.25rem;">AI-personalised for {{ scan.undertone|title }} {{ scan.skin_tone|title }} tone · {{ scan.skin_type|title }} skin</div>
+          </div>
+
+          {% with r=vision_data.makeup_routine %}
+          {% if r %}
+            {% if r.step1_moisturizer %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">01</div><div class="res-mk-icon">💧</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Moisturiser — Base Prep</div>
+                <div class="res-mk-prod">{{ r.step1_moisturizer.product }}</div>
+                <div class="res-mk-meta">{{ r.step1_moisturizer.brand }} · {{ r.step1_moisturizer.price_inr }}</div>
+                <div class="res-mk-note">{{ r.step1_moisturizer.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step2_primer %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">02</div><div class="res-mk-icon">🧴</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Primer</div>
+                <div class="res-mk-prod">{{ r.step2_primer.product }}</div>
+                <div class="res-mk-meta">{{ r.step2_primer.brand }} · {{ r.step2_primer.price_inr }}</div>
+                <div class="res-mk-note">{{ r.step2_primer.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step3_foundation %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">03</div><div class="res-mk-icon">💋</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Foundation</div>
+                <div class="res-mk-prod">{{ r.step3_foundation.product }}</div>
+                <div class="res-mk-meta">{{ r.step3_foundation.brand }} · {{ r.step3_foundation.price_inr }}</div>
+                {% if r.step3_foundation.shade %}<div class="res-shade-tag">Shade: {{ r.step3_foundation.shade }}</div>{% endif %}
+                <div class="res-mk-note">{{ r.step3_foundation.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step4_concealer %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">04</div><div class="res-mk-icon">🎭</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Concealer</div>
+                <div class="res-mk-prod">{{ r.step4_concealer.product }}</div>
+                <div class="res-mk-meta">{{ r.step4_concealer.brand }} · {{ r.step4_concealer.price_inr }}</div>
+                {% if r.step4_concealer.shade %}<div class="res-shade-tag">{{ r.step4_concealer.shade }}</div>{% endif %}
+                <div class="res-mk-note">{{ r.step4_concealer.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step5_powder %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">05</div><div class="res-mk-icon">✨</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Setting Powder</div>
+                <div class="res-mk-prod">{{ r.step5_powder.product }}</div>
+                <div class="res-mk-meta">{{ r.step5_powder.brand }} · {{ r.step5_powder.price_inr }}</div>
+                <div class="res-mk-note">{{ r.step5_powder.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step6_blush %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">06</div><div class="res-mk-icon">🌸</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Blush</div>
+                <div class="res-mk-prod">{{ r.step6_blush.product }}</div>
+                <div class="res-mk-meta">{{ r.step6_blush.brand }} · {{ r.step6_blush.price_inr }}</div>
+                {% if r.step6_blush.shade %}<div class="res-shade-tag">{{ r.step6_blush.shade }}</div>{% endif %}
+                <div class="res-mk-note">{{ r.step6_blush.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step7_eyeshadow %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">07</div><div class="res-mk-icon">👁️</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Eyeshadow</div>
+                <div class="res-mk-prod">{{ r.step7_eyeshadow.product }}</div>
+                <div class="res-mk-meta">{{ r.step7_eyeshadow.brand }} · {{ r.step7_eyeshadow.price_inr }}</div>
+                <div class="res-mk-note">{{ r.step7_eyeshadow.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% if r.step8_lipstick %}
+            <div class="res-mk-step">
+              <div class="res-mk-num">08</div><div class="res-mk-icon">💄</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag">Lipstick</div>
+                <div class="res-mk-prod">{{ r.step8_lipstick.product }}</div>
+                <div class="res-mk-meta">{{ r.step8_lipstick.brand }} · {{ r.step8_lipstick.price_inr }}</div>
+                {% if r.step8_lipstick.shade %}<div class="res-shade-tag">{{ r.step8_lipstick.shade }}</div>{% endif %}
+                <div class="res-mk-note">{{ r.step8_lipstick.reason }}</div>
+              </div>
+            </div>
+            {% endif %}
+          {% else %}
+          <div style="padding:2rem;text-align:center;color:var(--r-muted);font-size:.85rem;">
+            Generating your personalised makeup routine…
+          </div>
+          {% endif %}
+          {% endwith %}
+
+          <div style="padding:.5rem 1.25rem 1rem;">
+            <a href="{% url 'chat:create' %}?mode=makeup&scan_id={{ scan.id }}" class="res-cta-btn res-cta-pink" style="display:inline-flex;width:auto;">
+              💄 Ask Makeup AI for More
+            </a>
+          </div>
+        </div><!-- /rp-makeup -->
+        {% endif %}
+
+        <!-- ── PANEL: K-BEAUTY ── -->
+        <div class="res-panel" id="rp-kbeauty">
+          <div style="padding:.5rem 1.25rem .2rem;">
+            <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">K-Beauty Routine</div>
+            <div style="font-size:.68rem;color:var(--r-muted);margin-bottom:.25rem;">Personalised Korean skincare for {{ scan.skin_type }} {{ scan.undertone }} skin</div>
+          </div>
+
+          {% with kb=vision_data.kbeauty_routine %}
+          {% if kb and kb.morning %}
+            {% if kb.skin_focus %}
+            <div style="margin:.25rem 1.25rem .5rem;padding:.65rem .85rem;background:rgba(124,58,237,.06);border-radius:10px;border-left:3px solid var(--r-purple);font-size:.78rem;color:var(--r-text);">
+              🌸 {{ kb.skin_focus }}
+            </div>
+            {% endif %}
+
+            <div style="padding:.25rem 1.25rem .15rem;font-size:.72rem;font-weight:800;color:var(--r-purple);text-transform:uppercase;letter-spacing:.08em;">☀️ Morning</div>
+            {% for step in kb.morning %}
+            <div class="res-mk-step">
+              <div class="res-mk-num" style="color:var(--r-purple2);">{{ step.step }}</div>
+              <div class="res-mk-icon">{% if step.step == 1 %}🫧{% elif step.step == 2 %}💧{% elif step.step == 3 %}✨{% elif step.step == 4 %}🧴{% else %}🌞{% endif %}</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag" style="color:var(--r-purple);">{{ step.name }}</div>
+                <div class="res-mk-prod">{{ step.product }}</div>
+                <div class="res-mk-meta">{{ step.brand }} · {{ step.price_inr }}</div>
+                <div class="res-mk-note">{{ step.reason }}</div>
+              </div>
+            </div>
+            {% endfor %}
+
+            {% if kb.evening %}
+            <div style="padding:.75rem 1.25rem .15rem;font-size:.72rem;font-weight:800;color:var(--r-purple2);text-transform:uppercase;letter-spacing:.08em;border-top:1px solid var(--r-border);">🌙 Evening</div>
+            {% for step in kb.evening %}
+            <div class="res-mk-step">
+              <div class="res-mk-num" style="color:var(--r-purple3);">{{ step.step }}</div>
+              <div class="res-mk-icon">{% if step.step == 1 %}🫧{% elif step.step == 2 %}🧼{% elif step.step == 3 %}💧{% elif step.step == 4 %}💊{% else %}🌙{% endif %}</div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag" style="color:var(--r-purple2);">{{ step.name }}</div>
+                <div class="res-mk-prod">{{ step.product }}</div>
+                <div class="res-mk-meta">{{ step.brand }} · {{ step.price_inr }}</div>
+                <div class="res-mk-note">{{ step.reason }}</div>
+              </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+          {% else %}
+          <div style="padding:2rem;text-align:center;color:var(--r-muted);font-size:.85rem;">
+            Generating your K-Beauty routine…
+          </div>
+          {% endif %}
+          {% endwith %}
+
+          <div style="padding:.5rem 1.25rem 1rem;">
+            <a href="{% url 'chat:create' %}?mode=kbeauty&scan_id={{ scan.id }}" class="res-cta-btn res-cta-purple" style="display:inline-flex;width:auto;">
+              🌸 Build Full K-Beauty Routine
+            </a>
+          </div>
+        </div><!-- /rp-kbeauty -->
+
+      </div><!-- /res-card (tabs) -->
+    </div><!-- /left column -->
+
+    <!-- ── RIGHT COLUMN ── -->
+    <div>
+
+      <!-- Skin Health Bars -->
+      <div class="res-card" style="margin-bottom:1.25rem;">
+        <div class="res-card-hdr">
+          <div>
+            <div class="res-card-title">Skin Health Overview</div>
+            <div class="res-card-sub">Detailed score breakdown</div>
+          </div>
+        </div>
+        <div class="res-bar-card">
+          <div class="res-bar-row">
+            <div class="res-bar-lbl">Harmony</div>
+            <div class="res-bar-track"><div class="res-bar-fill" data-rw="{{ scan.harmony_score }}" style="background:{% if scan.harmony_score > 70 %}#22c55e{% elif scan.harmony_score > 45 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+            <div class="res-bar-val">{{ scan.harmony_score }}</div>
+          </div>
+          <div class="res-bar-row">
+            <div class="res-bar-lbl">Hydration</div>
+            <div class="res-bar-track"><div class="res-bar-fill" data-rw="{{ scan.hydration_score }}" style="background:{% if scan.hydration_score > 60 %}#22c55e{% elif scan.hydration_score > 35 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+            <div class="res-bar-val">{{ scan.hydration_score }}</div>
+          </div>
+          <div class="res-bar-row">
+            <div class="res-bar-lbl">Acne</div>
+            <div class="res-bar-track"><div class="res-bar-fill" data-rw="{{ scan.acne_score }}" style="background:{% if scan.acne_score < 25 %}#22c55e{% elif scan.acne_score < 55 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+            <div class="res-bar-val">{{ scan.acne_score }}</div>
+          </div>
+          <div class="res-bar-row">
+            <div class="res-bar-lbl">Pigmentation</div>
+            <div class="res-bar-track"><div class="res-bar-fill" data-rw="{{ scan.pigmentation_score }}" style="background:{% if scan.pigmentation_score < 30 %}#22c55e{% elif scan.pigmentation_score < 60 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+            <div class="res-bar-val">{{ scan.pigmentation_score }}</div>
+          </div>
+          <div class="res-bar-row">
+            <div class="res-bar-lbl">Elasticity</div>
+            <div class="res-bar-track"><div class="res-bar-fill" data-rw="{{ scan.elasticity_score }}" style="background:{% if scan.elasticity_score > 60 %}#22c55e{% elif scan.elasticity_score > 40 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+            <div class="res-bar-val">{{ scan.elasticity_score }}</div>
+          </div>
+          <div class="res-bar-row">
+            <div class="res-bar-lbl">Aging</div>
+            <div class="res-bar-track"><div class="res-bar-fill" data-rw="{{ scan.aging_score }}" style="background:{% if scan.aging_score < 30 %}#22c55e{% elif scan.aging_score < 60 %}#f59e0b{% else %}#ef4444{% endif %};"></div></div>
+            <div class="res-bar-val">{{ scan.aging_score }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Consultation CTAs -->
+      <div class="res-card" style="margin-bottom:1.25rem;">
+        <div class="res-card-hdr">
+          <div>
+            <div class="res-card-title">AI Consultants</div>
+            <div class="res-card-sub">Get personalised advice</div>
+          </div>
+        </div>
+        <div class="res-cta-strip">
+          <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ scan.id }}" class="res-cta-btn res-cta-teal">
+            🩺 Ask Dr. Lumina AI
+          </a>
+          {% if gender == 'female' %}
+          <a href="{% url 'chat:create' %}?mode=makeup&scan_id={{ scan.id }}" class="res-cta-btn res-cta-pink">
+            💄 Makeup AI Consult
+          </a>
+          {% endif %}
+          <a href="{% url 'chat:create' %}?mode=kbeauty&scan_id={{ scan.id }}" class="res-cta-btn res-cta-purple">
+            🌸 K-Beauty AI Routine
+          </a>
+        </div>
+      </div>
+
+      <!-- Lifestyle Tips -->
+      <div class="res-card" style="margin-bottom:1.25rem;">
+        <div class="res-card-hdr">
+          <div>
+            <div class="res-card-title">✨ Additional Tips</div>
+            <div class="res-card-sub">Daily habits for better skin</div>
+          </div>
+        </div>
+        <div class="res-tips-card">
+          <div class="res-tip-item"><span class="res-tip-icon">💧</span> Drink 8–10 glasses of water daily</div>
+          <div class="res-tip-item"><span class="res-tip-icon">😴</span> Sleep 7–9 hours for skin repair</div>
+          <div class="res-tip-item"><span class="res-tip-icon">🙅</span> Avoid touching your face</div>
+          <div class="res-tip-item"><span class="res-tip-icon">🛏️</span> Change pillow case every 3 days</div>
+          <div class="res-tip-item"><span class="res-tip-icon">🥗</span> Eat antioxidant-rich foods</div>
+          <div class="res-tip-item"><span class="res-tip-icon">☀️</span> Apply SPF 50+ every morning</div>
+        </div>
+        <div class="res-disclaimer">
+          ⚠️ This analysis is AI-generated and for informational purposes only. For medical advice, consult a licensed dermatologist.
+        </div>
+      </div>
+
+      <!-- Shop CTA -->
+      <div class="res-card">
+        <div style="padding:1.1rem 1.25rem;background:linear-gradient(135deg,#f5f3ff,#fdf4ff);border-radius:var(--r-radius);">
+          <div style="font-size:.85rem;font-weight:800;color:var(--r-purple);margin-bottom:.2rem;">🛍️ Shop Your Regimen</div>
+          <div style="font-size:.72rem;color:var(--r-muted);margin-bottom:.85rem;">Korean &amp; Makeup products matched to your skin profile</div>
+          <a href="{% url 'products:list' %}" class="res-cta-btn res-cta-purple" style="display:flex;">
+            View All Products
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /right column -->
+
+  </div><!-- /res-main-grid -->
+
+</div><!-- /res-shell -->
+{% endwith %}
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+/* ── PANEL / TAB SWITCHING ── */
+(function() {
+  const tabs   = document.querySelectorAll('.res-tab');
+  const panels = document.querySelectorAll('.res-panel');
+
+  function showPanel(id) {
+    panels.forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+    tabs.forEach(t => t.classList.remove('active'));
+    const panel = document.getElementById(id);
+    if (panel) { panel.classList.add('active'); panel.style.display = 'block'; }
+    const tab = document.querySelector(`[data-rpanel="${id}"]`);
+    if (tab) tab.classList.add('active');
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => showPanel(tab.dataset.rpanel));
+  });
+
+  // Init: show first panel, hide rest
+  window.addEventListener('DOMContentLoaded', () => {
+    panels.forEach(p => { if (!p.classList.contains('active')) p.style.display = 'none'; });
+    const first = document.querySelector('.res-panel.active');
+    if (first) first.style.display = 'block';
+  });
+})();
+
+/* ── CONCERN ACCORDION ── */
+function resToggleConcern(row) {
+  const expand  = row.nextElementSibling;
+  const chevron = row.querySelector('.res-concern-chevron');
+  const isOpen  = expand && expand.classList.contains('open');
+
+  document.querySelectorAll('.res-concern-expand').forEach(e => e.classList.remove('open'));
+  document.querySelectorAll('.res-concern-chevron').forEach(c => c.classList.remove('open'));
+
+  if (!isOpen && expand) {
+    expand.classList.add('open');
+    if (chevron) chevron.classList.add('open');
+  }
+}
+
+/* ── ANIMATE MAIN SCORE RING ── */
+function animateMainRing() {
+  const ring = document.getElementById('mainScoreRing');
+  if (!ring) return;
+  const score = parseInt(ring.dataset.score || '0', 10);
+  const circumference = 314.2;
+  const offset = circumference - (score / 100) * circumference;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 250);
+}
+
+/* ── ANIMATE DONUT CHARTS ── */
+function animateDonuts() {
+  document.querySelectorAll('.res-donut-fg').forEach(ring => {
+    const pct = parseInt(ring.dataset.pct || '0', 10);
+    const circumference = 201.1;
+    const offset = circumference - (pct / 100) * circumference;
+    setTimeout(() => { ring.style.strokeDashoffset = offset; }, 350);
+  });
+}
+
+/* ── ANIMATE HEALTH BARS ── */
+function animateBars() {
+  document.querySelectorAll('.res-bar-fill[data-rw]').forEach(bar => {
+    const w = bar.dataset.rw || '0';
+    setTimeout(() => { bar.style.width = w + '%'; }, 300);
+  });
+}
+
+/* ── BOOT ── */
+window.addEventListener('load', () => {
+  animateMainRing();
+  animateDonuts();
+  animateBars();
+});
+</script>
+{% endblock %}

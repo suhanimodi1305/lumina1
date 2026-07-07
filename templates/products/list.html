@@ -1,0 +1,1334 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Product Catalogue — Lumina{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --teal:    #0d9488;
+  --teal-lt: #ccfbf1;
+  --gold:    #c9a96e;
+  --gold-lt: #fef3c7;
+  --radius:  14px;
+  --shadow:  0 2px 12px rgba(0,0,0,.07);
+}
+
+/* ── PAGE LAYOUT ── */
+.catalog-layout {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+
+/* ── LEFT SIDEBAR ── */
+.filter-sidebar {
+  width: 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+  scrollbar-width: thin;
+  transition: width .28s cubic-bezier(.4,0,.2,1);
+}
+.filter-sidebar.filter-open {
+  width: 240px;
+  overflow-y: auto;
+}
+.filter-sidebar::-webkit-scrollbar { width: 4px; }
+.filter-sidebar::-webkit-scrollbar-thumb { background: var(--border, #e2e8f0); border-radius: 4px; }
+
+.filter-panel {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.filter-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .85rem 1rem .7rem;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  background: var(--surface, #fff);
+}
+.filter-panel-head h3 {
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin: 0;
+}
+.filter-clear-all {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--teal);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.filter-clear-all:hover { text-decoration: underline; }
+
+/* Filter section block */
+.filter-section-block {
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.filter-section-block:last-child { border-bottom: none; }
+
+.filter-section-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .75rem 1rem .6rem;
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.filter-section-toggle:hover { background: rgba(13,148,136,.03); }
+.filter-section-title {
+  font-size: .74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text, #0f172a);
+}
+.filter-toggle-icon {
+  font-size: .7rem;
+  color: var(--muted, #64748b);
+  transition: transform .2s;
+}
+.filter-section-block.open .filter-toggle-icon { transform: rotate(180deg); }
+
+.filter-section-body {
+  padding: .25rem 1rem .75rem;
+  display: block;
+}
+</style>
+
+<style>
+/* Filter option rows */
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .3rem 0;
+  cursor: pointer;
+  font-size: .78rem;
+  color: var(--text, #0f172a);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color .1s;
+}
+.filter-option:hover { color: var(--teal); }
+.filter-option.active { color: var(--teal); font-weight: 700; }
+.filter-option input[type="radio"] {
+  accent-color: var(--teal);
+  width: 14px; height: 14px; flex-shrink: 0;
+  cursor: pointer;
+}
+.filter-option-label { flex: 1; cursor: pointer; }
+.filter-count-badge {
+  font-size: .65rem;
+  color: var(--muted, #64748b);
+  background: var(--bg, #f8fafc);
+  padding: .08rem .35rem;
+  border-radius: 20px;
+  min-width: 22px;
+  text-align: center;
+}
+
+/* Price range radio group */
+.price-option { padding: .28rem 0; }
+
+/* Active filter chips strip */
+.active-chips {
+  display: flex; flex-wrap: wrap; gap: .35rem;
+  padding: .5rem 1rem .6rem;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.active-chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: rgba(13,148,136,.1); color: #065f46;
+  padding: .18rem .55rem; border-radius: 20px;
+  font-size: .7rem; font-weight: 600;
+  text-decoration: none; transition: background .1s;
+}
+.active-chip:hover { background: rgba(239,68,68,.12); color: #991b1b; }
+.active-chip .chip-x { font-size: .65rem; opacity: .7; }
+
+/* ── MAIN CONTENT (right side) ── */
+.catalog-main { flex: 1; min-width: 0; }
+
+/* ── HERO ── */
+.cat-hero {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cat-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 40%,
+    rgba(13,148,136,.2) 0%, transparent 70%);
+}
+.cat-hero-label {
+  font-size: .63rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--teal);
+  margin-bottom: .35rem; position: relative; z-index: 1;
+}
+.cat-hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 700;
+  color: #fff; margin-bottom: .3rem; position: relative; z-index: 1;
+}
+.cat-hero p { font-size: .8rem; color: rgba(255,255,255,.5); margin: 0; position: relative; z-index: 1; }
+</style>
+
+<style>
+/* ── TOP BAR (search + sort) ── */
+.topbar {
+  display: flex; gap: .65rem; flex-wrap: wrap; align-items: center;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  padding: .6rem .9rem;
+  margin-bottom: 1.1rem;
+  box-shadow: var(--shadow);
+}
+.search-wrap { flex: 1; min-width: 180px; position: relative; }
+.search-wrap i {
+  position: absolute; left: .75rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted, #64748b); font-size: .83rem; pointer-events: none;
+}
+.search-input {
+  width: 100%; padding: .48rem .75rem .48rem 2.1rem;
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 100px; font-size: .82rem;
+  background: var(--bg, #f8fafc);
+  color: var(--text, #0f172a);
+  outline: none; box-sizing: border-box;
+  transition: border-color .15s;
+}
+.search-input:focus { border-color: var(--teal); background: var(--surface, #fff); }
+
+.sort-select {
+  padding: .48rem .8rem;
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 100px; font-size: .78rem; font-weight: 600;
+  background: var(--bg, #f8fafc); color: var(--text, #0f172a);
+  cursor: pointer; outline: none; min-width: 155px;
+  transition: border-color .15s;
+}
+.sort-select:focus { border-color: var(--teal); }
+
+.topbar-btn {
+  padding: .48rem 1rem;
+  border: none; border-radius: 100px;
+  font-size: .78rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: background .12s;
+}
+.topbar-btn-teal { background: var(--teal); color: #fff; }
+.topbar-btn-teal:hover { background: #0f766e; }
+.topbar-btn-ghost {
+  background: var(--surface, #fff); color: var(--muted, #64748b);
+  border: 1.5px solid var(--border, #e2e8f0);
+  text-decoration: none; display: inline-flex; align-items: center; gap: .3rem;
+}
+.topbar-btn-ghost:hover { border-color: #ef4444; color: #ef4444; }
+
+/* Filter toggle button */
+.topbar-btn-filter {
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
+  border: 1.5px solid var(--border, #e2e8f0);
+  display: inline-flex; align-items: center; gap: .35rem;
+  position: relative;
+}
+.topbar-btn-filter:hover { border-color: var(--teal); color: var(--teal); }
+.topbar-btn-filter.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* Quick range pill buttons */
+.topbar-btn-range {
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
+  border: 1.5px solid var(--border, #e2e8f0);
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-weight: 600;
+  transition: all .12s;
+}
+.topbar-btn-range:hover {
+  border-color: var(--teal); color: var(--teal);
+}
+.range-active-makeup {
+  background: rgba(236,72,153,.1);
+  color: #9d174d;
+  border-color: rgba(236,72,153,.4);
+  font-weight: 700;
+}
+.range-active-korean {
+  background: rgba(13,148,136,.12);
+  color: #065f46;
+  border-color: rgba(13,148,136,.4);
+  font-weight: 700;
+}
+.filter-count-dot {
+  background: #ef4444; color: #fff;
+  font-size: .58rem; font-weight: 700;
+  padding: .06rem .38rem; border-radius: 20px;
+  min-width: 18px; text-align: center;
+}
+
+/* Results summary strip */
+.results-strip {
+  font-size: .78rem; color: var(--muted, #64748b);
+  margin-bottom: 1rem;
+}
+.results-strip strong { color: var(--text, #0f172a); }
+
+/* ── STAFF BAR ── */
+.staff-bar {
+  display: flex; gap: .5rem; flex-wrap: wrap; align-items: center;
+  background: rgba(239,68,68,.05); border: 1px solid rgba(239,68,68,.2);
+  border-radius: 12px; padding: .55rem .8rem; margin-bottom: 1rem;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.staff-bar-label {
+  font-size: .65rem; font-weight: 700; color: #ef4444;
+  text-transform: uppercase; letter-spacing: .07em; flex: 1 0 100%;
+}
+.staff-btn {
+  padding: .33rem .8rem; border-radius: 20px; font-size: .73rem;
+  font-weight: 600; cursor: pointer; border: none; text-decoration: none;
+  display: inline-flex; align-items: center; gap: .3rem; transition: all .12s;
+}
+.staff-btn-teal  { background: var(--teal); color: #fff; }
+.staff-btn-teal:hover  { background: #0f766e; color: #fff; }
+.staff-btn-gold  { background: var(--gold-lt); color: #92400e; border: 1px solid #fde68a; }
+.staff-btn-gray  { background: var(--surface, #f8fafc); color: var(--text, #0f172a); border: 1px solid var(--border, #e2e8f0); }
+</style>
+
+<style>
+/* ── SECTION HEADER ── */
+.section-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: .85rem; padding-bottom: .5rem;
+  border-bottom: 2px solid var(--border, #e2e8f0);
+}
+.section-hdr h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-weight: 700;
+  color: var(--text, #0f172a); margin: 0;
+}
+.count-badge {
+  padding: .18rem .65rem; background: var(--teal-lt);
+  color: #065f46; border-radius: 20px; font-size: .7rem; font-weight: 600;
+}
+
+/* ── PRODUCT GRID ── */
+.prod-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .9rem;
+  margin-bottom: 2rem;
+}
+
+/* ── PRODUCT CARD ── */
+.prod-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .15s, box-shadow .15s;
+  display: flex; flex-direction: column;
+}
+.prod-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,.11); }
+
+.prod-img-wrap {
+  position: relative; width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.prod-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.prod-img-placeholder { font-size: 3.2rem; color: #e8789a; }
+.prod-range-badge {
+  position: absolute; top: .5rem; left: .5rem;
+  padding: .15rem .55rem; border-radius: 20px;
+  font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+}
+.rb-makeup { background: rgba(236,72,153,.15); color: #9d174d; border: 1px solid rgba(236,72,153,.25); }
+.rb-korean { background: rgba(13,148,136,.15);  color: #065f46; border: 1px solid rgba(13,148,136,.25); }
+.prod-featured-badge {
+  position: absolute; top: .5rem; right: .5rem;
+  background: var(--gold); color: #0a0a0f;
+  padding: .12rem .5rem; border-radius: 20px;
+  font-size: .58rem; font-weight: 800; text-transform: uppercase;
+}
+
+/* Staff action overlay */
+.prod-staff-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(10,10,15,.85); backdrop-filter: blur(4px);
+  display: flex; gap: .4rem; padding: .45rem .6rem;
+  transform: translateY(100%); transition: transform .18s;
+}
+.prod-card:hover .prod-staff-overlay { transform: translateY(0); }
+.overlay-btn {
+  flex: 1; padding: .28rem .35rem; border-radius: 7px; border: none;
+  font-size: .66rem; font-weight: 600; cursor: pointer;
+  text-decoration: none; text-align: center; transition: opacity .1s;
+}
+.overlay-edit   { background: var(--teal); color: #fff; }
+.overlay-delete { background: #ef4444; color: #fff; }
+
+.prod-body { padding: .75rem .8rem; flex: 1; display: flex; flex-direction: column; }
+.prod-name { font-size: .83rem; font-weight: 700; color: var(--text, #0f172a); line-height: 1.3; margin-bottom: .18rem; }
+.prod-brand { font-size: .7rem; color: var(--muted, #64748b); margin-bottom: .45rem; }
+.prod-desc  { font-size: .73rem; color: var(--muted, #64748b); line-height: 1.5; margin-bottom: .45rem; flex: 1; }
+.prod-price { font-size: .95rem; font-weight: 800; color: var(--teal); margin-bottom: .45rem; }
+.shade-row  { display: flex; flex-wrap: wrap; gap: .28rem; margin-bottom: .5rem; }
+.shade-swatch {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.6);
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  cursor: pointer; transition: transform .12s; flex-shrink: 0;
+}
+.shade-swatch:hover { transform: scale(1.28); z-index: 2; }
+.shade-count { font-size: .63rem; color: var(--muted, #64748b); display: flex; align-items: center; margin-bottom: .35rem; }
+.cat-chip { display: inline-block; padding: .15rem .5rem; border-radius: 20px; font-size: .63rem; font-weight: 600; margin-bottom: .45rem; background: var(--teal-lt); color: #065f46; }
+.cat-chip-makeup { background: rgba(236,72,153,.1); color: #9d174d; }
+
+.prod-shop-btn {
+  display: flex; align-items: center; justify-content: center; gap: .3rem;
+  padding: .4rem; background: var(--teal); color: #fff;
+  border-radius: 8px; font-size: .73rem; font-weight: 600;
+  text-decoration: none; transition: background .12s; border: none; cursor: pointer; width: 100%;
+}
+.prod-shop-btn:hover { background: #0f766e; color: #fff; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 3rem 1rem;
+  background: var(--surface, #fff); border-radius: var(--radius);
+  border: 2px dashed var(--border, #e2e8f0);
+}
+.empty-state .es-icon { font-size: 2.8rem; margin-bottom: .8rem; }
+.empty-state h3 { font-size: 1rem; margin-bottom: .4rem; }
+.empty-state p { font-size: .82rem; color: var(--muted, #64748b); }
+
+/* ── RESPONSIVE ── */
+
+/* Tablet (≤768px) */
+@media (max-width: 768px) {
+  /* Hide the sidebar from the normal flow on mobile — it becomes a bottom drawer */
+  .filter-sidebar {
+    display: none !important;
+  }
+  .catalog-layout {
+    flex-direction: column;
+    padding: 0 .75rem 2rem;
+    gap: .85rem;
+  }
+  .cat-hero { padding: 1.1rem .85rem; margin-bottom: 1rem; }
+  .cat-hero h1 { font-size: 1.2rem; }
+  .topbar {
+    gap: .45rem;
+    padding: .5rem .65rem;
+    flex-wrap: wrap;
+  }
+  .search-wrap { min-width: 0; flex: 1 1 100%; order: 1; }
+  .sort-select { flex: 1 1 auto; order: 2; min-width: 0; font-size: .76rem; }
+  .topbar-btn { order: 3; padding: .45rem .75rem; font-size: .75rem; }
+  .topbar-btn-filter { order: 3; }
+  .prod-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .65rem; }
+  .staff-bar { padding: .45rem .65rem; }
+  .staff-btn { font-size: .68rem; padding: .28rem .6rem; }
+  .section-hdr h2 { font-size: 1.05rem; }
+  .results-strip { font-size: .73rem; }
+}
+
+/* Large phone (≤600px) */
+@media (max-width: 600px) {
+  .catalog-layout { padding: 0 .5rem 1.5rem; }
+  .prod-grid { grid-template-columns: 1fr 1fr; gap: .55rem; }
+  .prod-name { font-size: .78rem; }
+  .prod-body { padding: .6rem .65rem; }
+  .prod-price { font-size: .88rem; }
+  .cat-hero { padding: .9rem .75rem; border-radius: 10px; }
+  .cat-hero h1 { font-size: 1.05rem; }
+  .cat-hero p { font-size: .72rem; }
+  /* K-Beauty range header: stack icon + text vertically */
+  .krange-header { flex-direction: column; align-items: flex-start !important; gap: .45rem !important; }
+  .krange-icon { font-size: 1.4rem !important; }
+  .krange-title { font-size: .95rem !important; }
+  .topbar { padding: .45rem .5rem; }
+  .sort-select { min-width: 0; }
+  .staff-bar-label { font-size: .6rem; }
+}
+
+/* Small phone (≤400px) */
+@media (max-width: 400px) {
+  .catalog-layout { padding: 0 .35rem 1.25rem; }
+  .prod-grid { grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .prod-body { padding: .5rem .55rem; }
+  .prod-name { font-size: .74rem; }
+  .prod-price { font-size: .82rem; }
+  .prod-shop-btn { font-size: .68rem; padding: .35rem; }
+  .cat-hero h1 { font-size: .95rem; }
+  .topbar-btn span { display: none; } /* hide button text labels, keep icons */
+  .count-badge { font-size: .62rem; padding: .14rem .45rem; }
+}
+
+/* ═══════════════════════════════════════
+   MOBILE FILTER BOTTOM DRAWER (Amazon-style)
+   Appears over content when "Filters" tapped
+   ═══════════════════════════════════════ */
+
+/* Backdrop overlay */
+.mob-filter-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1040;
+  opacity: 0;
+  transition: opacity .28s ease;
+}
+.mob-filter-backdrop.visible {
+  opacity: 1;
+}
+
+/* The drawer itself */
+.mob-filter-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: var(--surface, #fff);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform .32s cubic-bezier(.32,0,.18,1);
+}
+.mob-filter-drawer.open {
+  transform: translateY(0);
+}
+
+/* Drag handle bar */
+.mob-drawer-handle {
+  display: flex;
+  justify-content: center;
+  padding: .65rem 0 .3rem;
+  flex-shrink: 0;
+}
+.mob-drawer-handle::before {
+  content: '';
+  width: 40px; height: 4px;
+  background: var(--border, #e2e8f0);
+  border-radius: 2px;
+}
+
+/* Drawer header */
+.mob-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .4rem 1rem .7rem;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  flex-shrink: 0;
+}
+.mob-drawer-header h3 {
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.mob-drawer-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--muted, #64748b);
+  cursor: pointer;
+  padding: .25rem .4rem;
+  border-radius: 8px;
+}
+.mob-drawer-close:active { background: var(--surface-alt, #f5f3f0); }
+
+/* Scrollable filter body */
+.mob-drawer-body {
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Footer with Apply / Clear */
+.mob-drawer-footer {
+  display: flex;
+  gap: .65rem;
+  padding: .85rem 1rem;
+  border-top: 1px solid var(--border, #e2e8f0);
+  flex-shrink: 0;
+  background: var(--surface, #fff);
+}
+.mob-drawer-apply {
+  flex: 1;
+  padding: .7rem;
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .12s;
+}
+.mob-drawer-apply:active { background: #0f766e; }
+.mob-drawer-clear {
+  padding: .7rem 1.2rem;
+  background: none;
+  color: var(--muted, #64748b);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 100px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.mob-drawer-clear:active { border-color: #ef4444; color: #ef4444; }
+
+/* Filter sections inside drawer */
+.mob-filter-section {
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.mob-filter-section:last-child { border-bottom: none; }
+.mob-filter-section-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .85rem 1rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.mob-filter-section-toggle:active { background: rgba(13,148,136,.04); }
+.mob-filter-section-title {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.mob-filter-chevron {
+  font-size: .75rem;
+  color: var(--muted, #64748b);
+  transition: transform .2s;
+}
+.mob-filter-section.mob-open .mob-filter-chevron {
+  transform: rotate(180deg);
+}
+.mob-filter-section-body {
+  padding: .1rem 1rem .85rem;
+}
+.mob-filter-option {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem 0;
+  font-size: .83rem;
+  color: var(--text, #0f172a);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+.mob-filter-option input[type="radio"] {
+  accent-color: var(--teal);
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+}
+.mob-filter-option.mob-active {
+  color: var(--teal);
+  font-weight: 700;
+}
+
+/* Only show drawer on mobile */
+@media (min-width: 769px) {
+  .mob-filter-backdrop,
+  .mob-filter-drawer { display: none !important; }
+}
+
+/* Dark mode */
+[data-theme="dark"] .prod-card { background: #12121a; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .prod-name { color: rgba(255,255,255,.85); }
+[data-theme="dark"] .prod-brand,[data-theme="dark"] .prod-desc { color: rgba(255,255,255,.4); }
+[data-theme="dark"] .section-hdr h2 { color: rgba(255,255,255,.85); }
+[data-theme="dark"] .section-hdr { border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .count-badge { background: rgba(13,148,136,.2); color: #5eead4; }
+[data-theme="dark"] .empty-state { background: #12121a; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .filter-panel { background: #12121a; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .filter-panel-head { background: #12121a; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .filter-section-block { border-color: rgba(255,255,255,.07); }
+[data-theme="dark"] .filter-panel-head h3,[data-theme="dark"] .filter-section-title { color: rgba(255,255,255,.8); }
+[data-theme="dark"] .filter-option { color: rgba(255,255,255,.7); }
+[data-theme="dark"] .filter-count-badge { background: rgba(255,255,255,.07); color: rgba(255,255,255,.4); }
+[data-theme="dark"] .topbar { background: #12121a; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .search-input,.sort-select { background: #1a1a28; color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .topbar-btn-filter { background: #12121a; color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .topbar-btn-filter.active { background: var(--teal); color: #fff; }
+[data-theme="dark"] .topbar-btn-range { background: #12121a; color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .range-active-makeup { background: rgba(236,72,153,.18); color: #f9a8d4; border-color: rgba(236,72,153,.4); }
+[data-theme="dark"] .range-active-korean { background: rgba(13,148,136,.2); color: #5eead4; border-color: rgba(13,148,136,.4); }
+[data-theme="dark"] .staff-bar { background: rgba(239,68,68,.08); }
+[data-theme="dark"] .active-chip { background: rgba(13,148,136,.2); color: #5eead4; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="catalog-layout">
+
+  <!-- ═══════════════ LEFT FILTER SIDEBAR ═══════════════ -->
+  <aside class="filter-sidebar" id="filter-sidebar">
+    <form method="get" id="filter-form">
+      <!-- Preserve search query and sort across filter changes -->
+      {% if cur_q %}<input type="hidden" name="q" value="{{ cur_q }}">{% endif %}
+      {% if cur_sort %}<input type="hidden" name="sort" value="{{ cur_sort }}">{% endif %}
+
+      <div class="filter-panel">
+
+        <!-- Panel header -->
+        <div class="filter-panel-head">
+          <h3><i class="bi bi-funnel-fill" style="margin-right:.35rem;color:var(--teal);"></i>Filters
+            {% if active_filter_count %}<span style="background:var(--teal);color:#fff;font-size:.62rem;padding:.08rem .42rem;border-radius:20px;margin-left:.4rem;font-weight:700;">{{ active_filter_count }}</span>{% endif %}
+          </h3>
+          {% if active_filter_count %}<a href="{% url 'products:list' %}" class="filter-clear-all">Clear All</a>{% endif %}
+        </div>
+
+        <!-- Active filter chips -->
+        {% if active_filter_count %}
+        <div class="active-chips">
+          {% if cur_q %}<a href="?{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">🔍 "{{ cur_q }}" <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_product_range %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">{% if cur_product_range == 'korean' %}🌸 K-Beauty{% else %}💄 Makeup{% endif %} <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_category %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">📂 {{ cur_category|title|cut:"_" }} <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_price %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">💰 Price <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_brand %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">🏷️ {{ cur_brand|truncatechars:16 }} <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_skin_type %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">🧴 {{ cur_skin_type|title }} <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_featured %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">⭐ Featured <span class="chip-x">✕</span></a>{% endif %}
+        </div>
+        {% endif %}
+
+        <!-- 1. PRODUCT RANGE -->
+        <div class="filter-section-block open" id="block-range">
+          <div class="filter-section-toggle">
+            <span class="filter-section-title">Product Range</span>
+          </div>
+          <div class="filter-section-body">
+            <label class="filter-option {% if cur_product_range == '' %}active{% endif %}">
+              <input type="radio" name="product_range" value="" {% if cur_product_range == '' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">All Products</span>
+            </label>
+            <label class="filter-option {% if cur_product_range == 'makeup' %}active{% endif %}">
+              <input type="radio" name="product_range" value="makeup" {% if cur_product_range == 'makeup' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">💄 Makeup</span>
+            </label>
+            <label class="filter-option {% if cur_product_range == 'korean' %}active{% endif %}">
+              <input type="radio" name="product_range" value="korean" {% if cur_product_range == 'korean' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">🌸 K-Beauty</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. PRICE RANGE -->
+        <div class="filter-section-block open" id="block-price">
+          <div class="filter-section-toggle">
+            <span class="filter-section-title">Price Range</span>
+          </div>
+          <div class="filter-section-body">
+            <label class="filter-option {% if cur_price == '' %}active{% endif %}">
+              <input type="radio" name="price" value="" {% if cur_price == '' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">Any Price</span>
+            </label>
+            <label class="filter-option {% if cur_price == '0-500' %}active{% endif %}">
+              <input type="radio" name="price" value="0-500" {% if cur_price == '0-500' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">Under ₹500</span>
+            </label>
+            <label class="filter-option {% if cur_price == '500-1000' %}active{% endif %}">
+              <input type="radio" name="price" value="500-1000" {% if cur_price == '500-1000' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">₹500 – ₹1,000</span>
+            </label>
+            <label class="filter-option {% if cur_price == '1000-2500' %}active{% endif %}">
+              <input type="radio" name="price" value="1000-2500" {% if cur_price == '1000-2500' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">₹1,000 – ₹2,500</span>
+            </label>
+            <label class="filter-option {% if cur_price == '2500-5000' %}active{% endif %}">
+              <input type="radio" name="price" value="2500-5000" {% if cur_price == '2500-5000' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">₹2,500 – ₹5,000</span>
+            </label>
+            <label class="filter-option {% if cur_price == '5000-' %}active{% endif %}">
+              <input type="radio" name="price" value="5000-" {% if cur_price == '5000-' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">₹5,000+</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. CATEGORY -->
+        <div class="filter-section-block open" id="block-category">
+          <button type="button" class="filter-section-toggle" onclick="toggleBlock('block-category')">
+            <span class="filter-section-title">Category</span>
+            <span class="filter-toggle-icon bi bi-chevron-up"></span>
+          </button>
+          <div class="filter-section-body">
+            <label class="filter-option {% if cur_category == '' %}active{% endif %}">
+              <input type="radio" name="category" value="" {% if cur_category == '' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">All Categories</span>
+            </label>
+            {% if cur_product_range != 'korean' %}
+            <div style="font-size:.65rem;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.06em;padding:.45rem 0 .2rem;margin-top:.2rem;border-top:1px dashed var(--border,#e2e8f0);">💄 Makeup</div>
+            {% for cat in makeup_categories %}
+            <label class="filter-option {% if cur_category == cat %}active{% endif %}">
+              <input type="radio" name="category" value="{{ cat }}" {% if cur_category == cat %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">{{ cat|title|cut:"_" }}</span>
+            </label>
+            {% endfor %}
+            {% endif %}
+            {% if cur_product_range != 'makeup' %}
+            <div style="font-size:.65rem;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.06em;padding:.45rem 0 .2rem;margin-top:.2rem;border-top:1px dashed var(--border,#e2e8f0);">🌸 K-Beauty</div>
+            {% for cat in korean_categories %}
+            <label class="filter-option {% if cur_category == cat %}active{% endif %}">
+              <input type="radio" name="category" value="{{ cat }}" {% if cur_category == cat %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">{{ cat|title|cut:"_" }}</span>
+            </label>
+            {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- 4. FEATURED -->
+        <div class="filter-section-block" id="block-featured">
+          <button type="button" class="filter-section-toggle" onclick="toggleBlock('block-featured')">
+            <span class="filter-section-title">Availability</span>
+            <span class="filter-toggle-icon bi bi-chevron-down"></span>
+          </button>
+          <div class="filter-section-body">
+            <label class="filter-option {% if cur_featured == '' %}active{% endif %}">
+              <input type="radio" name="featured" value="" {% if cur_featured == '' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">All Products</span>
+            </label>
+            <label class="filter-option {% if cur_featured == '1' %}active{% endif %}">
+              <input type="radio" name="featured" value="1" {% if cur_featured == '1' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">⭐ Featured Only</span>
+            </label>
+          </div>
+        </div>
+
+      </div><!-- /filter-panel -->
+    </form>
+  </aside>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <div class="catalog-main">
+
+    <!-- Hero -->
+    <div class="cat-hero">
+      <div class="cat-hero-label">Lumina · Product Catalogue</div>
+      <h1>💄 Makeup &amp; 🌸 K-Beauty Collection</h1>
+      <p>{{ total_makeup }} Makeup · {{ total_korean }} K-Beauty · SAS Global · Authentic &amp; Affordable</p>
+    </div>
+
+    <!-- Staff bar -->
+    {% if user.is_staff or user.is_superuser or user.username == 'suhani' %}
+    <div class="staff-bar">
+      <span class="staff-bar-label"><i class="bi bi-shield-lock"></i> Staff Quick Links</span>
+      <a href="{% url 'employee:product_add' %}" class="staff-btn staff-btn-teal"><i class="bi bi-plus-circle"></i> Add Product</a>
+      <a href="{% url 'employee:bulk_import' %}" class="staff-btn staff-btn-gold"><i class="bi bi-upload"></i> Bulk Import</a>
+      <a href="{% url 'employee:product_list' %}" class="staff-btn staff-btn-gray"><i class="bi bi-table"></i> Manage All</a>
+      <a href="{% url 'employee:export_products' %}" class="staff-btn staff-btn-gold"><i class="bi bi-download"></i> Export CSV</a>
+    </div>
+    {% endif %}
+
+    <!-- Top bar: search + sort -->
+    <form method="get" id="search-sort-form">
+      <!-- Preserve all sidebar filters -->
+      {% if cur_product_range %}<input type="hidden" name="product_range" value="{{ cur_product_range }}">{% endif %}
+      {% if cur_category %}<input type="hidden" name="category" value="{{ cur_category }}">{% endif %}
+      {% if cur_price %}<input type="hidden" name="price" value="{{ cur_price }}">{% endif %}
+      {% if cur_brand %}<input type="hidden" name="brand" value="{{ cur_brand }}">{% endif %}
+      {% if cur_skin_type %}<input type="hidden" name="skin_type" value="{{ cur_skin_type }}">{% endif %}
+      {% if cur_featured %}<input type="hidden" name="featured" value="{{ cur_featured }}">{% endif %}
+
+      <div class="topbar">
+        <div class="search-wrap">
+          <i class="bi bi-search"></i>
+          <input type="text" name="q" class="search-input" id="search-input"
+                 value="{{ cur_q }}"
+                 placeholder="Search products, brands, ingredients…"
+                 autocomplete="off">
+        </div>
+
+        <select name="sort" class="sort-select" onchange="document.getElementById('search-sort-form').submit()">
+          <option value="" {% if cur_sort == '' %}selected{% endif %}>Sort: Default</option>
+          <option value="price_asc"  {% if cur_sort == 'price_asc' %}selected{% endif %}>Price: Low → High</option>
+          <option value="price_desc" {% if cur_sort == 'price_desc' %}selected{% endif %}>Price: High → Low</option>
+          <option value="name_asc"   {% if cur_sort == 'name_asc' %}selected{% endif %}>Name A → Z</option>
+          <option value="newest"     {% if cur_sort == 'newest' %}selected{% endif %}>Newest First</option>
+        </select>
+
+        <button type="submit" class="topbar-btn topbar-btn-teal">
+          <i class="bi bi-search"></i> Search
+        </button>
+
+        <!-- Quick range pills -->
+        <a href="{% url 'products:list' %}?product_range=makeup{% if cur_q %}&q={{ cur_q }}{% endif %}{% if cur_sort %}&sort={{ cur_sort }}{% endif %}"
+           class="topbar-btn topbar-btn-range {% if cur_product_range == 'makeup' %}range-active-makeup{% endif %}">
+          💄 Makeup
+        </a>
+        <a href="{% url 'products:list' %}?product_range=korean{% if cur_q %}&q={{ cur_q }}{% endif %}{% if cur_sort %}&sort={{ cur_sort }}{% endif %}"
+           class="topbar-btn topbar-btn-range {% if cur_product_range == 'korean' %}range-active-korean{% endif %}">
+          🌸 K-Beauty
+        </a>
+
+        <button type="button" class="topbar-btn topbar-btn-filter" id="filter-toggle-btn" onclick="toggleFilterSidebar()">
+          <i class="bi bi-funnel"></i> Filters
+          {% if active_filter_count %}<span class="filter-count-dot">{{ active_filter_count }}</span>{% endif %}
+        </button>
+
+        {% if cur_q or cur_category or cur_price or cur_product_range or cur_brand or cur_skin_type or cur_featured %}
+        <a href="{% url 'products:list' %}" class="topbar-btn topbar-btn-ghost">
+          <i class="bi bi-x-circle"></i> Clear
+        </a>
+        {% endif %}
+      </div>
+    </form>
+
+    <!-- Results summary -->
+    <div class="results-strip">
+      Showing <strong>{{ total_results }}</strong> product{{ total_results|pluralize }}
+      {% if cur_q %} for "<strong>{{ cur_q }}</strong>"{% endif %}
+      {% if active_filter_count %} · <span style="color:var(--teal);">{{ active_filter_count }} filter{{ active_filter_count|pluralize }} applied</span>{% endif %}
+    </div>
+
+    <!-- ═══════════════════ MAKEUP SECTION ═══════════════════ -->
+    {% if makeup_brands %}
+    <div id="sec-makeup">
+      {% for brand_name, products in makeup_brands.items %}
+      <div style="margin-bottom:2rem;">
+        <div class="section-hdr">
+          <h2><i class="bi bi-palette"></i> {{ brand_name }}</h2>
+          <span class="count-badge">{{ products|length }} product{{ products|length|pluralize }}</span>
+        </div>
+        <div class="prod-grid">
+          {% for p in products %}
+          <div class="prod-card" data-aos="zoom-in" data-aos-delay="{% cycle '0' '100' '200' %}">
+            <div class="prod-img-wrap">
+              {% if p.image_url %}
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="prod-img-placeholder" style="display:none;">💄</div>
+              {% else %}
+                <div class="prod-img-placeholder">💄</div>
+              {% endif %}
+              <span class="prod-range-badge rb-makeup">Makeup</span>
+              {% if p.is_featured %}<span class="prod-featured-badge">★ Featured</span>{% endif %}
+              {% if user.is_staff or user.is_superuser or user.username == 'suhani' %}
+              <div class="prod-staff-overlay">
+                <a href="{% url 'employee:product_edit' pk=p.pk %}" class="overlay-btn overlay-edit"><i class="bi bi-pencil"></i> Edit</a>
+                <a href="{% url 'employee:product_delete' pk=p.pk %}" class="overlay-btn overlay-delete"><i class="bi bi-trash"></i> Delete</a>
+              </div>
+              {% endif %}
+            </div>
+            <div class="prod-body">
+              <div class="prod-name">{{ p.name }}</div>
+              <div class="prod-brand">{{ p.brand }}</div>
+              <span class="cat-chip cat-chip-makeup">{{ p.get_category_display }}</span>
+              {% if p.description %}<div class="prod-desc">{{ p.description|truncatewords:16 }}</div>{% endif %}
+              {% if p.price %}<div class="prod-price">₹{{ p.price }}</div>{% endif %}
+              {% if p.shades_available %}
+              <div class="shade-count"><i class="bi bi-palette" style="margin-right:.3rem;color:var(--teal);"></i>{{ p.shades_available|length }} shade{{ p.shades_available|length|pluralize }}</div>
+              <div class="shade-row">
+                {% for shade in p.shades_available|slice:":9" %}
+                  <span class="shade-swatch" style="background:{{ shade.hex }};" title="{{ shade.name }}"></span>
+                {% endfor %}
+                {% if p.shades_available|length > 9 %}<span style="font-size:.63rem;color:var(--muted);align-self:center;">+{{ p.shades_available|length|add:"-9" }}</span>{% endif %}
+              </div>
+              {% endif %}
+              {% if p.coverage or p.finish %}
+              <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.45rem;">
+                {% if p.coverage %}<span style="background:rgba(13,148,136,.1);color:#065f46;padding:.12rem .45rem;border-radius:20px;font-size:.6rem;font-weight:600;">{{ p.coverage|title }} Coverage</span>{% endif %}
+                {% if p.finish %}<span style="background:rgba(201,169,110,.12);color:#92400e;padding:.12rem .45rem;border-radius:20px;font-size:.6rem;font-weight:600;">{{ p.finish|title }} Finish</span>{% endif %}
+              </div>
+              {% endif %}
+              <a href="{% url 'products:detail' pk=p.pk %}" class="prod-shop-btn"><i class="bi bi-eye"></i> View Details</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% elif not korean_ranges %}
+    <!-- Empty state only when both sections are empty -->
+    {% endif %}
+
+    <!-- ═══════════════════ K-BEAUTY SECTION ═══════════════════ -->
+    {% if korean_ranges %}
+    <div id="sec-korean">
+      <!-- K-Beauty hero banner -->
+      <div style="background:linear-gradient(135deg,#0a0a0f 0%,#1a1a2e 60%,#0d1f3c 100%);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(13,148,136,.2) 0%,transparent 70%);"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0d9488;margin-bottom:.3rem;">SAS Global · Korean Skin Care Innovations</div>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,2.5vw,1.7rem);font-weight:700;color:#fff;margin-bottom:.25rem;">🌸 Korean Skin Care Range</h2>
+          <p style="font-size:.78rem;color:rgba(255,255,255,.5);margin:0;">{{ total_korean }} products across premium ranges · <a href="https://sasglobal.biz" target="_blank" style="color:#0d9488;">sasglobal.biz</a></p>
+        </div>
+      </div>
+
+      {% for brand_name, products in korean_ranges.items %}
+      <div class="krange-header" style="background:linear-gradient(135deg,rgba(13,148,136,.06),rgba(8,145,178,.03));border:1px solid rgba(13,148,136,.18);border-radius:12px;padding:.85rem 1rem;margin-bottom:.85rem;display:flex;align-items:center;gap:.85rem;">
+        <div class="krange-icon" style="font-size:1.8rem;flex-shrink:0;">
+          {% if brand_name == "Resurrection Aesthetic Range" %}✨
+          {% elif brand_name == "Differensea Blue Biome Repair Range" %}🌊
+          {% elif brand_name == "Revital Energy Line" %}🌿
+          {% elif brand_name == "Advance Formula Serum Range" %}🔬
+          {% elif brand_name == "Ultimate Repair Range" %}💊
+          {% elif brand_name == "Phyto PDRN Skin Boosting Range" %}⚗️
+          {% elif brand_name == "Post-Laser & Post-Surgery Care" %}🩹
+          {% elif brand_name == "Exolusion Time Rewinder" %}⏱️
+          {% else %}🌸{% endif %}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.2rem;">
+            <h2 class="krange-title" style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;color:var(--text,#0f172a);margin:0;">{{ brand_name }}</h2>
+            <span class="count-badge">{{ products|length }} product{{ products|length|pluralize }}</span>
+          </div>
+          <p style="font-size:.72rem;color:var(--muted,#64748b);margin:0;line-height:1.5;">
+            {% if brand_name == "Resurrection Aesthetic Range" %}Exosome-powered premium care for mature, sensitive skin.
+            {% elif brand_name == "Differensea Blue Biome Repair Range" %}Blue Biome Complex — barrier repair and deep soothing.
+            {% elif brand_name == "Revital Energy Line" %}Houttuynia Cordata + Centella for hydration and glow.
+            {% elif brand_name == "Advance Formula Serum Range" %}Exosome + Vitamin C for rejuvenation and brightening.
+            {% elif brand_name == "Ultimate Repair Range" %}Retinol, peptides, ceramides — clinical anti-aging care.
+            {% elif brand_name == "Phyto PDRN Skin Boosting Range" %}Salmon DNA PDRN for cellular renewal and elasticity.
+            {% elif brand_name == "Post-Laser & Post-Surgery Care" %}Accelerated recovery and comfort after procedures.
+            {% elif brand_name == "Exolusion Time Rewinder" %}Vibration massager + exosome serum for firmness.
+            {% else %}Premium Korean skincare from SAS Global.{% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="prod-grid" style="margin-bottom:2rem;">
+        {% for p in products %}
+        <div class="prod-card" data-aos="zoom-in" data-aos-delay="{% cycle '0' '100' '200' %}">
+          <div class="prod-img-wrap">
+            {% if p.image_url %}
+              <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div class="prod-img-placeholder" style="display:none;">🌿</div>
+            {% else %}
+              <div class="prod-img-placeholder">
+                {% if p.category == 'cleanser' %}🫧{% elif p.category == 'toner' %}💧{% elif p.category in 'serum,essence,ampoule' %}✨{% elif p.category == 'sunscreen' %}☀️{% elif p.category == 'mask' %}🎭{% elif p.category == 'eye_cream' %}👁️{% elif p.category == 'treatment' %}💊{% elif p.category == 'mist' %}🌫️{% else %}🌿{% endif %}
+              </div>
+            {% endif %}
+            <span class="prod-range-badge rb-korean">K-Beauty</span>
+            {% if p.is_featured %}<span class="prod-featured-badge">★ Featured</span>{% endif %}
+            {% if user.is_staff or user.is_superuser or user.username == 'suhani' %}
+            <div class="prod-staff-overlay">
+              <a href="{% url 'employee:product_edit' pk=p.pk %}" class="overlay-btn overlay-edit"><i class="bi bi-pencil"></i> Edit</a>
+              <a href="{% url 'employee:product_delete' pk=p.pk %}" class="overlay-btn overlay-delete"><i class="bi bi-trash"></i> Delete</a>
+            </div>
+            {% endif %}
+          </div>
+          <div class="prod-body">
+            <div class="prod-name">{{ p.name }}</div>
+            <div class="prod-brand" style="font-size:.65rem;">{{ p.brand }}</div>
+            <span class="cat-chip">{{ p.get_category_display }}</span>
+            <div style="font-size:.6rem;color:var(--muted,#64748b);font-family:monospace;margin-bottom:.3rem;">SKU: {{ p.sku }}</div>
+            {% if p.description %}<div class="prod-desc">{{ p.description|truncatewords:14 }}</div>{% endif %}
+            {% if p.price %}<div class="prod-price">₹{{ p.price }}</div>{% endif %}
+            {% if p.key_ingredients %}
+            <div style="font-size:.65rem;color:var(--muted,#64748b);margin-bottom:.4rem;line-height:1.4;">
+              <i class="bi bi-leaf"></i> {{ p.key_ingredients|truncatechars:55 }}
+            </div>
+            {% endif %}
+            {% if p.suitable_for_skin_types %}
+            <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.45rem;">
+              {% for st in p.suitable_for_skin_types|slice:":3" %}
+              <span style="background:rgba(13,148,136,.08);color:#065f46;border:1px solid rgba(13,148,136,.18);padding:.08rem .4rem;border-radius:20px;font-size:.58rem;font-weight:600;">{% if st == 'all' %}All Skin Types{% else %}{{ st|title }}{% endif %}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <a href="{% url 'products:detail' pk=p.pk %}" class="prod-shop-btn"><i class="bi bi-eye"></i> View Details</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Empty state -->
+    {% if not makeup_brands and not korean_ranges %}
+    <div class="empty-state">
+      <div class="es-icon">🔍</div>
+      <h3>No Products Found</h3>
+      <p>Try adjusting your filters or search term.</p>
+      <a href="{% url 'products:list' %}" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.75rem;padding:.45rem 1.1rem;background:var(--teal);color:#fff;border-radius:100px;font-size:.8rem;font-weight:600;text-decoration:none;">
+        <i class="bi bi-x-circle"></i> Clear All Filters
+      </a>
+    </div>
+    {% endif %}
+
+  </div><!-- /catalog-main -->
+</div><!-- /catalog-layout -->
+
+<!-- ═══════════════════════════════════════════════
+     MOBILE FILTER BOTTOM DRAWER (Amazon-style)
+     Hidden on desktop, shown only on ≤768px
+     ═══════════════════════════════════════════════ -->
+<div class="mob-filter-backdrop" id="mob-filter-backdrop" onclick="closeMobFilterDrawer()"></div>
+
+<div class="mob-filter-drawer" id="mob-filter-drawer" role="dialog" aria-modal="true" aria-label="Filter products">
+  <div class="mob-drawer-handle"></div>
+
+  <div class="mob-drawer-header">
+    <h3><i class="bi bi-funnel-fill" style="color:var(--teal);"></i> Filters
+      {% if active_filter_count %}<span style="background:var(--teal);color:#fff;font-size:.65rem;padding:.1rem .45rem;border-radius:20px;font-weight:700;">{{ active_filter_count }}</span>{% endif %}
+    </h3>
+    <button class="mob-drawer-close" onclick="closeMobFilterDrawer()" aria-label="Close filters">✕</button>
+  </div>
+
+  <div class="mob-drawer-body">
+    <form method="get" id="mob-filter-form">
+      {% if cur_q %}<input type="hidden" name="q" value="{{ cur_q }}">{% endif %}
+      {% if cur_sort %}<input type="hidden" name="sort" value="{{ cur_sort }}">{% endif %}
+
+      <!-- 1. PRODUCT RANGE -->
+      <div class="mob-filter-section mob-open" id="mob-block-range">
+        <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-range')" aria-expanded="true">
+          <span class="mob-filter-section-title">Product Range</span>
+          <i class="bi bi-chevron-up mob-filter-chevron"></i>
+        </button>
+        <div class="mob-filter-section-body">
+          <label class="mob-filter-option {% if cur_product_range == '' %}mob-active{% endif %}">
+            <input type="radio" name="product_range" value="" {% if cur_product_range == '' %}checked{% endif %}>
+            All Products
+          </label>
+          <label class="mob-filter-option {% if cur_product_range == 'makeup' %}mob-active{% endif %}">
+            <input type="radio" name="product_range" value="makeup" {% if cur_product_range == 'makeup' %}checked{% endif %}>
+            💄 Makeup
+          </label>
+          <label class="mob-filter-option {% if cur_product_range == 'korean' %}mob-active{% endif %}">
+            <input type="radio" name="product_range" value="korean" {% if cur_product_range == 'korean' %}checked{% endif %}>
+            🌸 K-Beauty
+          </label>
+        </div>
+      </div>
+
+      <!-- 2. PRICE RANGE -->
+      <div class="mob-filter-section mob-open" id="mob-block-price">
+        <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-price')" aria-expanded="true">
+          <span class="mob-filter-section-title">Price Range</span>
+          <i class="bi bi-chevron-up mob-filter-chevron"></i>
+        </button>
+        <div class="mob-filter-section-body">
+          <label class="mob-filter-option {% if cur_price == '' %}mob-active{% endif %}">
+            <input type="radio" name="price" value="" {% if cur_price == '' %}checked{% endif %}>Any Price</label>
+          <label class="mob-filter-option {% if cur_price == '0-500' %}mob-active{% endif %}">
+            <input type="radio" name="price" value="0-500" {% if cur_price == '0-500' %}checked{% endif %}>Under ₹500</label>
+          <label class="mob-filter-option {% if cur_price == '500-1000' %}mob-active{% endif %}">
+            <input type="radio" name="price" value="500-1000" {% if cur_price == '500-1000' %}checked{% endif %}>₹500 – ₹1,000</label>
+          <label class="mob-filter-option {% if cur_price == '1000-2500' %}mob-active{% endif %}">
+            <input type="radio" name="price" value="1000-2500" {% if cur_price == '1000-2500' %}checked{% endif %}>₹1,000 – ₹2,500</label>
+          <label class="mob-filter-option {% if cur_price == '2500-5000' %}mob-active{% endif %}">
+            <input type="radio" name="price" value="2500-5000" {% if cur_price == '2500-5000' %}checked{% endif %}>₹2,500 – ₹5,000</label>
+          <label class="mob-filter-option {% if cur_price == '5000-' %}mob-active{% endif %}">
+            <input type="radio" name="price" value="5000-" {% if cur_price == '5000-' %}checked{% endif %}>₹5,000+</label>
+        </div>
+      </div>
+
+      <!-- 3. CATEGORY -->
+      <div class="mob-filter-section" id="mob-block-category">
+        <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-category')" aria-expanded="false">
+          <span class="mob-filter-section-title">Category</span>
+          <i class="bi bi-chevron-down mob-filter-chevron"></i>
+        </button>
+        <div class="mob-filter-section-body" style="display:none;">
+          <label class="mob-filter-option {% if cur_category == '' %}mob-active{% endif %}">
+            <input type="radio" name="category" value="" {% if cur_category == '' %}checked{% endif %}>All Categories</label>
+          {% if cur_product_range != 'korean' %}
+          <div style="font-size:.68rem;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;padding:.5rem 0 .2rem;border-top:1px dashed var(--border,#e2e8f0);margin-top:.2rem;">💄 Makeup</div>
+          {% for cat in makeup_categories %}
+          <label class="mob-filter-option {% if cur_category == cat %}mob-active{% endif %}">
+            <input type="radio" name="category" value="{{ cat }}" {% if cur_category == cat %}checked{% endif %}>{{ cat|title|cut:"_" }}</label>
+          {% endfor %}
+          {% endif %}
+          {% if cur_product_range != 'makeup' %}
+          <div style="font-size:.68rem;font-weight:700;color:var(--muted,#64748b);text-transform:uppercase;padding:.5rem 0 .2rem;border-top:1px dashed var(--border,#e2e8f0);margin-top:.2rem;">🌸 K-Beauty</div>
+          {% for cat in korean_categories %}
+          <label class="mob-filter-option {% if cur_category == cat %}mob-active{% endif %}">
+            <input type="radio" name="category" value="{{ cat }}" {% if cur_category == cat %}checked{% endif %}>{{ cat|title|cut:"_" }}</label>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- 4. FEATURED -->
+      <div class="mob-filter-section" id="mob-block-featured">
+        <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-featured')" aria-expanded="false">
+          <span class="mob-filter-section-title">Availability</span>
+          <i class="bi bi-chevron-down mob-filter-chevron"></i>
+        </button>
+        <div class="mob-filter-section-body" style="display:none;">
+          <label class="mob-filter-option {% if cur_featured == '' %}mob-active{% endif %}">
+            <input type="radio" name="featured" value="" {% if cur_featured == '' %}checked{% endif %}>All Products</label>
+          <label class="mob-filter-option {% if cur_featured == '1' %}mob-active{% endif %}">
+            <input type="radio" name="featured" value="1" {% if cur_featured == '1' %}checked{% endif %}>⭐ Featured Only</label>
+        </div>
+      </div>
+
+    </form>
+  </div><!-- /mob-drawer-body -->
+
+  <div class="mob-drawer-footer">
+    <a href="{% url 'products:list' %}{% if cur_sort %}?sort={{ cur_sort }}{% endif %}" class="mob-drawer-clear">
+      <i class="bi bi-x-circle" style="margin-right:.3rem;"></i>Clear All
+    </a>
+    <button type="button" class="mob-drawer-apply" onclick="document.getElementById('mob-filter-form').submit()">
+      Apply Filters
+    </button>
+  </div>
+</div><!-- /mob-filter-drawer -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Desktop sidebar: toggle collapsible blocks ──
+function toggleBlock(id) {
+  const block = document.getElementById(id);
+  block.classList.toggle('open');
+  const icon = block.querySelector('.filter-toggle-icon');
+  if (block.classList.contains('open')) {
+    icon.classList.remove('bi-chevron-down');
+    icon.classList.add('bi-chevron-up');
+  } else {
+    icon.classList.remove('bi-chevron-up');
+    icon.classList.add('bi-chevron-down');
+  }
+}
+
+// ── Desktop sidebar: toggle the whole panel ──
+function toggleFilterSidebar() {
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    openMobFilterDrawer();
+    return;
+  }
+  const sidebar = document.getElementById('filter-sidebar');
+  const btn     = document.getElementById('filter-toggle-btn');
+  const isOpen  = sidebar.classList.toggle('filter-open');
+  btn.classList.toggle('active', isOpen);
+  const icon = btn.querySelector('i');
+  icon.className = isOpen ? 'bi bi-funnel-fill' : 'bi bi-funnel';
+}
+
+// ── Mobile bottom drawer ──
+function openMobFilterDrawer() {
+  const backdrop = document.getElementById('mob-filter-backdrop');
+  const drawer   = document.getElementById('mob-filter-drawer');
+  // Show elements first (display), then trigger transition
+  backdrop.style.display = 'block';
+  requestAnimationFrame(() => {
+    backdrop.classList.add('visible');
+    drawer.classList.add('open');
+  });
+  document.body.style.overflow = 'hidden'; // prevent page scroll behind drawer
+}
+
+function closeMobFilterDrawer() {
+  const backdrop = document.getElementById('mob-filter-backdrop');
+  const drawer   = document.getElementById('mob-filter-drawer');
+  backdrop.classList.remove('visible');
+  drawer.classList.remove('open');
+  document.body.style.overflow = '';
+  // Hide backdrop after transition
+  setTimeout(() => { backdrop.style.display = 'none'; }, 300);
+}
+
+// Toggle collapsible sections inside mobile drawer
+function toggleMobBlock(id) {
+  const block  = document.getElementById(id);
+  const body   = block.querySelector('.mob-filter-section-body');
+  const icon   = block.querySelector('.mob-filter-chevron');
+  const isOpen = block.classList.toggle('mob-open');
+  body.style.display = isOpen ? 'block' : 'none';
+  if (isOpen) {
+    icon.classList.remove('bi-chevron-down');
+    icon.classList.add('bi-chevron-up');
+  } else {
+    icon.classList.remove('bi-chevron-up');
+    icon.classList.add('bi-chevron-down');
+  }
+}
+
+// Close drawer on swipe down
+(function() {
+  let startY = 0;
+  const drawer = document.getElementById('mob-filter-drawer');
+  drawer.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+  drawer.addEventListener('touchend', e => {
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 80) closeMobFilterDrawer(); // swipe down > 80px closes drawer
+  }, { passive: true });
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const isMobile = window.innerWidth <= 768;
+
+  if (!isMobile) {
+    // Desktop: always open filter sidebar
+    const sidebar = document.getElementById('filter-sidebar');
+    const btn     = document.getElementById('filter-toggle-btn');
+    sidebar.classList.add('filter-open');
+    btn.classList.add('active');
+    btn.querySelector('i').className = 'bi bi-funnel-fill';
+  }
+
+  // Submit search-sort form on Enter key
+  document.getElementById('search-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('search-sort-form').submit();
+    }
+  });
+
+  // On mobile, if there are active filters, auto-open the drawer briefly to hint
+  // (optional — remove the block below if you don't want this)
+  const hasActiveFilters = {{ active_filter_count|default:0 }} > 0;
+});
+</script>
+{% endblock %}

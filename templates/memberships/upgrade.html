@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Upgrade Membership — Lumina{% endblock %}
+{% block page_title %}Membership Plans{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:960px; padding-block:2rem;">
+
+  <!-- Header -->
+  <div style="text-align:center; margin-bottom:2.5rem;">
+    <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.25);border-radius:100px;padding:.35rem 1rem;margin-bottom:1rem;">
+      <i class="bi bi-stars" style="color:var(--sb-gold);"></i>
+      <span style="font-size:.78rem;font-weight:700;color:var(--sb-gold);letter-spacing:.08em;text-transform:uppercase;">Membership Plans</span>
+    </div>
+    <h1 style="font-size:clamp(1.6rem,4vw,2.5rem);margin-bottom:.75rem;">Choose Your Lumina Plan</h1>
+    <p style="color:var(--muted);max-width:500px;margin:0 auto;font-size:.95rem;">
+      Unlock richer product recommendations, tier-aware AI, and exclusive features.
+    </p>
+  </div>
+
+  <!-- Tier Cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-bottom:2rem;">
+
+    {% for tier in tiers %}
+    <div class="tier-card{% if tier.key == 'vip' %} vip-glow{% endif %}"
+         data-aos="fade-up"
+         data-aos-delay="{{ tier.aos_delay }}"
+         style="
+           background:var(--surface);
+           border-radius:var(--r-xl);
+           padding:1.75rem;
+           border:2px solid {% if tier.key == 'vip' %}rgba(201,169,110,.5){% elif tier.key == 'medium' %}rgba(13,148,136,.3){% else %}rgba(255,255,255,.1){% endif %};
+           position:relative;
+           transition:transform .2s ease, box-shadow .2s ease;
+         ">
+
+      <!-- Current badge -->
+      {% if tier.is_current %}
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+           background:var(--sb-teal);color:#fff;padding:.2rem 1rem;border-radius:100px;
+           font-size:.68rem;font-weight:700;white-space:nowrap;">
+        ✓ Current Plan
+      </div>
+      {% endif %}
+
+      <!-- Tier badge -->
+      <div style="margin-bottom:1rem;">
+        <span class="tier-badge tier-{{ tier.key }}" style="font-size:.72rem;">{{ tier.badge }}</span>
+      </div>
+
+      <h3 style="font-size:1.3rem;margin-bottom:.25rem;">{{ tier.name }}</h3>
+      <div style="font-size:1.6rem;font-weight:700;color:{% if tier.key == 'vip' %}var(--sb-gold){% elif tier.key == 'medium' %}var(--sb-teal){% else %}rgba(255,255,255,.5){% endif %};margin-bottom:1.25rem;">
+        {{ tier.price }}
+      </div>
+
+      <!-- Benefits -->
+      <ul style="list-style:none;margin-bottom:1.5rem;padding:0;">
+        {% for benefit in tier.benefits %}
+        <li style="display:flex;align-items:flex-start;gap:.6rem;padding:.4rem 0;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--border);">
+          <i class="bi bi-check-circle-fill" style="color:{% if tier.key == 'vip' %}var(--sb-gold){% elif tier.key == 'medium' %}var(--sb-teal){% else %}#64748b{% endif %};margin-top:.1rem;flex-shrink:0;"></i>
+          {{ benefit }}
+        </li>
+        {% endfor %}
+      </ul>
+
+      <!-- CTA -->
+      {% if tier.key == 'normal' %}
+        {% if current_tier == 'normal' %}
+          <div style="text-align:center;padding:.65rem;border-radius:100px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:.85rem;font-weight:600;">
+            Your current plan
+          </div>
+        {% endif %}
+      {% else %}
+        {% if current_tier == tier.key %}
+          <div style="text-align:center;padding:.65rem;border-radius:100px;background:rgba(13,148,136,.15);color:var(--sb-teal);font-size:.85rem;font-weight:600;">
+            ✓ Active
+          </div>
+        {% else %}
+          <form method="post" action="{% url 'memberships:upgrade_confirm' %}">
+            {% csrf_token %}
+            <input type="hidden" name="tier" value="{{ tier.key }}">
+            <button type="submit" style="
+              width:100%;padding:.7rem;border:none;border-radius:100px;cursor:pointer;
+              font-size:.875rem;font-weight:700;
+              background:{% if tier.key == 'vip' %}var(--sb-gold){% else %}var(--sb-teal){% endif %};
+              color:{% if tier.key == 'vip' %}#0a0a0f{% else %}#fff{% endif %};
+              transition:opacity .15s;
+            " onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              Upgrade to {{ tier.name }} →
+            </button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Redeem points link -->
+  <p style="text-align:center;font-size:.85rem;color:var(--muted);">
+    Have loyalty points?
+    <a href="{% url 'memberships:redeem' %}" style="color:var(--sb-teal);font-weight:600;">Redeem them here →</a>
+  </p>
+
+</div>
+
+<!-- Confetti (triggered on tier upgrade) -->
+{% if request.session.tier_just_upgraded %}
+<canvas id="confetti-canvas"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 6 + 4,
+    d: Math.random() * 120,
+    color: ['#c9a96e','#0d9488','#fff','#f59e0b','#e2c080'][Math.floor(Math.random()*5)],
+    tilt: Math.random() * 10 - 10,
+    tiltAngle: 0,
+    tiltSpeed: Math.random() * 0.1 + 0.05,
+  }));
+  let elapsed = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.tiltAngle += p.tiltSpeed;
+      p.y += (Math.cos(p.d) + 1 + p.r / 2) * 0.8;
+      p.x += Math.sin(p.d) * 0.6;
+      p.tilt = Math.sin(p.tiltAngle) * 15;
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+      ctx.beginPath();
+      ctx.lineWidth = p.r / 2;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+      ctx.stroke();
+    });
+    elapsed += 16;
+    if (elapsed < 3000) requestAnimationFrame(draw);
+    else canvas.remove();
+  }
+  requestAnimationFrame(draw);
+  // Clear session flag
+  fetch('{% url "memberships:upgrade_confirm" %}', {
+    method:'POST',
+    headers:{'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'','Content-Type':'application/json'},
+    body: JSON.stringify({clear_confetti: true})
+  }).catch(()=>{});
+})();
+</script>
+{% endif %}
+
+{% endblock %}

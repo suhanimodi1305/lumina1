@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Makeup — Lumina{% endblock %}
+{% block page_title %}Makeup{% endblock %}
+
+{% block extra_css %}
+<style>
+.shop-wrap { max-width: 960px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.shop-hdr {
+  background: linear-gradient(135deg, #0a0a0f, #1a0a1e);
+  border-radius: 16px; padding: 1.5rem;
+  margin-bottom: 1.5rem; display: flex;
+  align-items: center; gap: 1rem;
+  border: 1px solid rgba(236,72,153,.2);
+}
+.shop-hdr-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(236,72,153,.3), rgba(168,85,247,.2));
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.shop-hdr-text h2 { color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0 0 .15rem; }
+.shop-hdr-text p  { color: rgba(255,255,255,.45); font-size: .78rem; margin: 0; }
+.shop-hdr-btn {
+  margin-left: auto; flex-shrink: 0;
+  padding: .55rem 1.15rem; background: #ec4899; color: #fff;
+  border-radius: 100px; font-size: .8rem; font-weight: 700;
+  text-decoration: none; transition: background .15s;
+}
+.shop-hdr-btn:hover { background: #db2777; color: #fff; }
+
+/* ── PRODUCT GRID ── */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 1rem;
+}
+.shop-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 8px rgba(0,0,0,.05);
+  transition: transform .15s, box-shadow .15s;
+}
+.shop-card:hover { transform: translateY(-3px); box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+
+.shop-img-wrap {
+  height: 180px; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  display: flex; align-items: center; justify-content: center;
+}
+.shop-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.shop-img-placeholder { font-size: 3rem; }
+.shop-featured-badge {
+  position: absolute; top: .5rem; right: .5rem;
+  background: #c9a96e; color: #0a0a0f;
+  padding: .15rem .5rem; border-radius: 20px;
+  font-size: .6rem; font-weight: 800; text-transform: uppercase;
+}
+
+.shop-body { padding: .8rem; }
+.shop-name  { font-size: .85rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; line-height: 1.3; }
+.shop-brand { font-size: .7rem; color: var(--muted); margin-bottom: .4rem; }
+.shop-cat   {
+  display: inline-block; padding: .15rem .5rem; border-radius: 20px;
+  font-size: .62rem; font-weight: 600; margin-bottom: .45rem;
+  background: rgba(236,72,153,.1); color: #9d174d;
+}
+.shop-price { font-size: .95rem; font-weight: 800; color: #0d9488; margin-bottom: .5rem; }
+.shop-btn {
+  display: flex; align-items: center; justify-content: center; gap: .3rem;
+  padding: .4rem; background: #0d9488; color: #fff; border-radius: 8px;
+  font-size: .75rem; font-weight: 600; text-decoration: none;
+  transition: background .12s; width: 100%;
+}
+.shop-btn:hover { background: #0f766e; color: #fff; }
+
+/* ── SCAN CTA ── */
+.shop-scan-cta {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.shop-scan-cta-icon { font-size: 2rem; flex-shrink: 0; }
+.shop-scan-cta div p { margin: 0; font-size: .8rem; color: var(--muted); }
+.shop-scan-cta div h4 { font-size: .9rem; font-weight: 700; color: var(--text); margin: 0 0 .15rem; }
+.shop-scan-link {
+  margin-left: auto; flex-shrink: 0;
+  padding: .5rem 1rem; background: #0d9488; color: #fff;
+  border-radius: 100px; font-size: .78rem; font-weight: 700;
+  text-decoration: none; white-space: nowrap;
+}
+.shop-scan-link:hover { background: #0f766e; color: #fff; }
+
+.shop-section-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+.empty-state {
+  text-align: center; padding: 3rem; background: var(--surface);
+  border: 2px dashed var(--border); border-radius: 14px;
+}
+.empty-state .e-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+.empty-state h3 { font-size: 1rem; margin-bottom: .4rem; }
+.empty-state p  { font-size: .8rem; color: var(--muted); }
+
+@media (max-width: 480px) {
+  .shop-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shop-wrap">
+
+  <div class="shop-hdr">
+    <div class="shop-hdr-icon">💄</div>
+    <div class="shop-hdr-text">
+      <h2>Makeup Collection</h2>
+      <p>AI-matched shades for your undertone and skin tone</p>
+    </div>
+    <a href="{% url 'products:list' %}?range=makeup" class="shop-hdr-btn">Browse All</a>
+  </div>
+
+  {# Scan CTA #}
+  <div class="shop-scan-cta">
+    <div class="shop-scan-cta-icon">🎨</div>
+    <div>
+      <h4>Get your shade match</h4>
+      <p>Scan your face and let AI find your exact foundation, blush & lipstick shades</p>
+    </div>
+    <a href="{% url 'scanner:upload' %}" class="shop-scan-link">
+      <i class="bi bi-camera-fill"></i> Scan Now
+    </a>
+  </div>
+
+  <div class="shop-section-label">💄 Featured Makeup</div>
+
+  {% if featured_products %}
+  <div class="shop-grid">
+    {% for p in featured_products %}
+    <div class="shop-card">
+      <div class="shop-img-wrap">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="shop-img-placeholder" style="display:none;">💄</div>
+        {% else %}
+          <div class="shop-img-placeholder">💄</div>
+        {% endif %}
+        {% if p.is_featured %}<span class="shop-featured-badge">★ Featured</span>{% endif %}
+      </div>
+      <div class="shop-body">
+        <div class="shop-name">{{ p.name }}</div>
+        <div class="shop-brand">{{ p.brand }}</div>
+        <span class="shop-cat">{{ p.get_category_display }}</span>
+        {% if p.price %}<div class="shop-price">₹{{ p.price }}</div>{% endif %}
+        <a href="https://sasglobal.biz" target="_blank" class="shop-btn">
+          <i class="bi bi-bag-check"></i> Shop Now
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="e-icon">💄</div>
+    <h3>No featured makeup yet</h3>
+    <p>Browse the full makeup catalogue to see all products.</p>
+    <a href="{% url 'products:list' %}?range=makeup" style="color:#0d9488;font-weight:600;font-size:.85rem;">
+      View all makeup →
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+{% load static %}
+{# ── Base template for auth pages (login, signup) — no sidebar, no topbar ── #}
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>{% block title %}Lumina{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons — self-hosted (no CDN dependency) -->
+  <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {# Apply theme before first paint — prevents flash #}
+  <script>(function(){var t=localStorage.getItem('lux_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <style>
+    :root {
+      --page-bg: #f5f3f0; --surface: #ffffff; --border: #e8e4df;
+      --text: #1a1a2e; --muted: #64748b;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+    }
+    [data-theme="dark"] {
+      --page-bg: #0d0d14; --surface: #12121a;
+      --border: rgba(255,255,255,.08);
+      --text: rgba(255,255,255,.9); --muted: rgba(255,255,255,.45);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans); background: var(--page-bg);
+      color: var(--text); font-size: 15px; line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* ── AUTH SHELL ── */
+    .auth-shell {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 1.5rem 1rem 2rem;
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV BAR (minimal) ── */
+    .auth-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 52px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 1.25rem; gap: .75rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.05);
+    }
+    .auth-nav-brand {
+      font-family: var(--font-serif); font-size: 1.3rem; font-weight: 700;
+      color: #c9a96e; letter-spacing: .04em; text-decoration: none;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .auth-nav-brand-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: linear-gradient(135deg, #0d9488, #0891b2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 700; color: #fff;
+      font-family: var(--font-serif);
+    }
+    .auth-nav-spacer { flex: 1; }
+    .auth-theme-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-size: .9rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .12s;
+    }
+    .auth-theme-btn:hover { background: var(--page-bg); color: var(--text); }
+
+    /* Push content below nav */
+    .auth-shell { padding-top: 68px; }
+
+    /* Django messages */
+    .auth-messages { width: 100%; max-width: 420px; margin-bottom: .75rem; }
+    .auth-msg {
+      padding: .65rem .9rem; border-radius: 10px; font-size: .82rem;
+      display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem;
+    }
+    .auth-msg-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .auth-msg-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .auth-msg-info    { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{# Minimal top nav #}
+<nav class="auth-nav">
+  <a href="{% url 'core:home' %}" class="auth-nav-brand">
+    <div class="auth-nav-brand-icon">L</div>
+    <img src="{% static 'images/lumina-logo.svg' %}" alt="Lumina" style="height:20px;width:auto;margin-left:2px;">
+  </a>
+  <div class="auth-nav-spacer"></div>
+  <button class="auth-theme-btn" id="authThemeBtn" title="Toggle theme">
+    <i class="bi bi-moon-stars" id="authThemeIcon"></i>
+  </button>
+</nav>
+
+<div class="auth-shell">
+  {# Django messages #}
+  {% if messages %}
+  <div class="auth-messages">
+    {% for message in messages %}
+    <div class="auth-msg auth-msg-{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% else %}info{% endif %}">
+      <i class="bi bi-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% else %}info-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Session expired banner (from ?expired=1 redirect) #}
+  {% if request.GET.expired %}
+  <div class="auth-messages" style="max-width:480px;">
+    <div class="auth-msg" style="background:rgba(245,158,11,.1);color:#92400e;border:1px solid rgba(245,158,11,.35);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;gap:.65rem;">
+      <i class="bi bi-clock-history" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0;"></i>
+      <span><strong>Your session expired</strong> due to inactivity. Please sign in again to continue.</span>
+    </div>
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<script>
+// Theme toggle
+const authThemeBtn  = document.getElementById('authThemeBtn');
+const authThemeIcon = document.getElementById('authThemeIcon');
+const _t = localStorage.getItem('lux_theme') || 'light';
+authThemeIcon.className = _t === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+authThemeBtn?.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  authThemeIcon.className = next === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+  localStorage.setItem('lux_theme', next);
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

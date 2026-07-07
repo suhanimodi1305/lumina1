@@ -1,0 +1,1249 @@
+[
+  {
+    "model": "products.product",
+    "pk": 101,
+    "fields": {
+      "name": "Anti Gravity Essence",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "essence",
+      "product_range": "korean",
+      "description": "Powerful anti-aging essence for firm, resilient skin. Stimulates renewal and reduces sagging.",
+      "key_ingredients": "Exosome Technology, Peptides, Hyaluronic Acid, Botanical Actives",
+      "full_ingredients": "",
+      "price": "2800.00",
+      "sku": "RAGE0001",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "combination",
+        "all"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 102,
+    "fields": {
+      "name": "Aesthetic Ultimate Cream",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Deep hydration and luminosity for dull, tired skin. Advanced firming for a youthful glow.",
+      "key_ingredients": "Exosome Technology, Ceramides, Niacinamide, Peptides",
+      "full_ingredients": "",
+      "price": "3200.00",
+      "sku": "RAE0002",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "all"
+      ],
+      "targets": [
+        "dryness",
+        "dullness",
+        "aging"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 103,
+    "fields": {
+      "name": "Aesthetic Ultimate Essence",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "essence",
+      "product_range": "korean",
+      "description": "Intensive repair and 24-hour moisture boost for skin showing fatigue or extreme dryness.",
+      "key_ingredients": "Exosome Technology, Hyaluronic Acid, Botanical Extracts",
+      "full_ingredients": "",
+      "price": "2600.00",
+      "sku": "RAUE0003",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "all"
+      ],
+      "targets": [
+        "dryness",
+        "dullness",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 104,
+    "fields": {
+      "name": "Anti Gravity Cream",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Strengthens and lifts skin with advanced repair ingredients. Restores elasticity and smoothness.",
+      "key_ingredients": "Exosome Technology, Peptides, Retinol, Ceramides",
+      "full_ingredients": "",
+      "price": "3500.00",
+      "sku": "RAGC0004",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "all"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 105,
+    "fields": {
+      "name": "Cleansing Foam Gentle Balance",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "cleanser",
+      "product_range": "korean",
+      "description": "Mild daily cleanser with botanicals. Purifies while protecting skin's natural moisture.",
+      "key_ingredients": "Botanical Extracts, Glycerin, Aloe Vera",
+      "full_ingredients": "",
+      "price": "1200.00",
+      "sku": "RCF0005",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "normal"
+      ],
+      "targets": [
+        "dryness",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 106,
+    "fields": {
+      "name": "Toner Dermeist Nurturing",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "toner",
+      "product_range": "korean",
+      "description": "Hydrating toner that soothes redness and improves skin clarity. Supports barrier strengthening.",
+      "key_ingredients": "Exosome Technology, Ceramides, Allantoin, Centella Asiatica",
+      "full_ingredients": "",
+      "price": "1500.00",
+      "sku": "RTDN0006",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "sensitive"
+      ],
+      "targets": [
+        "redness",
+        "dryness",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 107,
+    "fields": {
+      "name": "Mask Intensive Nurturing",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "mask",
+      "product_range": "korean",
+      "description": "Ultra-hydrating sheet mask for fast skin recovery. Leaves complexion glowing, plump, and soothed.",
+      "key_ingredients": "Exosome Technology, Hyaluronic Acid, Collagen, Botanical Extracts",
+      "full_ingredients": "",
+      "price": "800.00",
+      "sku": "RMIN0007",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "sensitive"
+      ],
+      "targets": [
+        "dryness",
+        "dullness",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 108,
+    "fields": {
+      "name": "Radiance Sunblock SPF 50+ / PA+++",
+      "brand": "Resurrection Aesthetic Range",
+      "category": "sunscreen",
+      "product_range": "korean",
+      "description": "High-protection sunblock with UV filters and skin-soothing actives for radiant, even-toned skin.",
+      "key_ingredients": "SPF 50+ UV Filters, PA+++, Skin-Soothing Actives, Niacinamide",
+      "full_ingredients": "",
+      "price": "1800.00",
+      "sku": "RSBSPF500008",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [
+        "pigmentation",
+        "dullness",
+        "aging"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 109,
+    "fields": {
+      "name": "Pore Serum 1989 Spicule Shot",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Intensive serum to refine pores and improve texture with Blue Biome Complex.",
+      "key_ingredients": "Blue Biome Complex, Spicule, Niacinamide, Salicylic Acid",
+      "full_ingredients": "",
+      "price": "2400.00",
+      "sku": "DPS890009",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "oily",
+        "combination"
+      ],
+      "targets": [
+        "large_pores",
+        "oiliness",
+        "blackheads",
+        "acne"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 110,
+    "fields": {
+      "name": "Cleansing Foam Blue Biome",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "cleanser",
+      "product_range": "korean",
+      "description": "Gentle cleansing foam enriched with Blue Biome Complex to protect and hydrate skin.",
+      "key_ingredients": "Blue Biome Complex, Botanical Extracts, Glycerin",
+      "full_ingredients": "",
+      "price": "1100.00",
+      "sku": "DCF0010",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "combination",
+        "all"
+      ],
+      "targets": [
+        "sensitivity",
+        "redness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 111,
+    "fields": {
+      "name": "Toner Pad Blue Biome",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "toner",
+      "product_range": "korean",
+      "description": "Hydrating and exfoliating toner pads with LHA and Blue Biome Complex for smooth skin.",
+      "key_ingredients": "Blue Biome Complex, LHA, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "1600.00",
+      "sku": "DTP0011",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "oily",
+        "combination",
+        "normal"
+      ],
+      "targets": [
+        "large_pores",
+        "blackheads",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 112,
+    "fields": {
+      "name": "Serum Mist Blue Biome Repair",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "mist",
+      "product_range": "korean",
+      "description": "Lightweight mist that hydrates and soothes, fortified with Blue Biome Complex.",
+      "key_ingredients": "Blue Biome Complex, Hyaluronic Acid, Aloe Vera",
+      "full_ingredients": "",
+      "price": "1300.00",
+      "sku": "DSM0012",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "sensitive"
+      ],
+      "targets": [
+        "redness",
+        "dryness",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 113,
+    "fields": {
+      "name": "Intensive Repair Serum Blue Biome",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Concentrated serum promoting skin barrier repair and hydration using Blue Biome.",
+      "key_ingredients": "Blue Biome Complex, Ceramides, Peptides, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "2200.00",
+      "sku": "DIRS0013",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "dry",
+        "combination"
+      ],
+      "targets": [
+        "sensitivity",
+        "redness",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 114,
+    "fields": {
+      "name": "Soothing Cream Repair",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Calming cream reducing redness and strengthening skin barrier with Blue Biome Complex.",
+      "key_ingredients": "Blue Biome Complex, Centella Asiatica, Allantoin, Ceramides",
+      "full_ingredients": "",
+      "price": "2000.00",
+      "sku": "DSC0014",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "dry",
+        "all"
+      ],
+      "targets": [
+        "redness",
+        "sensitivity",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 115,
+    "fields": {
+      "name": "Melting Cream Blue Biome",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Rich, comforting cream delivering deep hydration and repair via Blue Biome technology.",
+      "key_ingredients": "Blue Biome Complex, Shea Butter, Ceramides, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "2100.00",
+      "sku": "DMC0015",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal"
+      ],
+      "targets": [
+        "dryness",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 116,
+    "fields": {
+      "name": "Sun Protector Blue Biome",
+      "brand": "Differensea Blue Biome Repair Range",
+      "category": "sunscreen",
+      "product_range": "korean",
+      "description": "Broad spectrum SPF protection with soothing botanicals from Blue Biome.",
+      "key_ingredients": "Blue Biome Complex, Broad Spectrum SPF Filters, Soothing Botanicals",
+      "full_ingredients": "",
+      "price": "1700.00",
+      "sku": "DSP0016",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "combination",
+        "all"
+      ],
+      "targets": [
+        "redness",
+        "pigmentation",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 117,
+    "fields": {
+      "name": "Revital Energy Gel to Foam Cleanser",
+      "brand": "Revital Energy Line",
+      "category": "cleanser",
+      "product_range": "korean",
+      "description": "Mild daily cleanser that gently purifies with Houttuynia Cordata and Centella actives.",
+      "key_ingredients": "Houttuynia Cordata, Centella Asiatica, Glycerin",
+      "full_ingredients": "",
+      "price": "1000.00",
+      "sku": "JBMRECF0017",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "acne",
+        "oily",
+        "sensitive"
+      ],
+      "targets": [
+        "acne",
+        "redness",
+        "oiliness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 118,
+    "fields": {
+      "name": "Revital Energy Toner",
+      "brand": "Revital Energy Line",
+      "category": "toner",
+      "product_range": "korean",
+      "description": "Lightweight, soothing toner with triple cica complex for calm, hydrated, prepped skin.",
+      "key_ingredients": "Triple Cica Complex, Centella Asiatica, Houttuynia Cordata, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "1200.00",
+      "sku": "JBMRET0018",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "oily",
+        "combination"
+      ],
+      "targets": [
+        "redness",
+        "acne",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 119,
+    "fields": {
+      "name": "Revital Energy Bachuchiol Serum",
+      "brand": "Revital Energy Line",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Bakuchiol serum balances oil, refines texture, and supports a luminous glow.",
+      "key_ingredients": "Bakuchiol, Centella Asiatica, Niacinamide, Houttuynia Cordata",
+      "full_ingredients": "",
+      "price": "1800.00",
+      "sku": "JBMREBS0015",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "oily",
+        "combination",
+        "acne"
+      ],
+      "targets": [
+        "acne",
+        "large_pores",
+        "oiliness",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 120,
+    "fields": {
+      "name": "Revital Energy Sunscreen",
+      "brand": "Revital Energy Line",
+      "category": "sunscreen",
+      "product_range": "korean",
+      "description": "High-protection SPF defends against UVA/UVB while hydrating and calming the skin.",
+      "key_ingredients": "SPF Filters, Centella Asiatica, Houttuynia Cordata, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "1500.00",
+      "sku": "JBMRESSSPA0016",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "oily",
+        "combination"
+      ],
+      "targets": [
+        "pigmentation",
+        "redness",
+        "acne"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 121,
+    "fields": {
+      "name": "Revital Energy Tone Up Cream",
+      "brand": "Revital Energy Line",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Instantly brightens and evens tone; multi-cica complex soothes and energizes skin.",
+      "key_ingredients": "Multi-Cica Complex, Centella Asiatica, Niacinamide, Pearl Extract",
+      "full_ingredients": "",
+      "price": "1600.00",
+      "sku": "JBMRETUC0017",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [
+        "dullness",
+        "pigmentation",
+        "redness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 122,
+    "fields": {
+      "name": "Revital Energy Cream",
+      "brand": "Revital Energy Line",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Barrier-strengthening cream with blue complex for deep moisture and resilience.",
+      "key_ingredients": "Blue Complex, Centella Asiatica, Ceramides, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "1700.00",
+      "sku": "JBMREC0018",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "combination",
+        "oily"
+      ],
+      "targets": [
+        "sensitivity",
+        "redness",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 123,
+    "fields": {
+      "name": "Exosome Technology Serum",
+      "brand": "Advance Formula Serum Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Potent anti-aging serum utilizing exosome technology to promote skin regeneration and reduce wrinkles.",
+      "key_ingredients": "Exosome Technology, Peptides, Growth Factors",
+      "full_ingredients": "",
+      "price": "4500.00",
+      "sku": "V21EX0019",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "normal"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 124,
+    "fields": {
+      "name": "Guaiazulem Soothing Serum",
+      "brand": "Advance Formula Serum Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Soothing serum with guaiazulem extract to calm irritation and redness.",
+      "key_ingredients": "Guaiazulem, Centella Asiatica, Allantoin",
+      "full_ingredients": "",
+      "price": "3200.00",
+      "sku": "V21GUA0020",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "dry",
+        "all"
+      ],
+      "targets": [
+        "redness",
+        "sensitivity",
+        "acne"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 125,
+    "fields": {
+      "name": "Hyaluronic Acid Serum",
+      "brand": "Advance Formula Serum Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Deep hydrating serum infused with hyaluronic acid for long-lasting moisture and plump, smooth skin.",
+      "key_ingredients": "Hyaluronic Acid (3 molecular weights), Glycerin, Ceramides",
+      "full_ingredients": "",
+      "price": "2800.00",
+      "sku": "V21HYA0021",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "all"
+      ],
+      "targets": [
+        "dryness",
+        "fine_lines",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 126,
+    "fields": {
+      "name": "Vitamin C Solution Serum",
+      "brand": "Advance Formula Serum Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Brightening serum with stabilized Vitamin C to reduce pigmentation, enhance radiance, and improve texture.",
+      "key_ingredients": "Stabilized Vitamin C 15%, Niacinamide, Alpha Arbutin",
+      "full_ingredients": "",
+      "price": "3000.00",
+      "sku": "V21VITC0022",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "normal",
+        "combination"
+      ],
+      "targets": [
+        "pigmentation",
+        "dullness",
+        "dark_circles"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 127,
+    "fields": {
+      "name": "Ultimate Repair Cream",
+      "brand": "Ultimate Repair Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Anti-aging cream with 8-peptide complex, retinol, collagen boosters, ceramides, and niacinamide for skin renewal and barrier repair.",
+      "key_ingredients": "8-Peptide Complex, Retinol, Collagen, Ceramides, Niacinamide",
+      "full_ingredients": "",
+      "price": "3800.00",
+      "sku": "BURC0023",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "all"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 128,
+    "fields": {
+      "name": "Ultimate Repair Toner",
+      "brand": "Ultimate Repair Range",
+      "category": "toner",
+      "product_range": "korean",
+      "description": "Soothing toner that balances skin pH and promotes elasticity with peptides and botanical complexes.",
+      "key_ingredients": "Peptides, Botanical Complexes, Hyaluronic Acid, Ceramides",
+      "full_ingredients": "",
+      "price": "1800.00",
+      "sku": "BURT0024",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "normal"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "sensitivity"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 129,
+    "fields": {
+      "name": "Ultimate Repair Serum",
+      "brand": "Ultimate Repair Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Concentrated anti-aging serum that stimulates collagen production and improves skin texture and firmness.",
+      "key_ingredients": "Peptides, Retinol, Collagen Boosters, Botanical Actives",
+      "full_ingredients": "",
+      "price": "3500.00",
+      "sku": "BURS0025",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "normal"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 130,
+    "fields": {
+      "name": "Relief Soothing Cream",
+      "brand": "Ultimate Repair Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Calming cream with Jeju Green Tea and CICA to relieve redness and irritation while providing hydration.",
+      "key_ingredients": "Jeju Green Tea, Centella Asiatica (CICA), Allantoin, Ceramides",
+      "full_ingredients": "",
+      "price": "2200.00",
+      "sku": "BURPSC0026",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "dry",
+        "all"
+      ],
+      "targets": [
+        "redness",
+        "sensitivity",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 131,
+    "fields": {
+      "name": "Phyto PDRN Toner",
+      "brand": "Phyto PDRN Skin Boosting Range",
+      "category": "toner",
+      "product_range": "korean",
+      "description": "Hydrating and soothing toner that preps skin, enhances absorption, and calms sensitive, dull skin.",
+      "key_ingredients": "PDRN (Salmon DNA), Hyaluronic Acid, Botanical Extracts",
+      "full_ingredients": "",
+      "price": "2200.00",
+      "sku": "PHYPDRNT0027",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "sensitive"
+      ],
+      "targets": [
+        "dullness",
+        "dryness",
+        "aging"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 132,
+    "fields": {
+      "name": "Phyto PDRN Serum",
+      "brand": "Phyto PDRN Skin Boosting Range",
+      "category": "serum",
+      "product_range": "korean",
+      "description": "Potent serum that boosts collagen production, brightens skin, and targets firmness and fine lines.",
+      "key_ingredients": "PDRN (Salmon DNA), Peptides, Hyaluronic Acid, Growth Factors",
+      "full_ingredients": "",
+      "price": "4200.00",
+      "sku": "PHYPDRNS0028",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dullness",
+        "pigmentation"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 133,
+    "fields": {
+      "name": "Phyto PDRN Emulsion",
+      "brand": "Phyto PDRN Skin Boosting Range",
+      "category": "emulsion",
+      "product_range": "korean",
+      "description": "Lightweight emulsion locking in moisture and strengthening the skin barrier for smooth, healthy skin.",
+      "key_ingredients": "PDRN (Salmon DNA), Ceramides, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "2600.00",
+      "sku": "PHYPDRNE0029",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "normal"
+      ],
+      "targets": [
+        "dryness",
+        "aging",
+        "fine_lines"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 134,
+    "fields": {
+      "name": "Phyto PDRN Cream",
+      "brand": "Phyto PDRN Skin Boosting Range",
+      "category": "cream",
+      "product_range": "korean",
+      "description": "Rich nourishing cream that deeply moisturizes, repairs, and reduces wrinkles for mature, stressed skin.",
+      "key_ingredients": "PDRN (Salmon DNA), Peptides, Ceramides, Shea Butter",
+      "full_ingredients": "",
+      "price": "3800.00",
+      "sku": "PHYPDRNC0030",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "dry",
+        "normal",
+        "all"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 135,
+    "fields": {
+      "name": "Intensive Healing Cream",
+      "brand": "Post-Laser & Post-Surgery Care",
+      "category": "treatment",
+      "product_range": "korean",
+      "description": "Rich regenerative cream that promotes skin renewal and soothes inflammation post-laser or surgery. Soothes, repairs, hydrates.",
+      "key_ingredients": "PDRN, Allantoin, Centella Asiatica, Ceramides, Panthenol",
+      "full_ingredients": "",
+      "price": "3000.00",
+      "sku": "V21TR0031",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "all"
+      ],
+      "targets": [
+        "sensitivity",
+        "redness",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 136,
+    "fields": {
+      "name": "Skin Recovery Protective Cream",
+      "brand": "Post-Laser & Post-Surgery Care",
+      "category": "treatment",
+      "product_range": "korean",
+      "description": "Soothing cream formulated to calm redness and support skin barrier recovery after dermatological treatments.",
+      "key_ingredients": "Centella Asiatica, Allantoin, Ceramides, Squalane",
+      "full_ingredients": "",
+      "price": "2800.00",
+      "sku": "V21PL0032",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "sensitive",
+        "all"
+      ],
+      "targets": [
+        "redness",
+        "sensitivity",
+        "dryness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": false,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 137,
+    "fields": {
+      "name": "Exolusion Time Rewinder",
+      "brand": "Exolusion Time Rewinder",
+      "category": "treatment",
+      "product_range": "korean",
+      "description": "Advanced vibration massager device combined with potent exosome serum. Stimulates collagen production, improves elasticity, reduces fine lines and dullness for a youthful glow.",
+      "key_ingredients": "Exosome Serum, Vibration Therapy Technology, Peptides",
+      "full_ingredients": "",
+      "price": "8500.00",
+      "sku": "V21ETR0033",
+      "image_url": "",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [
+        "aging",
+        "fine_lines",
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "",
+      "is_featured": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  }
+]

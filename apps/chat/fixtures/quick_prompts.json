@@ -1,0 +1,62 @@
+[
+  {
+    "model": "chat.quickprompt",
+    "pk": 1,
+    "fields": {
+      "prompt_text": "I have acne on my forehead and cheeks",
+      "category": "acne",
+      "order": 1,
+      "active": true
+    }
+  },
+  {
+    "model": "chat.quickprompt",
+    "pk": 2,
+    "fields": {
+      "prompt_text": "My skin feels very dry and tight",
+      "category": "dryness",
+      "order": 2,
+      "active": true
+    }
+  },
+  {
+    "model": "chat.quickprompt",
+    "pk": 3,
+    "fields": {
+      "prompt_text": "I have dark circles under my eyes",
+      "category": "dark_circles",
+      "order": 3,
+      "active": true
+    }
+  },
+  {
+    "model": "chat.quickprompt",
+    "pk": 4,
+    "fields": {
+      "prompt_text": "Help me build a Korean skincare routine",
+      "category": "routine",
+      "order": 4,
+      "active": true
+    }
+  },
+  {
+    "model": "chat.quickprompt",
+    "pk": 5,
+    "fields": {
+      "prompt_text": "What foundation shade matches my skin?",
+      "category": "makeup",
+      "order": 5,
+      "active": true
+    }
+  },
+  {
+    "model": "chat.quickprompt",
+    "pk": 6,
+    "fields": {
+      "prompt_text": "I have oily skin and large pores",
+      "category": "oiliness",
+      "order": 6,
+      "active": true
+    }
+  }
+]

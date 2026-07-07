@@ -1,0 +1,16 @@
+{% extends "admin/login.html" %}
+
+{% block content %}
+{% if request.GET.expired %}
+<div style="
+  background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);
+  border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1.25rem;
+  display:flex;align-items:center;gap:.65rem;
+  color:#92400e;font-size:.9rem;
+">
+  <span style="font-size:1.2rem;">⏱</span>
+  <span><strong>Your admin session expired</strong> due to inactivity. Please sign in again.</span>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}

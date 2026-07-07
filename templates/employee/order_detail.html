@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Order {{ order.order_id }} — Employee{% endblock %}
+{% block page_title %}Order Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{--teal:#0d9488;--gold:#c9a96e;--radius:12px;}
+.od-wrap{max-width:900px;margin:0 auto;}
+.od-head{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-bottom:1.1rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.od-head h2{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:#fff;margin:0;}
+.od-head .sub{font-size:.72rem;color:rgba(255,255,255,.5);}
+.od-grid{display:grid;grid-template-columns:1fr 320px;gap:1rem;}
+@media(max-width:720px){.od-grid{grid-template-columns:1fr;}}
+.od-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1rem;margin-bottom:.85rem;}
+.od-card h3{font-size:.88rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.35rem;}
+.od-row{display:flex;justify-content:space-between;font-size:.82rem;padding:.3rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.od-row:last-child{border-bottom:none;}
+.od-label{color:var(--muted,#64748b);font-weight:600;}
+.od-item{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border,#e2e8f0);}
+.od-item:last-child{border-bottom:none;}
+.od-item-img{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#fdf2f8,#fce7f3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden;}
+/* status badge */
+.sp{padding:.25rem .75rem;border-radius:20px;font-size:.72rem;font-weight:700;}
+.sp-pending{background:rgba(245,158,11,.15);color:#92400e;}
+.sp-confirmed{background:#dbeafe;color:#1e40af;}
+.sp-packed{background:#fef9c3;color:#854d0e;}
+.sp-shipped,.sp-out_for_delivery{background:#fce7f3;color:#9d174d;}
+.sp-delivered{background:#dcfce7;color:#166534;}
+.sp-cancelled,.sp-returned{background:#fee2e2;color:#991b1b;}
+/* timeline */
+.od-tl-event{display:flex;gap:.65rem;padding:.5rem 0;position:relative;}
+.od-tl-event:not(:last-child)::before{content:'';position:absolute;left:12px;top:32px;bottom:-6px;width:2px;background:var(--border,#e2e8f0);}
+.od-tl-dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid var(--border,#e2e8f0);background:var(--surface,#fff);display:flex;align-items:center;justify-content:center;font-size:.75rem;z-index:1;}
+.od-tl-event.latest .od-tl-dot{background:#0d9488;border-color:#0d9488;color:#fff;}
+.od-tl-msg{font-size:.8rem;font-weight:600;color:var(--text,#0f172a);}
+.od-tl-meta{font-size:.68rem;color:var(--muted,#64748b);}
+/* status update form */
+.update-form{background:var(--surface-alt,#f5f3f0);border-radius:10px;padding:.85rem;margin-top:.75rem;}
+.update-form h4{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#64748b);margin-bottom:.65rem;}
+.uf-select,.uf-input,.uf-textarea{width:100%;padding:.52rem .75rem;border:1.5px solid var(--border,#e2e8f0);border-radius:8px;font-size:.82rem;background:var(--surface,#fff);color:var(--text,#0f172a);margin-bottom:.5rem;font-family:inherit;}
+.uf-select:focus,.uf-input:focus,.uf-textarea:focus{outline:none;border-color:#0d9488;}
+.uf-btn{padding:.55rem 1.1rem;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;width:100%;}
+.uf-btn:hover{background:#0f766e;}
+[data-theme="dark"] .od-card{background:#12121a;border-color:rgba(255,255,255,.08);}
+[data-theme="dark"] .update-form{background:#1a1a28;}
+[data-theme="dark"] .uf-select,[data-theme="dark"] .uf-input,[data-theme="dark"] .uf-textarea{background:#12121a;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="od-wrap">
+  <div class="od-head">
+    <div>
+      <h2><i class="bi bi-bag-check" style="color:#0d9488;margin-right:.35rem;"></i>{{ order.order_id }}</h2>
+      <div class="sub">Tracking: {{ order.tracking_id }} · Placed {{ order.created_at|date:"d M Y · g:i A" }}</div>
+    </div>
+    <span class="sp sp-{{ order.status }}" style="font-size:.78rem;padding:.3rem .9rem;">{{ order.get_status_display }}</span>
+  </div>
+
+  <div class="od-grid">
+    <!-- LEFT -->
+    <div>
+      <!-- Customer -->
+      <div class="od-card">
+        <h3><i class="bi bi-person" style="color:var(--teal);"></i> Customer</h3>
+        <div class="od-row"><span class="od-label">Name</span><span>{{ order.full_name }}</span></div>
+        <div class="od-row"><span class="od-label">Phone</span><span>{{ order.phone }}</span></div>
+        {% if order.email %}
+        <div class="od-row"><span class="od-label">Email</span><span>{{ order.email }}</span></div>
+        {% endif %}
+        <div class="od-row"><span class="od-label">Address</span>
+          <span style="text-align:right;max-width:60%;">
+            {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}<br>
+            {{ order.city }}, {{ order.state }} — {{ order.pincode }}
+          </span>
+        </div>
+        {% if order.order_notes %}
+        <div style="margin-top:.65rem;font-size:.8rem;color:var(--text,#0f172a);background:rgba(13,148,136,.06);border-radius:7px;padding:.55rem;">
+          <strong style="color:var(--muted,#64748b);font-size:.67rem;text-transform:uppercase;">Notes:</strong> {{ order.order_notes }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Items -->
+      <div class="od-card">
+        <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Items ({{ order.items.count }})</h3>
+        {% for item in order.items.all %}
+        <div class="od-item">
+          <div class="od-item-img">
+            {% if item.image_url %}<img src="{{ item.image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentNode.innerHTML='💄'">{% else %}💄{% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.82rem;font-weight:700;color:var(--text,#0f172a);">{{ item.name }}</div>
+            <div style="font-size:.7rem;color:var(--muted,#64748b);">{{ item.brand }} · {{ item.sku }}</div>
+            {% if item.shade %}<div style="font-size:.68rem;color:#0d9488;">Shade: {{ item.shade }}</div>{% endif %}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:.85rem;font-weight:800;color:#0d9488;">₹{{ item.line_total }}</div>
+            <div style="font-size:.68rem;color:var(--muted,#64748b);">×{{ item.quantity }}</div>
+          </div>
+        </div>
+        {% endfor %}
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-top:.65rem;padding-top:.65rem;border-top:1.5px solid var(--border,#e2e8f0);">
+          <span style="color:var(--muted,#64748b);">Subtotal</span><span>₹{{ order.subtotal }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.2rem 0;">
+          <span style="color:var(--muted,#64748b);">Delivery</span><span>₹{{ order.delivery_charge }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:800;padding:.35rem 0;color:#0d9488;">
+          <span>Total</span><span>₹{{ order.total }}</span>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="od-card">
+        <h3><i class="bi bi-clock-history" style="color:var(--teal);"></i> Status Timeline</h3>
+        {% for log in logs %}
+        <div class="od-tl-event {% if forloop.first %}latest{% endif %}">
+          <div class="od-tl-dot">
+            {% if log.status == 'confirmed' %}✅{% elif log.status == 'packed' %}📦
+            {% elif log.status == 'shipped' %}🚚{% elif log.status == 'out_for_delivery' %}🏃
+            {% elif log.status == 'delivered' %}🎉{% else %}📍{% endif %}
+          </div>
+          <div>
+            <div class="od-tl-msg">{{ log.message }}</div>
+            <div class="od-tl-meta">
+              {% if log.location %}📍 {{ log.location }} · {% endif %}
+              {{ log.timestamp|date:"d M Y, g:i A" }}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="font-size:.82rem;color:var(--muted,#64748b);">No status events yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- RIGHT: update panel -->
+    <div>
+      <div class="od-card">
+        <h3><i class="bi bi-pencil-square" style="color:var(--gold);"></i> Update Status</h3>
+        <div style="font-size:.78rem;color:var(--muted,#64748b);margin-bottom:.65rem;">
+          Payment: <strong>{{ order.get_payment_method_display }}</strong>
+          &nbsp;·&nbsp; {{ order.payment_status|title }}
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="update-form">
+            <h4>Change Order Status</h4>
+            <select name="status" class="uf-select">
+              {% for val, label in status_choices %}
+              <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <input type="text" name="location" class="uf-input" placeholder="Location (e.g. Mumbai Hub)">
+            <textarea name="note" class="uf-textarea" rows="2" placeholder="Status note (optional)…"></textarea>
+            <button type="submit" class="uf-btn"><i class="bi bi-check-circle"></i> Update Status</button>
+          </div>
+        </form>
+
+        {% if order.estimated_delivery %}
+        <div style="margin-top:.75rem;font-size:.78rem;color:var(--muted,#64748b);text-align:center;">
+          Est. Delivery: <strong style="color:#0d9488;">{{ order.estimated_delivery|date:"d M Y" }}</strong>
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <a href="{% url 'employee:order_list' %}" style="display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1rem;background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);border-radius:9px;font-size:.82rem;font-weight:700;text-decoration:none;">
+          <i class="bi bi-arrow-left"></i> Back to Orders
+        </a>
+        <a href="{% url 'orders:tracking' order_id=order.order_id %}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1rem;background:rgba(13,148,136,.1);color:#0d9488;border:1.5px solid rgba(13,148,136,.2);border-radius:9px;font-size:.82rem;font-weight:700;text-decoration:none;">
+          <i class="bi bi-geo-alt"></i> Customer Tracking View
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

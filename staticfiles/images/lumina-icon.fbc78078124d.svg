@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" fill="none">
+  <defs>
+    <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0891b2"/>
+    </linearGradient>
+    <linearGradient id="is" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.3)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="34" height="34" rx="9" fill="url(#ig)"/>
+  <rect x="0" y="0" width="34" height="17" rx="9" fill="url(#is)"/>
+  <!-- Stylised "L" mark -->
+  <rect x="10" y="7" width="4" height="14" rx="2" fill="white" opacity="0.95"/>
+  <rect x="10" y="18" width="12" height="3.5" rx="1.75" fill="white" opacity="0.95"/>
+  <!-- Diamond sparkle -->
+  <path d="M26 8 L28 11 L26 14 L24 11 Z" fill="white" opacity="0.72"/>
+</svg>

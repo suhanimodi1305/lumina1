@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}K-Beauty — Lumina{% endblock %}
+{% block page_title %}K-Beauty{% endblock %}
+
+{% block extra_css %}
+<style>
+.kb-wrap { max-width: 960px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.kb-hdr {
+  background: linear-gradient(135deg, #0a0a0f, #051a14);
+  border-radius: 16px; padding: 1.5rem;
+  margin-bottom: 1.5rem; display: flex;
+  align-items: center; gap: 1rem;
+  border: 1px solid rgba(13,148,136,.25);
+}
+.kb-hdr-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: rgba(13,148,136,.2);
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.kb-hdr-text h2 { color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0 0 .15rem; }
+.kb-hdr-text p  { color: rgba(255,255,255,.45); font-size: .78rem; margin: 0; }
+.kb-hdr-btn {
+  margin-left: auto; flex-shrink: 0;
+  padding: .55rem 1.15rem; background: #0d9488; color: #fff;
+  border-radius: 100px; font-size: .8rem; font-weight: 700;
+  text-decoration: none; transition: background .15s;
+}
+.kb-hdr-btn:hover { background: #0f766e; color: #fff; }
+
+/* ── 10-STEP GRID ── */
+.kb-section-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+.steps-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: .65rem; margin-bottom: 1.5rem;
+}
+.step-tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: .85rem .6rem;
+  text-align: center; box-shadow: 0 1px 6px rgba(0,0,0,.04);
+  transition: transform .15s, box-shadow .15s;
+}
+.step-tile:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.09); }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #0d9488; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; margin: 0 auto .5rem;
+}
+.step-icon { font-size: 1.4rem; margin-bottom: .35rem; }
+.step-name { font-size: .68rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+/* ── PRODUCT GRID ── */
+.kb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.kb-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 8px rgba(0,0,0,.05);
+  transition: transform .15s, box-shadow .15s;
+}
+.kb-card:hover { transform: translateY(-3px); box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+.kb-img-wrap {
+  height: 170px; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  display: flex; align-items: center; justify-content: center;
+}
+.kb-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.kb-img-placeholder { font-size: 2.75rem; }
+.kb-featured-badge {
+  position: absolute; top: .5rem; right: .5rem;
+  background: #c9a96e; color: #0a0a0f;
+  padding: .15rem .5rem; border-radius: 20px;
+  font-size: .6rem; font-weight: 800; text-transform: uppercase;
+}
+.kb-body { padding: .8rem; }
+.kb-name  { font-size: .85rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; line-height: 1.3; }
+.kb-brand { font-size: .65rem; color: var(--muted); margin-bottom: .35rem; }
+.kb-cat   {
+  display: inline-block; padding: .15rem .5rem; border-radius: 20px;
+  font-size: .62rem; font-weight: 600; margin-bottom: .45rem;
+  background: rgba(13,148,136,.1); color: #065f46;
+}
+.kb-sku   { font-size: .6rem; color: var(--muted); font-family: monospace; margin-bottom: .35rem; }
+.kb-ing   { font-size: .67rem; color: #0d9488; font-weight: 500; margin-bottom: .5rem; line-height: 1.4; }
+.kb-price { font-size: .95rem; font-weight: 800; color: #0d9488; margin-bottom: .5rem; }
+.kb-btn {
+  display: flex; align-items: center; justify-content: center; gap: .3rem;
+  padding: .4rem; background: #0d9488; color: #fff; border-radius: 8px;
+  font-size: .75rem; font-weight: 600; text-decoration: none;
+  transition: background .12s; width: 100%;
+}
+.kb-btn:hover { background: #0f766e; color: #fff; }
+
+.empty-state {
+  text-align: center; padding: 3rem; background: var(--surface);
+  border: 2px dashed var(--border); border-radius: 14px;
+}
+.empty-state .e-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+@media (max-width: 600px) {
+  .steps-grid { grid-template-columns: repeat(5, 1fr); }
+  .kb-grid    { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 380px) {
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kb-wrap">
+
+  <div class="kb-hdr">
+    <div class="kb-hdr-icon">🌸</div>
+    <div class="kb-hdr-text">
+      <h2>Korean Skincare</h2>
+      <p>{{ featured_products|length }} featured · SAS Global authentic K-Beauty</p>
+    </div>
+    <a href="{% url 'products:list' %}?range=korean" class="kb-hdr-btn">Browse All</a>
+  </div>
+
+  {# 10-step ritual #}
+  <div class="kb-section-label">🌿 The 10-Step Routine</div>
+  <div class="steps-grid">
+    {% for step in k_beauty_steps %}
+    <div class="step-tile">
+      <div class="step-num">{{ step.step_number }}</div>
+      <div class="step-icon"><i class="{{ step.icon }}"></i></div>
+      <div class="step-name">{{ step.name }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Featured products #}
+  <div class="kb-section-label">✨ Featured Products</div>
+
+  {% if featured_products %}
+  <div class="kb-grid">
+    {% for p in featured_products %}
+    <div class="kb-card">
+      <div class="kb-img-wrap">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="kb-img-placeholder" style="display:none;">🌿</div>
+        {% else %}
+          <div class="kb-img-placeholder">
+            {% if p.category == 'cleanser' %}🫧
+            {% elif p.category == 'toner' %}💧
+            {% elif p.category == 'serum' or p.category == 'essence' %}✨
+            {% elif p.category == 'sunscreen' %}☀️
+            {% elif p.category == 'mask' %}🎭
+            {% else %}🌿{% endif %}
+          </div>
+        {% endif %}
+        {% if p.is_featured %}<span class="kb-featured-badge">★ Featured</span>{% endif %}
+      </div>
+      <div class="kb-body">
+        <div class="kb-name">{{ p.name }}</div>
+        <div class="kb-brand">{{ p.brand }}</div>
+        <span class="kb-cat">{{ p.get_category_display }}</span>
+        <div class="kb-sku">SKU: {{ p.sku }}</div>
+        {% if p.key_ingredients %}
+          <div class="kb-ing"><i class="bi bi-leaf"></i> {{ p.key_ingredients|truncatechars:55 }}</div>
+        {% endif %}
+        {% if p.price %}<div class="kb-price">₹{{ p.price }}</div>{% endif %}
+        <a href="https://sasglobal.biz" target="_blank" class="kb-btn">
+          <i class="bi bi-bag-check"></i> Shop on SAS Global
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="e-icon">🌸</div>
+    <h3>No featured K-Beauty yet</h3>
+    <a href="{% url 'products:list' %}?range=korean" style="color:#0d9488;font-weight:600;font-size:.85rem;">
+      Browse all K-Beauty →
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

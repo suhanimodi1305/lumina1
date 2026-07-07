@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Redeem Points — Lumina{% endblock %}
+{% block page_title %}Redeem Loyalty Points{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:600px; padding-block:2rem;">
+
+  <div style="background:var(--surface);border-radius:var(--r-xl);padding:2rem;border:1px solid var(--border);box-shadow:var(--shadow);">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-size:3rem;margin-bottom:.75rem;">⭐</div>
+      <h2 style="margin-bottom:.5rem;">Your Loyalty Points</h2>
+      <div style="font-size:2.5rem;font-weight:700;color:var(--sb-gold);">{{ points }}</div>
+      <p style="color:var(--muted);font-size:.85rem;margin-top:.35rem;">points available</p>
+    </div>
+
+    <!-- Current tier -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--page-bg);border-radius:var(--r-md);margin-bottom:1.5rem;">
+      <span style="font-size:.85rem;color:var(--muted);">Current Tier</span>
+      <span class="tier-badge tier-{{ current_tier }}" style="font-size:.78rem;">
+        {% if current_tier == 'vip' %}VIP{% elif current_tier == 'medium' %}PLUS{% else %}FREE{% endif %}
+      </span>
+    </div>
+
+    {% if current_tier == 'vip' %}
+    <!-- VIP congratulations -->
+    <div style="text-align:center;padding:1.5rem;background:rgba(201,169,110,.08);border:1px solid rgba(201,169,110,.2);border-radius:var(--r-md);">
+      <div style="font-size:1.5rem;margin-bottom:.5rem;">👑</div>
+      <p style="color:var(--sb-gold);font-weight:600;margin:0;">You're already a VIP member!</p>
+      <p style="color:var(--muted);font-size:.82rem;margin:.5rem 0 0;">You've reached the highest tier. Enjoy all premium benefits.</p>
+    </div>
+
+    {% elif upgrade_info %}
+    <!-- Progress bar -->
+    <div style="margin-bottom:1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+        <span style="font-size:.82rem;color:var(--muted);">Progress to {{ upgrade_info.label }}</span>
+        <span style="font-size:.82rem;font-weight:700;color:var(--sb-teal);">{{ points }} / {{ threshold }}</span>
+      </div>
+      <div style="height:10px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden;">
+        <div style="height:100%;width:{{ progress_pct }}%;background:var(--sb-teal);border-radius:100px;transition:width .5s ease;"></div>
+      </div>
+      <p style="font-size:.78rem;color:var(--muted);margin-top:.5rem;text-align:right;">
+        {% if points < threshold %}{{ threshold|add:"-"|add:points|default:points }} more points needed{% else %}Ready to redeem!{% endif %}
+      </p>
+    </div>
+
+    <!-- Redeem form -->
+    {% if points >= threshold %}
+    <form method="post" action="{% url 'memberships:redeem' %}">
+      {% csrf_token %}
+      <div style="background:rgba(13,148,136,.08);border:1px solid rgba(13,148,136,.2);border-radius:var(--r-md);padding:1.25rem;margin-bottom:1.25rem;text-align:center;">
+        <p style="color:var(--sb-teal);font-weight:600;font-size:.95rem;margin:0;">
+          Redeem {{ threshold }} points to {{ upgrade_info.label }}
+        </p>
+        <p style="color:var(--muted);font-size:.82rem;margin:.35rem 0 0;">
+          You'll have {{ points|add:"-500"|default:"0" }} points remaining after redemption.
+        </p>
+      </div>
+      <button type="submit" style="
+        width:100%;padding:.8rem;background:var(--sb-teal);color:#fff;
+        border:none;border-radius:100px;font-size:.9rem;font-weight:700;cursor:pointer;
+      ">
+        ⭐ Redeem {{ threshold }} Points — {{ upgrade_info.label }}
+      </button>
+    </form>
+    {% else %}
+    <div style="text-align:center;padding:1rem;background:rgba(255,255,255,.04);border-radius:var(--r-md);border:1px solid var(--border);">
+      <p style="color:var(--muted);font-size:.85rem;margin:0;">
+        Earn {{ threshold|add:"-"|add:points|default:"more" }} more points to unlock redemption.
+        <br><a href="{% url 'orders:checkout' %}" style="color:var(--sb-teal);font-weight:600;">Shop to earn points →</a>
+      </p>
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+    <!-- Back link -->
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="{% url 'memberships:upgrade' %}" style="color:var(--muted);font-size:.82rem;">
+        ← View all membership plans
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

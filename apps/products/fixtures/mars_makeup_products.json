@@ -1,0 +1,426 @@
+[
+  {
+    "model": "products.product",
+    "pk": 201,
+    "fields": {
+      "name": "Take a Glow Illuminating Primer & Strobe Cream",
+      "brand": "MARS",
+      "category": "foundation",
+      "product_range": "makeup",
+      "description": "Illuminating face primer and strobe cream. Gives skin a lit-from-within glow, preps for foundation and can be used as a highlighter.",
+      "key_ingredients": "Vitamin E, Light-Reflecting Particles, Glycerin",
+      "full_ingredients": "",
+      "price": "449.00",
+      "sku": "MARS-PRM-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/files/T10Web_2.jpg",
+      "suitable_for_skin_types": [
+        "all",
+        "dry",
+        "normal",
+        "combination"
+      ],
+      "targets": [
+        "dullness"
+      ],
+      "shades_available": [],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "luminous",
+      "is_featured": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 202,
+    "fields": {
+      "name": "High Coverage Foundation SPF50 PA++++",
+      "brand": "MARS",
+      "category": "foundation",
+      "product_range": "makeup",
+      "description": "High coverage foundation in a tube with SPF 50 PA++++ UVA/UVB protection. Available in 8 shades from Ivory Glow to Deep Tan.",
+      "key_ingredients": "SPF50 PA++, Niacinamide, Hyaluronic Acid",
+      "full_ingredients": "",
+      "price": "249.00",
+      "sku": "MARS-FDN-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/files/FrontBox.jpg",
+      "suitable_for_skin_types": [
+        "all",
+        "oily",
+        "combination",
+        "normal"
+      ],
+      "targets": [
+        "pigmentation",
+        "acne"
+      ],
+      "shades_available": [
+        {
+          "shade": "01",
+          "name": "Porcelain",
+          "hex": "#F5E6D3"
+        },
+        {
+          "shade": "02",
+          "name": "Ivory",
+          "hex": "#F0D9C0"
+        },
+        {
+          "shade": "03",
+          "name": "Natural Beige",
+          "hex": "#E8C9A8"
+        },
+        {
+          "shade": "04",
+          "name": "Sand Beige",
+          "hex": "#D4B090"
+        },
+        {
+          "shade": "05",
+          "name": "Warm Honey",
+          "hex": "#C49A78"
+        },
+        {
+          "shade": "06",
+          "name": "Caramel",
+          "hex": "#A07850"
+        }
+      ],
+      "undertone_match": "neutral",
+      "skin_tone_match": "",
+      "coverage": "full",
+      "finish": "matte",
+      "is_featured": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 203,
+    "fields": {
+      "name": "Wonder Cover Liquid Concealer",
+      "brand": "MARS",
+      "category": "concealer",
+      "product_range": "makeup",
+      "description": "Liquid concealer for targeted spot coverage. Covers dark circles, blemishes and pigmentation. Available in 6 shades.",
+      "key_ingredients": "Vitamin C, Caffeine, Light-Diffusing Pigments",
+      "full_ingredients": "",
+      "price": "199.00",
+      "sku": "MARS-CON-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/files/CS04-Box01w.jpg",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [
+        "dark_circles",
+        "pigmentation",
+        "acne"
+      ],
+      "shades_available": [
+        {
+          "shade": "C01",
+          "name": "Fair",
+          "hex": "#F5E1CC"
+        },
+        {
+          "shade": "C02",
+          "name": "Light",
+          "hex": "#EACFB5"
+        },
+        {
+          "shade": "C03",
+          "name": "Medium",
+          "hex": "#D4AA88"
+        },
+        {
+          "shade": "C04",
+          "name": "Tan",
+          "hex": "#B88860"
+        },
+        {
+          "shade": "C05",
+          "name": "Deep",
+          "hex": "#8B5E3C"
+        }
+      ],
+      "undertone_match": "neutral",
+      "skin_tone_match": "",
+      "coverage": "full",
+      "finish": "natural",
+      "is_featured": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 204,
+    "fields": {
+      "name": "Born To Bake Setting Powder",
+      "brand": "MARS",
+      "category": "powder",
+      "product_range": "makeup",
+      "description": "Loose baking and setting powder for long-lasting makeup wear. Blurs pores and fine lines. Available in Translucent, Banana Pudding, Vanilla Extract and Honey Glaze.",
+      "key_ingredients": "Silica, Talc-Free Formula, Vitamin E",
+      "full_ingredients": "",
+      "price": "449.00",
+      "sku": "MARS-PWD-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/products/TRANSLUCENT01.jpg",
+      "suitable_for_skin_types": [
+        "all",
+        "oily",
+        "combination"
+      ],
+      "targets": [
+        "oiliness",
+        "large_pores"
+      ],
+      "shades_available": [
+        {
+          "shade": "Translucent",
+          "name": "Translucent",
+          "hex": "#FAF0E6"
+        },
+        {
+          "shade": "Banana",
+          "name": "Banana",
+          "hex": "#FFF3CD"
+        },
+        {
+          "shade": "Deep",
+          "name": "Deep",
+          "hex": "#C8A882"
+        }
+      ],
+      "undertone_match": "neutral",
+      "skin_tone_match": "",
+      "coverage": "light",
+      "finish": "matte",
+      "is_featured": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 205,
+    "fields": {
+      "name": "Sugar Rush Liquid Blusher",
+      "brand": "MARS",
+      "category": "blush",
+      "product_range": "makeup",
+      "description": "Liquid blusher with dewy finish. Available in 6 shades — Marshmallow, Coral Sorbet, Red Velvet, Rose Slush, Pink Mousse, Peach Pie.",
+      "key_ingredients": "Jojoba Oil, Vitamin E, Mica",
+      "full_ingredients": "",
+      "price": "279.00",
+      "sku": "MARS-BLS-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/files/LBL0201BOXWEB.jpg",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [
+        "dullness"
+      ],
+      "shades_available": [
+        {
+          "shade": "Coral Kiss",
+          "name": "Coral Kiss",
+          "hex": "#FF7F6E"
+        },
+        {
+          "shade": "Rose Flush",
+          "name": "Rose Flush",
+          "hex": "#E8789A"
+        },
+        {
+          "shade": "Peachy Keen",
+          "name": "Peachy Keen",
+          "hex": "#FFAA80"
+        },
+        {
+          "shade": "Berry Bliss",
+          "name": "Berry Bliss",
+          "hex": "#C06080"
+        },
+        {
+          "shade": "Nude Pink",
+          "name": "Nude Pink",
+          "hex": "#E8B4B8"
+        },
+        {
+          "shade": "Bronzed Glow",
+          "name": "Bronzed Glow",
+          "hex": "#C4956A"
+        }
+      ],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "satin",
+      "is_featured": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 206,
+    "fields": {
+      "name": "12 Color Eyeshadow Palette Dance Of Joy",
+      "brand": "MARS",
+      "category": "eyeshadow",
+      "product_range": "makeup",
+      "description": "12-shade ultra-pigmented eyeshadow palette with mix of matte and shimmer shades. Available in 2 variants.",
+      "key_ingredients": "Mica, Carnauba Wax, Vitamin E",
+      "full_ingredients": "",
+      "price": "299.00",
+      "sku": "MARS-EYE-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/products/MG_6125-1.jpg",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [],
+      "shades_available": [
+        {
+          "shade": "Champagne",
+          "name": "Champagne",
+          "hex": "#F5DEB3"
+        },
+        {
+          "shade": "Rose Gold",
+          "name": "Rose Gold",
+          "hex": "#B76E79"
+        },
+        {
+          "shade": "Copper",
+          "name": "Copper",
+          "hex": "#B87333"
+        },
+        {
+          "shade": "Brown",
+          "name": "Brown",
+          "hex": "#8B5E3C"
+        },
+        {
+          "shade": "Burgundy",
+          "name": "Burgundy",
+          "hex": "#800020"
+        },
+        {
+          "shade": "Nude",
+          "name": "Nude",
+          "hex": "#E8C4A0"
+        },
+        {
+          "shade": "Coral",
+          "name": "Coral",
+          "hex": "#FF6B6B"
+        },
+        {
+          "shade": "Pink",
+          "name": "Pink",
+          "hex": "#FFB6C1"
+        },
+        {
+          "shade": "Bronze",
+          "name": "Bronze",
+          "hex": "#CD7F32"
+        },
+        {
+          "shade": "Taupe",
+          "name": "Taupe",
+          "hex": "#8B7355"
+        },
+        {
+          "shade": "Black",
+          "name": "Black",
+          "hex": "#1A1A1A"
+        },
+        {
+          "shade": "White Shimmer",
+          "name": "White Shimmer",
+          "hex": "#F8F8FF"
+        }
+      ],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "",
+      "finish": "mixed",
+      "is_featured": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 207,
+    "fields": {
+      "name": "Matte Muse Mousse Lipstick",
+      "brand": "MARS",
+      "category": "lipstick",
+      "product_range": "makeup",
+      "description": "Lightweight mousse lipstick with intense matte pigmentation. Transfer-proof, long-wearing formula. Available in 18 shades.",
+      "key_ingredients": "Jojoba Oil, Vitamin E, Matte Pigments",
+      "full_ingredients": "",
+      "price": "299.00",
+      "sku": "MARS-LIP-001",
+      "image_url": "https://marscosmetics.in/cdn/shop/files/Artboard2copy11.jpg",
+      "suitable_for_skin_types": [
+        "all"
+      ],
+      "targets": [],
+      "shades_available": [
+        {
+          "shade": "Ruby Red",
+          "name": "Ruby Red",
+          "hex": "#9B1C31"
+        },
+        {
+          "shade": "Nude Beige",
+          "name": "Nude Beige",
+          "hex": "#C4956A"
+        },
+        {
+          "shade": "Rose Pink",
+          "name": "Rose Pink",
+          "hex": "#E8789A"
+        },
+        {
+          "shade": "Coral Orange",
+          "name": "Coral Orange",
+          "hex": "#E8603C"
+        },
+        {
+          "shade": "Berry",
+          "name": "Berry",
+          "hex": "#7B2869"
+        },
+        {
+          "shade": "Mauve",
+          "name": "Mauve",
+          "hex": "#987070"
+        },
+        {
+          "shade": "Dark Brown",
+          "name": "Dark Brown",
+          "hex": "#5C3317"
+        },
+        {
+          "shade": "Hot Pink",
+          "name": "Hot Pink",
+          "hex": "#E0478A"
+        }
+      ],
+      "undertone_match": "",
+      "skin_tone_match": "",
+      "coverage": "full",
+      "finish": "matte",
+      "is_featured": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

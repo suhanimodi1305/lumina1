@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}Team — Employee Portal{% endblock %}
+{% block page_title %}Team & Employees{% endblock %}
+
+{% block extra_css %}
+<style>
+.emp-team-header {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
+  border-radius: 18px; padding: 1.5rem;
+  margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  border: 1px solid rgba(13,148,136,.22);
+}
+.emp-team-header::before {
+  content: ''; position: absolute; top: -20%; right: -10%; width: 45%; height: 140%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.2) 0%, transparent 65%);
+  pointer-events: none;
+}
+.emp-team-header h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 700; color: #fff; margin: 0 0 .25rem;
+  position: relative; z-index: 1;
+}
+.emp-team-header p { font-size: .82rem; color: rgba(255,255,255,.5); margin: 0; position: relative; z-index: 1; }
+
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.team-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  display: flex; flex-direction: column; gap: .75rem;
+  transition: transform .15s, box-shadow .15s;
+}
+.team-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,.1); }
+
+.tc-avatar-row { display: flex; align-items: center; gap: .85rem; }
+.tc-avatar {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; font-weight: 700; color: #fff;
+  border: 2px solid rgba(13,148,136,.3);
+}
+.tc-name  { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .1rem; }
+.tc-email { font-size: .72rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
+
+.tc-role-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .2rem .7rem; border-radius: 20px; font-size: .65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; width: fit-content;
+}
+.role-super  { background: rgba(201,169,110,.15); color: #c9a96e; border: 1px solid rgba(201,169,110,.3); }
+.role-staff  { background: rgba(13,148,136,.12);  color: #0d9488;  border: 1px solid rgba(13,148,136,.25); }
+.role-member { background: rgba(100,116,139,.1);  color: #64748b;  border: 1px solid rgba(100,116,139,.2); }
+
+.tc-meta { display: flex; flex-direction: column; gap: .3rem; }
+.tc-meta-row { display: flex; align-items: center; gap: .5rem; font-size: .75rem; color: var(--muted); }
+.tc-meta-row i { color: #0d9488; font-size: .8rem; flex-shrink: 0; }
+
+.tc-actions { display: flex; gap: .5rem; margin-top: auto; }
+.tc-btn {
+  flex: 1; padding: .45rem .75rem; border-radius: 20px;
+  font-size: .75rem; font-weight: 600; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: .35rem;
+  transition: background .12s;
+}
+.tc-btn-primary { background: #0d9488; color: #fff; }
+.tc-btn-primary:hover { background: #0f766e; color: #fff; }
+.tc-btn-ghost { background: var(--page-bg); color: var(--muted); border: 1px solid var(--border); }
+.tc-btn-ghost:hover { background: var(--border); color: var(--text); }
+
+.emp-count-badge {
+  background: rgba(13,148,136,.12); color: #0d9488;
+  border: 1px solid rgba(13,148,136,.25);
+  padding: .2rem .75rem; border-radius: 20px;
+  font-size: .72rem; font-weight: 700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="emp-team-header">
+  <h2>👥 Team & Employees</h2>
+  <p>View employee profiles, login activity, and account details.</p>
+</div>
+
+<!-- Back + count row -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem;">
+  <a href="{% url 'employee:portal' %}"
+     style="font-size:.82rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:.35rem;">
+    <i class="bi bi-arrow-left"></i> Back to Portal
+  </a>
+  <span class="emp-count-badge">{{ employees|length }} employee{{ employees|length|pluralize }}</span>
+</div>
+
+<!-- Team grid -->
+<div class="team-grid">
+  {% for emp in employees %}
+  <div class="team-card">
+
+    <div class="tc-avatar-row">
+      <div class="tc-avatar">{{ emp.username|first|upper }}</div>
+      <div style="min-width:0;">
+        <div class="tc-name">{{ emp.get_full_name|default:emp.username }}</div>
+        <div class="tc-email" title="{{ emp.email }}">{{ emp.email|default:"—" }}</div>
+      </div>
+    </div>
+
+    <div>
+      {% if emp.is_superuser %}
+        <span class="tc-role-badge role-super"><i class="bi bi-shield-fill-check"></i> Superuser</span>
+      {% elif emp.is_staff %}
+        <span class="tc-role-badge role-staff"><i class="bi bi-briefcase-fill"></i> Staff</span>
+      {% else %}
+        <span class="tc-role-badge role-member"><i class="bi bi-person-fill"></i> Member</span>
+      {% endif %}
+    </div>
+
+    <div class="tc-meta">
+      <div class="tc-meta-row">
+        <i class="bi bi-person-badge"></i>
+        <span>@{{ emp.username }}</span>
+      </div>
+      <div class="tc-meta-row">
+        <i class="bi bi-calendar3"></i>
+        <span>Joined {{ emp.date_joined|date:"M j, Y" }}</span>
+      </div>
+      <div class="tc-meta-row">
+        <i class="bi bi-clock-history"></i>
+        <span>
+          {% if emp.last_login %}
+            Last login {{ emp.last_login|date:"M j, Y · g:i A" }}
+          {% else %}
+            Never logged in
+          {% endif %}
+        </span>
+      </div>
+      <div class="tc-meta-row">
+        <i class="bi bi-circle-fill" style="font-size:.5rem;color:{% if emp.is_active %}#22c55e{% else %}#ef4444{% endif %};"></i>
+        <span>{% if emp.is_active %}Active{% else %}Inactive{% endif %}</span>
+      </div>
+    </div>
+
+    <div class="tc-actions">
+      <a href="{% url 'employee:employee_detail' pk=emp.pk %}" class="tc-btn tc-btn-primary">
+        <i class="bi bi-person-lines-fill"></i> Details
+      </a>
+      <a href="{% url 'admin:auth_user_change' emp.pk %}" class="tc-btn tc-btn-ghost" target="_blank">
+        <i class="bi bi-pencil"></i> Edit
+      </a>
+    </div>
+
+  </div>
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--surface);border-radius:16px;border:2px dashed var(--border);">
+    <div style="font-size:2.5rem;margin-bottom:.75rem;">👤</div>
+    <p style="color:var(--muted);">No staff accounts found.</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

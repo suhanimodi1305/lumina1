@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dermatology — Lumina{% endblock %}
+{% block page_title %}Dermatology{% endblock %}
+
+{% block extra_css %}
+<style>
+.derm-wrap { max-width: 860px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.derm-hdr {
+  background: linear-gradient(135deg, #0a0a0f, #0d1a2e);
+  border-radius: 16px; padding: 1.5rem;
+  margin-bottom: 1.5rem; display: flex;
+  align-items: center; gap: 1rem;
+  border: 1px solid rgba(91,141,184,.2);
+}
+.derm-hdr-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: rgba(13,148,136,.15);
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.derm-hdr-text h2 { color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0 0 .15rem; }
+.derm-hdr-text p  { color: rgba(255,255,255,.45); font-size: .78rem; margin: 0; }
+
+/* ── SECTION LABEL ── */
+.derm-section-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+
+/* ── AI DOCTOR CTA ── */
+.derm-ai-cta {
+  background: linear-gradient(135deg, rgba(13,148,136,.1), rgba(8,145,178,.05));
+  border: 1px solid rgba(13,148,136,.25); border-radius: 14px;
+  padding: 1.25rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.derm-ai-icon {
+  width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: #fff;
+}
+.derm-ai-cta h4 { font-size: .9rem; font-weight: 700; color: var(--text); margin: 0 0 .15rem; }
+.derm-ai-cta p  { font-size: .78rem; color: var(--muted); margin: 0; }
+.derm-ai-btn {
+  margin-left: auto; flex-shrink: 0;
+  padding: .55rem 1.15rem; background: #0d9488; color: #fff;
+  border-radius: 100px; font-size: .8rem; font-weight: 700;
+  text-decoration: none; white-space: nowrap; transition: background .15s;
+}
+.derm-ai-btn:hover { background: #0f766e; color: #fff; }
+
+/* ── DOCTOR CARDS ── */
+.doctors-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: .85rem; margin-bottom: 1.5rem;
+}
+.doctor-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem; text-align: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  transition: transform .15s, box-shadow .15s;
+}
+.doctor-card:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+.doctor-avatar {
+  width: 64px; height: 64px; border-radius: 50%; margin: 0 auto .85rem;
+  background: linear-gradient(135deg, rgba(13,148,136,.15), rgba(8,145,178,.1));
+  border: 2px solid rgba(13,148,136,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem;
+}
+.doctor-name { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+.doctor-creds { font-size: .72rem; color: var(--muted); margin-bottom: .35rem; }
+.doctor-spec {
+  font-size: .75rem; color: #0d9488; font-weight: 600; margin-bottom: .75rem;
+}
+.doctor-verified {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .2rem .65rem; border-radius: 20px;
+  background: rgba(59,130,246,.1); color: #1d4ed8;
+  font-size: .68rem; font-weight: 600; margin-bottom: .9rem;
+}
+[data-theme="dark"] .doctor-verified { background: rgba(59,130,246,.15); color: #93c5fd; }
+.doctor-profile-btn {
+  display: block; width: 100%; padding: .5rem;
+  border: 1.5px solid #0d9488; border-radius: 100px;
+  color: #0d9488; font-size: .78rem; font-weight: 600;
+  text-decoration: none; text-align: center;
+  transition: background .15s, color .15s;
+}
+.doctor-profile-btn:hover { background: #0d9488; color: #fff; }
+
+/* ── DISCLAIMER ── */
+.derm-disclaimer {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1rem 1.1rem;
+  font-size: .78rem; color: var(--muted);
+  display: flex; align-items: flex-start; gap: .6rem;
+}
+.derm-disclaimer i { color: #0d9488; flex-shrink: 0; margin-top: .05rem; }
+
+@media (max-width: 480px) {
+  .doctors-grid { grid-template-columns: 1fr; }
+  .derm-ai-cta  { flex-direction: column; align-items: flex-start; }
+  .derm-ai-btn  { margin-left: 0; width: 100%; text-align: center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="derm-wrap">
+
+  <div class="derm-hdr">
+    <div class="derm-hdr-icon">🩺</div>
+    <div class="derm-hdr-text">
+      <h2>Dermatology</h2>
+      <p>Board-certified dermatologists and AI skin consultations</p>
+    </div>
+  </div>
+
+  {# AI Doctor CTA #}
+  <div class="derm-section-label">⚡ Available 24/7</div>
+  <div class="derm-ai-cta">
+    <div class="derm-ai-icon">🩺</div>
+    <div>
+      <h4>Dr. Lumina — AI Dermatologist</h4>
+      <p>Get instant skin advice, product recommendations, and treatment guidance.</p>
+    </div>
+    <a href="{% url 'chat:create' %}?mode=doctor" class="derm-ai-btn">
+      <i class="bi bi-heart-pulse"></i> Consult Now
+    </a>
+  </div>
+
+  {# Doctors #}
+  <div class="derm-section-label">👩‍⚕️ Board-Certified Dermatologists</div>
+  <div class="doctors-grid">
+    {% for doctor in doctors %}
+    <div class="doctor-card">
+      <div class="doctor-avatar">👩‍⚕️</div>
+      <div class="doctor-name">{{ doctor.name }}</div>
+      <div class="doctor-creds">{{ doctor.credentials }}</div>
+      <div class="doctor-spec">{{ doctor.specialty }}</div>
+      {% if doctor.verified %}
+      <div class="doctor-verified">
+        <i class="bi bi-patch-check-fill"></i> Verified Clinician
+      </div>
+      {% endif %}
+      <a href="{% url 'chat:create' %}?mode=doctor" class="doctor-profile-btn">
+        <i class="bi bi-chat-dots"></i> Consult via AI Doctor
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Disclaimer #}
+  <div class="derm-disclaimer">
+    <i class="bi bi-info-circle-fill"></i>
+    <span>Lumina's AI Doctor provides informational guidance only. For diagnosis, prescription, or medical treatment, please consult a licensed dermatologist in person.</span>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+[
+  {
+    "model": "products.product",
+    "pk": 101,
+    "fields": {
+      "name": "Cushion Foundation",
+      "brand": "Laneige",
+      "category": "foundation",
+      "product_range": "makeup",
+      "description": "Light coverage cushion foundation with SPF 50",
+      "key_ingredients": "",
+      "full_ingredients": "",
+      "price": "39.99",
+      "sku": "LNG-CSH-001",
+      "image_url": "",
+      "suitable_for_skin_types": ["all"],
+      "targets": [],
+      "shades_available": [
+        {"shade": "13N", "name": "Ivory", "hex": "#F5D9C8"},
+        {"shade": "21N", "name": "Natural Beige", "hex": "#E8C5A8"},
+        {"shade": "23N", "name": "Sand Beige", "hex": "#D4B194"}
+      ],
+      "undertone_match": "neutral",
+      "skin_tone_match": "light",
+      "coverage": "light",
+      "finish": "natural",
+      "is_featured": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

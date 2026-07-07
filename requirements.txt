@@ -1,0 +1,18 @@
+# ── Core Django ───────────────────────────────────────────────────────────
+django==4.2.7
+python-decouple==3.8
+whitenoise==6.6.0
+gunicorn==21.2.0
+
+# ── Django add-ons ────────────────────────────────────────────────────────# ── Image processing ──────────────────────────────────────────────────────
+pillow==10.1.0                  # Required by Django ImageField
+opencv-python-headless==4.8.1.78
+numpy==1.26.0
+
+# ── Face & skin analysis ──────────────────────────────────────────────────
+mediapipe==0.10.14              # 468-landmark face mesh for geometry extraction
+groq>=0.9.0                     # Groq Vision — skin analysis (acne/type/undertone)
+openai>=1.30.0                  # xAI Grok client (OpenAI-compatible) — face shape classification
+
+# ── HTTP utilities ────────────────────────────────────────────────────────
+requests==2.31.0                # Used in scanner management command (test_hf_apis)

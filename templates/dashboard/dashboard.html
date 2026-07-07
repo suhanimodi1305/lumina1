@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Scan History — Lumina{% endblock %}
+{% block page_title %}Scan History{% endblock %}
+
+{% block extra_css %}
+<style>
+.sh-wrap { max-width: 860px; margin: 0 auto; }
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--surface); border-radius: 14px;
+  border: 1px solid var(--border); padding: .9rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05); text-align: center;
+}
+.stat-card .stat-icon { font-size: 1.35rem; margin-bottom: .25rem; }
+.stat-card .stat-val  {
+  font-family: var(--font-heading); font-size: 1.7rem;
+  font-weight: 700; color: var(--lux-teal); line-height: 1; margin-bottom: .15rem;
+}
+.stat-card .stat-label {
+  font-size: .62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-muted);
+}
+
+.sh-section-title {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--text-muted);
+  margin-bottom: .75rem; display: flex; align-items: center; gap: .4rem;
+}
+
+.latest-hero {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1e293b 100%);
+  border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  position: relative; overflow: hidden;
+}
+.latest-hero::before {
+  content: ''; position: absolute; top: -30%; right: -10%; width: 40%; height: 160%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.25) 0%, transparent 65%);
+  pointer-events: none;
+}
+.latest-face {
+  width: 68px; height: 68px; border-radius: 50%; flex-shrink: 0;
+  object-fit: cover; border: 3px solid var(--lux-teal); position: relative; z-index: 1;
+}
+.latest-face-ph {
+  width: 68px; height: 68px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,.07); border: 3px solid var(--lux-teal);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.9rem; position: relative; z-index: 1;
+}
+.latest-info { flex: 1; position: relative; z-index: 1; min-width: 0; }
+.latest-info h3 { color: #fff; font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
+.latest-info p  { color: rgba(255,255,255,.5); font-size: .75rem; margin: 0; }
+.latest-chips   { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .45rem; }
+.latest-chip {
+  padding: .18rem .55rem; border-radius: 20px; font-size: .63rem; font-weight: 600;
+  background: rgba(13,148,136,.2); color: #5eead4;
+  border: 1px solid rgba(13,148,136,.3);
+}
+.latest-actions { display: flex; flex-direction: column; gap: .45rem; flex-shrink: 0; position: relative; z-index: 1; }
+.btn-view-result {
+  padding: .42rem .9rem; border-radius: 20px;
+  background: var(--lux-teal); color: #fff;
+  font-size: .73rem; font-weight: 600; border: none;
+  text-decoration: none; white-space: nowrap; text-align: center; transition: background .12s;
+}
+.btn-view-result:hover { background: #0f766e; color: #fff; }
+.btn-chat-result {
+  padding: .42rem .9rem; border-radius: 20px;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.7);
+  font-size: .73rem; font-weight: 600; border: 1px solid rgba(255,255,255,.12);
+  text-decoration: none; white-space: nowrap; text-align: center; transition: background .12s;
+}
+.btn-chat-result:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+.scan-cards-list { display: flex; flex-direction: column; gap: .85rem; }
+.scan-card-item {
+  background: var(--surface); border-radius: 14px;
+  border: 1px solid var(--border); padding: 1rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,.05);
+  transition: box-shadow .15s, transform .15s;
+}
+.scan-card-item:hover { box-shadow: 0 4px 18px rgba(0,0,0,.1); transform: translateY(-2px); }
+
+.sci-header { display: flex; align-items: center; gap: .85rem; margin-bottom: .7rem; }
+.sci-face {
+  width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+  object-fit: cover; border: 2px solid var(--lux-teal);
+}
+.sci-face-ph {
+  width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+  background: var(--lux-teal-lt); border: 2px solid var(--lux-teal);
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+.sci-info { flex: 1; min-width: 0; }
+.sci-date { font-size: .78rem; font-weight: 700; color: var(--text); margin-bottom: .1rem; }
+.sci-sub  { font-size: .7rem; color: var(--text-muted); }
+.sci-harmony {
+  font-family: var(--font-heading); font-size: 1.45rem; font-weight: 700;
+  color: var(--lux-teal); flex-shrink: 0; line-height: 1;
+}
+.sci-harmony span { font-size: .6rem; font-weight: 400; color: var(--text-muted); display: block; text-align: center; }
+
+.sci-badges { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .7rem; }
+.sci-badge  {
+  padding: .18rem .55rem; border-radius: 20px; font-size: .65rem; font-weight: 600;
+  background: var(--surface-alt); color: var(--text-muted); border: 1px solid var(--border);
+}
+.sci-badge.sev-none     { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.sci-badge.sev-mild     { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
+.sci-badge.sev-moderate { background: #fed7aa; color: #9a3412; border-color: #fdba74; }
+.sci-badge.sev-severe   { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+
+.sci-scores {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .7rem;
+}
+.sci-score-mini {
+  background: var(--surface-alt); border-radius: 8px; padding: .4rem .5rem; text-align: center;
+}
+.sci-score-mini .s-val { font-size: .88rem; font-weight: 700; color: var(--lux-teal); }
+.sci-score-mini .s-lbl { font-size: .57rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+
+.sci-concerns { display: flex; flex-wrap: wrap; gap: .28rem; }
+.sci-concern  {
+  padding: .15rem .52rem; border-radius: 20px; font-size: .63rem; font-weight: 500;
+  background: var(--lux-teal-lt); color: var(--lux-teal);
+}
+
+.scan-action-row {
+  display: flex; gap: .5rem; margin-top: .75rem;
+  padding-top: .6rem; border-top: 1px solid var(--border);
+}
+.td-btn {
+  flex: 1; padding: .38rem .5rem; border-radius: 20px; font-size: .7rem; font-weight: 600;
+  border: none; cursor: pointer; text-decoration: none; text-align: center;
+  transition: background .12s; display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+}
+.td-btn-view { background: var(--lux-teal); color: #fff; }
+.td-btn-view:hover { background: #0f766e; color: #fff; }
+.td-btn-chat { background: var(--lux-gold-lt); color: var(--lux-gold); border: 1px solid rgba(201,169,110,.3); }
+.td-btn-chat:hover { background: var(--lux-gold); color: var(--lux-black); }
+.td-btn-del  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.td-btn-del:hover  { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+.sh-new-scan {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem 1.1rem; background: #0d9488; color: #fff;
+  border-radius: 100px; font-size: .8rem; font-weight: 700;
+  text-decoration: none; transition: background .15s; margin-bottom: 1.5rem;
+}
+.sh-new-scan:hover { background: #0f766e; color: #fff; }
+
+.sh-empty {
+  text-align: center; padding: 3rem 1.5rem;
+  background: var(--surface); border-radius: 16px;
+  border: 2px dashed var(--border);
+}
+.sh-empty .e-icon { font-size: 3rem; margin-bottom: 1rem; }
+.sh-empty h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+.sh-empty p  { color: var(--text-muted); font-size: .875rem; margin-bottom: 1.25rem; }
+
+@media (max-width: 600px) {
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sh-wrap">
+
+  <!-- New Scan -->
+  <a href="{% url 'scanner:upload' %}" class="sh-new-scan">
+    <i class="bi bi-plus-circle"></i> New Scan
+  </a>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">✦</div>
+      <div class="stat-val">{{ total_scans }}</div>
+      <div class="stat-label">Total Scans</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-val">{{ avg_harmony }}%</div>
+      <div class="stat-label">Avg Harmony</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">{% if progress and progress > 0 %}📈{% elif progress and progress < 0 %}📉{% else %}➡{% endif %}</div>
+      <div class="stat-val" style="color:{% if progress and progress > 0 %}#22c55e{% elif progress and progress < 0 %}#ef4444{% else %}var(--lux-teal){% endif %};">
+        {% if progress %}{% if progress > 0 %}+{% endif %}{{ progress }}{% else %}—{% endif %}
+      </div>
+      <div class="stat-label">Progress</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💬</div>
+      <div class="stat-val">{{ user.conversations.count|default:"0" }}</div>
+      <div class="stat-label">AI Chats</div>
+    </div>
+  </div>
+
+  <!-- Latest Scan -->
+  {% if latest_scan %}
+  <div class="sh-section-title">⭐ Latest Scan</div>
+  <div class="latest-hero">
+    {% if latest_scan.scan_image %}
+      <img src="{{ latest_scan.scan_image.url }}" alt="Latest scan" class="latest-face">
+    {% else %}
+      <div class="latest-face-ph">👤</div>
+    {% endif %}
+    <div class="latest-info">
+      <h3>{{ latest_scan.skin_type|title }} · {{ latest_scan.undertone|title }} Undertone</h3>
+      <p>{{ latest_scan.created_at|date:"F j, Y · g:i A" }} · Harmony {{ latest_scan.harmony_score }}%</p>
+      <div class="latest-chips">
+        <span class="latest-chip">{{ latest_scan.skin_tone|title }} Tone</span>
+        <span class="latest-chip">{{ latest_scan.face_shape|title }} Face</span>
+        <span class="latest-chip">Acne: {{ latest_scan.hf_acne_severity|title }}</span>
+        {% for concern in latest_scan.detected_concerns.all|slice:":3" %}
+          <span class="latest-chip">{{ concern.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="latest-actions">
+      <a href="{% url 'results:detail' scan_id=latest_scan.id %}" class="btn-view-result">
+        <i class="bi bi-eye"></i> View Results
+      </a>
+      <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ latest_scan.id }}" class="btn-chat-result">
+        🩺 Consult AI
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- All Scans -->
+  <div class="sh-section-title">📂 All Scans ({{ total_scans }})</div>
+
+  {% if all_scans %}
+  <div class="scan-cards-list">
+    {% for scan in all_scans %}
+    <div class="scan-card-item">
+      <a href="{% url 'results:detail' scan_id=scan.id %}" style="text-decoration:none;color:inherit;display:block;">
+        <div class="sci-header">
+          {% if scan.scan_image %}
+            <img src="{{ scan.scan_image.url }}" alt="Scan" class="sci-face">
+          {% else %}
+            <div class="sci-face-ph">👤</div>
+          {% endif %}
+          <div class="sci-info">
+            <div class="sci-date">{{ scan.created_at|date:"M j, Y" }}</div>
+            <div class="sci-sub">{{ scan.created_at|date:"g:i A" }} · {{ scan.skin_type|title }} · {{ scan.undertone|title }}</div>
+          </div>
+          <div class="sci-harmony">{{ scan.harmony_score }}<span>Harmony</span></div>
+        </div>
+        <div class="sci-badges">
+          <span class="sci-badge">{{ scan.skin_tone|title }} Tone</span>
+          <span class="sci-badge">{{ scan.face_shape|title }} Face</span>
+          <span class="sci-badge sev-{{ scan.hf_acne_severity }}">Acne: {{ scan.hf_acne_severity|title }}</span>
+          {% if scan.is_demo %}<span class="sci-badge" style="background:#fef9c3;color:#854d0e;">Demo</span>{% endif %}
+        </div>
+        <div class="sci-scores">
+          <div class="sci-score-mini"><div class="s-val">{{ scan.hydration_score }}</div><div class="s-lbl">Hydration</div></div>
+          <div class="sci-score-mini"><div class="s-val">{{ scan.acne_score }}</div><div class="s-lbl">Acne</div></div>
+          <div class="sci-score-mini"><div class="s-val">{{ scan.elasticity_score }}</div><div class="s-lbl">Elasticity</div></div>
+        </div>
+        {% if scan.detected_concerns.all %}
+        <div class="sci-concerns">
+          {% for c in scan.detected_concerns.all|slice:":5" %}<span class="sci-concern">{{ c.name }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </a>
+      <div class="scan-action-row">
+        <a href="{% url 'results:detail' scan_id=scan.id %}" class="td-btn td-btn-view">
+          <i class="bi bi-eye"></i> View
+        </a>
+        <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ scan.id }}" class="td-btn td-btn-chat">
+          🩺 Chat
+        </a>
+        <form method="post" action="{% url 'dashboard:delete_scan' scan_id=scan.id %}" style="flex:1;" onsubmit="return confirm('Delete this scan permanently?');">
+          {% csrf_token %}
+          <button type="submit" class="td-btn td-btn-del" style="width:100%;">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="sh-empty">
+    <div class="e-icon">✦</div>
+    <h3>No scans yet</h3>
+    <p>Take your first AI skin scan to see your history and track your progress over time.</p>
+    <a href="{% url 'scanner:upload' %}" class="sh-new-scan">
+      <i class="bi bi-camera-fill"></i> Start Your First Scan
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

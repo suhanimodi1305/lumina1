@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Treatment Plan — Lumina{% endblock %}
+{% block page_title %}Treatment Plan{% endblock %}
+
+{% block extra_css %}
+<style>
+.tp-wrap { max-width: 960px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.tp-hdr {
+  background: linear-gradient(135deg, #0a0a0f, #0d1a14);
+  border-radius: 16px; padding: 1.5rem;
+  margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;
+  border: 1px solid rgba(13,148,136,.2);
+}
+.tp-hdr-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: rgba(13,148,136,.2);
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.tp-hdr-text h2 { color: #fff; font-size: 1.1rem; font-weight: 700; margin: 0 0 .15rem; }
+.tp-hdr-text p  { color: rgba(255,255,255,.45); font-size: .78rem; margin: 0; }
+
+/* ── PRIORITY LEGEND ── */
+.tp-legend {
+  display: flex; gap: 1.25rem; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: .85rem 1.1rem; margin-bottom: 1.5rem;
+}
+.tp-legend-item { display: flex; align-items: center; gap: .45rem; font-size: .78rem; color: var(--text); }
+.tp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tp-dot.urgent      { background: #ef4444; }
+.tp-dot.recommended { background: #f59e0b; }
+.tp-dot.maintenance { background: #0d9488; }
+
+/* ── SECTION LABEL ── */
+.tp-section-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+
+/* ── TREATMENT GRID ── */
+.tp-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem; margin-bottom: 1.75rem;
+}
+.tp-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,.05);
+  transition: transform .15s, box-shadow .15s;
+}
+.tp-card:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+
+.tp-card-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .75rem; gap: .5rem; }
+.tp-card-hdr h3 { font-size: .95rem; font-weight: 700; color: var(--text); margin: 0; line-height: 1.3; }
+
+.tp-priority-badge {
+  padding: .18rem .6rem; border-radius: 20px; font-size: .63rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; flex-shrink: 0;
+  display: flex; align-items: center; gap: .3rem;
+}
+.tp-priority-badge.urgent      { background: rgba(239,68,68,.1);  color: #dc2626; border: 1px solid rgba(239,68,68,.2); }
+.tp-priority-badge.recommended { background: rgba(245,158,11,.1); color: #d97706; border: 1px solid rgba(245,158,11,.2); }
+.tp-priority-badge.maintenance { background: rgba(13,148,136,.1); color: #0d9488; border: 1px solid rgba(13,148,136,.2); }
+
+.tp-best-for { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .75rem; }
+.tp-tag {
+  padding: .18rem .55rem; border-radius: 20px; font-size: .65rem; font-weight: 600;
+  background: rgba(13,148,136,.1); color: #0d9488;
+}
+
+.tp-cost-row {
+  display: flex; gap: .75rem; margin-bottom: .75rem;
+  background: var(--surface-alt); border-radius: 10px; padding: .65rem .75rem;
+}
+.tp-cost-item { flex: 1; }
+.tp-cost-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: .15rem; }
+.tp-cost-val   { font-size: .85rem; font-weight: 700; color: var(--text); }
+
+.tp-expect { font-size: .8rem; color: var(--muted); line-height: 1.55; margin-bottom: .5rem; }
+.tp-clinic  { font-size: .72rem; color: var(--muted); font-style: italic; margin-bottom: .85rem; }
+
+.tp-book-btn {
+  display: block; width: 100%; padding: .5rem;
+  border: 1.5px solid #0d9488; border-radius: 100px; color: #0d9488;
+  font-size: .78rem; font-weight: 600; text-decoration: none; text-align: center;
+  transition: background .15s, color .15s;
+}
+.tp-book-btn:hover { background: #0d9488; color: #fff; }
+
+/* ── POST-TREATMENT PRODUCTS ── */
+.tp-products-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: .85rem; margin-bottom: 1.5rem;
+}
+.tp-product-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  transition: transform .15s, box-shadow .15s;
+}
+.tp-product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+.tp-prod-img {
+  width: 100%; height: 160px; background: var(--surface-alt);
+  display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+  overflow: hidden;
+}
+.tp-prod-img img { width: 100%; height: 100%; object-fit: cover; }
+.tp-prod-body { padding: .75rem; }
+.tp-prod-name  { font-size: .82rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; line-height: 1.3; }
+.tp-prod-brand { font-size: .68rem; color: var(--muted); margin-bottom: .4rem; }
+.tp-prod-btn {
+  display: block; width: 100%; padding: .4rem; border-radius: 8px;
+  background: #0d9488; color: #fff; font-size: .72rem; font-weight: 600;
+  text-decoration: none; text-align: center; transition: background .12s;
+}
+.tp-prod-btn:hover { background: #0f766e; color: #fff; }
+
+/* ── DISCLAIMER ── */
+.tp-disclaimer {
+  background: var(--surface); border: 1px solid rgba(59,130,246,.2);
+  border-left: 4px solid #3b82f6; border-radius: 12px;
+  padding: 1rem 1.1rem; margin-bottom: 1.5rem;
+  font-size: .78rem; color: var(--muted); line-height: 1.65;
+  display: flex; align-items: flex-start; gap: .6rem;
+}
+.tp-disclaimer i { color: #3b82f6; flex-shrink: 0; margin-top: .05rem; }
+
+/* ── EMPTY STATE ── */
+.tp-empty {
+  text-align: center; padding: 2.5rem; background: var(--surface);
+  border: 2px dashed var(--border); border-radius: 14px;
+}
+.tp-empty .e-icon { font-size: 2.75rem; margin-bottom: .75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tp-wrap">
+
+  <div class="tp-hdr">
+    <div class="tp-hdr-icon">💊</div>
+    <div class="tp-hdr-text">
+      <h2>Your Personalised Treatment Plan</h2>
+      <p>Based on Lumina AI scan #{{ scan.id }} · {{ scan.created_at|date:"M j, Y" }}</p>
+    </div>
+  </div>
+
+  {# Priority legend #}
+  <div class="tp-legend">
+    <div class="tp-legend-item"><div class="tp-dot urgent"></div> <strong>Urgent</strong> — address immediately</div>
+    <div class="tp-legend-item"><div class="tp-dot recommended"></div> <strong>Recommended</strong> — highly beneficial</div>
+    <div class="tp-legend-item"><div class="tp-dot maintenance"></div> <strong>Maintenance</strong> — long-term health</div>
+  </div>
+
+  {# Treatments #}
+  <div class="tp-section-label">💊 Clinical Treatments</div>
+
+  {% if treatments %}
+  <div class="tp-grid">
+    {% for t in treatments %}
+    <div class="tp-card">
+      <div class="tp-card-hdr">
+        <h3>{{ t.name }}</h3>
+        <span class="tp-priority-badge {{ t.priority_label|lower }}">
+          <div class="tp-dot {{ t.priority_label|lower }}"></div>
+          {{ t.priority_label }}
+        </span>
+      </div>
+      <div class="tp-best-for">
+        {% for ind in t.best_for %}<span class="tp-tag">{{ ind }}</span>{% endfor %}
+      </div>
+      <div class="tp-cost-row">
+        <div class="tp-cost-item">
+          <div class="tp-cost-label">Cost</div>
+          <div class="tp-cost-val">{{ t.cost_inr }}</div>
+        </div>
+        <div class="tp-cost-item">
+          <div class="tp-cost-label">Sessions</div>
+          <div class="tp-cost-val">{{ t.sessions }}</div>
+        </div>
+      </div>
+      <div class="tp-expect">{{ t.expect }}</div>
+      <div class="tp-clinic"><i class="bi bi-building"></i> {{ t.clinic_type }}</div>
+      <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ scan.id }}" class="tp-book-btn">
+        <i class="bi bi-calendar-check"></i> Consult AI Doctor
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="tp-empty">
+    <div class="e-icon">😊</div>
+    <h3>Great news!</h3>
+    <p style="font-size:.82rem;color:var(--muted);">No urgent clinical treatments needed. Keep up with your skincare routine!</p>
+  </div>
+  {% endif %}
+
+  {# Post-treatment products #}
+  {% if post_treatment_products %}
+  <div class="tp-section-label">🌿 Post-Treatment Care</div>
+  <div class="tp-products-grid">
+    {% for p in post_treatment_products %}
+    <div class="tp-product-card">
+      <div class="tp-prod-img">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy"
+               onerror="this.style.display='none';this.parentElement.textContent='🌿';">
+        {% else %}🌿{% endif %}
+      </div>
+      <div class="tp-prod-body">
+        <div class="tp-prod-name">{{ p.name }}</div>
+        <div class="tp-prod-brand">{{ p.brand }}</div>
+        <a href="https://sasglobal.biz" target="_blank" class="tp-prod-btn">
+          <i class="bi bi-bag-check"></i> Shop on SAS Global
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Disclaimer #}
+  <div class="tp-disclaimer">
+    <i class="bi bi-info-circle-fill"></i>
+    <span>This plan is for informational purposes only and does not constitute medical advice. All clinical procedures must be performed by licensed dermatologists. Always consult a board-certified dermatologist before undergoing any cosmetic or medical procedure.</span>
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <a href="{% url 'results:detail' scan_id=scan.id %}" style="color:#0d9488;font-size:.82rem;font-weight:600;text-decoration:none;">
+      ← Back to Scan Results
+    </a>
+  </div>
+
+</div>
+{% endblock %}
