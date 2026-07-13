@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block title %}Team — Employee Portal{% endblock %}
 {% block page_title %}Team & Employees{% endblock %}
 
@@ -78,13 +78,11 @@
 
 {% block content %}
 
-<!-- Header -->
 <div class="emp-team-header">
   <h2>👥 Team & Employees</h2>
   <p>View employee profiles, login activity, and account details.</p>
 </div>
 
-<!-- Back + count row -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem;">
   <a href="{% url 'employee:portal' %}"
      style="font-size:.82rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:.35rem;">
@@ -93,7 +91,6 @@
   <span class="emp-count-badge">{{ employees|length }} employee{{ employees|length|pluralize }}</span>
 </div>
 
-<!-- Team grid -->
 <div class="team-grid">
   {% for emp in employees %}
   <div class="team-card">

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}{{ req.req_id }} — My Requirement{% endblock %}
 
@@ -42,7 +42,7 @@
       &nbsp;·&nbsp; Submitted {{ req.created_at|date:"d M Y" }}</div>
   </div>
 
-  <!-- Status -->
+  
   <div class="rd-card">
     <h3><i class="bi bi-activity" style="color:var(--teal);"></i> Status</h3>
     <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
@@ -58,7 +58,7 @@
     </div>
   </div>
 
-  <!-- Requirement Details -->
+  
   <div class="rd-card">
     <h3><i class="bi bi-stars" style="color:var(--gold);"></i> Requirement Details</h3>
     <div class="rd-row"><span class="rd-label">Quantity</span><span class="rd-val">{{ req.quantity }}</span></div>
@@ -70,7 +70,7 @@
     {% endif %}
   </div>
 
-  <!-- Products -->
+  
   {% if req.products.exists or req.custom_product %}
   <div class="rd-card">
     <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Requested Products</h3>
@@ -86,7 +86,7 @@
   </div>
   {% endif %}
 
-  <!-- Delivery Address -->
+  
   <div class="rd-card">
     <h3><i class="bi bi-geo-alt-fill" style="color:var(--teal);"></i> Delivery Address</h3>
     <div class="addr-box">
@@ -96,7 +96,7 @@
     </div>
   </div>
 
-  <!-- Employee Notes (if any) -->
+  
   {% if req.employee_notes %}
   <div class="rd-card">
     <h3><i class="bi bi-chat-left-text" style="color:#8b5cf6;"></i> Team Note</h3>
@@ -104,7 +104,7 @@
   </div>
   {% endif %}
 
-  <!-- Linked Order -->
+  
   {% if req.linked_order %}
   <div class="rd-card">
     <h3><i class="bi bi-bag-check" style="color:var(--teal);"></i> Linked Order</h3>
@@ -117,7 +117,7 @@
   </div>
   {% endif %}
 
-  <!-- Actions -->
+  
   <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
     <a href="{% url 'orders:my_requirements' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:var(--surface,#fff);color:var(--text,#0f172a);border:1.5px solid var(--border,#e2e8f0);border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none;">
       <i class="bi bi-arrow-left"></i> Back to Requirements

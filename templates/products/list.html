@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Product Catalogue — Lumina{% endblock %}
 
@@ -282,6 +282,12 @@
   background: rgba(13,148,136,.12);
   color: #065f46;
   border-color: rgba(13,148,136,.4);
+  font-weight: 700;
+}
+.range-active-ayurvedic {
+  background: rgba(34,197,94,.12);
+  color: #14532d;
+  border-color: rgba(34,197,94,.4);
   font-weight: 700;
 }
 .filter-count-dot {
@@ -706,6 +712,7 @@
 [data-theme="dark"] .topbar-btn-range { background: #12121a; color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.1); }
 [data-theme="dark"] .range-active-makeup { background: rgba(236,72,153,.18); color: #f9a8d4; border-color: rgba(236,72,153,.4); }
 [data-theme="dark"] .range-active-korean { background: rgba(13,148,136,.2); color: #5eead4; border-color: rgba(13,148,136,.4); }
+[data-theme="dark"] .range-active-ayurvedic { background: rgba(34,197,94,.18); color: #86efac; border-color: rgba(34,197,94,.4); }
 [data-theme="dark"] .staff-bar { background: rgba(239,68,68,.08); }
 [data-theme="dark"] .active-chip { background: rgba(13,148,136,.2); color: #5eead4; }
 </style>
@@ -714,16 +721,16 @@
 {% block content %}
 <div class="catalog-layout">
 
-  <!-- ═══════════════ LEFT FILTER SIDEBAR ═══════════════ -->
+  
   <aside class="filter-sidebar" id="filter-sidebar">
     <form method="get" id="filter-form">
-      <!-- Preserve search query and sort across filter changes -->
+      
       {% if cur_q %}<input type="hidden" name="q" value="{{ cur_q }}">{% endif %}
       {% if cur_sort %}<input type="hidden" name="sort" value="{{ cur_sort }}">{% endif %}
 
       <div class="filter-panel">
 
-        <!-- Panel header -->
+        
         <div class="filter-panel-head">
           <h3><i class="bi bi-funnel-fill" style="margin-right:.35rem;color:var(--teal);"></i>Filters
             {% if active_filter_count %}<span style="background:var(--teal);color:#fff;font-size:.62rem;padding:.08rem .42rem;border-radius:20px;margin-left:.4rem;font-weight:700;">{{ active_filter_count }}</span>{% endif %}
@@ -731,11 +738,11 @@
           {% if active_filter_count %}<a href="{% url 'products:list' %}" class="filter-clear-all">Clear All</a>{% endif %}
         </div>
 
-        <!-- Active filter chips -->
+        
         {% if active_filter_count %}
         <div class="active-chips">
           {% if cur_q %}<a href="?{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">🔍 "{{ cur_q }}" <span class="chip-x">✕</span></a>{% endif %}
-          {% if cur_product_range %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">{% if cur_product_range == 'korean' %}🌸 K-Beauty{% else %}💄 Makeup{% endif %} <span class="chip-x">✕</span></a>{% endif %}
+          {% if cur_product_range %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">{% if cur_product_range == 'korean' %}🌸 K-Beauty{% elif cur_product_range == 'makeup' %}💄 Makeup{% elif cur_product_range == 'ayurvedic' %}🌿 Ayurvedic{% else %}{{ cur_product_range|title }}{% endif %} <span class="chip-x">✕</span></a>{% endif %}
           {% if cur_category %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">📂 {{ cur_category|title|cut:"_" }} <span class="chip-x">✕</span></a>{% endif %}
           {% if cur_price %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_brand %}brand={{ cur_brand }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">💰 Price <span class="chip-x">✕</span></a>{% endif %}
           {% if cur_brand %}<a href="?{% if cur_q %}q={{ cur_q }}&{% endif %}{% if cur_category %}category={{ cur_category }}&{% endif %}{% if cur_price %}price={{ cur_price }}&{% endif %}{% if cur_product_range %}product_range={{ cur_product_range }}&{% endif %}{% if cur_skin_type %}skin_type={{ cur_skin_type }}&{% endif %}{% if cur_featured %}featured={{ cur_featured }}&{% endif %}{% if cur_sort %}sort={{ cur_sort }}{% endif %}" class="active-chip">🏷️ {{ cur_brand|truncatechars:16 }} <span class="chip-x">✕</span></a>{% endif %}
@@ -744,7 +751,7 @@
         </div>
         {% endif %}
 
-        <!-- 1. PRODUCT RANGE -->
+        
         <div class="filter-section-block open" id="block-range">
           <div class="filter-section-toggle">
             <span class="filter-section-title">Product Range</span>
@@ -762,10 +769,14 @@
               <input type="radio" name="product_range" value="korean" {% if cur_product_range == 'korean' %}checked{% endif %} onchange="this.form.submit()">
               <span class="filter-option-label">🌸 K-Beauty</span>
             </label>
+            <label class="filter-option {% if cur_product_range == 'ayurvedic' %}active{% endif %}">
+              <input type="radio" name="product_range" value="ayurvedic" {% if cur_product_range == 'ayurvedic' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="filter-option-label">🌿 Ayurvedic</span>
+            </label>
           </div>
         </div>
 
-        <!-- 2. PRICE RANGE -->
+        
         <div class="filter-section-block open" id="block-price">
           <div class="filter-section-toggle">
             <span class="filter-section-title">Price Range</span>
@@ -798,7 +809,7 @@
           </div>
         </div>
 
-        <!-- 3. CATEGORY -->
+        
         <div class="filter-section-block open" id="block-category">
           <button type="button" class="filter-section-toggle" onclick="toggleBlock('block-category')">
             <span class="filter-section-title">Category</span>
@@ -830,7 +841,7 @@
           </div>
         </div>
 
-        <!-- 4. FEATURED -->
+        
         <div class="filter-section-block" id="block-featured">
           <button type="button" class="filter-section-toggle" onclick="toggleBlock('block-featured')">
             <span class="filter-section-title">Availability</span>
@@ -848,21 +859,21 @@
           </div>
         </div>
 
-      </div><!-- /filter-panel -->
+      </div>
     </form>
   </aside>
 
-  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  
   <div class="catalog-main">
 
-    <!-- Hero -->
+    
     <div class="cat-hero">
       <div class="cat-hero-label">Lumina · Product Catalogue</div>
-      <h1>💄 Makeup &amp; 🌸 K-Beauty Collection</h1>
-      <p>{{ total_makeup }} Makeup · {{ total_korean }} K-Beauty · SAS Global · Authentic &amp; Affordable</p>
+      <h1>💄 Makeup &amp; 🌸 K-Beauty &amp; 🌿 Ayurvedic Collection</h1>
+      <p>{{ total_makeup }} Makeup · {{ total_korean }} K-Beauty · {{ total_ayurvedic }} Ayurvedic · SAS Global &amp; SP Ayurved</p>
     </div>
 
-    <!-- Staff bar -->
+    
     {% if user.is_staff or user.is_superuser or user.username == 'suhani' %}
     <div class="staff-bar">
       <span class="staff-bar-label"><i class="bi bi-shield-lock"></i> Staff Quick Links</span>
@@ -873,9 +884,9 @@
     </div>
     {% endif %}
 
-    <!-- Top bar: search + sort -->
+    
     <form method="get" id="search-sort-form">
-      <!-- Preserve all sidebar filters -->
+      
       {% if cur_product_range %}<input type="hidden" name="product_range" value="{{ cur_product_range }}">{% endif %}
       {% if cur_category %}<input type="hidden" name="category" value="{{ cur_category }}">{% endif %}
       {% if cur_price %}<input type="hidden" name="price" value="{{ cur_price }}">{% endif %}
@@ -904,7 +915,7 @@
           <i class="bi bi-search"></i> Search
         </button>
 
-        <!-- Quick range pills -->
+        
         <a href="{% url 'products:list' %}?product_range=makeup{% if cur_q %}&q={{ cur_q }}{% endif %}{% if cur_sort %}&sort={{ cur_sort }}{% endif %}"
            class="topbar-btn topbar-btn-range {% if cur_product_range == 'makeup' %}range-active-makeup{% endif %}">
           💄 Makeup
@@ -912,6 +923,10 @@
         <a href="{% url 'products:list' %}?product_range=korean{% if cur_q %}&q={{ cur_q }}{% endif %}{% if cur_sort %}&sort={{ cur_sort }}{% endif %}"
            class="topbar-btn topbar-btn-range {% if cur_product_range == 'korean' %}range-active-korean{% endif %}">
           🌸 K-Beauty
+        </a>
+        <a href="{% url 'products:list' %}?product_range=ayurvedic{% if cur_q %}&q={{ cur_q }}{% endif %}{% if cur_sort %}&sort={{ cur_sort }}{% endif %}"
+           class="topbar-btn topbar-btn-range {% if cur_product_range == 'ayurvedic' %}range-active-ayurvedic{% endif %}">
+          🌿 Ayurvedic
         </a>
 
         <button type="button" class="topbar-btn topbar-btn-filter" id="filter-toggle-btn" onclick="toggleFilterSidebar()">
@@ -927,14 +942,14 @@
       </div>
     </form>
 
-    <!-- Results summary -->
+    
     <div class="results-strip">
       Showing <strong>{{ total_results }}</strong> product{{ total_results|pluralize }}
       {% if cur_q %} for "<strong>{{ cur_q }}</strong>"{% endif %}
       {% if active_filter_count %} · <span style="color:var(--teal);">{{ active_filter_count }} filter{{ active_filter_count|pluralize }} applied</span>{% endif %}
     </div>
 
-    <!-- ═══════════════════ MAKEUP SECTION ═══════════════════ -->
+    
     {% if makeup_brands %}
     <div id="sec-makeup">
       {% for brand_name, products in makeup_brands.items %}
@@ -993,13 +1008,13 @@
       {% endfor %}
     </div>
     {% elif not korean_ranges %}
-    <!-- Empty state only when both sections are empty -->
+    
     {% endif %}
 
-    <!-- ═══════════════════ K-BEAUTY SECTION ═══════════════════ -->
+    
     {% if korean_ranges %}
     <div id="sec-korean">
-      <!-- K-Beauty hero banner -->
+      
       <div style="background:linear-gradient(135deg,#0a0a0f 0%,#1a1a2e 60%,#0d1f3c 100%);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;text-align:center;position:relative;overflow:hidden;">
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(13,148,136,.2) 0%,transparent 70%);"></div>
         <div style="position:relative;z-index:1;">
@@ -1090,8 +1105,89 @@
     </div>
     {% endif %}
 
-    <!-- Empty state -->
-    {% if not makeup_brands and not korean_ranges %}
+    
+    {% if ayurvedic_brands %}
+    <div id="sec-ayurvedic">
+      
+      <div style="background:linear-gradient(135deg,#0a1a0a 0%,#0d2b0d 55%,#1a3a1a 100%);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(34,197,94,.18) 0%,transparent 70%);"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#4ade80;margin-bottom:.3rem;">SP Ayurved · Homemade Herbal Products</div>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,2.5vw,1.7rem);font-weight:700;color:#fff;margin-bottom:.25rem;">🌿 Ayurvedic Herbal Collection</h2>
+          <p style="font-size:.78rem;color:rgba(255,255,255,.5);margin:0;">{{ total_ayurvedic }} products · Hair · Skin · Soaps · Wellness · Made in India 🇮🇳</p>
+        </div>
+      </div>
+
+      {% for brand_name, products in ayurvedic_brands.items %}
+      
+      {% regroup products by get_category_display as category_groups %}
+      <div style="margin-bottom:2.5rem;">
+        <div style="background:linear-gradient(135deg,rgba(34,197,94,.06),rgba(22,163,74,.03));border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:.85rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.85rem;">
+          <div style="font-size:1.8rem;flex-shrink:0;">🌿</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.2rem;">
+              <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;color:var(--text,#0f172a);margin:0;">{{ brand_name }}</h2>
+              <span style="padding:.18rem .65rem;background:rgba(34,197,94,.15);color:#14532d;border-radius:20px;font-size:.7rem;font-weight:600;">{{ products|length }} product{{ products|length|pluralize }}</span>
+            </div>
+            <p style="font-size:.72rem;color:var(--muted,#64748b);margin:0;line-height:1.5;">Authentic Ayurvedic formulations · Homemade Herbal · Store in cool, dry place · 12 months shelf life</p>
+          </div>
+        </div>
+        <div class="prod-grid">
+          {% for p in products %}
+          <div class="prod-card" data-aos="zoom-in" data-aos-delay="{% cycle '0' '100' '200' %}">
+            <div class="prod-img-wrap" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
+              {% if p.image_url %}
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="prod-img-placeholder" style="display:none;">
+                  {% if p.category == 'cleanser' %}🫧{% elif p.category == 'oil' %}🫙{% elif p.category == 'mask' %}🌿{% elif p.category == 'serum' %}💧{% elif p.category == 'cream' %}🌸{% elif p.category == 'exfoliator' %}✨{% elif p.category == 'sunscreen' %}☀️{% else %}🌿{% endif %}
+                </div>
+              {% else %}
+                <div class="prod-img-placeholder" style="color:#16a34a;">
+                  {% if p.category == 'cleanser' %}🫧{% elif p.category == 'oil' %}🫙{% elif p.category == 'mask' %}🎭{% elif p.category == 'serum' %}💧{% elif p.category == 'cream' %}🌸{% elif p.category == 'exfoliator' %}✨{% elif p.category == 'sunscreen' %}☀️{% elif p.category == 'treatment' %}
+                    {% if 'soap' in p.name|lower or 'bar' in p.name|lower %}🧼{% elif 'lip' in p.name|lower %}💋{% elif 'foot' in p.name|lower %}🦶{% elif 'facial' in p.name|lower or 'face' in p.name|lower %}🪷{% elif 'hair' in p.name|lower %}💆{% elif 'weight' in p.name|lower %}⚖️{% elif 'comb' in p.name|lower %}🪮{% else %}🌿{% endif %}
+                  {% else %}🌿{% endif %}
+                </div>
+              {% endif %}
+              <span style="position:absolute;top:.5rem;left:.5rem;padding:.15rem .55rem;border-radius:20px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:rgba(34,197,94,.15);color:#14532d;border:1px solid rgba(34,197,94,.25);">Ayurvedic</span>
+              {% if p.is_featured %}<span class="prod-featured-badge">★ Featured</span>{% endif %}
+              {% if user.is_staff or user.is_superuser or user.username == 'suhani' %}
+              <div class="prod-staff-overlay">
+                <a href="{% url 'employee:product_edit' pk=p.pk %}" class="overlay-btn overlay-edit"><i class="bi bi-pencil"></i> Edit</a>
+                <a href="{% url 'employee:product_delete' pk=p.pk %}" class="overlay-btn overlay-delete"><i class="bi bi-trash"></i> Delete</a>
+              </div>
+              {% endif %}
+            </div>
+            <div class="prod-body">
+              <div class="prod-name">{{ p.name }}</div>
+              <div class="prod-brand" style="font-size:.65rem;color:#16a34a;">{{ p.brand }}</div>
+              <span style="display:inline-block;padding:.15rem .5rem;border-radius:20px;font-size:.63rem;font-weight:600;margin-bottom:.45rem;background:rgba(34,197,94,.1);color:#14532d;">{{ p.get_category_display }}</span>
+              {% if p.description %}<div class="prod-desc">{{ p.description|truncatewords:14 }}</div>{% endif %}
+              {% if p.price %}<div class="prod-price">₹{{ p.price }}</div>{% endif %}
+              {% if p.key_ingredients %}
+              <div style="font-size:.65rem;color:var(--muted,#64748b);margin-bottom:.4rem;line-height:1.4;">
+                <i class="bi bi-leaf" style="color:#16a34a;"></i> {{ p.key_ingredients|truncatechars:55 }}
+              </div>
+              {% endif %}
+              {% if p.suitable_for_skin_types %}
+              <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.45rem;">
+                {% for st in p.suitable_for_skin_types|slice:":3" %}
+                <span style="background:rgba(34,197,94,.08);color:#14532d;border:1px solid rgba(34,197,94,.18);padding:.08rem .4rem;border-radius:20px;font-size:.58rem;font-weight:600;">{% if st == 'all' %}All Types{% else %}{{ st|title }}{% endif %}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+              <a href="{% url 'products:detail' pk=p.pk %}" class="prod-shop-btn" style="background:#16a34a;" onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'"><i class="bi bi-eye"></i> View Details</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    
+    {% if not makeup_brands and not korean_ranges and not ayurvedic_brands %}
     <div class="empty-state">
       <div class="es-icon">🔍</div>
       <h3>No Products Found</h3>
@@ -1102,13 +1198,9 @@
     </div>
     {% endif %}
 
-  </div><!-- /catalog-main -->
-</div><!-- /catalog-layout -->
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════════
-     MOBILE FILTER BOTTOM DRAWER (Amazon-style)
-     Hidden on desktop, shown only on ≤768px
-     ═══════════════════════════════════════════════ -->
 <div class="mob-filter-backdrop" id="mob-filter-backdrop" onclick="closeMobFilterDrawer()"></div>
 
 <div class="mob-filter-drawer" id="mob-filter-drawer" role="dialog" aria-modal="true" aria-label="Filter products">
@@ -1126,7 +1218,7 @@
       {% if cur_q %}<input type="hidden" name="q" value="{{ cur_q }}">{% endif %}
       {% if cur_sort %}<input type="hidden" name="sort" value="{{ cur_sort }}">{% endif %}
 
-      <!-- 1. PRODUCT RANGE -->
+      
       <div class="mob-filter-section mob-open" id="mob-block-range">
         <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-range')" aria-expanded="true">
           <span class="mob-filter-section-title">Product Range</span>
@@ -1145,10 +1237,14 @@
             <input type="radio" name="product_range" value="korean" {% if cur_product_range == 'korean' %}checked{% endif %}>
             🌸 K-Beauty
           </label>
+          <label class="mob-filter-option {% if cur_product_range == 'ayurvedic' %}mob-active{% endif %}">
+            <input type="radio" name="product_range" value="ayurvedic" {% if cur_product_range == 'ayurvedic' %}checked{% endif %}>
+            🌿 Ayurvedic
+          </label>
         </div>
       </div>
 
-      <!-- 2. PRICE RANGE -->
+      
       <div class="mob-filter-section mob-open" id="mob-block-price">
         <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-price')" aria-expanded="true">
           <span class="mob-filter-section-title">Price Range</span>
@@ -1170,7 +1266,7 @@
         </div>
       </div>
 
-      <!-- 3. CATEGORY -->
+      
       <div class="mob-filter-section" id="mob-block-category">
         <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-category')" aria-expanded="false">
           <span class="mob-filter-section-title">Category</span>
@@ -1196,7 +1292,7 @@
         </div>
       </div>
 
-      <!-- 4. FEATURED -->
+      
       <div class="mob-filter-section" id="mob-block-featured">
         <button type="button" class="mob-filter-section-toggle" onclick="toggleMobBlock('mob-block-featured')" aria-expanded="false">
           <span class="mob-filter-section-title">Availability</span>
@@ -1211,7 +1307,7 @@
       </div>
 
     </form>
-  </div><!-- /mob-drawer-body -->
+  </div>
 
   <div class="mob-drawer-footer">
     <a href="{% url 'products:list' %}{% if cur_sort %}?sort={{ cur_sort }}{% endif %}" class="mob-drawer-clear">
@@ -1221,7 +1317,7 @@
       Apply Filters
     </button>
   </div>
-</div><!-- /mob-filter-drawer -->
+</div>
 
 {% endblock %}
 
@@ -1307,17 +1403,6 @@ function toggleMobBlock(id) {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-  const isMobile = window.innerWidth <= 768;
-
-  if (!isMobile) {
-    // Desktop: always open filter sidebar
-    const sidebar = document.getElementById('filter-sidebar');
-    const btn     = document.getElementById('filter-toggle-btn');
-    sidebar.classList.add('filter-open');
-    btn.classList.add('active');
-    btn.querySelector('i').className = 'bi bi-funnel-fill';
-  }
-
   // Submit search-sort form on Enter key
   document.getElementById('search-input')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -1325,10 +1410,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('search-sort-form').submit();
     }
   });
-
-  // On mobile, if there are active filters, auto-open the drawer briefly to hint
-  // (optional — remove the block below if you don't want this)
-  const hasActiveFilters = {{ active_filter_count|default:0 }} > 0;
 });
 </script>
 {% endblock %}

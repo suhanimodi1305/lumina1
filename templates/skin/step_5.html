@@ -1,0 +1,78 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Does your skin <em>react</em> easily?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=5 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Does your skin sting or burn after using skincare products?</label>
+    <div class="ac-options">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sting_reaction" value="never" required
+               {% if not sess.sensitivity_symptoms %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">✅</div>
+          <div class="ac-opt-label">Never</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sting_reaction" value="sometimes">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">😐</div>
+          <div class="ac-opt-label">Sometimes</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sting_reaction" value="often">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">😬</div>
+          <div class="ac-opt-label">Often</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sting_reaction" value="always">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🔥</div>
+          <div class="ac-opt-label">Almost always</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Do you experience any of these? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in sensitivity_options %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="sensitivity_symptoms" value="{{ o.value }}"
+               {% if o.value in sess.sensitivity_symptoms %}checked{% endif %}>
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:.3rem;">Leave blank if none apply — this helps us avoid triggering ingredients.</p>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=4 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

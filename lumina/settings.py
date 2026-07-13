@@ -45,6 +45,15 @@ INSTALLED_APPS = [
     'apps.employee',
     'apps.orders',
     'apps.memberships',
+    'apps.diagnostic',
+    'apps.hair',
+    'apps.skin',
+    # New system-design apps
+    'apps.notifications',
+    'apps.progress',
+    'apps.reviews',
+    'apps.coupons',
+    'apps.blog',
 ]
 
 MIDDLEWARE = [
@@ -54,8 +63,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'apps.memberships.middleware.TierExpiryMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'apps.memberships.middleware.TierExpiryMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # ── Lumina security ──────────────────────────────────────────────────
     'apps.core.middleware.RateLimitMiddleware',        # brute-force / DoS
@@ -78,6 +87,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'apps.core.context_processors.user_scan_context',
                 'apps.memberships.context_processors.user_tier_context',
+                'apps.notifications.context_processors.unread_notifications',
             ],
         },
     },
@@ -134,7 +144,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# In development, use simple storage (no hashing) so Django's built-in
+# static file server works correctly alongside WhiteNoise.
+# In production (DEBUG=False), WhiteNoise compresses and hashes files.
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -150,9 +166,9 @@ EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST          = 'smtp.gmail.com'
 EMAIL_PORT          = 587
 EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = config('EMAIL_HOST_USER', default='suhanimodi7090@gmail.com')
+EMAIL_HOST_USER     = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL', default='Lumina <suhanimodi7090@gmail.com>')
+DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL', default='Lumina <noreply@lumina.app>')
 SERVER_EMAIL        = EMAIL_HOST_USER
 
 # Authentication settings

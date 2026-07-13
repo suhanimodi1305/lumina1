@@ -1,0 +1,98 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Last step — <em>health context</em></h1>
+{% endblock %}
+
+{% block step_css %}
+.ac-disclaimer-med {
+  background: rgba(239,68,68,.07);
+  border: 1px solid rgba(239,68,68,.2);
+  border-radius: 14px; padding: 1rem 1.1rem;
+  font-size: .8rem; line-height: 1.55;
+  color: var(--muted); margin-bottom: 1.75rem;
+  display: flex; gap: .7rem; align-items: flex-start;
+}
+.ac-disclaimer-med i { color: #ef4444; flex-shrink: 0; font-size: 1rem; margin-top: .1rem; }
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=12 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-disclaimer-med">
+    <i class="bi bi-shield-exclamation"></i>
+    <span>
+      <strong>Important:</strong> This information helps us give you safe recommendations only.
+      Lumina AI is <strong>not a substitute for a licensed dermatologist or medical doctor</strong>.
+      If you have any medical conditions, please consult your doctor before following any skincare advice.
+    </span>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Do you have any of these health conditions? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in medical_conditions %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="medical_conditions" value="{{ o.value }}"
+               {% if o.checked %}checked{% endif %}>
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="medical_conditions" value="none_apply">
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">✅</span>
+          <span class="ac-toggle-label">None apply to me</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="ac-section-divider"><i class="bi bi-capsule"></i> Skin Medications</div>
+  <div class="ac-field">
+    <label class="ac-label">Are you currently using any of these? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in skin_meds %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="medical_conditions" value="{{ o.value }}"
+               {% if o.checked %}checked{% endif %}>
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label" for="allergies">Known skin allergies (optional)</label>
+    <input type="text" name="known_allergies" id="allergies" class="ac-input"
+           placeholder="e.g. Fragrance, Lanolin, Retinol, Latex…"
+           value="{{ sess.known_allergies|default:'' }}">
+  </div>
+
+  
+  <button type="submit" class="ac-next-btn" style="background:linear-gradient(135deg,#0d9488,#f59e0b);font-size:1.05rem;">
+    <i class="bi bi-stars"></i> Generate My AI Skin Report
+  </button>
+  <p style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:.7rem;">
+    <i class="bi bi-lock-fill"></i> Your answers are private and never shared with third parties
+  </p>
+  <a href="{% url 'skin:question' step=11 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

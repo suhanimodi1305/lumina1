@@ -1,0 +1,1046 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}Skin Progress Tracker — Lumina{% endblock %}
+{% block page_title %}Progress Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   LUMINA — Skin Progress Tracker  v1.0
+   Premium design: timeline · charts · before/after · streaks
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --pg-purple:  #7c3aed;
+  --pg-purple2: #8b5cf6;
+  --pg-teal:    #0d9488;
+  --pg-pink:    #ec4899;
+  --pg-blue:    #3b82f6;
+  --pg-green:   #22c55e;
+  --pg-amber:   #f59e0b;
+  --pg-red:     #ef4444;
+  --pg-orange:  #f97316;
+  --pg-surf:    var(--surface);
+  --pg-surf2:   var(--surface-alt, #f8f9fc);
+  --pg-border:  var(--border);
+  --pg-text:    var(--text);
+  --pg-muted:   var(--text-muted, #64748b);
+  --pg-radius:  16px;
+  --pg-pill:    100px;
+  --pg-shadow:  0 2px 12px rgba(0,0,0,.07);
+  --pg-shadow2: 0 6px 28px rgba(0,0,0,.11);
+}
+[data-theme="dark"] {
+  --pg-surf2: #1d2035;
+}
+.pg-shell { padding-bottom: 3rem; }
+</style>
+
+<style>
+/* ── TOP BAR ── */
+.pg-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: .6rem;
+}
+.pg-back {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 600; color: var(--pg-muted);
+  background: var(--pg-surf); border: 1.5px solid var(--pg-border);
+  border-radius: var(--pg-pill); padding: .38rem 1rem;
+  text-decoration: none; transition: all .15s;
+}
+.pg-back:hover { color: var(--pg-purple); border-color: var(--pg-purple); }
+.pg-new-scan {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 700; color: #fff;
+  background: var(--pg-teal); border: none;
+  border-radius: var(--pg-pill); padding: .42rem 1.1rem;
+  text-decoration: none; transition: background .15s;
+}
+.pg-new-scan:hover { background: #0f766e; color: #fff; }
+
+/* ── SUMMARY STATS ROW ── */
+.pg-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: .85rem; margin-bottom: 1.5rem;
+}
+.pg-stat {
+  background: var(--pg-surf); border-radius: var(--pg-radius);
+  border: 1px solid var(--pg-border); padding: 1.1rem 1rem;
+  text-align: center; box-shadow: var(--pg-shadow);
+  transition: transform .15s, box-shadow .15s;
+}
+.pg-stat:hover { transform: translateY(-2px); box-shadow: var(--pg-shadow2); }
+.pg-stat-icon  { font-size: 1.5rem; margin-bottom: .35rem; }
+.pg-stat-val   {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight: 700; line-height: 1;
+  margin-bottom: .2rem;
+}
+.pg-stat-label {
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--pg-muted);
+}
+</style>
+
+<style>
+/* ── CARD BASE ── */
+.pg-card {
+  background: var(--pg-surf); border-radius: var(--pg-radius);
+  border: 1px solid var(--pg-border); box-shadow: var(--pg-shadow);
+  overflow: hidden; margin-bottom: 1.25rem;
+}
+.pg-card-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem .65rem; border-bottom: 1px solid var(--pg-border);
+}
+.pg-card-title { font-size: .95rem; font-weight: 800; color: var(--pg-text); }
+.pg-card-sub   { font-size: .7rem;  color: var(--pg-muted); margin-top: .06rem; }
+.pg-badge {
+  font-size: .63rem; font-weight: 700; padding: .2rem .65rem;
+  border-radius: var(--pg-pill);
+}
+.pg-badge-purple { background: rgba(124,58,237,.1); color: var(--pg-purple); }
+.pg-badge-teal   { background: rgba(13,148,136,.1);  color: var(--pg-teal); }
+.pg-badge-green  { background: rgba(34,197,94,.1);   color: #16a34a; }
+.pg-badge-amber  { background: rgba(245,158,11,.1);  color: #d97706; }
+.pg-badge-red    { background: rgba(239,68,68,.1);   color: #dc2626; }
+
+/* ── SCAN DUE BANNER ── */
+.pg-scan-due {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.25rem; border-radius: var(--pg-radius);
+  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(13,148,136,.08));
+  border: 1.5px solid rgba(124,58,237,.2);
+  margin-bottom: 1.5rem;
+}
+.pg-scan-due-icon { font-size: 2rem; flex-shrink: 0; }
+.pg-scan-due h3   { font-size: .95rem; font-weight: 800; color: var(--pg-text); margin-bottom: .15rem; }
+.pg-scan-due p    { font-size: .78rem; color: var(--pg-muted); margin: 0; }
+.pg-scan-due-btn  {
+  margin-left: auto; flex-shrink: 0;
+  padding: .5rem 1.1rem; background: var(--pg-purple); color: #fff;
+  border-radius: var(--pg-pill); font-size: .8rem; font-weight: 700;
+  text-decoration: none; transition: background .15s;
+}
+.pg-scan-due-btn:hover { background: #6d28d9; color: #fff; }
+
+/* ── OVERALL VERDICT ── */
+.pg-verdict-wrap {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.25rem 1.25rem .5rem; flex-wrap: wrap;
+}
+.pg-verdict-ring { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+.pg-verdict-ring svg { width: 100px; height: 100px; transform: rotate(-90deg); }
+.pg-vring-bg { fill: none; stroke: #eef0f8; stroke-width: 9; }
+.pg-vring-fg { fill: none; stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1); }
+.pg-vring-num {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 700;
+  line-height: 1; color: var(--pg-text);
+}
+.pg-vring-num small { font-size: .55rem; color: var(--pg-muted); font-family: 'Inter', sans-serif; font-weight: 500; }
+[data-theme="dark"] .pg-vring-bg { stroke: rgba(255,255,255,.08); }
+.pg-verdict-info { flex: 1; min-width: 200px; }
+.pg-verdict-info h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 700; color: var(--pg-text); margin-bottom: .25rem;
+}
+.pg-verdict-info p { font-size: .83rem; color: var(--pg-muted); line-height: 1.6; margin: 0; }
+.pg-verdict-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .65rem; }
+</style>
+
+<style>
+/* ── DELTA METRICS GRID ── */
+.pg-delta-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: .85rem; padding: 1.1rem 1.25rem;
+}
+.pg-delta-card {
+  background: var(--pg-surf2); border-radius: 12px;
+  border: 1px solid var(--pg-border); padding: .9rem 1rem;
+  display: flex; flex-direction: column; gap: .3rem;
+}
+.pg-delta-header { display: flex; align-items: center; gap: .45rem; }
+.pg-delta-icon { font-size: 1.1rem; }
+.pg-delta-name { font-size: .75rem; font-weight: 700; color: var(--pg-text); }
+.pg-delta-scores {
+  display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap;
+}
+.pg-delta-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.7rem; font-weight: 700; line-height: 1;
+}
+.pg-delta-arrow {
+  font-size: .8rem; font-weight: 800; padding: .18rem .55rem;
+  border-radius: var(--pg-pill); margin-left: auto;
+}
+.da-up   { background: rgba(34,197,94,.12);  color: #15803d; }
+.da-down { background: rgba(239,68,68,.12);  color: #dc2626; }
+.da-same { background: rgba(100,116,139,.1); color: var(--pg-muted); }
+.pg-delta-bar-track {
+  height: 5px; background: var(--pg-border); border-radius: var(--pg-pill); overflow: hidden;
+}
+.pg-delta-bar-fill { height: 100%; border-radius: var(--pg-pill); transition: width 1.3s cubic-bezier(.4,0,.2,1); width: 0; }
+.pg-delta-sub { font-size: .67rem; color: var(--pg-muted); }
+
+/* ── CHART AREA ── */
+.pg-chart-wrap {
+  padding: .85rem 1.25rem 1.25rem; position: relative;
+}
+.pg-chart-canvas { max-height: 260px; width: 100% !important; }
+.pg-chart-tabs {
+  display: flex; gap: .3rem; padding: .75rem 1.25rem 0;
+  border-bottom: 1.5px solid var(--pg-border); flex-wrap: wrap;
+}
+.pg-ctab {
+  padding: .38rem .9rem; border-radius: var(--pg-pill);
+  font-size: .75rem; font-weight: 600; border: none;
+  background: transparent; color: var(--pg-muted);
+  cursor: pointer; transition: all .13s; font-family: inherit;
+}
+.pg-ctab.active { background: var(--pg-purple); color: #fff; }
+.pg-ctab:hover:not(.active) { background: rgba(124,58,237,.08); color: var(--pg-purple); }
+
+/* ── SCAN HISTORY CARDS ── */
+.sh-list { padding: 1rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: .85rem; }
+
+.sh-card {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 0;
+  background: var(--pg-surf2);
+  border: 1.5px solid var(--pg-border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow .15s, border-color .15s, transform .15s;
+  position: relative;
+}
+.sh-card:hover { box-shadow: var(--pg-shadow2); transform: translateY(-1px); }
+.sh-card.sh-latest { border-color: rgba(13,148,136,.45); background: linear-gradient(135deg, rgba(13,148,136,.04), var(--pg-surf2)); }
+.sh-card.sh-baseline { border-color: rgba(124,58,237,.35); background: linear-gradient(135deg, rgba(124,58,237,.04), var(--pg-surf2)); }
+
+/* Left: image / placeholder column */
+.sh-thumb {
+  width: 80px; flex-shrink: 0;
+  display: flex; align-items: stretch;
+  overflow: hidden;
+}
+.sh-thumb img {
+  width: 80px; height: 100%; min-height: 100px;
+  object-fit: cover; object-position: center top; display: block;
+}
+.sh-thumb-placeholder {
+  width: 80px; background: linear-gradient(135deg, #e8eaf6, #f0ecff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; min-height: 100px; flex: 1;
+}
+[data-theme="dark"] .sh-thumb-placeholder { background: linear-gradient(135deg, #1d1535, #2a1f4a); }
+
+/* Center: body */
+.sh-body {
+  padding: .85rem 1rem; flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: .35rem;
+}
+.sh-meta {
+  display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+}
+.sh-date { font-size: .7rem; font-weight: 600; color: var(--pg-muted); }
+.sh-pill {
+  font-size: .58rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; padding: .15rem .55rem; border-radius: var(--pg-pill);
+}
+.sh-pill-teal   { background: rgba(13,148,136,.1);  color: var(--pg-teal); }
+.sh-pill-purple { background: rgba(124,58,237,.1); color: var(--pg-purple); }
+.sh-pill-amber  { background: rgba(245,158,11,.1); color: #d97706; }
+.sh-title { font-size: .88rem; font-weight: 700; color: var(--pg-text); line-height: 1.3; }
+.sh-tags { display: flex; flex-wrap: wrap; gap: .25rem; }
+.sh-tag {
+  font-size: .62rem; font-weight: 600; padding: .12rem .48rem;
+  border-radius: var(--pg-pill); background: var(--pg-surf); color: var(--pg-muted);
+  border: 1px solid var(--pg-border);
+}
+.sh-tag-concern {
+  background: rgba(124,58,237,.07); color: var(--pg-purple);
+  border-color: rgba(124,58,237,.15);
+}
+
+/* Mini metric bars row */
+.sh-metrics { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin-top: .15rem; }
+.sh-metric {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .65rem; color: var(--pg-muted); font-weight: 600;
+  white-space: nowrap;
+}
+.sh-metric-bar {
+  width: 40px; height: 4px; background: var(--pg-border);
+  border-radius: var(--pg-pill); overflow: hidden;
+}
+.sh-metric-fill { height: 100%; border-radius: var(--pg-pill); }
+
+/* Action buttons row */
+.sh-actions { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .35rem; }
+.sh-btn {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .7rem; font-weight: 700; padding: .28rem .65rem;
+  border-radius: var(--pg-pill); text-decoration: none;
+  transition: all .13s; border: 1.5px solid transparent;
+}
+.sh-btn-primary {
+  background: rgba(124,58,237,.08); color: var(--pg-purple);
+  border-color: rgba(124,58,237,.2);
+}
+.sh-btn-primary:hover { background: var(--pg-purple); color: #fff; border-color: var(--pg-purple); }
+.sh-btn-teal {
+  background: rgba(13,148,136,.07); color: var(--pg-teal);
+  border-color: rgba(13,148,136,.2);
+}
+.sh-btn-teal:hover { background: var(--pg-teal); color: #fff; border-color: var(--pg-teal); }
+
+/* Right: score ring column */
+.sh-score-col {
+  padding: .85rem 1rem; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .2rem;
+  border-left: 1px solid var(--pg-border); min-width: 78px;
+}
+.sh-ring-wrap { position: relative; width: 58px; height: 58px; }
+.sh-ring-svg  { width: 58px; height: 58px; transform: rotate(-90deg); }
+.sh-ring-bg   { fill: none; stroke-width: 6; }
+.sh-ring-fg   { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+.sh-ring-num  {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--pg-text); line-height: 1;
+}
+.sh-score-lbl { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--pg-muted); }
+
+/* Index badge — absolute top-left corner */
+.sh-index {
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: .62rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.45); color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+@media (max-width: 600px) {
+  .sh-card { grid-template-columns: 70px 1fr auto; }
+  .sh-thumb, .sh-thumb img, .sh-thumb-placeholder { width: 70px; }
+  .sh-score-col { min-width: 65px; padding: .6rem .7rem; }
+}
+</style>
+
+<style>
+/* ── AI RECOMMENDATION CARD ── */
+.pg-ai-rec {
+  padding: 1rem 1.25rem 1.25rem;
+}
+.pg-ai-bubble {
+  display: flex; gap: .9rem; align-items: flex-start;
+  padding: 1rem 1.1rem; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124,58,237,.06), rgba(13,148,136,.04));
+  border: 1.5px solid rgba(124,58,237,.15);
+}
+.pg-ai-avatar {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--pg-purple), var(--pg-teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: #fff;
+}
+.pg-ai-text { flex: 1; font-size: .83rem; color: var(--pg-text); line-height: 1.65; }
+.pg-ai-text strong { color: var(--pg-purple); }
+
+/* ── EMPTY STATE ── */
+.pg-empty {
+  text-align: center; padding: 4rem 2rem;
+  background: var(--pg-surf); border-radius: var(--pg-radius);
+  border: 2px dashed var(--pg-border);
+}
+.pg-empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.pg-empty h2   { font-size: 1.15rem; font-weight: 700; margin-bottom: .5rem; }
+.pg-empty p    { font-size: .85rem; color: var(--pg-muted); margin-bottom: 1.25rem; max-width: 360px; margin-inline: auto; line-height: 1.6; }
+.pg-empty-btn  {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .65rem 1.5rem; background: var(--pg-purple); color: #fff;
+  border-radius: var(--pg-pill); font-size: .88rem; font-weight: 700;
+  text-decoration: none; transition: background .15s;
+}
+.pg-empty-btn:hover { background: #6d28d9; color: #fff; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 991px) {
+  .pg-stats { grid-template-columns: repeat(2, 1fr); }
+  .pg-delta-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .pg-stats { grid-template-columns: repeat(2, 1fr); }
+  .pg-delta-grid { grid-template-columns: 1fr; }
+  .pg-scan-due-btn { margin-left: 0; margin-top: .5rem; }
+  .pg-scan-due { flex-wrap: wrap; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-shell">
+
+  
+  <div class="pg-topbar">
+    <a href="{% url 'dashboard:dashboard' %}" class="pg-back">
+      <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
+    <div style="display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;">
+      {% if last_scan %}
+      <a href="{% url 'results:detail' scan_id=last_scan.id %}" class="pg-back">
+        <i class="bi bi-eye"></i> Latest Result
+      </a>
+      {% endif %}
+      <a href="{% url 'scanner:upload' %}" class="pg-new-scan">
+        <i class="bi bi-camera"></i> New Scan
+      </a>
+    </div>
+  </div>
+
+  {% if total == 0 %}
+  
+  <div class="pg-empty">
+    <div class="pg-empty-icon">📊</div>
+    <h2>No scans yet</h2>
+    <p>Take your first AI skin scan to start tracking your skin health journey over time. Progress charts, before/after comparisons, and AI recommendations will appear here.</p>
+    <a href="{% url 'scanner:upload' %}" class="pg-empty-btn">
+      <i class="bi bi-camera-fill"></i> Take First Scan
+    </a>
+  </div>
+
+  {% else %}
+
+  
+  {% if scan_due %}
+  <div class="pg-scan-due">
+    <div class="pg-scan-due-icon">📅</div>
+    <div>
+      <h3>Time for Your Progress Scan!</h3>
+      <p>It's been {{ days_since_last }} day{{ days_since_last|pluralize }} since your last scan. Upload a new selfie to track your skin improvement.</p>
+    </div>
+    <a href="{% url 'scanner:upload' %}" class="pg-scan-due-btn">
+      <i class="bi bi-camera"></i> Scan Now
+    </a>
+  </div>
+  {% endif %}
+
+  
+  <div class="pg-stats">
+    <div class="pg-stat">
+      <div class="pg-stat-icon">✦</div>
+      <div class="pg-stat-val" style="color:var(--pg-teal);">{{ total }}</div>
+      <div class="pg-stat-label">Total Scans</div>
+    </div>
+    <div class="pg-stat">
+      <div class="pg-stat-icon">📅</div>
+      <div class="pg-stat-val" style="color:var(--pg-purple);">{{ days_since_last }}d</div>
+      <div class="pg-stat-label">Days Since Last</div>
+    </div>
+    {% if overall_comp %}
+    <div class="pg-stat">
+      <div class="pg-stat-icon">{% if overall_comp.harmony_delta > 0 %}📈{% elif overall_comp.harmony_delta < 0 %}📉{% else %}➡{% endif %}</div>
+      <div class="pg-stat-val" style="color:{% if overall_comp.harmony_delta > 0 %}#22c55e{% elif overall_comp.harmony_delta < 0 %}#ef4444{% else %}var(--pg-teal){% endif %};">
+        {% if overall_comp.harmony_delta > 0 %}+{% endif %}{{ overall_comp.harmony_delta }}
+      </div>
+      <div class="pg-stat-label">Overall Change</div>
+    </div>
+    <div class="pg-stat">
+      <div class="pg-stat-icon">
+        {% if overall_comp.ai_verdict == 'improved' %}✅
+        {% elif overall_comp.ai_verdict == 'declined' %}⚠️
+        {% else %}⟳{% endif %}
+      </div>
+      <div class="pg-stat-val" style="font-size:1.3rem;color:{% if overall_comp.ai_verdict == 'improved' %}#22c55e{% elif overall_comp.ai_verdict == 'declined' %}#ef4444{% else %}var(--pg-amber){% endif %};">
+        {{ overall_comp.ai_verdict|title }}
+      </div>
+      <div class="pg-stat-label">AI Verdict</div>
+    </div>
+    {% else %}
+    <div class="pg-stat">
+      <div class="pg-stat-icon">🎯</div>
+      <div class="pg-stat-val" style="color:var(--pg-purple);">{{ last_scan.harmony_score }}</div>
+      <div class="pg-stat-label">Current Harmony</div>
+    </div>
+    <div class="pg-stat">
+      <div class="pg-stat-icon">📸</div>
+      <div class="pg-stat-val" style="font-size:1.2rem;color:var(--pg-muted);">Need 2+</div>
+      <div class="pg-stat-label">Scans for Progress</div>
+    </div>
+    {% endif %}
+  </div>
+
+  
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:1.25rem;align-items:start;">
+  <div>
+
+  
+  {% if total >= 2 %}
+  <div class="pg-card" style="margin-bottom:1.25rem;">
+    <div class="pg-card-hdr">
+      <div>
+        <div class="pg-card-title">📈 Skin Health Trends</div>
+        <div class="pg-card-sub">All metrics over time across {{ total }} scans</div>
+      </div>
+      <span class="pg-badge pg-badge-purple">{{ total }} data points</span>
+    </div>
+    
+    <div class="pg-chart-tabs">
+      <button class="pg-ctab active" data-chart="harmony">Harmony</button>
+      <button class="pg-ctab" data-chart="hydration">Hydration</button>
+      <button class="pg-ctab" data-chart="acne">Acne</button>
+      <button class="pg-ctab" data-chart="pigmentation">Pigmentation</button>
+      <button class="pg-ctab" data-chart="aging">Aging</button>
+      <button class="pg-ctab" data-chart="elasticity">Elasticity</button>
+    </div>
+    <div class="pg-chart-wrap">
+      <canvas id="trendChart" class="pg-chart-canvas"></canvas>
+    </div>
+  </div>
+  {% endif %}
+
+  
+  {% if overall_comp %}
+  <div class="pg-card" style="margin-bottom:1.25rem;">
+    <div class="pg-card-hdr">
+      <div>
+        <div class="pg-card-title">✦ Overall Progress</div>
+        <div class="pg-card-sub">First scan vs latest scan · {{ overall_comp.days_between }} days</div>
+      </div>
+      <span class="pg-badge {% if overall_comp.ai_verdict == 'improved' %}pg-badge-green{% elif overall_comp.ai_verdict == 'declined' %}pg-badge-red{% else %}pg-badge-amber{% endif %}">
+        {{ overall_comp.ai_verdict|title }}
+      </span>
+    </div>
+
+    
+    <div class="pg-verdict-wrap">
+      <div class="pg-verdict-ring">
+        <svg viewBox="0 0 100 100">
+          <circle class="pg-vring-bg" cx="50" cy="50" r="42"/>
+          <circle class="pg-vring-fg" id="overallRing" cx="50" cy="50" r="42"
+            stroke="{% if overall_comp.ai_verdict == 'improved' %}#22c55e{% elif overall_comp.ai_verdict == 'declined' %}#ef4444{% else %}#f59e0b{% endif %}"
+            stroke-dasharray="263.9" stroke-dashoffset="263.9"
+            data-score="{{ last_scan.harmony_score|default:'0' }}"/>
+        </svg>
+        <div class="pg-vring-num">
+          {% if last_scan %}{{ last_scan.harmony_score }}{% else %}0{% endif %}
+          <small>/ 100</small>
+        </div>
+      </div>
+      <div class="pg-verdict-info">
+        <h2>
+          {% if overall_comp.ai_verdict == 'improved' %}Skin Improved ✨
+          {% elif overall_comp.ai_verdict == 'declined' %}Needs Attention ⚠️
+          {% else %}Skin Stable ⟳{% endif %}
+        </h2>
+        <p>{{ overall_comp.ai_recommendation }}</p>
+        <div class="pg-verdict-tags">
+          <span class="pg-badge pg-badge-teal">{{ overall_comp.days_between }} days tracked</span>
+          {% if overall_comp.harmony_delta >= 0 %}
+          <span class="pg-badge pg-badge-green">Harmony +{{ overall_comp.harmony_delta }}</span>
+          {% else %}
+          <span class="pg-badge pg-badge-red">Harmony {{ overall_comp.harmony_delta }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="pg-delta-grid">
+
+      
+      <div class="pg-delta-card">
+        <div class="pg-delta-header">
+          <span class="pg-delta-icon">✦</span>
+          <span class="pg-delta-name">Harmony</span>
+          <span class="pg-delta-arrow {% if overall_comp.harmony_delta > 2 %}da-up{% elif overall_comp.harmony_delta < -2 %}da-down{% else %}da-same{% endif %}">
+            {% if overall_comp.harmony_delta > 0 %}+{% endif %}{{ overall_comp.harmony_delta }}
+          </span>
+        </div>
+        <div class="pg-delta-scores">
+          <span class="pg-delta-num" style="color:var(--pg-teal);">{{ all_scans|last }}</span>
+        </div>
+        <div class="pg-delta-bar-track">
+          <div class="pg-delta-bar-fill" data-w="{{ all_scans|last }}" style="background:var(--pg-teal);"></div>
+        </div>
+        <div class="pg-delta-sub">Overall skin health score</div>
+      </div>
+
+      
+      <div class="pg-delta-card">
+        <div class="pg-delta-header">
+          <span class="pg-delta-icon">💧</span>
+          <span class="pg-delta-name">Hydration</span>
+          <span class="pg-delta-arrow {% if overall_comp.hydration_delta > 2 %}da-up{% elif overall_comp.hydration_delta < -2 %}da-down{% else %}da-same{% endif %}">
+            {% if overall_comp.hydration_delta > 0 %}+{% endif %}{{ overall_comp.hydration_delta }}
+          </span>
+        </div>
+        <div class="pg-delta-bar-track" style="margin-top:.4rem;">
+          <div class="pg-delta-bar-fill" data-w="{{ chart_hydration|last }}" style="background:#3b82f6;"></div>
+        </div>
+        <div class="pg-delta-sub">Moisture level in skin</div>
+      </div>
+
+      
+      <div class="pg-delta-card">
+        <div class="pg-delta-header">
+          <span class="pg-delta-icon">🔴</span>
+          <span class="pg-delta-name">Acne</span>
+          <span class="pg-delta-arrow {% if overall_comp.acne_delta < -2 %}da-up{% elif overall_comp.acne_delta > 2 %}da-down{% else %}da-same{% endif %}">
+            {% if overall_comp.acne_delta > 0 %}+{% endif %}{{ overall_comp.acne_delta }}
+          </span>
+        </div>
+        <div class="pg-delta-bar-track" style="margin-top:.4rem;">
+          <div class="pg-delta-bar-fill" data-w="{{ chart_acne|last }}" style="background:#ef4444;"></div>
+        </div>
+        <div class="pg-delta-sub">Lower is better</div>
+      </div>
+
+      
+      <div class="pg-delta-card">
+        <div class="pg-delta-header">
+          <span class="pg-delta-icon">🟤</span>
+          <span class="pg-delta-name">Pigmentation</span>
+          <span class="pg-delta-arrow {% if overall_comp.pigmentation_delta < -2 %}da-up{% elif overall_comp.pigmentation_delta > 2 %}da-down{% else %}da-same{% endif %}">
+            {% if overall_comp.pigmentation_delta > 0 %}+{% endif %}{{ overall_comp.pigmentation_delta }}
+          </span>
+        </div>
+        <div class="pg-delta-bar-track" style="margin-top:.4rem;">
+          <div class="pg-delta-bar-fill" data-w="{{ chart_pigment|last }}" style="background:#f97316;"></div>
+        </div>
+        <div class="pg-delta-sub">Dark spots & uneven tone</div>
+      </div>
+
+      
+      <div class="pg-delta-card">
+        <div class="pg-delta-header">
+          <span class="pg-delta-icon">💪</span>
+          <span class="pg-delta-name">Elasticity</span>
+          <span class="pg-delta-arrow {% if overall_comp.elasticity_delta > 2 %}da-up{% elif overall_comp.elasticity_delta < -2 %}da-down{% else %}da-same{% endif %}">
+            {% if overall_comp.elasticity_delta > 0 %}+{% endif %}{{ overall_comp.elasticity_delta }}
+          </span>
+        </div>
+        <div class="pg-delta-bar-track" style="margin-top:.4rem;">
+          <div class="pg-delta-bar-fill" data-w="{{ chart_elasticity|last }}" style="background:#22c55e;"></div>
+        </div>
+        <div class="pg-delta-sub">Skin firmness</div>
+      </div>
+
+      
+      <div class="pg-delta-card">
+        <div class="pg-delta-header">
+          <span class="pg-delta-icon">⏳</span>
+          <span class="pg-delta-name">Aging</span>
+          <span class="pg-delta-arrow {% if overall_comp.aging_delta < -2 %}da-up{% elif overall_comp.aging_delta > 2 %}da-down{% else %}da-same{% endif %}">
+            {% if overall_comp.aging_delta > 0 %}+{% endif %}{{ overall_comp.aging_delta }}
+          </span>
+        </div>
+        <div class="pg-delta-bar-track" style="margin-top:.4rem;">
+          <div class="pg-delta-bar-fill" data-w="{{ chart_aging|last }}" style="background:#8b5cf6;"></div>
+        </div>
+        <div class="pg-delta-sub">Fine lines & wrinkles</div>
+      </div>
+
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── SCAN HISTORY ── -->
+  <div class="pg-card" style="margin-bottom:1.25rem;">
+    <div class="pg-card-hdr">
+      <div>
+        <div class="pg-card-title">📸 Scan History</div>
+        <div class="pg-card-sub">{{ total }} scan{{ total|pluralize }} — newest first</div>
+      </div>
+      <span class="pg-badge pg-badge-teal">{{ total }} total</span>
+    </div>
+
+    <div class="sh-list">
+      {% for scan in all_scans reversed %}
+      <div class="sh-card{% if forloop.first %} sh-latest{% elif forloop.last and not forloop.first %} sh-baseline{% endif %}">
+
+        <!-- Index badge overlaid on image -->
+        <div class="sh-index">{{ forloop.counter }}</div>
+
+        <!-- Thumb -->
+        <div class="sh-thumb">
+          {% if scan.scan_image %}
+            <img src="{{ scan.scan_image.url }}" alt="Scan {{ forloop.counter }}">
+          {% else %}
+            <div class="sh-thumb-placeholder">
+              {% if scan.gender == 'male' %}👨{% else %}👩{% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Body -->
+        <div class="sh-body">
+          <div class="sh-meta">
+            <span class="sh-date">{{ scan.created_at|date:"D, d M Y · g:i A" }}</span>
+            {% if forloop.first %}
+              <span class="sh-pill sh-pill-teal">✦ Latest</span>
+            {% elif forloop.last and not forloop.first %}
+              <span class="sh-pill sh-pill-purple">① Baseline</span>
+            {% endif %}
+          </div>
+
+          <div class="sh-title">{{ scan.skin_type|title }} · {{ scan.undertone|title }} undertone · {{ scan.face_shape|title }} face</div>
+
+          <div class="sh-tags">
+            <span class="sh-tag">{{ scan.skin_tone|title }} Tone</span>
+            <span class="sh-tag">Acne: {{ scan.hf_acne_severity|title }}</span>
+            {% for c in scan.detected_concerns.all|slice:":3" %}
+            <span class="sh-tag sh-tag-concern">{{ c.name }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- Mini metric bars -->
+          <div class="sh-metrics">
+            <div class="sh-metric">
+              💧
+              <div class="sh-metric-bar">
+                <div class="sh-metric-fill" style="width:{{ scan.hydration_score }}%;background:#3b82f6;"></div>
+              </div>
+              {{ scan.hydration_score }}
+            </div>
+            <div class="sh-metric">
+              💪
+              <div class="sh-metric-bar">
+                <div class="sh-metric-fill" style="width:{{ scan.elasticity_score }}%;background:#22c55e;"></div>
+              </div>
+              {{ scan.elasticity_score }}
+            </div>
+            <div class="sh-metric">
+              🔴
+              <div class="sh-metric-bar">
+                <div class="sh-metric-fill" style="width:{{ scan.acne_score }}%;background:#ef4444;"></div>
+              </div>
+              {{ scan.acne_score }}
+            </div>
+            <div class="sh-metric">
+              🟤
+              <div class="sh-metric-bar">
+                <div class="sh-metric-fill" style="width:{{ scan.pigmentation_score }}%;background:#f97316;"></div>
+              </div>
+              {{ scan.pigmentation_score }}
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="sh-actions">
+            <a href="{% url 'results:detail' scan_id=scan.id %}" class="sh-btn sh-btn-primary">
+              <i class="bi bi-eye"></i> View Result
+            </a>
+            {% if not forloop.first %}
+            <a href="{% url 'results:compare' baseline_id=all_scans.0.id latest_id=scan.id %}" class="sh-btn sh-btn-teal">
+              <i class="bi bi-arrow-left-right"></i> Compare
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Score ring -->
+        <div class="sh-score-col">
+          <div class="sh-ring-wrap">
+            <svg class="sh-ring-svg" viewBox="0 0 58 58">
+              <circle class="sh-ring-bg" cx="29" cy="29" r="23"
+                stroke="{% if scan.harmony_score > 70 %}#bbf7d0{% elif scan.harmony_score > 45 %}#fde68a{% else %}#fecaca{% endif %}"/>
+              <circle class="sh-ring-fg" cx="29" cy="29" r="23"
+                stroke="{% if scan.harmony_score > 70 %}#22c55e{% elif scan.harmony_score > 45 %}#f59e0b{% else %}#ef4444{% endif %}"
+                stroke-dasharray="144.5"
+                stroke-dashoffset="144.5"
+                data-score="{{ scan.harmony_score }}"/>
+            </svg>
+            <div class="sh-ring-num">{{ scan.harmony_score }}</div>
+          </div>
+          <div class="sh-score-lbl">Harmony</div>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  </div>
+
+  
+  <div>
+
+    
+    {% if overall_comp %}
+    <div class="pg-card" style="margin-bottom:1.25rem;">
+      <div class="pg-card-hdr">
+        <div>
+          <div class="pg-card-title">🤖 AI Recommendation</div>
+          <div class="pg-card-sub">Based on your progress data</div>
+        </div>
+      </div>
+      <div class="pg-ai-rec">
+        <div class="pg-ai-bubble">
+          <div class="pg-ai-avatar">🩺</div>
+          <div class="pg-ai-text">{{ overall_comp.ai_recommendation }}</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    
+    {% if last_scan %}
+    <div class="pg-card" style="margin-bottom:1.25rem;">
+      <div class="pg-card-hdr">
+        <div>
+          <div class="pg-card-title">📸 Latest Scan</div>
+          <div class="pg-card-sub">{{ last_scan.created_at|date:"d M Y" }}</div>
+        </div>
+        <a href="{% url 'results:detail' scan_id=last_scan.id %}" class="pg-badge pg-badge-teal" style="text-decoration:none;">View →</a>
+      </div>
+      <div style="padding:1rem 1.25rem;">
+        {% if last_scan.scan_image %}
+        <div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:1rem;">
+          <img src="{{ last_scan.scan_image.url }}" alt="Latest scan"
+               style="width:100%;height:180px;object-fit:cover;object-position:center top;display:block;">
+          <div style="position:absolute;bottom:8px;left:8px;">
+            <span class="pg-badge pg-badge-teal" style="backdrop-filter:blur(8px);background:rgba(13,148,136,.85);color:#fff;">
+              Score: {{ last_scan.harmony_score }}
+            </span>
+          </div>
+        </div>
+        {% endif %}
+        
+        {% with bars=last_scan %}
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="display:flex;align-items:center;gap:.6rem;">
+            <span style="font-size:.72rem;font-weight:600;color:var(--pg-muted);width:85px;">Harmony</span>
+            <div style="flex:1;height:6px;background:var(--pg-border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;border-radius:3px;background:var(--pg-teal);width:{{ bars.harmony_score }}%;transition:width 1.2s ease;"></div>
+            </div>
+            <span style="font-size:.72rem;font-weight:700;color:var(--pg-text);width:22px;text-align:right;">{{ bars.harmony_score }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.6rem;">
+            <span style="font-size:.72rem;font-weight:600;color:var(--pg-muted);width:85px;">Hydration</span>
+            <div style="flex:1;height:6px;background:var(--pg-border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;border-radius:3px;background:#3b82f6;width:{{ bars.hydration_score }}%;transition:width 1.2s ease;"></div>
+            </div>
+            <span style="font-size:.72rem;font-weight:700;color:var(--pg-text);width:22px;text-align:right;">{{ bars.hydration_score }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.6rem;">
+            <span style="font-size:.72rem;font-weight:600;color:var(--pg-muted);width:85px;">Acne</span>
+            <div style="flex:1;height:6px;background:var(--pg-border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;border-radius:3px;background:#ef4444;width:{{ bars.acne_score }}%;transition:width 1.2s ease;"></div>
+            </div>
+            <span style="font-size:.72rem;font-weight:700;color:var(--pg-text);width:22px;text-align:right;">{{ bars.acne_score }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.6rem;">
+            <span style="font-size:.72rem;font-weight:600;color:var(--pg-muted);width:85px;">Elasticity</span>
+            <div style="flex:1;height:6px;background:var(--pg-border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;border-radius:3px;background:#22c55e;width:{{ bars.elasticity_score }}%;transition:width 1.2s ease;"></div>
+            </div>
+            <span style="font-size:.72rem;font-weight:700;color:var(--pg-text);width:22px;text-align:right;">{{ bars.elasticity_score }}</span>
+          </div>
+        </div>
+        {% endwith %}
+      </div>
+    </div>
+    {% endif %}
+
+    
+    {% if comparisons %}
+    <div class="pg-card" style="margin-bottom:1.25rem;">
+      <div class="pg-card-hdr">
+        <div>
+          <div class="pg-card-title">🔄 Scan Comparisons</div>
+          <div class="pg-card-sub">Consecutive scan changes</div>
+        </div>
+      </div>
+      <div style="padding:.5rem 0;">
+        {% for comp in comparisons %}
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1.25rem;border-bottom:1px solid var(--pg-border);">
+          <div style="width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;
+            background:{% if comp.ai_verdict == 'improved' %}rgba(34,197,94,.1){% elif comp.ai_verdict == 'declined' %}rgba(239,68,68,.1){% else %}rgba(245,158,11,.1){% endif %};">
+            {% if comp.ai_verdict == 'improved' %}✅{% elif comp.ai_verdict == 'declined' %}⚠️{% else %}⟳{% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.78rem;font-weight:700;color:var(--pg-text);">
+              {{ comp.baseline_scan.created_at|date:"d M" }} → {{ comp.latest_scan.created_at|date:"d M Y" }}
+            </div>
+            <div style="font-size:.68rem;color:var(--pg-muted);">{{ comp.days_between }}d · Harmony {{ comp.latest_scan.harmony_score }} ({% if comp.harmony_delta >= 0 %}+{% endif %}{{ comp.harmony_delta }})</div>
+          </div>
+          <a href="{% url 'results:compare' baseline_id=comp.baseline_scan.id latest_id=comp.latest_scan.id %}"
+             style="font-size:.7rem;font-weight:600;color:var(--pg-teal);text-decoration:none;white-space:nowrap;">
+            Compare →
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    
+    <div class="pg-card">
+      <div class="pg-card-hdr">
+        <div>
+          <div class="pg-card-title">💡 Progress Tips</div>
+          <div class="pg-card-sub">Maximise your results</div>
+        </div>
+      </div>
+      <div style="padding:.75rem 1.25rem 1rem;display:flex;flex-direction:column;gap:.5rem;">
+        <div style="display:flex;gap:.55rem;align-items:flex-start;font-size:.78rem;color:var(--pg-muted);padding:.3rem 0;border-bottom:1px solid var(--pg-border);">
+          <span style="font-size:1rem;">📅</span> Scan every 14–30 days for accurate progress tracking
+        </div>
+        <div style="display:flex;gap:.55rem;align-items:flex-start;font-size:.78rem;color:var(--pg-muted);padding:.3rem 0;border-bottom:1px solid var(--pg-border);">
+          <span style="font-size:1rem;">☀️</span> Always scan in natural light, no makeup, same time of day
+        </div>
+        <div style="display:flex;gap:.55rem;align-items:flex-start;font-size:.78rem;color:var(--pg-muted);padding:.3rem 0;border-bottom:1px solid var(--pg-border);">
+          <span style="font-size:1rem;">🧴</span> Consistency is key — routines need 4–8 weeks to show results
+        </div>
+        <div style="display:flex;gap:.55rem;align-items:flex-start;font-size:.78rem;color:var(--pg-muted);padding:.3rem 0;">
+          <span style="font-size:1rem;">💬</span> Use AI Chat to get advice when scores decline
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+
+  {% endif %}{# end total > 0 #}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+/* ── DATA from Django ── */
+const LABELS      = {{ chart_labels|safe }};
+const DATA_MAP = {
+  harmony:     {{ chart_harmony|safe }},
+  hydration:   {{ chart_hydration|safe }},
+  acne:        {{ chart_acne|safe }},
+  pigmentation:{{ chart_pigment|safe }},
+  aging:       {{ chart_aging|safe }},
+  elasticity:  {{ chart_elasticity|safe }},
+};
+const COLORS = {
+  harmony:     '#0d9488',
+  hydration:   '#3b82f6',
+  acne:        '#ef4444',
+  pigmentation:'#f97316',
+  aging:       '#8b5cf6',
+  elasticity:  '#22c55e',
+};
+const LABELS_NICE = {
+  harmony:'Harmony Score', hydration:'Hydration', acne:'Acne Score',
+  pigmentation:'Pigmentation', aging:'Aging', elasticity:'Elasticity',
+};
+
+/* ── CHART INIT ── */
+let chart = null;
+function buildChart(metric) {
+  const ctx = document.getElementById('trendChart');
+  if (!ctx) return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
+  const textColor = isDark ? 'rgba(255,255,255,.45)' : '#64748b';
+
+  if (chart) chart.destroy();
+  const data = DATA_MAP[metric] || [];
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        label: LABELS_NICE[metric],
+        data: data,
+        borderColor: COLORS[metric],
+        backgroundColor: COLORS[metric] + '18',
+        pointBackgroundColor: COLORS[metric],
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.38,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: { duration: 900 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: isDark ? '#1d2035' : '#fff',
+          titleColor: isDark ? '#fff' : '#1a1a2e',
+          bodyColor: isDark ? 'rgba(255,255,255,.6)' : '#64748b',
+          borderColor: COLORS[metric] + '40',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label: ctx => ` ${ctx.parsed.y} / 100`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: textColor, font: { size: 11, family: 'Inter' } },
+        },
+        y: {
+          min: 0, max: 100,
+          grid: { color: gridColor },
+          ticks: { color: textColor, font: { size: 11, family: 'Inter' }, stepSize: 25 },
+        },
+      },
+    },
+  });
+}
+
+/* ── TAB SWITCHING ── */
+document.querySelectorAll('.pg-ctab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.pg-ctab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    buildChart(this.dataset.chart);
+  });
+});
+
+/* ── ANIMATE DELTA BARS ── */
+function animateDeltaBars() {
+  document.querySelectorAll('.pg-delta-bar-fill[data-w]').forEach(el => {
+    setTimeout(() => { el.style.width = Math.min(parseInt(el.dataset.w) || 0, 100) + '%'; }, 400);
+  });
+}
+
+/* ── OVERALL RING ANIMATION ── */
+function animateOverallRing() {
+  const ring = document.getElementById('overallRing');
+  if (!ring) return;
+  const score = {{ last_scan.harmony_score|default:'0' }};
+  const c = 263.9;
+  setTimeout(() => { ring.style.strokeDashoffset = c - (score / 100) * c; }, 300);
+}
+
+/* ── SCAN HISTORY CARD RINGS ── */
+function animateScanHistoryRings() {
+  document.querySelectorAll('.sh-ring-fg[data-score]').forEach((ring, i) => {
+    const score = parseInt(ring.dataset.score || '0', 10);
+    const circumference = 144.5; // 2π × r=23
+    const offset = circumference - (score / 100) * circumference;
+    setTimeout(() => { ring.style.strokeDashoffset = offset; }, 200 + i * 80);
+  });
+}
+
+/* ── BOOT ── */
+window.addEventListener('DOMContentLoaded', () => {
+  if (LABELS.length >= 2) buildChart('harmony');
+  animateDeltaBars();
+  animateScanHistoryRings();
+});
+window.addEventListener('load', animateOverallRing);
+</script>
+{% endblock %}

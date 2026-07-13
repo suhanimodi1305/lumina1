@@ -1,0 +1,57 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Any signs of <em>aging</em>?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=6 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Which aging signs concern you? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in aging_options %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="aging_concerns" value="{{ o.value }}"
+               {% if o.value in sess.aging_concerns %}checked{% endif %}>
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);">Skip if aging isn't a current concern — we'll still include prevention tips.</p>
+  </div>
+
+  
+  <div class="ac-section-divider"><i class="bi bi-droplet"></i> Hydration Check</div>
+  <div class="ac-field">
+    <label class="ac-label">Do you experience any of these? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in hydration_options %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="hydration_issues" value="{{ o.value }}"
+               {% if o.value in sess.hydration_issues %}checked{% endif %}>
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=5 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

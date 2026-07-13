@@ -2,10 +2,27 @@
 AI service for Dr. Lumina chatbot using Groq API (llama-3.3-70b-versatile)
 Supports 3 modes: doctor | makeup | kbeauty
 """
+import os
 import re
 import logging
 import base64
-from django.conf import settings
+
+# ── Settings shim: works inside Django OR as a standalone FastAPI service ──────
+try:
+    from django.conf import settings as _dj_settings
+    # Force evaluation — raises ImproperlyConfigured if Django isn't set up
+    _ = _dj_settings.DEBUG
+    _DJANGO_CONFIGURED = True
+except Exception:
+    _DJANGO_CONFIGURED = False
+    _dj_settings = None  # type: ignore
+
+
+def _get_setting(name: str, default=''):
+    """Read a setting from Django settings (if available) or fall back to env var."""
+    if _DJANGO_CONFIGURED and _dj_settings is not None:
+        return getattr(_dj_settings, name, default) or os.getenv(name, default)
+    return os.getenv(name, default)
 
 try:
     from groq import Groq
@@ -355,7 +372,7 @@ def get_ai_response(
         )
 
     try:
-        api_key = getattr(settings, 'GROQ_API_KEY', '')
+        api_key = _get_setting('GROQ_API_KEY', '')
         if not api_key:
             return (
                 "Groq API key is missing. Add GROQ_API_KEY to your .env file.\n\n"

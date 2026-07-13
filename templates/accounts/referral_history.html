@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Referral History — Lumina{% endblock %}
+{% block page_title %}Referral History{% endblock %}
+
+{% block extra_css %}
+<style>
+.ref-wrap{max-width:760px;margin:0 auto;padding-bottom:3rem;}
+.ref-hero{background:linear-gradient(135deg,#0a0a0f,#0c1d3b);border:1px solid rgba(13,148,136,.25);border-radius:20px;padding:1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden;}
+.ref-hero::after{content:'';position:absolute;top:-30%;right:-5%;width:40%;height:160%;background:radial-gradient(ellipse,rgba(13,148,136,.15) 0%,transparent 65%);pointer-events:none;}
+.ref-code-box{background:rgba(13,148,136,.12);border:1.5px dashed rgba(13,148,136,.4);border-radius:12px;padding:.85rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1rem;}
+.ref-code{font-family:monospace;font-size:1.5rem;font-weight:700;letter-spacing:.18em;color:#5eead4;}
+.btn-copy{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .95rem;background:#0d9488;color:#fff;border:none;border-radius:100px;font-size:.75rem;font-weight:700;cursor:pointer;transition:background .13s;flex-shrink:0;}
+.btn-copy:hover{background:#0f766e;}
+.ref-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.5rem;}
+.ref-stat{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1rem;text-align:center;}
+.ref-stat-val{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:#0d9488;line-height:1;}
+.ref-stat-lbl{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.2rem;}
+.ref-table{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.ref-table-head{display:grid;grid-template-columns:1fr 1fr auto auto;gap:.5rem;padding:.7rem 1.2rem;background:var(--page-bg);border-bottom:1px solid var(--border);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
+.ref-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:.5rem;padding:.85rem 1.2rem;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;}
+.ref-row:last-child{border-bottom:none;}
+.ref-row:hover{background:var(--page-bg);}
+.ref-username{font-size:.85rem;font-weight:600;color:var(--text);}
+.ref-date{font-size:.76rem;color:var(--muted);}
+.ref-pts{font-size:.85rem;font-weight:700;color:#0d9488;}
+.ref-status{font-size:.65rem;font-weight:700;padding:.18rem .6rem;border-radius:100px;}
+.ref-status.confirmed{background:#dcfce7;color:#166534;}
+.ref-status.pending{background:#fef9c3;color:#854d0e;}
+.ref-status.revoked{background:#fee2e2;color:#991b1b;}
+.empty-state{text-align:center;padding:3.5rem 1rem;}
+.empty-state i{font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.25;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ref-wrap">
+
+  <div style="display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--muted);margin-bottom:1.25rem;">
+    <a href="{% url 'user_home' %}" style="color:var(--muted);text-decoration:none;">My Hub</a>
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    <span style="color:var(--text);">Referral History</span>
+  </div>
+
+  {# Hero + referral code #}
+  <div class="ref-hero">
+    <div style="position:relative;z-index:1;">
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-bottom:.4rem;">Your Referral Code</div>
+      <div style="font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:.3rem;">Share &amp; Earn Rewards</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:.5rem;">
+        Earn <strong style="color:#5eead4;">100 points</strong> for every friend who signs up and logs in with your code.
+      </div>
+      <div class="ref-code-box">
+        <span class="ref-code" id="ref-code-text">{{ referral_code }}</span>
+        <button class="btn-copy" onclick="copyCode()"><i class="bi bi-clipboard"></i> Copy</button>
+      </div>
+      <div style="margin-top:.75rem;font-size:.75rem;color:rgba(255,255,255,.35);">
+        Share link: <span style="color:rgba(255,255,255,.6);">{{ request.scheme }}://{{ request.get_host }}/register?ref={{ referral_code }}</span>
+      </div>
+    </div>
+  </div>
+
+  {# Stats #}
+  <div class="ref-stats">
+    <div class="ref-stat">
+      <div class="ref-stat-val">{{ referrals.count }}</div>
+      <div class="ref-stat-lbl">Total Referrals</div>
+    </div>
+    <div class="ref-stat">
+      <div class="ref-stat-val" style="color:#c9a96e;">{{ total_earned }}</div>
+      <div class="ref-stat-lbl">Points Earned</div>
+    </div>
+    <div class="ref-stat">
+      <div class="ref-stat-val" style="color:#f59e0b;">{{ pending_count }}</div>
+      <div class="ref-stat-lbl">Pending</div>
+    </div>
+  </div>
+
+  {# Table #}
+  <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.65rem;">Referral Log</div>
+  <div class="ref-table">
+    {% if referrals %}
+    <div class="ref-table-head">
+      <span>Friend</span>
+      <span>Date</span>
+      <span>Points</span>
+      <span>Status</span>
+    </div>
+    {% for ref in referrals %}
+    <div class="ref-row">
+      <div>
+        <div class="ref-username">{{ ref.referred_user.user.get_full_name|default:ref.referred_user.user.username }}</div>
+        <div class="ref-date">@{{ ref.referred_user.user.username }}</div>
+      </div>
+      <div class="ref-date">{{ ref.created_at|date:"d M Y" }}</div>
+      <div class="ref-pts">+{{ ref.points_awarded }} pts</div>
+      <div>
+        <span class="ref-status {{ ref.status }}">
+          {% if ref.status == 'confirmed' %}✓ Confirmed
+          {% elif ref.status == 'pending' %}⏳ Pending
+          {% else %}✕ Revoked{% endif %}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-people"></i>
+      <p style="font-size:.88rem;color:var(--muted);">No referrals yet — share your code to start earning!</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function copyCode() {
+  const code = document.getElementById('ref-code-text').textContent.trim();
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+    setTimeout(() => { btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy'; }, 2000);
+  });
+}
+</script>
+{% endblock %}

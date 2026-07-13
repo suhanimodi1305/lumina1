@@ -1,0 +1,474 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Your Personalised Skin Plan — Lumina{% endblock %}
+{% block page_title %}Your Skin Plan{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─── HERO ─── */
+.result-hero {
+  background: linear-gradient(135deg, #0a0a0f 0%, #0d1a1a 60%, #0a1a14 100%);
+  margin: -1.5rem -1.75rem 0;
+  padding: 2.5rem 2rem 2rem;
+  position: relative; overflow: hidden;
+}
+.result-hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 55% 50% at 85% 15%, rgba(13,148,136,.2) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 15% 85%, rgba(124,58,237,.12) 0%, transparent 55%);
+  pointer-events:none;
+}
+.result-hero-inner { position:relative; z-index:1; }
+.result-hero-tag {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--lux-teal);
+  background:rgba(13,148,136,.12); border:1px solid rgba(13,148,136,.25);
+  padding:.28rem .8rem; border-radius:var(--r-pill); margin-bottom:.85rem;
+}
+.result-hero h1 {
+  font-family: var(--font-heading);
+  font-size:clamp(1.6rem,4vw,2.25rem); font-weight:700; color:#fff;
+  line-height:1.2; margin-bottom:.5rem;
+}
+.result-hero p { color:rgba(255,255,255,.55); font-size:.88rem; margin-bottom:1rem; }
+.cat-chips { display:flex; flex-wrap:wrap; gap:.45rem; }
+.cat-chip {
+  background:rgba(13,148,136,.15); color:var(--lux-teal);
+  border:1px solid rgba(13,148,136,.3);
+  padding:.22rem .7rem; border-radius:var(--r-pill);
+  font-size:.72rem; font-weight:700;
+}
+.cat-chip.gold {
+  background:rgba(201,169,110,.12); color:var(--lux-gold);
+  border-color:rgba(201,169,110,.25);
+}
+
+/* ─── SECTION HEADING ─── */
+.result-section-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin: 2rem 0 1.25rem; flex-wrap:wrap; gap:.5rem;
+}
+.result-section-title {
+  font-size:1.05rem; font-weight:700; color:var(--text);
+}
+.result-section-sub { font-size:.8rem; color:var(--text-muted); }
+
+/* ─── TIER CARDS ─── */
+.tier-grid {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:1.25rem;
+  margin-bottom:2rem;
+}
+@media (max-width: 900px) { .tier-grid { grid-template-columns:1fr; } }
+@media (min-width: 600px) and (max-width: 900px) {
+  .tier-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+.tier-card {
+  border-radius:var(--r-xl);
+  border:2px solid var(--border);
+  background:var(--surface);
+  position:relative;
+  transition:all .25s ease;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.tier-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+.tier-card.recommended {
+  border-color:var(--lux-teal);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.12), var(--shadow-md);
+}
+.tier-card.vip-card {
+  background:linear-gradient(145deg,#111122 0%,#1e1040 100%);
+  border-color:#5b21b6;
+}
+.tier-card.vip-card.recommended {
+  border-color:#7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,.15), var(--shadow-md);
+}
+
+.tier-ribbon {
+  background:var(--lux-teal); color:#fff;
+  font-size:.65rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  padding:.3rem 0; text-align:center;
+}
+.tier-card.vip-card .tier-ribbon {
+  background:linear-gradient(90deg,#f5a623,#f7c948); color:#1a1a1a;
+}
+
+.tier-body { padding:1.5rem 1.5rem 1.25rem; flex:1; display:flex; flex-direction:column; }
+
+.tier-badge {
+  display:inline-flex; align-items:center; gap:.3rem;
+  padding:.25rem .75rem; border-radius:var(--r-pill);
+  font-size:.72rem; font-weight:800; margin-bottom:.85rem;
+}
+.tier-badge.normal  { background:#dcfce7; color:#166534; }
+.tier-badge.medium  { background:#ede9fe; color:#6d28d9; }
+.tier-badge.vip     { background:linear-gradient(135deg,#f5a623,#f7c948); color:#1a1a1a; }
+
+.tier-title { font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:.2rem; }
+.vip-card .tier-title { color:#fff; }
+.tier-sub   { font-size:.78rem; color:var(--text-muted); margin-bottom:.65rem; }
+.vip-card .tier-sub   { color:rgba(255,255,255,.45); }
+.tier-price { font-size:1.25rem; font-weight:700; color:var(--lux-teal); margin-bottom:.2rem; }
+.vip-card .tier-price { color:#f7c948; }
+.tier-strike { font-size:.75rem; color:var(--text-muted); text-decoration:line-through; margin-bottom:.9rem; }
+
+.tier-features { list-style:none; flex:1; margin-bottom:1.25rem; padding:0; }
+.tier-features li {
+  display:flex; align-items:flex-start; gap:.45rem;
+  padding:.38rem 0; border-bottom:1px solid var(--border);
+  font-size:.82rem; color:var(--text-muted);
+}
+.vip-card .tier-features li {
+  border-color:rgba(255,255,255,.07); color:rgba(255,255,255,.6);
+}
+.tier-features li:last-child { border-bottom:none; }
+.feat-ok   { color:var(--lux-teal); flex-shrink:0; margin-top:.1rem; }
+.feat-lock { color:rgba(255,255,255,.25); flex-shrink:0; margin-top:.1rem; }
+.feat-locked-text { font-style:italic; color:rgba(255,255,255,.25); }
+
+.tier-cta {
+  display:block; width:100%; text-align:center;
+  padding:.75rem 1rem; border-radius:var(--r-pill);
+  font-size:.88rem; font-weight:700; text-decoration:none;
+  transition:all .2s ease; border:none; cursor:pointer;
+  margin-top:auto;
+}
+.tier-cta.normal  {
+  background:transparent; border:2px solid var(--border);
+  color:var(--text);
+}
+.tier-cta.normal:hover { border-color:var(--lux-teal); color:var(--lux-teal); }
+.tier-cta.medium  { background:#7c3aed; color:#fff; }
+.tier-cta.medium:hover { background:#6d28d9; }
+.tier-cta.vip     { background:linear-gradient(135deg,#f5a623,#f7c948); color:#1a1a1a; }
+.tier-cta.vip:hover { filter:brightness(1.05); transform:translateY(-1px); }
+
+/* ─── VIP DOCTOR LOCK ─── */
+.doc-lock {
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-lg);
+  padding:1rem; margin:.75rem 0 1rem;
+  display:flex; align-items:center; gap:.75rem;
+  position:relative; overflow:hidden;
+}
+.doc-lock-blur { filter:blur(2.5px); pointer-events:none; flex:1; }
+.doc-lock-overlay {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.5);
+  border-radius:var(--r-lg);
+  gap:.35rem;
+}
+.doc-lock-badge {
+  background:linear-gradient(135deg,#f5a623,#f7c948);
+  color:#1a1a1a; font-size:.62rem; font-weight:800;
+  letter-spacing:.07em; text-transform:uppercase;
+  padding:.2rem .65rem; border-radius:var(--r-pill);
+}
+.doc-lock-text { font-size:.72rem; color:rgba(255,255,255,.65); text-align:center; line-height:1.4; }
+
+/* ─── NEXT STEPS ─── */
+.next-steps-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1rem; margin-bottom:2rem;
+}
+@media (max-width:576px) { .next-steps-grid { grid-template-columns:1fr; } }
+
+.next-step-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:1.25rem 1rem;
+  text-align:center;
+  text-decoration:none;
+  display:block;
+  transition:all .2s ease;
+}
+.next-step-card:hover {
+  transform:translateY(-3px);
+  box-shadow:var(--shadow-md);
+  border-color:var(--lux-teal);
+}
+.next-step-icon { font-size:1.75rem; margin-bottom:.5rem; }
+.next-step-label { font-size:.84rem; font-weight:700; color:var(--text); margin-bottom:.2rem; }
+.next-step-desc  { font-size:.72rem; color:var(--text-muted); line-height:1.35; }
+
+/* ─── REFERRAL ─── */
+.referral-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  padding:1.5rem;
+}
+.referral-hdr {
+  display:flex; align-items:center; gap:.65rem; margin-bottom:1rem;
+}
+.referral-icon {
+  width:44px; height:44px; border-radius:var(--r-md);
+  background:var(--lux-gold-lt); border:1.5px solid rgba(201,169,110,.3);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.25rem; flex-shrink:0;
+}
+.referral-copy-row {
+  display:flex; gap:.5rem; flex-wrap:wrap;
+}
+.referral-input {
+  flex:1; min-width:0;
+  padding:.65rem 1rem;
+  border:2px solid var(--border);
+  border-radius:var(--r-md);
+  background:var(--page-bg);
+  color:var(--text); font-size:.8rem;
+  outline:none;
+}
+.referral-copy-btn {
+  padding:.65rem 1.25rem;
+  background:var(--lux-teal); color:#fff;
+  border:none; border-radius:var(--r-md);
+  font-size:.82rem; font-weight:700;
+  cursor:pointer; transition:all .15s ease;
+  white-space:nowrap;
+}
+.referral-copy-btn:hover { background:#0b7d74; }
+.referral-copy-btn.copied { background:#10b981; }
+</style>
+{% endblock %}
+
+{% block content %}
+<canvas id="confetti-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></canvas>
+
+<div class="result-hero">
+  <div class="result-hero-inner">
+    <div class="result-hero-tag">
+      <i class="bi bi-check-circle-fill"></i> Diagnostic Complete
+    </div>
+    <h1>Your Skin Profile<br>is Ready ✨</h1>
+    <p>Based on your answers, we've curated 3 personalised skincare plans for you.</p>
+    <div class="cat-chips">
+      {% for cat in sess.selected_categories %}
+      <span class="cat-chip">
+        {% if cat == 'makeup' %}💄 Makeup
+        {% elif cat == 'korean' %}🧴 K-Beauty
+        {% elif cat == 'ayurvedic' %}🌿 Ayurvedic
+        {% elif cat == 'pharmacy' %}🧪 Pharmacy{% endif %}
+      </span>
+      {% endfor %}
+      <span class="cat-chip gold">{{ sess.skin_type|title }} Skin</span>
+      <span class="cat-chip gold">{{ sess.concern_1|title|default:"Skin Care" }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="result-section-hdr">
+  <div>
+    <div class="result-section-title">Your Personalised Plans</div>
+    <div class="result-section-sub">
+      We recommend the
+      <strong style="color:var(--lux-teal);">
+        {% if sess.recommended_tier == 'vip' %}VIP{% elif sess.recommended_tier == 'medium' %}Plus{% else %}Essential{% endif %}
+      </strong> plan for your skin profile
+    </div>
+  </div>
+  <span style="font-size:.72rem;color:var(--text-muted);">
+    <i class="bi bi-stars" style="color:var(--lux-teal);"></i>
+    AI-matched to your answers
+  </span>
+</div>
+
+<div class="tier-grid">
+
+  
+  <div class="tier-card {% if sess.recommended_tier == 'normal' %}recommended{% endif %}">
+    {% if sess.recommended_tier == 'normal' %}
+    <div class="tier-ribbon">⭐ Recommended for You</div>
+    {% endif %}
+    <div class="tier-body">
+      <div class="tier-badge normal">🟢 Essential</div>
+      <div class="tier-title">Essential Skincare</div>
+      <div class="tier-sub">Local &amp; budget-friendly brands</div>
+      <div class="tier-price">From ₹99 – ₹999</div>
+      <ul class="tier-features">
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Best local brand picks for your concern</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Available at pharmacies &amp; online</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Dermatologist-approved OTC formulas</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> AI chat support included</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Log &amp; Earn points on purchases</li>
+      </ul>
+      <a href="/products/?product_range=ayurvedic" class="tier-cta normal">
+        Shop Essential Plan <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  
+  <div class="tier-card {% if sess.recommended_tier == 'medium' %}recommended{% endif %}">
+    {% if sess.recommended_tier == 'medium' %}
+    <div class="tier-ribbon">⭐ Recommended for You</div>
+    {% endif %}
+    <div class="tier-body">
+      <div class="tier-badge medium">💜 Plus</div>
+      <div class="tier-title">Advanced Skincare</div>
+      <div class="tier-sub">Mid-market brands at lower prices</div>
+      <div class="tier-price">From ₹500 – ₹2,499</div>
+      <div class="tier-strike">Regular retail: ₹2,999+</div>
+      <ul class="tier-features">
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Established brand alternatives</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Clinically proven formulations</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Priority AI consultant access</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Exclusive member pricing</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> 2× Log &amp; Earn points</li>
+      </ul>
+      <a href="{% url 'memberships:upgrade' %}" class="tier-cta medium">
+        Upgrade to Plus <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  
+  <div class="tier-card vip-card {% if sess.recommended_tier == 'vip' %}recommended{% endif %}">
+    {% if sess.recommended_tier == 'vip' %}
+    <div class="tier-ribbon">⭐ Recommended for You</div>
+    {% else %}
+    <div class="tier-ribbon">👑 Most Premium</div>
+    {% endif %}
+    <div class="tier-body">
+      <div class="tier-badge vip">👑 VIP</div>
+      <div class="tier-title">Premium Collection</div>
+      <div class="tier-sub">Top-tier global brands — exclusive pricing</div>
+      <div class="tier-price">₹1,500 – No Limit</div>
+      <ul class="tier-features">
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Premium international brands</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> VIP member exclusive pricing</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> Unlimited AI consultant sessions</li>
+        <li><i class="bi bi-check-circle-fill feat-ok"></i> 3× Log &amp; Earn points multiplier</li>
+        <li>
+          <i class="bi bi-lock-fill feat-lock"></i>
+          <span class="feat-locked-text">1-on-1 Doctor Live Chat</span>
+        </li>
+      </ul>
+
+      
+      <div class="doc-lock">
+        <div class="doc-lock-blur" style="flex:1;">
+          <div style="display:flex;gap:.5rem;margin-bottom:.4rem;">
+            <div style="width:30px;height:30px;border-radius:50%;background:rgba(13,148,136,.3);border:1.5px solid rgba(13,148,136,.4);display:flex;align-items:center;justify-content:center;font-size:.85rem;">🩺</div>
+            <div style="width:30px;height:30px;border-radius:50%;background:rgba(124,58,237,.3);border:1.5px solid rgba(124,58,237,.4);display:flex;align-items:center;justify-content:center;font-size:.85rem;">👤</div>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,.1);border-radius:4px;margin-bottom:.3rem;width:90%;"></div>
+          <div style="height:6px;background:rgba(255,255,255,.07);border-radius:4px;width:60%;"></div>
+        </div>
+        <div class="doc-lock-overlay">
+          <span class="doc-lock-badge">🔒 Coming Soon</span>
+          <div class="doc-lock-text">1-on-1 Doctor<br>Live Consultation</div>
+        </div>
+      </div>
+
+      <a href="{% url 'memberships:upgrade' %}" class="tier-cta vip">
+        Go VIP 👑 <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="result-section-hdr" style="margin-top:0;">
+  <div class="result-section-title">What happens next?</div>
+</div>
+<div class="next-steps-grid">
+  {% for step in next_steps %}
+  <a href="{{ step.url }}" class="next-step-card">
+    <div class="next-step-icon">{{ step.icon }}</div>
+    <div class="next-step-label">{{ step.label }}</div>
+    <div class="next-step-desc">{{ step.desc }}</div>
+  </a>
+  {% endfor %}
+</div>
+
+{% if referral_code %}
+<div class="referral-card" style="margin-bottom:1.5rem;">
+  <div class="referral-hdr">
+    <div class="referral-icon">🎁</div>
+    <div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--text);">Share &amp; Earn</div>
+      <div style="font-size:.78rem;color:var(--text-muted);">Earn 100 points when a friend completes the quiz using your link</div>
+    </div>
+  </div>
+  <div class="referral-copy-row">
+    <input type="text" class="referral-input" id="refLinkInput" readonly
+           value="{{ request.scheme }}://{{ request.get_host }}/diagnostic/?ref={{ referral_code }}">
+    <button class="referral-copy-btn" id="copyRefBtn" onclick="copyRef()">
+      <i class="bi bi-clipboard"></i> Copy Link
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<div style="text-align:center;padding:1rem 0 .5rem;">
+  <a href="{% url 'diagnostic:wizard' %}" style="font-size:.8rem;color:var(--text-muted);text-decoration:none;">
+    <i class="bi bi-arrow-repeat"></i> Retake the quiz
+  </a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Confetti burst ─────────────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const colors = ['#0d9488','#a78bfa','#f7c948','#10b981','#e11d48','#fff'];
+  const particles = Array.from({length:80}, () => ({
+    x: Math.random()*canvas.width, y: -10,
+    r: Math.random()*6+3, d: Math.random()*90+20,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random()*10-10, tiltAngle:0, tiltSpeed:Math.random()*.1+.05
+  }));
+  let angle=0, frame=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    angle+=.01; frame++;
+    particles.forEach(p=>{
+      p.tiltAngle+=p.tiltSpeed;
+      p.y+=(Math.cos(angle+p.d)+1+p.r/2)*1.5;
+      p.x+=Math.sin(angle)*2;
+      p.tilt=Math.sin(p.tiltAngle)*15;
+      ctx.beginPath(); ctx.lineWidth=p.r/2;
+      ctx.strokeStyle=p.color;
+      ctx.moveTo(p.x+p.tilt+p.r/4,p.y);
+      ctx.lineTo(p.x+p.tilt,p.y+p.tilt+p.r/4);
+      ctx.stroke();
+    });
+    if(frame<200) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+})();
+
+// ── Copy referral ─────────────────────────────────────────────
+function copyRef(){
+  const inp = document.getElementById('refLinkInput');
+  const btn = document.getElementById('copyRefBtn');
+  if(!inp) return;
+  navigator.clipboard.writeText(inp.value).then(()=>{
+    btn.innerHTML='<i class="bi bi-check-lg"></i> Copied!';
+    btn.classList.add('copied');
+    setTimeout(()=>{
+      btn.innerHTML='<i class="bi bi-clipboard"></i> Copy Link';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+</script>
+{% endblock %}

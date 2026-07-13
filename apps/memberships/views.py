@@ -243,6 +243,7 @@ def redeem_points(request):
     return render(request, 'memberships/redeem.html', context)
 
 
+@login_required
 @tier_required('vip')
 def doctor_consultation(request):
     """GET /doctor/ — VIP-only 1:1 AI Doctor consultation page."""

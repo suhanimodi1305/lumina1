@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from apps.scanner.models import ScanResult
+from apps.scanner.models import ScanResult, ProgressComparison
 from apps.products.models import SkinConcern, Product
 from apps.scanner.mediapipe_face_shape import get_face_shape_makeup_tips, FACE_SHAPE_MAKEUP_GUIDE
 import logging
@@ -435,7 +435,16 @@ def skin_results(request, scan_id):
     """
     # Get scan result
     scan = get_object_or_404(ScanResult, id=scan_id)
-    
+
+    # Ownership check — prevent IDOR (enumeration of other users' scan data)
+    if scan.user:
+        if not request.user.is_authenticated or scan.user != request.user:
+            from django.http import HttpResponseForbidden
+            return HttpResponseForbidden("You don't have permission to view this scan.")
+    elif scan.session_key and scan.session_key != request.session.session_key:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("You don't have permission to view this scan.")
+
     logger.info(f"Displaying results for scan {scan_id}")
     
     # Build condition cards with dermatology info and products
@@ -547,6 +556,30 @@ def skin_results(request, scan_id):
     ordered_kbeauty.sort(key=lambda p: p.category or '')
     kbeauty_products_final = ordered_kbeauty[:20]
 
+    # ── Ayurvedic products — concern & skin-type matched, sorted by category for {% regroup %}
+    all_ayurvedic = list(Product.objects.filter(product_range='ayurvedic').order_by('category', 'brand', 'name'))
+
+    ayur_by_concern = [
+        p for p in all_ayurvedic
+        if concern_slugs and any(slug in (p.targets or []) for slug in concern_slugs)
+    ]
+    ayur_by_skin = [
+        p for p in all_ayurvedic
+        if scan.skin_type in (p.suitable_for_skin_types or [])
+        or 'all' in (p.suitable_for_skin_types or [])
+    ]
+
+    seen_ayur = set()
+    ordered_ayurvedic = []
+    for p in ayur_by_concern + ayur_by_skin + all_ayurvedic:
+        if p.id not in seen_ayur:
+            seen_ayur.add(p.id)
+            ordered_ayurvedic.append(p)
+
+    # Sort by category so {% regroup %} works correctly
+    ordered_ayurvedic.sort(key=lambda p: p.category or '')
+    ayurvedic_products = ordered_ayurvedic[:16]
+
     def _best_korean(category, name_hint=None):
         """Return best-matched Korean product for given category.
         Priority: concern-match + skin-type → skin-type only → any in category.
@@ -651,7 +684,8 @@ def skin_results(request, scan_id):
         'pore_pct': pore_pct,
         # K-Beauty products from database (korean range only)
         'kbeauty_products': kbeauty_products_final,
-        # Parsed from hf_acne_raw (vision result)
+        # Ayurvedic products matched to skin concerns & type
+        'ayurvedic_products': ayurvedic_products,        # Parsed from hf_acne_raw (vision result)
         'vision_data': _parse_vision_data(scan),
         # Face shape makeup guide — based on actual detected face shape + undertone
         'face_shape_tips': get_face_shape_makeup_tips(scan.face_shape, scan.undertone),
@@ -698,3 +732,287 @@ def face_shape_api(request, scan_id):
         'undertone':  scan.undertone,
         'skin_type':  scan.skin_type,
     })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  PROGRESS TRACKING VIEWS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _compute_progress_comparison(baseline: ScanResult, latest: ScanResult, user=None) -> ProgressComparison:
+    """
+    Compute or update a ProgressComparison between two scans.
+    Returns the ProgressComparison instance (saved to DB).
+    """
+    # Check if one already exists for this pair
+    existing = ProgressComparison.objects.filter(
+        baseline_scan=baseline, latest_scan=latest
+    ).first()
+    if existing:
+        return existing
+
+    # Compute deltas
+    h_delta  = latest.harmony_score      - baseline.harmony_score
+    hy_delta = latest.hydration_score    - baseline.hydration_score
+    ac_delta = latest.acne_score         - baseline.acne_score
+    pi_delta = latest.pigmentation_score - baseline.pigmentation_score
+    ag_delta = latest.aging_score        - baseline.aging_score
+    el_delta = latest.elasticity_score   - baseline.elasticity_score
+
+    days = 0
+    if baseline.created_at and latest.created_at:
+        days = abs((latest.created_at - baseline.created_at).days)
+
+    # Improvement score:
+    # harmony↑, hydration↑, elasticity↑ = good
+    # acne↓, pigmentation↓, aging↓ = good
+    improvement_pts = (
+        h_delta +
+        hy_delta +
+        el_delta +
+        (-ac_delta) +       # acne decrease = positive
+        (-pi_delta) +       # pigmentation decrease = positive
+        (-ag_delta)         # aging decrease = positive
+    )
+
+    if improvement_pts >= 8:
+        verdict = 'improved'
+    elif improvement_pts <= -8:
+        verdict = 'declined'
+    else:
+        verdict = 'unchanged'
+
+    # Build AI recommendation text (rule-based, no API call needed)
+    rec_parts = []
+    if ac_delta > 5:
+        rec_parts.append("Acne has increased — consider switching to a BHA cleanser and reducing heavy creams.")
+    elif ac_delta < -5:
+        rec_parts.append("Great acne improvement! Maintain your current cleanser and spot treatment.")
+
+    if hy_delta < -5:
+        rec_parts.append("Hydration has decreased — add a Hyaluronic Acid serum and drink more water.")
+    elif hy_delta > 5:
+        rec_parts.append("Hydration levels improved — your moisturiser is working well.")
+
+    if pi_delta > 5:
+        rec_parts.append("Pigmentation has increased — ensure daily SPF 50+ application and add Vitamin C serum.")
+    elif pi_delta < -5:
+        rec_parts.append("Dark spots are fading — your brightening routine is effective.")
+
+    if ag_delta > 5:
+        rec_parts.append("Aging signs have progressed — consider adding a peptide serum or retinol (PM only).")
+    elif ag_delta < -5:
+        rec_parts.append("Excellent anti-aging progress — your current routine is showing real results.")
+
+    if el_delta < -5:
+        rec_parts.append("Elasticity has dropped — use a collagen-boosting serum and stay hydrated.")
+
+    if not rec_parts:
+        if verdict == 'improved':
+            rec_parts = ["Your skin health is improving steadily. Continue your current routine."]
+        elif verdict == 'declined':
+            rec_parts = ["Some metrics have declined. Review your recent product changes and lifestyle habits."]
+        else:
+            rec_parts = ["Your skin health is stable. Consistent routine is key — keep it up!"]
+
+    ai_rec = " ".join(rec_parts)
+
+    comp = ProgressComparison.objects.create(
+        user=user,
+        baseline_scan=baseline,
+        latest_scan=latest,
+        harmony_delta=h_delta,
+        hydration_delta=hy_delta,
+        acne_delta=ac_delta,
+        pigmentation_delta=pi_delta,
+        aging_delta=ag_delta,
+        elasticity_delta=el_delta,
+        days_between=days,
+        ai_verdict=verdict,
+        ai_recommendation=ai_rec,
+    )
+    return comp
+
+
+@login_required
+def progress_overview(request):
+    """
+    Progress overview — shows timeline of all scans with trend charts.
+    Requires login.
+    """
+    all_scans = ScanResult.objects.filter(
+        user=request.user, is_demo=False
+    ).prefetch_related('detected_concerns').order_by('created_at')
+
+    scans_list = list(all_scans)
+    total = len(scans_list)
+
+    # Build time-series data for Chart.js
+    labels      = []
+    harmony_ts  = []
+    hydration_ts = []
+    acne_ts     = []
+    pigment_ts  = []
+    aging_ts    = []
+    elasticity_ts = []
+
+    for s in scans_list:
+        labels.append(s.created_at.strftime('%d %b'))
+        harmony_ts.append(s.harmony_score)
+        hydration_ts.append(s.hydration_score)
+        acne_ts.append(s.acne_score)
+        pigment_ts.append(s.pigmentation_score)
+        aging_ts.append(s.aging_score)
+        elasticity_ts.append(s.elasticity_score)
+
+    # Compute overall progress (latest vs earliest)
+    overall_comp = None
+    if total >= 2:
+        overall_comp = _compute_progress_comparison(
+            scans_list[0], scans_list[-1], request.user
+        )
+
+    # Build pairwise comparison list (consecutive pairs, newest first)
+    comparisons = []
+    for i in range(len(scans_list) - 1, 0, -1):
+        comp = _compute_progress_comparison(
+            scans_list[i - 1], scans_list[i], request.user
+        )
+        comparisons.append(comp)
+
+    # Next scan reminder
+    last_scan = scans_list[-1] if scans_list else None
+    days_since_last = 0
+    if last_scan:
+        from django.utils import timezone
+        days_since_last = (timezone.now() - last_scan.created_at).days
+
+    context = {
+        'all_scans':       scans_list,
+        'total':           total,
+        'overall_comp':    overall_comp,
+        'comparisons':     comparisons,
+        'last_scan':       last_scan,
+        'days_since_last': days_since_last,
+        'scan_due':        days_since_last >= 14,
+        # Chart.js time-series (JSON-safe)
+        'chart_labels':      json.dumps(labels),
+        'chart_harmony':     json.dumps(harmony_ts),
+        'chart_hydration':   json.dumps(hydration_ts),
+        'chart_acne':        json.dumps(acne_ts),
+        'chart_pigment':     json.dumps(pigment_ts),
+        'chart_aging':       json.dumps(aging_ts),
+        'chart_elasticity':  json.dumps(elasticity_ts),
+        # Latest scores for delta bar display (last scan values)
+        'latest_hydration':    last_scan.hydration_score    if last_scan else 0,
+        'latest_acne':         last_scan.acne_score         if last_scan else 0,
+        'latest_pigment':      last_scan.pigmentation_score if last_scan else 0,
+        'latest_elasticity':   last_scan.elasticity_score   if last_scan else 0,
+        'latest_aging':        last_scan.aging_score        if last_scan else 0,
+    }
+    return render(request, 'results/progress.html', context)
+
+
+@login_required
+def compare_scans(request, baseline_id, latest_id):
+    """
+    Side-by-side detailed comparison of two specific scans.
+    """
+    baseline = get_object_or_404(ScanResult, id=baseline_id, user=request.user, is_demo=False)
+    latest   = get_object_or_404(ScanResult, id=latest_id,  user=request.user, is_demo=False)
+
+    if baseline.id == latest.id:
+        return redirect('results:progress')
+
+    # Ensure baseline is the older scan
+    if baseline.created_at > latest.created_at:
+        baseline, latest = latest, baseline
+
+    comp = _compute_progress_comparison(baseline, latest, request.user)
+
+    # Concern changes
+    baseline_concerns = set(baseline.detected_concerns.values_list('slug', flat=True))
+    latest_concerns   = set(latest.detected_concerns.values_list('slug', flat=True))
+    resolved_concerns  = baseline_concerns - latest_concerns
+    new_concerns       = latest_concerns   - baseline_concerns
+    persisting_concerns= baseline_concerns & latest_concerns
+
+    # Metric-by-metric breakdown
+    metrics = [
+        {
+            'name': 'Overall Harmony',
+            'baseline': baseline.harmony_score,
+            'latest': latest.harmony_score,
+            'delta': comp.harmony_delta,
+            'higher_is_better': True,
+            'color': '#7c3aed',
+            'icon': '✦',
+        },
+        {
+            'name': 'Hydration',
+            'baseline': baseline.hydration_score,
+            'latest': latest.hydration_score,
+            'delta': comp.hydration_delta,
+            'higher_is_better': True,
+            'color': '#3b82f6',
+            'icon': '💧',
+        },
+        {
+            'name': 'Acne Score',
+            'baseline': baseline.acne_score,
+            'latest': latest.acne_score,
+            'delta': comp.acne_delta,
+            'higher_is_better': False,   # lower acne is better
+            'color': '#ef4444',
+            'icon': '🔴',
+        },
+        {
+            'name': 'Pigmentation',
+            'baseline': baseline.pigmentation_score,
+            'latest': latest.pigmentation_score,
+            'delta': comp.pigmentation_delta,
+            'higher_is_better': False,
+            'color': '#f97316',
+            'icon': '🟤',
+        },
+        {
+            'name': 'Aging',
+            'baseline': baseline.aging_score,
+            'latest': latest.aging_score,
+            'delta': comp.aging_delta,
+            'higher_is_better': False,
+            'color': '#8b5cf6',
+            'icon': '⏳',
+        },
+        {
+            'name': 'Elasticity',
+            'baseline': baseline.elasticity_score,
+            'latest': latest.elasticity_score,
+            'delta': comp.elasticity_delta,
+            'higher_is_better': True,
+            'color': '#22c55e',
+            'icon': '💪',
+        },
+    ]
+
+    # Annotate each metric with improvement status
+    for m in metrics:
+        if m['higher_is_better']:
+            m['improved'] = m['delta'] > 2
+            m['declined']  = m['delta'] < -2
+        else:
+            m['improved'] = m['delta'] < -2
+            m['declined']  = m['delta'] > 2
+        m['stable'] = not m['improved'] and not m['declined']
+        m['abs_delta'] = abs(m['delta'])
+        m['improvement_pct'] = round(abs(m['delta']) / max(m['baseline'], 1) * 100, 1)
+
+    context = {
+        'baseline': baseline,
+        'latest':   latest,
+        'comp':     comp,
+        'metrics':  metrics,
+        'resolved_concerns':   resolved_concerns,
+        'new_concerns':        new_concerns,
+        'persisting_concerns': persisting_concerns,
+    }
+    return render(request, 'results/compare.html', context)

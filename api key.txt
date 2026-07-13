@@ -1,7 +1,0 @@
-AQ.Ab8RN6KFBAdVKUnx__tdk2N9nSoOh44wpaGTov42LMe0hi4G2A my key that and my code 
-.env inside 
-SECRET_KEY=lumina-change-this-in-production
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-GEMINI_API_KEY=AQ.Ab8RN6KFBAdVKUnx__tdk2N9nSoOh44wpaGTov42LMe0hi4G2A
-HF_API_KEY=your-huggingface-key-here

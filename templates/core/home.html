@@ -1,377 +1,896 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Home — Lumina{% endblock %}
+{% block title %}Lumina — AI Skin Intelligence{% endblock %}
 {% block page_title %}Home{% endblock %}
-
-{# Show footer on the public home page only #}
-{% block footer %}
-<footer class="lux-footer" style="display:block;">
-  &copy; 2025 Lumina by SAS Global &nbsp;·&nbsp;
-  <a href="https://sasglobal.biz" target="_blank" style="color:var(--sb-teal);">sasglobal.biz</a> &nbsp;·&nbsp;
-  Informational only. Consult a dermatologist for medical advice.
-</footer>
-{% endblock %}
+{% block description %}AI-powered skin analysis in 30 seconds. Discover your skin type, acne zones, undertone and get personalised K-Beauty recommendations.{% endblock %}
 
 {% block extra_css %}
 <style>
-.home-wrap { max-width: 900px; margin: 0 auto; }
+/* ── Reset content padding for full-bleed sections ── */
+.lux-content { padding: 0 !important; overflow-x: hidden; max-width: none !important; margin-inline: 0 !important; }
 
-/* ── WELCOME BANNER ── */
-.home-banner {
-  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 60%, #0d1f3c 100%);
-  border-radius: 18px; padding: 1.75rem 1.5rem;
-  margin-bottom: 1.5rem; position: relative; overflow: hidden;
-  border: 1px solid rgba(13,148,136,.2);
+/* ── CSS Variables ── */
+:root {
+  --lx-teal:    #0d9488;
+  --lx-teal-dk: #0f766e;
+  --lx-gold:    #c9a96e;
+  --lx-dark:    #0a0a0f;
+  --lx-dark2:   #0d1a2e;
 }
-.home-banner::before {
-  content: ''; position: absolute; top: -20%; right: -8%; width: 40%; height: 140%;
-  background: radial-gradient(ellipse, rgba(13,148,136,.22) 0%, transparent 65%);
-  pointer-events: none;
-}
-.home-banner-inner {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
-}
-.home-avatar {
-  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, #0d9488, #0891b2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; font-weight: 700; color: #fff;
-  border: 2px solid rgba(255,255,255,.15);
-}
-.home-banner-text h2 { color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: .15rem; }
-.home-banner-text p  { color: rgba(255,255,255,.45); font-size: .8rem; margin: 0; }
-.home-scan-btn {
-  margin-left: auto; flex-shrink: 0;
-  display: inline-flex; align-items: center; gap: .45rem;
-  padding: .6rem 1.25rem; background: #0d9488; color: #fff;
-  border-radius: 100px; font-size: .82rem; font-weight: 700;
-  text-decoration: none; transition: background .15s, transform .15s;
-  border: none; cursor: pointer;
-}
-.home-scan-btn:hover { background: #0f766e; color: #fff; transform: translateY(-1px); }
 
-/* ── STAT STRIP ── */
-.home-stats {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: .75rem; margin-bottom: 1.5rem;
+/* ── Shared Utilities ── */
+.lx-sec          { padding: 5rem 1.5rem; }
+.lx-inner        { max-width: 1100px; margin: 0 auto; }
+.lx-center       { text-align: center; }
+.lx-eyebrow      {
+  display: inline-block; font-size: .63rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .22em; color: var(--lx-teal);
+  margin-bottom: .75rem;
 }
-.home-stat {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: .9rem; text-align: center;
-  box-shadow: 0 1px 6px rgba(0,0,0,.05);
-}
-.home-stat .sv {
+.lx-h2 {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.75rem; font-weight: 700; color: #0d9488; line-height: 1; margin-bottom: .2rem;
+  font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 700;
+  color: var(--text); line-height: 1.15; margin-bottom: .9rem;
 }
-.home-stat .sl {
-  font-size: .62rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--muted);
+.lx-h2 em { color: var(--lx-teal); font-style: italic; }
+.lx-lead { font-size: .97rem; color: var(--muted); line-height: 1.75; max-width: 540px; margin: 0 auto 2.5rem; }
+.lx-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .85rem 1.9rem; border-radius: 100px;
+  font-size: .92rem; font-weight: 700; text-decoration: none;
+  transition: all .22s ease; border: none; cursor: pointer; line-height: 1;
 }
-
-/* ── SECTION LABEL ── */
-.home-section-label {
-  font-size: .65rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--muted); margin-bottom: .75rem;
-  display: flex; align-items: center; gap: .4rem;
-}
-
-/* ── ACTION CARDS ── */
-.home-actions {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: .75rem; margin-bottom: 1.5rem;
-}
-.home-action {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-  padding: 1.1rem; text-decoration: none; color: var(--text);
-  display: flex; align-items: center; gap: .85rem;
-  transition: box-shadow .15s, transform .15s;
-  box-shadow: 0 1px 6px rgba(0,0,0,.05);
-}
-.home-action:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); color: var(--text); }
-.home-action-icon {
-  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
-}
-.home-action .ac-title { font-size: .875rem; font-weight: 700; color: var(--text); margin-bottom: .1rem; }
-.home-action .ac-sub   { font-size: .7rem; color: var(--muted); }
-
-/* ── LATEST SCAN CARD ── */
-.home-latest {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-  padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,.05);
-  display: flex; align-items: center; gap: 1rem;
-}
-.home-scan-face {
-  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
-  border: 2px solid #0d9488; flex-shrink: 0;
-}
-.home-scan-face-ph {
-  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(13,148,136,.1); border: 2px solid #0d9488;
-  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
-}
-.home-latest-info { flex: 1; min-width: 0; }
-.home-latest-info .li-title { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; }
-.home-latest-info .li-sub   { font-size: .72rem; color: var(--muted); }
-.home-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
-.home-chip {
-  padding: .15rem .5rem; border-radius: 20px; font-size: .62rem; font-weight: 600;
-  background: rgba(13,148,136,.1); color: #0d9488;
-}
-.home-score {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.6rem; font-weight: 700; color: #0d9488;
-  flex-shrink: 0; line-height: 1; text-align: center;
-}
-.home-score span { font-size: .6rem; font-weight: 400; color: var(--muted); display: block; }
-
-/* ── FEATURE PILLS (guest) ── */
-.home-features {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: .65rem; margin-bottom: 1.5rem;
-}
-.home-feature {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 1rem;
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center; gap: .45rem;
-  box-shadow: 0 1px 6px rgba(0,0,0,.05);
-}
-.home-feature-icon {
-  width: 42px; height: 42px; border-radius: 12px;
-  background: rgba(13,148,136,.1); color: #0d9488;
-  display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
-}
-.home-feature .hf-title { font-size: .82rem; font-weight: 700; color: var(--text); }
-.home-feature .hf-sub   { font-size: .7rem; color: var(--muted); line-height: 1.4; }
-
-/* ── PRODUCT TEASERS ── */
-.home-product-strip {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: .75rem; margin-bottom: 1.5rem;
-}
-.home-product-tile {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 1rem;
-  display: flex; align-items: center; gap: .85rem;
-  text-decoration: none; color: var(--text);
-  box-shadow: 0 1px 6px rgba(0,0,0,.05);
-  transition: box-shadow .15s, transform .15s;
-}
-.home-product-tile:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,.1); color: var(--text); }
-.home-product-tile-icon {
-  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
-}
-.hpt-title { font-size: .85rem; font-weight: 700; color: var(--text); }
-.hpt-count { font-size: .72rem; color: var(--muted); }
-
-/* ── CTA (empty state) ── */
-.home-empty {
-  text-align: center; padding: 2.5rem 1.5rem;
-  background: var(--surface); border: 2px dashed var(--border);
-  border-radius: 16px; margin-bottom: 1.5rem;
-}
-.home-empty .e-icon { font-size: 2.75rem; margin-bottom: .85rem; }
-.home-empty h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .4rem; }
-.home-empty p  { font-size: .82rem; color: var(--muted); margin-bottom: 1.1rem; }
-.home-cta {
-  display: inline-flex; align-items: center; gap: .45rem;
-  padding: .6rem 1.35rem; background: #0d9488; color: #fff;
-  border-radius: 100px; font-size: .82rem; font-weight: 700;
-  text-decoration: none; transition: background .15s;
-}
-.home-cta:hover { background: #0f766e; color: #fff; }
-
-/* Responsive */
-@media (max-width: 600px) {
-  .home-actions  { grid-template-columns: 1fr; }
-  .home-features { grid-template-columns: repeat(2, 1fr); }
-  .home-product-strip { grid-template-columns: 1fr; }
-}
-@media (max-width: 380px) {
-  .home-stats    { grid-template-columns: repeat(3, 1fr); }
-  .home-features { grid-template-columns: 1fr; }
-}
+.lx-btn-teal  { background: var(--lx-teal); color: #fff; box-shadow: 0 6px 24px rgba(13,148,136,.38); }
+.lx-btn-teal:hover { background: var(--lx-teal-dk); color: #fff; transform: translateY(-2px); box-shadow: 0 10px 32px rgba(13,148,136,.5); }
+.lx-btn-ghost { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.28); }
+.lx-btn-ghost:hover { background: rgba(255,255,255,.08); color: #fff; transform: translateY(-2px); }
+.lx-btn-outline { background: transparent; color: var(--lx-teal); border: 2px solid var(--lx-teal); }
+.lx-btn-outline:hover { background: var(--lx-teal); color: #fff; transform: translateY(-2px); }
 </style>
 {% endblock %}
 
+{% block footer %}
+<footer style="background:#06060a;border-top:1px solid rgba(255,255,255,.07);padding:2.5rem 1.5rem 2rem;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:flex-start;gap:2.5rem;flex-wrap:wrap;justify-content:space-between;">
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--lx-gold);letter-spacing:.06em;">Lumina</div>
+      <p style="font-size:.78rem;color:rgba(255,255,255,.28);margin:.3rem 0 0;">AI-powered skin intelligence by SAS Global</p>
+    </div>
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.22);margin-bottom:.7rem;">Platform</div>
+        <div style="display:flex;flex-direction:column;gap:.45rem;">
+          <a href="{% url 'skin:start' %}" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">AI Consultation</a>
+          <a href="{% url 'scanner:upload' %}" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Free Skin Scan</a>
+          <a href="{% url 'chat:create' %}?mode=doctor" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">AI Doctor</a>
+          <a href="{% url 'progress:progress_home' %}" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Progress Tracker</a>
+          <a href="{% url 'products:list' %}" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Shop</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.22);margin-bottom:.7rem;">Account</div>
+        <div style="display:flex;flex-direction:column;gap:.45rem;">
+          <a href="{% url 'accounts:signup' %}" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Sign Up Free</a>
+          <a href="{% url 'accounts:login' %}" style="font-size:.82rem;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#0d9488'" onmouseout="this.style.color='rgba(255,255,255,.4)'">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:1100px;margin:1.5rem auto 0;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+    <p style="font-size:.7rem;color:rgba(255,255,255,.18);margin:0;">&copy; 2025 Lumina by SAS Global &nbsp;·&nbsp; <a href="https://sasglobal.biz" target="_blank" style="color:rgba(255,255,255,.32);text-decoration:none;">sasglobal.biz</a></p>
+    <p style="font-size:.7rem;color:rgba(255,255,255,.18);margin:0;">Informational only — not a substitute for medical advice.</p>
+  </div>
+</footer>
+{% endblock %}
+
 {% block content %}
-<div class="home-wrap">
+<style>
+/* ══════════════════════════════════════════════════════
+   HERO
+   ══════════════════════════════════════════════════════ */
+.lx-hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #0a0a0f 0%, #0d1628 55%, #0a0a0f 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 7rem 1.5rem 5rem;
+  position: relative; overflow: hidden;
+}
+.lx-hero-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.lx-hero-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(13,148,136,.1);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: ring-pulse 5s ease-in-out infinite;
+}
+.lx-hero-ring:nth-child(2){width:300px;height:300px;animation-delay:0s;}
+.lx-hero-ring:nth-child(3){width:520px;height:520px;animation-delay:1s;}
+.lx-hero-ring:nth-child(4){width:740px;height:740px;animation-delay:2s;}
+@keyframes ring-pulse {
+  0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1);}
+  50%{opacity:.1;transform:translate(-50%,-50%) scale(1.05);}
+}
+.lx-hero-badge {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .38rem 1.1rem; border-radius: 100px;
+  border: 1px solid rgba(13,148,136,.4); background: rgba(13,148,136,.1);
+  color: #5eead4; font-size: .7rem; font-weight: 600; letter-spacing: .07em;
+  margin-bottom: 1.75rem; position: relative; z-index: 2;
+  animation: float-up 3.5s ease-in-out infinite;
+}
+@keyframes float-up { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+.lx-hero-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 8vw, 5.5rem); font-weight: 700;
+  color: #fff; line-height: 1.06; margin-bottom: 1.25rem;
+  position: relative; z-index: 2;
+}
+.lx-hero-h1 .c-teal { color: #0d9488; }
+.lx-hero-h1 .c-gold { color: #c9a96e; }
+.lx-hero-p {
+  font-size: clamp(.88rem, 2vw, 1.1rem); color: rgba(255,255,255,.5);
+  max-width: 520px; line-height: 1.8; margin: 0 auto 2.75rem;
+  position: relative; z-index: 2;
+}
+.lx-hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; z-index: 2; position: relative; margin-bottom: 3rem; }
+.lx-hero-trust { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; z-index: 2; position: relative; }
+.lx-trust-it { display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: rgba(255,255,255,.35); }
+.lx-trust-it i { color: #0d9488; }
 
-  {% if user.is_authenticated %}
+/* ══════════════════════════════════════════════════════
+   TICKER
+   ══════════════════════════════════════════════════════ */
+.lx-ticker { background: #0d9488; padding: .52rem 0; overflow: hidden; white-space: nowrap; }
+.lx-ticker-track { display: inline-flex; animation: ticker-scroll 36s linear infinite; }
+.lx-ticker-track:hover { animation-play-state: paused; }
+.lx-tick-item { display: inline-flex; align-items: center; gap: .45rem; padding: 0 1.75rem; font-size: .76rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: .07em; }
+.lx-tick-sep { color: rgba(255,255,255,.35); }
+@keyframes ticker-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 
-  <div class="home-banner">
-    <div class="home-banner-inner">
-      <div class="home-avatar">{{ user.username|first|upper }}</div>
-      <div class="home-banner-text">
-        <h2>Hello, {{ user.first_name|default:user.username }} 👋</h2>
-        <p>Member since {{ user.date_joined|date:"M Y" }} &nbsp;·&nbsp; Free Plan</p>
-      </div>
-      <a href="{% url 'scanner:upload' %}" class="home-scan-btn">
-        <i class="bi bi-camera-fill"></i> New Scan
-      </a>
-    </div>
+/* ══════════════════════════════════════════════════════
+   STATS BAR
+   ══════════════════════════════════════════════════════ */
+.lx-stats-bar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.lx-stats-grid { display: grid; grid-template-columns: repeat(4,1fr); max-width: 1100px; margin: 0 auto; }
+.lx-stat-cell { padding: 2.25rem 1.5rem; text-align: center; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
+.lx-stat-cell:last-child { border-right: none; }
+.lx-stat-cell::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#0d9488,#0891b2); transform:scaleX(0); transition:transform .3s; transform-origin:left; }
+.lx-stat-cell:hover::after { transform:scaleX(1); }
+.lx-stat-num { font-family:'Cormorant Garamond',serif; font-size:3.2rem; font-weight:700; color:#0d9488; line-height:1; display:block; }
+.lx-stat-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-top:.3rem; }
+@media(max-width:640px){.lx-stats-grid{grid-template-columns:repeat(2,1fr);}.lx-stat-cell:nth-child(2){border-right:none;}}
+</style>
+
+<style>
+/* ══════════════════════════════════════════════════════
+   ROOT CAUSES
+   ══════════════════════════════════════════════════════ */
+.lx-causes-sec { background: var(--surface); }
+.lx-causes-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.2rem; }
+.lx-cause-card {
+  background: var(--page-bg); border: 1px solid var(--border);
+  border-radius: 18px; padding: 1.7rem 1.5rem; transition: all .22s;
+}
+.lx-cause-card:hover {
+  border-color: #0d9488; background: rgba(13,148,136,.04);
+  transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.08);
+}
+.lx-cause-ico { font-size: 2.2rem; display: block; margin-bottom: .8rem; }
+.lx-cause-ttl { font-size: .98rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
+.lx-cause-txt { font-size: .82rem; color: var(--muted); line-height: 1.65; }
+
+/* ══════════════════════════════════════════════════════
+   HOW IT WORKS
+   ══════════════════════════════════════════════════════ */
+.lx-how-sec { background: linear-gradient(160deg,#0a0a0f 0%,#0d1a2e 100%); }
+.lx-how-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2.5rem; position: relative; }
+.lx-how-grid::before {
+  content: ''; position: absolute; top: 36px;
+  left: calc(16.6% + 32px); right: calc(16.6% + 32px);
+  height: 1px; background: linear-gradient(90deg, transparent, rgba(13,148,136,.4), transparent);
+}
+.lx-how-step { text-align: center; padding: 1rem .5rem; }
+.lx-how-num {
+  width: 68px; height: 68px; border-radius: 50%;
+  background: rgba(13,148,136,.12); border: 2px solid rgba(13,148,136,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 700; color: #0d9488;
+  margin: 0 auto 1.2rem; position: relative; z-index: 1; transition: all .25s;
+}
+.lx-how-step:hover .lx-how-num { background: #0d9488; color: #fff; box-shadow: 0 8px 28px rgba(13,148,136,.4); }
+.lx-how-tag { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: #0d9488; margin-bottom: .4rem; }
+.lx-how-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+.lx-how-text { font-size: .83rem; color: rgba(255,255,255,.4); line-height: 1.65; }
+
+/* ══════════════════════════════════════════════════════
+   FEATURES
+   ══════════════════════════════════════════════════════ */
+.lx-feat-sec { background: var(--page-bg); }
+.lx-feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.lx-feat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2rem 1.75rem; transition: all .22s;
+  position: relative; overflow: hidden;
+}
+.lx-feat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #0d9488, #c9a96e); opacity: 0; transition: opacity .25s;
+}
+.lx-feat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,.09); }
+.lx-feat-card:hover::before { opacity: 1; }
+.lx-feat-ico {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: rgba(13,148,136,.1); color: #0d9488;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin-bottom: 1.2rem; transition: all .22s;
+}
+.lx-feat-card:hover .lx-feat-ico { background: #0d9488; color: #fff; transform: scale(1.08); }
+.lx-feat-ttl { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
+.lx-feat-dsc { font-size: .85rem; color: var(--muted); line-height: 1.65; }
+
+/* ══════════════════════════════════════════════════════
+   TESTIMONIALS
+   ══════════════════════════════════════════════════════ */
+.lx-test-sec { background: var(--surface); }
+.lx-test-slider { display: flex; gap: 1.25rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: .5rem; }
+.lx-test-slider::-webkit-scrollbar { display: none; }
+.lx-test-card {
+  flex-shrink: 0; width: 280px; scroll-snap-align: start;
+  background: var(--page-bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 1.75rem; transition: all .2s;
+}
+.lx-test-card:hover { transform: translateY(-4px); box-shadow: 0 16px 44px rgba(0,0,0,.09); }
+.lx-test-stars { color: #f59e0b; font-size: .88rem; letter-spacing: .06em; margin-bottom: .85rem; }
+.lx-test-quote { font-size: .86rem; color: var(--muted); line-height: 1.7; font-style: italic; margin-bottom: 1rem; }
+.lx-test-author { font-size: .82rem; font-weight: 700; color: var(--text); }
+.lx-test-skin { font-size: .7rem; color: var(--muted); margin-top: .12rem; }
+
+/* ══════════════════════════════════════════════════════
+   TIMELINE
+   ══════════════════════════════════════════════════════ */
+.lx-tl-sec { background: linear-gradient(160deg,#0a0a0f 0%,#0d1a2e 100%); }
+.lx-tl-track { display: flex; overflow-x: auto; scrollbar-width: none; gap: 0; }
+.lx-tl-track::-webkit-scrollbar { display: none; }
+.lx-tl-item { flex: 1; min-width: 125px; text-align: center; padding: 1rem .75rem; position: relative; }
+.lx-tl-item::after { content:''; position:absolute; top:28px; left:50%; width:100%; height:2px; background:rgba(13,148,136,.22); }
+.lx-tl-item:last-child::after { display: none; }
+.lx-tl-dot {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(13,148,136,.12); border: 2px solid rgba(13,148,136,.3);
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+  margin: 0 auto .8rem; position: relative; z-index: 1; transition: all .25s;
+}
+.lx-tl-item:hover .lx-tl-dot { background: #0d9488; box-shadow: 0 6px 20px rgba(13,148,136,.4); }
+.lx-tl-wk { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #0d9488; margin-bottom: .22rem; }
+.lx-tl-desc { font-size: .76rem; color: rgba(255,255,255,.45); line-height: 1.45; }
+
+/* ══════════════════════════════════════════════════════
+   FINAL CTA
+   ══════════════════════════════════════════════════════ */
+.lx-cta-sec {
+  background: linear-gradient(135deg,#0a0a0f 0%,#0d1a2e 100%);
+  padding: 6rem 1.5rem; text-align: center; position: relative; overflow: hidden;
+}
+.lx-cta-sec::before {
+  content:''; position:absolute; top:-20%; left:50%; transform:translateX(-50%);
+  width:600px; height:600px; border-radius:50%;
+  background: radial-gradient(ellipse, rgba(13,148,136,.14) 0%, transparent 65%);
+}
+.lx-cta-h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 700;
+  color: #fff; line-height: 1.12; margin-bottom: .9rem; position: relative;
+}
+.lx-cta-h2 em { color: #0d9488; font-style: italic; }
+.lx-cta-p { font-size: .97rem; color: rgba(255,255,255,.42); max-width: 440px; margin: 0 auto 2.5rem; position: relative; }
+.lx-cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
+
+/* ══════════════════════════════════════════════════════
+   TRUST STRIP
+   ══════════════════════════════════════════════════════ */
+.lx-trust-sec { background: var(--page-bg); }
+.lx-trust-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+.lx-trust-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 1.75rem; text-align: center; transition: all .22s;
+}
+.lx-trust-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,.07); }
+.lx-trust-card-ico { font-size: 2.2rem; margin-bottom: .75rem; }
+.lx-trust-card-ttl { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
+.lx-trust-card-txt { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ══════════════════════════════════════════════════════ */
+[data-theme="dark"] .lx-cause-card,
+[data-theme="dark"] .lx-feat-card,
+[data-theme="dark"] .lx-test-card,
+[data-theme="dark"] .lx-trust-card { background: #12121a; border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .lx-causes-sec,
+[data-theme="dark"] .lx-trust-sec { background: #0d0d14; }
+[data-theme="dark"] .lx-feat-sec,
+[data-theme="dark"] .lx-test-sec { background: #0d0d14; }
+[data-theme="dark"] .lx-stats-bar { background: #0d0d14; }
+[data-theme="dark"] .lx-stat-cell { border-color: rgba(255,255,255,.08); }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  .lx-causes-grid,.lx-feat-grid,.lx-trust-grid { grid-template-columns: repeat(2,1fr); }
+  .lx-how-grid { grid-template-columns: 1fr; }
+  .lx-how-grid::before { display: none; }
+}
+@media(max-width:600px){
+  .lx-causes-grid,.lx-feat-grid,.lx-trust-grid { grid-template-columns: 1fr; }
+  .lx-sec { padding: 3.5rem 1rem; }
+}
+</style>
+
+{# LOGGED-IN WELCOME BAR #}
+{% if user.is_authenticated %}
+<div style="background:linear-gradient(135deg,#0a0a0f,#0d1f3c);border-bottom:1px solid rgba(13,148,136,.2);padding:1rem 1.75rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+  <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#0891b2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff;flex-shrink:0;border:2px solid rgba(255,255,255,.15);">
+    {{ user.username|first|upper }}
+  </div>
+  <div>
+    <p style="color:#fff;font-size:.95rem;font-weight:700;margin:0 0 .08rem;">Hello, {{ user.first_name|default:user.username }} 👋</p>
+    <p style="color:rgba(255,255,255,.38);font-size:.7rem;margin:0;">
+      Member since {{ user.date_joined|date:"M Y" }} &nbsp;·&nbsp;
+      {% if user_tier == 'vip' %}VIP Member{% elif user_tier == 'medium' %}Plus Member{% else %}Free Plan{% endif %}
+    </p>
+  </div>
+  <a href="{% url 'scanner:upload' %}" style="margin-left:auto;display:inline-flex;align-items:center;gap:.4rem;padding:.52rem 1.2rem;background:#0d9488;color:#fff;border-radius:100px;font-size:.8rem;font-weight:700;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#0f766e'" onmouseout="this.style.background='#0d9488'">
+    <i class="bi bi-camera-fill"></i> New Scan
+  </a>
+</div>
+{% endif %}
+
+{# SECTION 1 — HERO #}
+<section class="lx-hero">
+  <div class="lx-hero-glow"></div>
+  <div class="lx-hero-ring"></div>
+  <div class="lx-hero-ring"></div>
+  <div class="lx-hero-ring"></div>
+
+  <div class="lx-hero-badge">
+    <i class="bi bi-cpu-fill"></i>
+    AI-Powered &nbsp;·&nbsp; Groq Vision &nbsp;·&nbsp; Grok-4
   </div>
 
-  {# Stats #}
-  <div class="home-stats">
-    <div class="home-stat">
-      <div class="sv">{{ user_real_scan_count|default:"0" }}</div>
-      <div class="sl">Scans</div>
-    </div>
-    <div class="home-stat">
-      <div class="sv">{{ user.conversations.count|default:"0" }}</div>
-      <div class="sl">AI Chats</div>
-    </div>
-    <div class="home-stat">
-      <div class="sv">{% if user_latest_real_scan %}{{ user_latest_real_scan.harmony_score }}{% else %}—{% endif %}</div>
-      <div class="sl">Harmony</div>
-    </div>
-  </div>
+  <h1 class="lx-hero-h1">
+    Your skin, <span class="c-teal">understood</span><br>
+    at a <span class="c-gold">molecular level.</span>
+  </h1>
 
-  <div class="home-section-label">⚡ Quick Actions</div>
-  <div class="home-actions">
-    <a href="{% url 'scanner:upload' %}" class="home-action">
-      <div class="home-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
-        <i class="bi bi-camera-fill"></i>
-      </div>
-      <div>
-        <div class="ac-title">New Face Scan</div>
-        <div class="ac-sub">AI skin analysis</div>
-      </div>
-    </a>
-    <a href="{% url 'chat:create' %}?mode=doctor{% if user_latest_real_scan %}&scan_id={{ user_latest_real_scan.id }}{% endif %}" class="home-action">
-      <div class="home-action-icon" style="background:rgba(13,148,136,.12);color:#0d9488;">
-        <i class="bi bi-heart-pulse"></i>
-      </div>
-      <div>
-        <div class="ac-title">Ask AI Doctor</div>
-        <div class="ac-sub">Skin concern advice</div>
-      </div>
-    </a>
-    <a href="{% url 'products:list' %}?range=korean" class="home-action">
-      <div class="home-action-icon" style="background:rgba(236,72,153,.1);color:#ec4899;">
-        <i class="bi bi-stars"></i>
-      </div>
-      <div>
-        <div class="ac-title">K-Beauty Shop</div>
-        <div class="ac-sub">SAS Global products</div>
-      </div>
-    </a>
-    <a href="{% url 'dashboard:dashboard' %}" class="home-action">
-      <div class="home-action-icon" style="background:rgba(201,169,110,.12);color:#c9a96e;">
-        <i class="bi bi-clock-history"></i>
-      </div>
-      <div>
-        <div class="ac-title">Scan History</div>
-        <div class="ac-sub">Track your progress</div>
-      </div>
-    </a>
-  </div>
+  <p class="lx-hero-p">
+    Clinical-grade AI skin analysis in under 30 seconds.
+    Discover acne severity, skin type, undertone &amp; face shape —
+    then get personalised Korean skincare and makeup shade recommendations.
+  </p>
 
-  {% with latest=user_latest_real_scan %}
-  {% if latest %}
-  <div class="home-section-label">✦ Latest Scan</div>
-  <div class="home-latest">
-    {% if latest.scan_image %}
-      <img src="{{ latest.scan_image.url }}" alt="scan" class="home-scan-face">
-    {% else %}
-      <div class="home-scan-face-ph">👤</div>
-    {% endif %}
-    <div class="home-latest-info">
-      <div class="li-title">{{ latest.skin_type|title }} · {{ latest.undertone|title }} Undertone</div>
-      <div class="li-sub">{{ latest.created_at|date:"M j, Y · g:i A" }}</div>
-      <div class="home-chips">
-        <span class="home-chip">{{ latest.skin_tone|title }} Tone</span>
-        <span class="home-chip">Acne: {{ latest.hf_acne_severity|title }}</span>
-        {% for c in latest.detected_concerns.all|slice:":2" %}
-          <span class="home-chip">{{ c.name }}</span>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="home-score">{{ latest.harmony_score }}<span>Harmony</span></div>
-  </div>
-  <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;">
-    <a href="{% url 'results:detail' scan_id=latest.id %}" class="home-cta">
-      <i class="bi bi-bar-chart-line"></i> Full Results
+  <div class="lx-hero-btns">
+    <a href="{% url 'skin:start' %}" class="lx-btn lx-btn-teal">
+      <i class="bi bi-stars"></i> Start Free Analysis →
     </a>
-    <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ latest.id }}"
-       class="home-cta" style="background:rgba(13,148,136,.12);color:#0d9488;border:1px solid rgba(13,148,136,.2);">
-      🩺 Consult AI
+    <a href="#how-it-works" class="lx-btn lx-btn-ghost">
+      <i class="bi bi-play-circle"></i> See How It Works
     </a>
   </div>
-  {% else %}
-  <div class="home-empty">
-    <div class="e-icon">📸</div>
-    <h3>Take your first scan</h3>
-    <p>Upload a selfie and get your complete AI skin analysis in under 30 seconds.</p>
-    <a href="{% url 'scanner:upload' %}" class="home-cta">
-      <i class="bi bi-camera-fill"></i> Start Scan
-    </a>
-  </div>
+  {% if not user.is_authenticated %}
+  <p style="font-size:.72rem;color:rgba(255,255,255,.28);margin-top:-1.5rem;margin-bottom:2.5rem;position:relative;z-index:2;">
+    <i class="bi bi-lock" style="font-size:.68rem;"></i> 
+    <a href="{% url 'accounts:login' %}" style="color:rgba(255,255,255,.42);text-decoration:underline;text-underline-offset:2px;">Login to save results</a>
+  </p>
   {% endif %}
-  {% endwith %}
 
-  {% else %}
-
-  <div class="home-banner">
-    <div class="home-banner-inner">
-      <div class="home-avatar" style="font-size:1.1rem;">✦</div>
-      <div class="home-banner-text">
-        <h2>Your AI Skin Specialist</h2>
-        <p>Instant analysis · Korean skincare · Makeup shade matching</p>
-      </div>
-      <a href="{% url 'scanner:upload' %}" class="home-scan-btn">
-        <i class="bi bi-camera-fill"></i> Start Free Scan
-      </a>
-    </div>
+  <div class="lx-hero-trust">
+    <div class="lx-trust-it"><i class="bi bi-shield-check"></i> 100% Private</div>
+    <div class="lx-trust-it"><i class="bi bi-lightning-charge"></i> Results in 25 sec</div>
+    <div class="lx-trust-it"><i class="bi bi-diagram-3"></i> 468-Point Analysis</div>
+    <div class="lx-trust-it"><i class="bi bi-heart-pulse"></i> Dermatologist-Grade AI</div>
   </div>
+</section>
 
-  <div class="home-section-label">✦ What Lumina Does</div>
-  <div class="home-features">
-    {% for feature in features %}
-    <div class="home-feature">
-      <div class="home-feature-icon"><i class="{{ feature.icon }}"></i></div>
-      <div class="hf-title">{{ feature.title }}</div>
-      <div class="hf-sub">{{ feature.description|truncatewords:10 }}</div>
-    </div>
+{# SECTION 2 — TICKER #}
+<div class="lx-ticker" aria-hidden="true">
+  <div class="lx-ticker-track">
+    {% for _ in "12345678"|make_list %}
+      <span class="lx-tick-item"><i class="bi bi-camera-fill"></i> AI Face Scan <span class="lx-tick-sep">·</span></span>
+      <span class="lx-tick-item"><i class="bi bi-droplet-half"></i> Skin Type Analysis <span class="lx-tick-sep">·</span></span>
+      <span class="lx-tick-item"><i class="bi bi-palette2"></i> Foundation Shade Match <span class="lx-tick-sep">·</span></span>
+      <span class="lx-tick-item"><i class="bi bi-flower1"></i> K-Beauty Personalisation <span class="lx-tick-sep">·</span></span>
+      <span class="lx-tick-item"><i class="bi bi-heart-pulse"></i> AI Doctor Chat <span class="lx-tick-sep">·</span></span>
+      <span class="lx-tick-item"><i class="bi bi-stars"></i> Acne Zone Mapping <span class="lx-tick-sep">·</span></span>
     {% endfor %}
   </div>
+</div>
 
-  <div class="home-empty">
-    <div class="e-icon">👤</div>
-    <h3>Create a free account</h3>
-    <p>Save your scan history, track progress, and get personalised product recommendations.</p>
-    <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;">
-      <a href="{% url 'accounts:signup' %}" class="home-cta">Sign Up Free</a>
-      <a href="{% url 'accounts:login' %}" class="home-cta" style="background:var(--surface);color:#0d9488;border:1.5px solid #0d9488;">Sign In</a>
+{# SECTION 3 — STATS BAR #}
+<section class="lx-stats-bar">
+  <div class="lx-stats-grid">
+    <div class="lx-stat-cell">
+      <span class="lx-stat-num" data-count="468">0</span>
+      <span class="lx-stat-label">Facial Landmarks Mapped</span>
+    </div>
+    <div class="lx-stat-cell">
+      <span class="lx-stat-num" data-count="30">0</span>
+      <span class="lx-stat-label">Seconds to Full Analysis</span>
+    </div>
+    <div class="lx-stat-cell">
+      <span class="lx-stat-num" data-count="12">0</span>
+      <span class="lx-stat-label">Skin Metrics Detected</span>
+    </div>
+    <div class="lx-stat-cell">
+      <span class="lx-stat-num" data-count="5000">0</span>
+      <span class="lx-stat-label">Products Matched</span>
     </div>
   </div>
+</section>
 
-  {% endif %}
-
-  {# ── PRODUCT SHORTCUTS (everyone) ── #}
-  <div class="home-section-label">🛍 Shop</div>
-  <div class="home-product-strip">
-    <a href="{% url 'products:list' %}?range=korean" class="home-product-tile">
-      <div class="home-product-tile-icon" style="background:rgba(13,148,136,.1);">🌸</div>
-      <div>
-        <div class="hpt-title">K-Beauty</div>
-        <div class="hpt-count">{{ korean_count }} products · SAS Global</div>
+{# SECTION 4 — ROOT CAUSES #}
+<section class="lx-sec lx-causes-sec">
+  <div class="lx-inner">
+    <div class="lx-center" style="margin-bottom:2.5rem;">
+      <span class="lx-eyebrow">Root Causes</span>
+      <h2 class="lx-h2">Skin health starts <em>from within</em></h2>
+      <p class="lx-lead">Lumina analyses 6 key root causes behind your skin issues — going deeper than any store-bought test.</p>
+    </div>
+    <div class="lx-causes-grid">
+      <div class="lx-cause-card">
+        <span class="lx-cause-ico">💧</span>
+        <div class="lx-cause-ttl">Hydration Level</div>
+        <p class="lx-cause-txt">Dehydrated skin looks dull, feels tight and is prone to fine lines. Your moisture barrier needs targeted care.</p>
       </div>
-    </a>
-    <a href="{% url 'products:list' %}?range=makeup" class="home-product-tile">
-      <div class="home-product-tile-icon" style="background:rgba(236,72,153,.08);">💄</div>
-      <div>
-        <div class="hpt-title">Makeup</div>
-        <div class="hpt-count">{{ makeup_count }} products</div>
+      <div class="lx-cause-card">
+        <span class="lx-cause-ico">🔬</span>
+        <div class="lx-cause-ttl">Acne &amp; Breakouts</div>
+        <p class="lx-cause-txt">Excess sebum, clogged pores, and bacterial overgrowth cause acne. AI maps severity across 5 facial zones precisely.</p>
       </div>
-    </a>
+      <div class="lx-cause-card">
+        <span class="lx-cause-ico">🌡️</span>
+        <div class="lx-cause-ttl">Skin Undertone</div>
+        <p class="lx-cause-txt">Warm, cool or neutral — your undertone dictates which makeup shades and skincare actives work best for you.</p>
+      </div>
+      <div class="lx-cause-card">
+        <span class="lx-cause-ico">⚡</span>
+        <div class="lx-cause-ttl">Pigmentation &amp; Tone</div>
+        <p class="lx-cause-txt">Sun damage, hormones and inflammation trigger uneven pigmentation. Early detection allows targeted treatment.</p>
+      </div>
+      <div class="lx-cause-card">
+        <span class="lx-cause-ico">🧬</span>
+        <div class="lx-cause-ttl">Skin Aging</div>
+        <p class="lx-cause-txt">Loss of collagen, elastin and cellular turnover accelerates visible aging. Your skin age may differ from your real age.</p>
+      </div>
+      <div class="lx-cause-card">
+        <span class="lx-cause-ico">🌿</span>
+        <div class="lx-cause-ttl">Skin Type</div>
+        <p class="lx-cause-txt">Oily, dry, combination or normal — your skin type determines the ideal cleanser, moisturiser and treatment routine.</p>
+      </div>
+    </div>
   </div>
+</section>
 
-</div>
+{# SECTION 5 — HOW IT WORKS #}
+<section class="lx-sec lx-how-sec" id="how-it-works">
+  <div class="lx-inner">
+    <div class="lx-center" style="margin-bottom:2.5rem;">
+      <span class="lx-eyebrow" style="color:#5eead4;">How It Works</span>
+      <h2 class="lx-h2" style="color:#fff;">Six steps to <em>your best skin</em></h2>
+      <p style="color:rgba(255,255,255,.4);font-size:.9rem;max-width:480px;margin:.5rem auto 0;">
+        From selfie to 90-day transformation — here's your complete Lumina journey.
+      </p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.75rem;position:relative;">
+      <a href="{% url 'scanner:upload' %}" class="lx-how-step" style="text-decoration:none;">
+        <div class="lx-how-num">1</div>
+        <div class="lx-how-tag">Upload</div>
+        <div class="lx-how-title">Upload Selfie</div>
+        <p class="lx-how-text">Take a clear photo in good lighting — no makeup. AI analyses 468 facial landmarks in under 30 seconds.</p>
+      </a>
+      <a href="{% url 'skin:start' %}" class="lx-how-step" style="text-decoration:none;">
+        <div class="lx-how-num">2</div>
+        <div class="lx-how-tag">Quiz</div>
+        <div class="lx-how-title">Smart Quiz</div>
+        <p class="lx-how-text">Complete the 15-step AI consultation for a deeper profile — lifestyle, concerns, goals. Improves recommendation accuracy.</p>
+      </a>
+      <div class="lx-how-step">
+        <div class="lx-how-num">3</div>
+        <div class="lx-how-tag">Analysis</div>
+        <div class="lx-how-title">AI Skin Analysis</div>
+        <p class="lx-how-text">Receive your harmony score, skin type, acne zone map, undertone, face shape and foundation shade match.</p>
+      </div>
+      <div class="lx-how-step">
+        <div class="lx-how-num">4</div>
+        <div class="lx-how-tag">Routine</div>
+        <div class="lx-how-title">Get Your Routine</div>
+        <p class="lx-how-text">Your personalised AM/PM skincare routine and matched K-Beauty products — curated for your exact skin profile.</p>
+      </div>
+      <a href="{% url 'progress:progress_home' %}" class="lx-how-step" style="text-decoration:none;">
+        <div class="lx-how-num">5</div>
+        <div class="lx-how-tag">Track</div>
+        <div class="lx-how-title">Daily Tracking</div>
+        <p class="lx-how-text">Log AM/PM routines daily, earn streak points, and build consistent habits with the progress tracker.</p>
+      </a>
+      <div class="lx-how-step">
+        <div class="lx-how-num">6</div>
+        <div class="lx-how-tag">Compare</div>
+        <div class="lx-how-title">Progress Comparison</div>
+        <p class="lx-how-text">Re-scan at Day 14, 30, 60 and 90. See your harmony score improve with measurable before/after data.</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:3rem;">
+      <a href="{% url 'skin:start' %}" class="lx-btn lx-btn-teal" style="margin-right:.75rem;">
+        <i class="bi bi-stars"></i> Start AI Consultation
+      </a>
+      <a href="{% url 'scanner:upload' %}" class="lx-btn lx-btn-ghost">
+        <i class="bi bi-camera-fill"></i> Quick Selfie Scan
+      </a>
+    </div>
+  </div>
+</section>
+
+{# SECTION 6 — FEATURES #}
+<section class="lx-sec lx-feat-sec">
+  <div class="lx-inner">
+    <div class="lx-center" style="margin-bottom:2.5rem;">
+      <span class="lx-eyebrow">Holistic Approach</span>
+      <h2 class="lx-h2">Great skin requires <em>more than one tool</em></h2>
+    </div>
+    <div class="lx-feat-grid">
+      <a href="{% url 'scanner:upload' %}" class="lx-feat-card" style="text-decoration:none;">
+        <div class="lx-feat-ico"><i class="bi bi-camera-fill"></i></div>
+        <div class="lx-feat-ttl">AI Face Scanner</div>
+        <p class="lx-feat-dsc">Upload a selfie. Lumina maps 468 facial landmarks and analyses acne severity, skin type, undertone and face shape in one pass.</p>
+      </a>
+      <a href="{% url 'chat:create' %}?mode=kbeauty" class="lx-feat-card" style="text-decoration:none;">
+        <div class="lx-feat-ico"><i class="bi bi-flower1"></i></div>
+        <div class="lx-feat-ttl">K-Beauty Matching</div>
+        <p class="lx-feat-dsc">Your scan results are matched to SAS Global's curated Korean skincare catalogue. Every product selected for your exact skin profile.</p>
+      </a>
+      <a href="{% url 'chat:create' %}?mode=makeup" class="lx-feat-card" style="text-decoration:none;">
+        <div class="lx-feat-ico"><i class="bi bi-palette2"></i></div>
+        <div class="lx-feat-ttl">Makeup Shade Finder</div>
+        <p class="lx-feat-dsc">Lumina's vision AI identifies your exact skin tone and recommends matching foundation shades from top brands like MAC and Maybelline.</p>
+      </a>
+      <a href="{% url 'chat:create' %}?mode=doctor" class="lx-feat-card" style="text-decoration:none;">
+        <div class="lx-feat-ico"><i class="bi bi-heart-pulse-fill"></i></div>
+        <div class="lx-feat-ttl">AI Dermatologist</div>
+        <p class="lx-feat-dsc">Chat with Lumina's AI dermatologist — trained on clinical skin data. Ask about your acne, pigmentation, or any skin concern 24/7.</p>
+      </a>
+      <a href="{% url 'skin:start' %}" class="lx-feat-card" style="text-decoration:none;">
+        <div class="lx-feat-ico"><i class="bi bi-clipboard-heart"></i></div>
+        <div class="lx-feat-ttl">Treatment Planner</div>
+        <p class="lx-feat-dsc">The 15-step AI consultation builds a personalised treatment plan — morning, evening, weekly — tailored to your skin's root causes.</p>
+      </a>
+      <a href="{% url 'progress:progress_home' %}" class="lx-feat-card" style="text-decoration:none;">
+        <div class="lx-feat-ico"><i class="bi bi-bar-chart-line"></i></div>
+        <div class="lx-feat-ttl">Progress Tracking</div>
+        <p class="lx-feat-dsc">Every scan is saved to your dashboard. Track your harmony score, acne severity and hydration over time to see measurable improvement.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+{# SECTION 7 — PROOF BANNER #}
+<section class="lx-sec" style="background:linear-gradient(135deg,#0a0a0f 0%,#0d1a2e 100%);padding:4.5rem 1.5rem;">
+  <div class="lx-inner lx-center">
+    <span class="lx-eyebrow" style="color:#5eead4;">Research Backed</span>
+    <h2 class="lx-h2" style="color:#fff;"><em>98% accuracy</em> on skin type detection</h2>
+    <p class="lx-lead" style="color:rgba(255,255,255,.42);">
+      Powered by Groq Llama-4-Scout Vision — trained on millions of clinical images.
+      Grok-4 processes 468 MediaPipe landmarks to classify face shape with geometric precision.
+    </p>
+    <div style="display:flex;gap:1.25rem;justify-content:center;flex-wrap:wrap;">
+      {% for stat in proof_stats %}
+      <div style="text-align:center;padding:1.2rem 1.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;min-width:110px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:{{ stat.color }};">{{ stat.value }}</div>
+        <div style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.38);">{{ stat.label }}</div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:1.2rem 1.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:#0d9488;">7</div>
+        <div style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.38);">Face Shapes</div>
+      </div>
+      <div style="text-align:center;padding:1.2rem 1.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:#0d9488;">5</div>
+        <div style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.38);">Acne Zones Mapped</div>
+      </div>
+      <div style="text-align:center;padding:1.2rem 1.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:#0d9488;">3</div>
+        <div style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.38);">AI Models Working</div>
+      </div>
+      <div style="text-align:center;padding:1.2rem 1.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:700;color:#c9a96e;">&lt;30s</div>
+        <div style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.38);">Full Report Time</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# SECTION 8 — TESTIMONIALS #}
+<section class="lx-sec lx-test-sec">
+  <div class="lx-inner">
+    <div class="lx-center" style="margin-bottom:2rem;">
+      <span class="lx-eyebrow">Our Success Stories</span>
+      <h2 class="lx-h2">Real skin. <em>Real results.</em></h2>
+    </div>
+    <div class="lx-test-slider" id="testSlider">
+      <div class="lx-test-card">
+        <div class="lx-test-stars">★★★★★</div>
+        <p class="lx-test-quote">"Lumina detected my combination skin and acne zones perfectly. The K-Beauty recommendations cleared my T-zone breakouts in 3 weeks!"</p>
+        <div class="lx-test-author">Priya S.</div>
+        <div class="lx-test-skin">Combination · Warm Undertone · Mumbai</div>
+      </div>
+      <div class="lx-test-card">
+        <div class="lx-test-stars">★★★★★</div>
+        <p class="lx-test-quote">"The foundation shade match was incredibly accurate — it suggested MAC NC35 and it's genuinely my exact shade. Saved me so many returns!"</p>
+        <div class="lx-test-author">Aisha M.</div>
+        <div class="lx-test-skin">Oily · Neutral Undertone · Delhi</div>
+      </div>
+      <div class="lx-test-card">
+        <div class="lx-test-stars">★★★★★</div>
+        <p class="lx-test-quote">"I was sceptical but the face shape and undertone detection was spot on. The AI Doctor chat answered all my skincare questions like a real dermatologist."</p>
+        <div class="lx-test-author">Meera K.</div>
+        <div class="lx-test-skin">Dry · Cool Undertone · Bangalore</div>
+      </div>
+      <div class="lx-test-card">
+        <div class="lx-test-stars">★★★★★</div>
+        <p class="lx-test-quote">"Took the scan on my phone and got a detailed acne zone map with Korean product recommendations. It's like having a skin clinic in your pocket."</p>
+        <div class="lx-test-author">Rahul D.</div>
+        <div class="lx-test-skin">Normal · Warm Undertone · Pune</div>
+      </div>
+      <div class="lx-test-card">
+        <div class="lx-test-stars">★★★★★</div>
+        <p class="lx-test-quote">"The VIP Doctor consultation guided me through a full skincare routine. My pigmentation has visibly reduced in 6 weeks following the AI's customised plan."</p>
+        <div class="lx-test-author">Sneha R.</div>
+        <div class="lx-test-skin">Combination · Neutral Undertone · Chennai</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:.6rem;margin-top:1.5rem;" id="testDots">
+      <button style="width:8px;height:8px;border-radius:4px;background:#0d9488;border:none;cursor:pointer;transition:all .2s;width:24px;" data-i="0"></button>
+      <button style="width:8px;height:8px;border-radius:4px;background:var(--border);border:none;cursor:pointer;transition:all .2s;" data-i="1"></button>
+      <button style="width:8px;height:8px;border-radius:4px;background:var(--border);border:none;cursor:pointer;transition:all .2s;" data-i="2"></button>
+      <button style="width:8px;height:8px;border-radius:4px;background:var(--border);border:none;cursor:pointer;transition:all .2s;" data-i="3"></button>
+      <button style="width:8px;height:8px;border-radius:4px;background:var(--border);border:none;cursor:pointer;transition:all .2s;" data-i="4"></button>
+    </div>
+  </div>
+</section>
+
+{# SECTION 9 — SKIN IMPROVEMENT TIMELINE #}
+<section class="lx-sec lx-tl-sec">
+  <div class="lx-inner">
+    <div class="lx-center" style="margin-bottom:2.5rem;">
+      <span class="lx-eyebrow" style="color:#5eead4;">Honest Expectations</span>
+      <h2 class="lx-h2" style="color:#fff;">When will <em>you</em> see results?</h2>
+      <p class="lx-lead" style="color:rgba(255,255,255,.42);">Timeline varies based on your unique skin profile. Consistency is key.</p>
+    </div>
+    <div class="lx-tl-track">
+      <div class="lx-tl-item"><div class="lx-tl-dot">📸</div><div class="lx-tl-wk">Week 1</div><div class="lx-tl-desc">Baseline scan &amp; skin profile created</div></div>
+      <div class="lx-tl-item"><div class="lx-tl-dot">🌿</div><div class="lx-tl-wk">Week 2–3</div><div class="lx-tl-desc">Routine established, skin adjusting</div></div>
+      <div class="lx-tl-item"><div class="lx-tl-dot">💧</div><div class="lx-tl-wk">Month 1</div><div class="lx-tl-desc">Improved hydration &amp; reduced oiliness</div></div>
+      <div class="lx-tl-item"><div class="lx-tl-dot">✨</div><div class="lx-tl-wk">Month 2</div><div class="lx-tl-desc">Fewer breakouts, calmer skin</div></div>
+      <div class="lx-tl-item"><div class="lx-tl-dot">🔬</div><div class="lx-tl-wk">Month 3</div><div class="lx-tl-desc">Visible pigmentation reduction</div></div>
+      <div class="lx-tl-item"><div class="lx-tl-dot">🌟</div><div class="lx-tl-wk">Month 4–5</div><div class="lx-tl-desc">Improved elasticity &amp; glow</div></div>
+      <div class="lx-tl-item"><div class="lx-tl-dot">🏆</div><div class="lx-tl-wk">Month 6</div><div class="lx-tl-desc">Maintaining healthy, balanced skin</div></div>
+    </div>
+    <p style="text-align:center;font-size:.7rem;color:rgba(255,255,255,.22);margin-top:1.25rem;">*Timeline varies for each person based on their unique skin profile and root causes.</p>
+  </div>
+</section>
+
+{# SECTION 10 — TRUST STRIP #}
+<section class="lx-sec lx-trust-sec">
+  <div class="lx-inner">
+    <div class="lx-center" style="margin-bottom:2.5rem;">
+      <span class="lx-eyebrow">Why Lumina</span>
+      <h2 class="lx-h2">Built on <em>trust &amp; science</em></h2>
+    </div>
+    <div class="lx-trust-grid">
+      <div class="lx-trust-card">
+        <div class="lx-trust-card-ico">🔒</div>
+        <div class="lx-trust-card-ttl">100% Private</div>
+        <p class="lx-trust-card-txt">Your photos are analysed and never stored on external servers. Full privacy guaranteed by design.</p>
+      </div>
+      <div class="lx-trust-card">
+        <div class="lx-trust-card-ico">✅</div>
+        <div class="lx-trust-card-ttl" style="color:#c9a96e;">Free to Start</div>
+        <p class="lx-trust-card-txt">Take your first AI skin scan completely free. No credit card. No commitment. Just results in seconds.</p>
+      </div>
+      <div class="lx-trust-card">
+        <div class="lx-trust-card-ico">💬</div>
+        <div class="lx-trust-card-ttl">AI Expert Always On</div>
+        <p class="lx-trust-card-txt">24/7 AI Doctor and K-Beauty consultant. Ask anything about your skin — get real answers instantly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# SECTION 11 — AI DOCTOR CTA CARD #}
+<section class="lx-sec" style="background:var(--surface);padding:4rem 1.5rem;">
+  <div class="lx-inner">
+    <div style="background:linear-gradient(135deg,#0a0a0f 0%,#0d1a2e 100%);border-radius:28px;padding:3rem 2.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;border:1px solid rgba(13,148,136,.2);">
+      <div style="flex:1;min-width:240px;">
+        <span class="lx-eyebrow">Have Questions?</span>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,3.5vw,2.3rem);font-weight:700;color:#fff;line-height:1.15;margin-bottom:.75rem;">
+          Our AI Doctor is just <em style="color:#0d9488;">one click away.</em>
+        </h2>
+        <p style="font-size:.88rem;color:rgba(255,255,255,.42);line-height:1.7;margin-bottom:1.5rem;max-width:400px;">
+          Ask anything about your acne, dryness, pigmentation, or product questions. Available 24/7 — no appointments, no waiting rooms.
+        </p>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+          <a href="{% url 'chat:create' %}?mode=doctor" class="lx-btn lx-btn-teal">
+            <i class="bi bi-heart-pulse-fill"></i> Chat with AI Doctor
+          </a>
+          <a href="{% url 'chat:create' %}?mode=kbeauty" class="lx-btn lx-btn-ghost" style="border-color:rgba(255,255,255,.22);">
+            <i class="bi bi-flower1"></i> K-Beauty Advisor
+          </a>
+        </div>
+      </div>
+      <div style="flex-shrink:0;width:130px;height:130px;border-radius:50%;background:rgba(13,148,136,.12);border:2px solid rgba(13,148,136,.3);display:flex;align-items:center;justify-content:center;font-size:3.75rem;">
+        🩺
+      </div>
+    </div>
+  </div>
+</section>
+
+{# SECTION 12 — PRODUCT CATEGORIES #}
+<section class="lx-sec" style="background:var(--page-bg);padding:4rem 1.5rem;">
+  <div class="lx-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+      <div>
+        <span class="lx-eyebrow">Products</span>
+        <h2 class="lx-h2" style="margin-bottom:0;">Skin essentials, <em>matched for you</em></h2>
+      </div>
+      <a href="{% url 'products:list' %}" class="lx-btn lx-btn-teal" style="padding:.65rem 1.4rem;font-size:.85rem;">
+        View All <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
+      <a href="{% url 'products:list' %}?product_range=korean" style="text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <span style="font-size:2.4rem;">🌸</span>
+        <div style="font-size:.88rem;font-weight:700;color:var(--text);">K-Beauty</div>
+        <div style="font-size:.7rem;color:var(--muted);">{{ korean_count|default:"50" }}+ curated products</div>
+      </a>
+      <a href="{% url 'products:list' %}?product_range=makeup" style="text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <span style="font-size:2.4rem;">💄</span>
+        <div style="font-size:.88rem;font-weight:700;color:var(--text);">Makeup</div>
+        <div style="font-size:.7rem;color:var(--muted);">{{ makeup_count|default:"40" }}+ shade-matched</div>
+      </a>
+      <a href="{% url 'products:list' %}?product_range=ayurvedic" style="text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <span style="font-size:2.4rem;">🌿</span>
+        <div style="font-size:.88rem;font-weight:700;color:var(--text);">Ayurvedic</div>
+        <div style="font-size:.7rem;color:var(--muted);">Holistic skin wellness</div>
+      </a>
+      <a href="{% url 'products:list' %}?product_range=pharmacy" style="text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(0,0,0,.1)'" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <span style="font-size:2.4rem;">💊</span>
+        <div style="font-size:.88rem;font-weight:700;color:var(--text);">Pharmacy</div>
+        <div style="font-size:.7rem;color:var(--muted);">Clinically formulated</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+{# SECTION 13 — FINAL CTA #}
+<section class="lx-cta-sec">
+  <div class="lx-inner lx-center">
+    <span class="lx-eyebrow" style="color:#5eead4;">Start Today — It's Free</span>
+    <h2 class="lx-cta-h2">
+      Science-led skin care.<br><em>Know the root cause</em> of your skin.
+    </h2>
+    <p class="lx-cta-p">
+      Join thousands who have already discovered their skin profile with Lumina's AI — no account required to start.
+    </p>
+    <div class="lx-cta-btns">
+      <a href="{% url 'scanner:upload' %}" class="lx-btn lx-btn-teal" style="font-size:1rem;padding:1rem 2.4rem;">
+        <i class="bi bi-camera-fill"></i> Take the Skin Test™
+      </a>
+      <a href="{% url 'accounts:signup' %}" class="lx-btn lx-btn-ghost">
+        <i class="bi bi-person-plus"></i> Create Free Account
+      </a>
+    </div>
+    <p style="font-size:.73rem;color:rgba(255,255,255,.22);margin-top:1.5rem;position:relative;">
+      No credit card &nbsp;·&nbsp; No makeup needed &nbsp;·&nbsp; Results in 30 seconds
+    </p>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+/* ── Counter animation (IntersectionObserver) ── */
+(function() {
+  var counters = document.querySelectorAll('[data-count]');
+  if (!counters.length) return;
+
+  function animateCounter(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    var duration = 1800;
+    var step = Math.ceil(target / (duration / 16));
+    var current = 0;
+    var t = setInterval(function() {
+      current = Math.min(current + step, target);
+      el.textContent = current.toLocaleString();
+      if (current >= target) {
+        var suffix = target >= 5000 ? '+' : target === 30 ? 's' : '';
+        el.textContent = target.toLocaleString() + suffix;
+        clearInterval(t);
+      }
+    }, 16);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          animateCounter(e.target);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(function(c) { io.observe(c); });
+  } else {
+    counters.forEach(function(c) { animateCounter(c); });
+  }
+})();
+
+/* ── Testimonial slider dots ── */
+(function() {
+  var slider = document.getElementById('testSlider');
+  var dots   = document.querySelectorAll('#testDots button');
+  if (!slider || !dots.length) return;
+
+  function setActive(idx) {
+    dots.forEach(function(d, i) {
+      d.style.background = i === idx ? '#0d9488' : 'var(--border)';
+      d.style.width      = i === idx ? '24px' : '8px';
+    });
+  }
+
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      var i = parseInt(dot.getAttribute('data-i'), 10);
+      var cards = slider.querySelectorAll('.lx-test-card');
+      if (cards[i]) slider.scrollTo({ left: cards[i].offsetLeft - 16, behavior: 'smooth' });
+      setActive(i);
+    });
+  });
+
+  slider.addEventListener('scroll', function() {
+    var cards = slider.querySelectorAll('.lx-test-card');
+    var closest = 0, minDist = Infinity;
+    var sliderLeft = slider.getBoundingClientRect().left;
+    cards.forEach(function(c, i) {
+      var dist = Math.abs(c.getBoundingClientRect().left - sliderLeft);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    setActive(closest);
+  }, { passive: true });
+
+  /* Auto-advance every 4.5s */
+  var autoIdx = 0;
+  setInterval(function() {
+    var cards = slider.querySelectorAll('.lx-test-card');
+    autoIdx = (autoIdx + 1) % cards.length;
+    slider.scrollTo({ left: cards[autoIdx].offsetLeft - 16, behavior: 'smooth' });
+    setActive(autoIdx);
+  }, 4500);
+})();
+
+/* ── Init AOS if available ── */
+try {
+  if (typeof AOS !== 'undefined') {
+    AOS.init({ duration: 650, easing: 'ease-out-cubic', once: true, offset: 60 });
+  }
+} catch(e) {}
+</script>
 {% endblock %}

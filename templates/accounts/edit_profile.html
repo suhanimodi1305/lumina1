@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Profile — Lumina{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+.prof-wrap{max-width:720px;margin:0 auto;padding-bottom:3rem;}
+.prof-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:1.25rem;}
+.prof-section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;}
+.prof-avatar-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:2rem;}
+.prof-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#0891b2);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:#fff;flex-shrink:0;}
+.prof-avatar-info strong{display:block;font-size:.95rem;font-weight:700;color:var(--text);}
+.prof-avatar-info span{font-size:.76rem;color:var(--muted);}
+.form-label{font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:.35rem;}
+.form-control,.form-select{font-size:.84rem;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:.55rem .85rem;}
+.form-control:focus,.form-select:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12);outline:none;}
+[data-theme="dark"] .form-control,[data-theme="dark"] .form-select{background:#1a1a28;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.9);}
+.btn-save{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.5rem;background:#0d9488;color:#fff;border:none;border-radius:100px;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .13s;}
+.btn-save:hover{background:#0f766e;}
+.btn-cancel{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.25rem;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:100px;font-size:.84rem;font-weight:600;text-decoration:none;transition:all .13s;}
+.btn-cancel:hover{background:var(--page-bg);color:var(--text);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prof-wrap">
+
+  {# breadcrumb #}
+  <div style="display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--muted);margin-bottom:1.25rem;">
+    <a href="{% url 'user_home' %}" style="color:var(--muted);text-decoration:none;">My Hub</a>
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    <span style="color:var(--text);">Edit Profile</span>
+  </div>
+
+  {# avatar row #}
+  <div class="prof-card">
+    <div class="prof-avatar-row">
+      <div class="prof-avatar">{{ user.username|first|upper }}</div>
+      <div class="prof-avatar-info">
+        <strong>{{ user.get_full_name|default:user.username }}</strong>
+        <span>{{ user.email }}</span><br>
+        <span style="font-size:.68rem;color:var(--muted);">Member since {{ user.date_joined|date:"F Y" }}</span>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="prof-section-title"><i class="bi bi-person"></i> Personal Information</div>
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6">
+          <label class="form-label">First Name</label>
+          {{ form.first_name }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Last Name</label>
+          {{ form.last_name }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Email Address</label>
+          {{ form.email }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Phone Number</label>
+          {{ form.phone }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Bio</label>
+          {{ form.bio }}
+        </div>
+      </div>
+
+      <div class="prof-section-title"><i class="bi bi-stars"></i> Skin Profile</div>
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6">
+          <label class="form-label">Age Group</label>
+          {{ form.age_group }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Primary Skin Goal</label>
+          {{ form.skin_goal }}
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <button type="submit" class="btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+        <a href="{% url 'user_home' %}" class="btn-cancel"><i class="bi bi-x"></i> Cancel</a>
+        <a href="{% url 'accounts:password_reset' %}" class="btn-cancel" style="margin-left:auto;">
+          <i class="bi bi-lock"></i> Change Password
+        </a>
+      </div>
+    </form>
+  </div>
+
+  {# danger zone #}
+  <div class="prof-card" style="border-color:rgba(239,68,68,.2);">
+    <div class="prof-section-title" style="color:#ef4444;"><i class="bi bi-exclamation-triangle"></i> Account</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;">Need to change your password or have questions? Use the links below.</p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="{% url 'accounts:password_reset' %}" style="font-size:.8rem;color:#0d9488;text-decoration:none;font-weight:600;">
+        <i class="bi bi-shield-lock"></i> Reset Password
+      </a>
+      <a href="{% url 'accounts:login_history' %}" style="font-size:.8rem;color:var(--muted);text-decoration:none;font-weight:600;">
+        <i class="bi bi-clock-history"></i> View Login History
+      </a>
+      <a href="{% url 'accounts:devices' %}" style="font-size:.8rem;color:var(--muted);text-decoration:none;font-weight:600;">
+        <i class="bi bi-phone"></i> Manage Devices
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

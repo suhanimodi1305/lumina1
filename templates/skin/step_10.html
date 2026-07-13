@@ -1,0 +1,82 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">What's your <em>current skincare</em>?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=10 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Which products do you currently use? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in routine_items %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="routine_items" value="{{ o.value }}"
+               {% if o.checked %}checked{% endif %}>
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);">Select nothing if you don't have a routine yet — we'll build one from scratch!</p>
+  </div>
+
+  
+  <div class="ac-section-divider"><i class="bi bi-currency-rupee"></i> Budget</div>
+  <div class="ac-field">
+    <label class="ac-label">What's your budget per skincare product?</label>
+    <div class="ac-options">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="budget" value="low" required>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">💚</div>
+          <div class="ac-opt-label">Under ₹500</div>
+          <div class="ac-opt-desc">Drugstore / Pharmacy</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="budget" value="mid1">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">💛</div>
+          <div class="ac-opt-label">₹500 – ₹1,000</div>
+          <div class="ac-opt-desc">Mid-range brands</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="budget" value="mid2">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🧡</div>
+          <div class="ac-opt-label">₹1,000 – ₹2,500</div>
+          <div class="ac-opt-desc">Quality K-Beauty / clinical</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="budget" value="high">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">💎</div>
+          <div class="ac-opt-label">₹2,500+</div>
+          <div class="ac-opt-desc">Premium / Luxury</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=9 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

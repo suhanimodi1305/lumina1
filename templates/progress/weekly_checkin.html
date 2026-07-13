@@ -1,0 +1,170 @@
+﻿{% extends "base.html" %}
+{% block title %}Week {{ week_number }} Check-in — Lumina{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:680px;">
+
+  <a href="{% url 'progress:progress_home' %}" class="btn btn-sm btn-outline-secondary mb-4">← Back</a>
+
+  <h4 class="fw-bold mb-1">📋 Week {{ week_number }} Check-in</h4>
+  <p class="text-muted small mb-4">{{ week_start|date:"d M Y" }}</p>
+
+  {% if existing %}
+    <div class="alert alert-success border-0" style="border-radius:12px;">
+      <strong>✅ Already submitted!</strong> You completed this week's check-in.
+      <a href="{% url 'progress:progress_home' %}" class="btn btn-sm btn-success ms-2">View Progress</a>
+    </div>
+  {% else %}
+  <form method="post">
+    {% csrf_token %}
+
+    
+    <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+      <h6 class="fw-bold mb-3">Rate Your Skin This Week (1 = Poor, 5 = Excellent)</h6>
+
+      {% for field_name, label, emoji in checkin_fields %}
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">{{ emoji }} {{ label }}</label>
+        <div class="d-flex gap-2">
+          {% for i in "12345" %}
+          <div>
+            <input type="radio" class="btn-check" name="{{ field_name }}"
+                   id="{{ field_name }}_{{ forloop.counter }}" value="{{ forloop.counter }}"
+                   {% if forloop.counter == 3 %}checked{% endif %}>
+            <label class="btn btn-outline-secondary btn-sm" for="{{ field_name }}_{{ forloop.counter }}">
+              {{ forloop.counter }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% empty %}
+      
+      {% for row in "1234" %}
+      {% endfor %}
+      {% endfor %}
+
+      
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">🌟 Overall Skin</label>
+        <div class="d-flex gap-2">
+          {% for i in "12345" %}
+          <div>
+            <input type="radio" class="btn-check" name="overall_rating"
+                   id="overall_{{ forloop.counter }}" value="{{ forloop.counter }}"
+                   {% if forloop.counter == 3 %}checked{% endif %}>
+            <label class="btn btn-outline-secondary btn-sm" for="overall_{{ forloop.counter }}">
+              {{ forloop.counter }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">💧 Hydration</label>
+        <div class="d-flex gap-2">
+          {% for i in "12345" %}
+          <div>
+            <input type="radio" class="btn-check" name="hydration_rating"
+                   id="hydration_{{ forloop.counter }}" value="{{ forloop.counter }}"
+                   {% if forloop.counter == 3 %}checked{% endif %}>
+            <label class="btn btn-outline-secondary btn-sm" for="hydration_{{ forloop.counter }}">
+              {{ forloop.counter }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">🔴 Acne (5 = no acne)</label>
+        <div class="d-flex gap-2">
+          {% for i in "12345" %}
+          <div>
+            <input type="radio" class="btn-check" name="acne_rating"
+                   id="acne_{{ forloop.counter }}" value="{{ forloop.counter }}"
+                   {% if forloop.counter == 4 %}checked{% endif %}>
+            <label class="btn btn-outline-secondary btn-sm" for="acne_{{ forloop.counter }}">
+              {{ forloop.counter }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">✨ Brightness / Glow</label>
+        <div class="d-flex gap-2">
+          {% for i in "12345" %}
+          <div>
+            <input type="radio" class="btn-check" name="brightness_rating"
+                   id="brightness_{{ forloop.counter }}" value="{{ forloop.counter }}"
+                   {% if forloop.counter == 3 %}checked{% endif %}>
+            <label class="btn btn-outline-secondary btn-sm" for="brightness_{{ forloop.counter }}">
+              {{ forloop.counter }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    
+    <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+      <h6 class="fw-bold mb-3">Any New Concerns?</h6>
+      <textarea name="new_concerns" class="form-control mb-3" rows="2"
+                placeholder="e.g. Noticed some new dry patches this week…"></textarea>
+
+      <label class="form-label small fw-semibold">Additional Notes</label>
+      <textarea name="notes" class="form-control" rows="3"
+                placeholder="How has your skin been overall? Any products that worked well?"></textarea>
+
+      <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" name="has_selfie" id="has_selfie">
+        <label class="form-check-label small" for="has_selfie">
+          📸 I took a comparison selfie this week
+        </label>
+      </div>
+    </div>
+
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary btn-lg" style="border-radius:12px;">
+        Submit Week {{ week_number }} Check-in (+25 pts)
+      </button>
+    </div>
+  </form>
+  {% endif %}
+
+  
+  {% if history %}
+  <div class="card border-0 shadow-sm mt-4 p-4" style="border-radius:16px;">
+    <h6 class="fw-bold mb-3">Previous Check-ins</h6>
+    <div class="table-responsive">
+      <table class="table table-sm small table-borderless">
+        <thead class="text-muted">
+          <tr><th>Week</th><th>Overall</th><th>Hydration</th><th>Glow</th><th>Delta</th></tr>
+        </thead>
+        <tbody>
+          {% for c in history %}
+          <tr>
+            <td>W{{ c.week_number }}</td>
+            <td>{{ c.overall_rating }}/5</td>
+            <td>{{ c.hydration_rating }}/5</td>
+            <td>{{ c.brightness_rating }}/5</td>
+            <td>
+              {% if c.overall_delta > 0 %}<span class="text-success">↑+{{ c.overall_delta }}</span>
+              {% elif c.overall_delta < 0 %}<span class="text-danger">↓{{ c.overall_delta }}</span>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

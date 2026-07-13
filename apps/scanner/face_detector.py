@@ -34,13 +34,22 @@ def detect_face(image_path):
         cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
         face_cascade = cv2.CascadeClassifier(cascade_path)
         
-        # Step 4: Detect faces
+        # Step 4: Detect faces — use multiple scale factors for better detection
         faces = face_cascade.detectMultiScale(
             gray,
-            scaleFactor=1.1,
-            minNeighbors=5,
-            minSize=(80, 80)
+            scaleFactor=1.05,
+            minNeighbors=4,
+            minSize=(60, 60)
         )
+        
+        # If nothing found, retry with more lenient settings
+        if len(faces) == 0:
+            faces = face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=3,
+                minSize=(40, 40)
+            )
         
         # Step 5: Check if face detected
         if len(faces) == 0:
@@ -73,13 +82,13 @@ def detect_face(image_path):
         img_w = img.shape[1]
         img_h = img.shape[0]
         
-        if (face_center_x < img_w * 0.2 or face_center_x > img_w * 0.8 or 
-            face_center_y < img_h * 0.2 or face_center_y > img_h * 0.8):
+        if (face_center_x < img_w * 0.12 or face_center_x > img_w * 0.88 or 
+            face_center_y < img_h * 0.08 or face_center_y > img_h * 0.92):
             return {
                 'detected': False,
                 'confidence': confidence,
                 'face_rect': (x, y, w, h),
-                'message': 'Face detected but not centered. Please position your face in the middle of the frame.'
+                'message': 'Face detected but too close to the edge. Please position your face in the centre of the frame.'
             }
         
         # Step 9: Check if face is too small (FIXED: changed 15 to 8)

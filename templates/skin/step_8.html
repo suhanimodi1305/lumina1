@@ -1,0 +1,122 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Tell us about your <em>lifestyle</em></h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=8 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">How many hours do you sleep per night?</label>
+    <div class="ac-options col-3">
+      {% for o in sleep_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sleep_hours" value="{{ o.value }}"
+               {% if sess.sleep_hours == o.value %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ o.icon }}</div>
+          <div class="ac-opt-label">{{ o.label }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">What is your daily stress level?</label>
+    <div class="ac-options col-3">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="stress_level" value="low"
+               {% if sess.stress_level == 'low' %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">😌</div>
+          <div class="ac-opt-label">Low</div>
+          <div class="ac-opt-desc">Calm & relaxed</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="stress_level" value="medium"
+               {% if sess.stress_level == 'medium' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">😐</div>
+          <div class="ac-opt-label">Medium</div>
+          <div class="ac-opt-desc">Manageable pressure</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="stress_level" value="high"
+               {% if sess.stress_level == 'high' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">😰</div>
+          <div class="ac-opt-label">High</div>
+          <div class="ac-opt-desc">Often stressed or anxious</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">How often do you exercise?</label>
+    <div class="ac-options">
+      {% for o in exercise_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="exercise" value="{{ o.value }}"
+               {% if sess.exercise == o.value %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ o.icon }}</div>
+          <div class="ac-opt-label">{{ o.label }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-section-divider"><i class="bi bi-slash-circle"></i> Habits</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.75rem;">
+    <div>
+      <label class="ac-label" style="margin-bottom:.6rem;">Do you smoke?</label>
+      <div class="ac-pills" style="flex-direction:column;gap:.4rem;">
+        <label class="ac-pill-wrap" style="width:100%;">
+          <input type="radio" name="smoking" value="no" {% if not sess.smoking %}checked{% endif %} required>
+          <div class="ac-pill" style="width:100%;justify-content:center;">🚭 No</div>
+        </label>
+        <label class="ac-pill-wrap" style="width:100%;">
+          <input type="radio" name="smoking" value="yes" {% if sess.smoking %}checked{% endif %}>
+          <div class="ac-pill" style="width:100%;justify-content:center;">🚬 Yes</div>
+        </label>
+      </div>
+    </div>
+    <div>
+      <label class="ac-label" style="margin-bottom:.6rem;">Alcohol consumption?</label>
+      <div class="ac-pills" style="flex-direction:column;gap:.4rem;">
+        {% for o in alcohol_options %}
+        <label class="ac-pill-wrap" style="width:100%;">
+          <input type="radio" name="alcohol" value="{{ o.value }}"
+                 {% if sess.alcohol == o.value %}checked{% endif %} required>
+          <div class="ac-pill" style="width:100%;justify-content:center;">{{ o.icon }} {{ o.label }}</div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=7 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

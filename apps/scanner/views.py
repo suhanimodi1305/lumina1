@@ -194,7 +194,7 @@ def upload(request):
             
             logger.info(f"Demo scan created: ID={scan.id}, Profile={profile_key}")
             
-            # Redirect to results
+            # Skip questionnaire — go straight to results
             return redirect('results:detail', scan_id=scan.id)
         
         # Normal GET - show upload page
@@ -467,8 +467,8 @@ def upload(request):
             logger.info(f"Scan completed successfully: ID={scan.id}")
             messages.success(request, 'Your skin analysis is complete!')
             
-            # Redirect to results page (POST-redirect-GET — prevents refresh re-submit)
-            return redirect('results:detail', scan_id=scan.id)
+            # Scan done → go straight to Smart AI Quiz
+            return redirect('diagnostic:smart_start')
             
         except Exception as e:
             # Log the full error
@@ -489,3 +489,131 @@ def upload(request):
                 'initial_state': 'no-face',
                 'no_face_message': error_msg,
             })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST-SCAN QUESTIONNAIRE VIEW
+# ─────────────────────────────────────────────────────────────────────────────
+
+def questionnaire(request, scan_id):
+    """
+    After the scan completes, show a short questionnaire to improve accuracy.
+    The user answers lifestyle / age / concern questions, we patch the ScanResult,
+    then redirect to results.
+    """
+    scan = get_object_or_404(ScanResult, id=scan_id)
+
+    # Ownership check — must be the session owner or the logged-in user
+    is_owner = (
+        (request.user.is_authenticated and scan.user == request.user)
+        or scan.session_key == request.session.session_key
+    )
+    if not is_owner:
+        from django.contrib import messages as _msg
+        _msg.warning(request, "This scan doesn't belong to your session.")
+        return redirect('scanner:upload')
+
+    # If already completed, skip straight to results
+    if scan.qa_completed:
+        return redirect('results:detail', scan_id=scan.id)
+
+    if request.method == 'POST':
+        # Handle skip
+        if request.POST.get('skip') == '1':
+            scan.qa_completed = True
+            scan.save(update_fields=['qa_completed'])
+            # Skip → go straight to results
+            return redirect('results:detail', scan_id=scan.id)
+
+        # Parse answers
+        try:
+            age = int(request.POST.get('age', 0))
+            if 10 <= age <= 100:
+                scan.real_age = age
+                scan.qa_age   = age
+                # Recalculate skin_age from aging_score + real_age context
+                scan.skin_age = age + max(0, (scan.aging_score - 30) // 5)
+        except (ValueError, TypeError):
+            pass
+
+        scan.qa_water_intake  = request.POST.get('water_intake', '')[:20]
+        scan.qa_sleep_hours   = request.POST.get('sleep_hours', '')[:20]
+        scan.qa_stress_level  = request.POST.get('stress_level', '')[:20]
+        scan.qa_diet          = request.POST.get('diet', '')[:20]
+        scan.qa_outdoor_hours = request.POST.get('outdoor_hours', '')[:20]
+        scan.qa_completed     = True
+
+        # User-selected additional concerns
+        user_concerns = request.POST.getlist('extra_concerns')
+        if user_concerns:
+            scan.qa_skin_concerns = user_concerns[:10]
+            # Also add them to detected_concerns M2M
+            from apps.products.models import SkinConcern
+            for slug in user_concerns:
+                try:
+                    concern = SkinConcern.objects.get(slug=slug)
+                    scan.detected_concerns.add(concern)
+                except SkinConcern.DoesNotExist:
+                    pass
+
+        # Adjust scores based on lifestyle answers
+        _apply_lifestyle_adjustments(scan)
+
+        scan.save()
+        logger.info(f"Questionnaire completed for scan {scan_id}")
+        # After questionnaire → go to Smart AI Quiz for deeper analysis
+        return redirect('diagnostic:smart_start')
+
+    # GET — build concern choices list
+    from apps.products.models import SkinConcern
+    all_concerns = SkinConcern.objects.all().order_by('name')
+    # Exclude concerns already detected by AI scan
+    detected_slugs = set(scan.detected_concerns.values_list('slug', flat=True))
+    concern_choices = [
+        (c.slug, c.name)
+        for c in all_concerns
+        if c.slug not in detected_slugs
+    ]
+
+    return render(request, 'scanner/questionnaire.html', {
+        'scan':            scan,
+        'scan_id':         scan_id,
+        'concern_choices': concern_choices,
+    })
+
+
+def _apply_lifestyle_adjustments(scan):
+    """
+    Nudge scan scores based on questionnaire answers for higher accuracy.
+    All adjustments are clamped to [0, 100].
+    """
+    def clamp(val, lo=0, hi=100):
+        return max(lo, min(hi, val))
+
+    # Water intake → hydration
+    water_map = {'low': -8, 'moderate': 0, 'high': +6}
+    scan.hydration_score = clamp(scan.hydration_score + water_map.get(scan.qa_water_intake, 0))
+
+    # Sleep → elasticity + harmony
+    sleep_map = {'<6': -10, '6-8': 0, '>8': +5}
+    delta_sleep = sleep_map.get(scan.qa_sleep_hours, 0)
+    scan.elasticity_score = clamp(scan.elasticity_score + delta_sleep)
+    scan.harmony_score    = clamp(scan.harmony_score    + delta_sleep // 2)
+
+    # Stress → acne + aging
+    stress_map = {'low': -5, 'moderate': 0, 'high': +10}
+    delta_stress = stress_map.get(scan.qa_stress_level, 0)
+    scan.acne_score  = clamp(scan.acne_score  + delta_stress)
+    scan.aging_score = clamp(scan.aging_score + delta_stress // 2)
+
+    # Diet → pigmentation + acne
+    diet_map = {'balanced': -5, 'oily': +8, 'sugary': +10}
+    delta_diet = diet_map.get(scan.qa_diet, 0)
+    scan.acne_score         = clamp(scan.acne_score         + delta_diet)
+    scan.pigmentation_score = clamp(scan.pigmentation_score + delta_diet // 2)
+
+    # Outdoor exposure → pigmentation
+    outdoor_map = {'low': 0, 'moderate': +5, 'high': +12}
+    scan.pigmentation_score = clamp(
+        scan.pigmentation_score + outdoor_map.get(scan.qa_outdoor_hours, 0)
+    )

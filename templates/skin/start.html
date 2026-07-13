@@ -1,0 +1,179 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Face Scan — Lumina{% endblock %}
+{% block page_title %}Face Scan{% endblock %}
+
+{% block extra_css %}
+<style>
+.sk-landing { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+/* ── Hero ── */
+.sk-hero {
+  background: linear-gradient(135deg, #050810 0%, #0a1a1a 55%, #050c10 100%);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+  border: 1px solid rgba(13,148,136,.2);
+}
+.sk-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 65% 55% at 50% 30%, rgba(13,148,136,.2) 0%, transparent 65%);
+  pointer-events: none;
+}
+.sk-hero-tag {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #5eead4; background: rgba(13,148,136,.15); border: 1px solid rgba(13,148,136,.3);
+  padding: .3rem .85rem; border-radius: 100px; margin-bottom: 1rem;
+  position: relative; z-index: 1;
+}
+.sk-hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.9rem, 5vw, 2.75rem);
+  font-weight: 700; color: #fff; line-height: 1.15;
+  margin-bottom: .6rem; letter-spacing: -.01em;
+  position: relative; z-index: 1;
+}
+.sk-hero h1 em { color: #5eead4; font-style: normal; }
+.sk-hero-sub {
+  color: rgba(255,255,255,.5); font-size: .9rem; line-height: 1.55;
+  max-width: 440px; margin: 0 auto;
+  position: relative; z-index: 1;
+}
+
+/* ── Options grid ── */
+.sk-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-bottom: 1.5rem; }
+@media (max-width: 500px) { .sk-options { grid-template-columns: 1fr; } }
+
+.sk-option-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 22px;
+  padding: 1.75rem 1.25rem 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+  transition: all .22s ease;
+  cursor: pointer;
+}
+.sk-option-card:hover {
+  transform: translateY(-4px);
+  border-color: #0d9488;
+  box-shadow: 0 12px 36px rgba(13,148,136,.15);
+}
+.sk-option-card.primary {
+  background: linear-gradient(135deg, rgba(13,148,136,.1), rgba(8,145,178,.07));
+  border-color: rgba(13,148,136,.4);
+}
+.sk-option-card.primary:hover { border-color: #0d9488; }
+
+.sk-opt-icon {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: rgba(13,148,136,.12); border: 1.5px solid rgba(13,148,136,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.9rem; margin-bottom: .25rem;
+}
+.sk-opt-badge {
+  font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+  color: #c9a96e; background: rgba(201,169,110,.12); border: 1px solid rgba(201,169,110,.25);
+  padding: .15rem .6rem; border-radius: 100px;
+}
+.sk-opt-title {
+  font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.2;
+}
+.sk-opt-desc {
+  font-size: .78rem; color: var(--muted); line-height: 1.45;
+}
+.sk-opt-time {
+  font-size: .68rem; color: var(--muted); display: flex; align-items: center; gap: .3rem;
+  background: var(--surface-alt, rgba(0,0,0,.04));
+  padding: .25rem .7rem; border-radius: 100px; border: 1px solid var(--border);
+}
+
+/* ── Feature pills ── */
+.sk-features {
+  display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.sk-feat {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .72rem; font-weight: 600; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border);
+  padding: .3rem .8rem; border-radius: 100px;
+}
+
+/* ── Disclaimer ── */
+.sk-disclaimer {
+  font-size: .7rem; color: var(--muted); text-align: center;
+  line-height: 1.6; padding-top: 1rem; border-top: 1px solid var(--border);
+}
+
+/* dark mode tweaks */
+[data-theme="dark"] .sk-opt-time { background: rgba(255,255,255,.04); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sk-landing">
+
+  
+  <div class="sk-hero">
+    <div class="sk-hero-tag"><i class="bi bi-stars"></i> AI-Powered Analysis</div>
+    <h1>Know Your <em>Skin</em>,<br>Inside Out</h1>
+    <p class="sk-hero-sub">
+      Get a personalised skin type report, ingredient recommendations, and a daily routine
+      built just for you — in minutes.
+    </p>
+  </div>
+
+  
+  <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;margin-bottom:1rem;">
+    Choose how to start
+  </p>
+
+  <div class="sk-options">
+
+    
+    <a href="{% url 'scanner:upload' %}" class="sk-option-card primary">
+      <span class="sk-opt-badge">✨ Recommended</span>
+      <div class="sk-opt-icon">📸</div>
+      <div class="sk-opt-title">Face Scan</div>
+      <div class="sk-opt-desc">
+        Upload or take a selfie. Our AI reads your skin's texture, tone, and concerns instantly.
+      </div>
+      <div class="sk-opt-time"><i class="bi bi-clock"></i> ~30 seconds</div>
+    </a>
+
+    
+    <a href="{% url 'skin:begin' %}" class="sk-option-card">
+      <div class="sk-opt-icon">📋</div>
+      <div class="sk-opt-title">Skin Quiz</div>
+      <div class="sk-opt-desc">
+        Answer 12 steps of targeted questions for a deep, personalised skin profile.
+      </div>
+      <div class="sk-opt-time"><i class="bi bi-clock"></i> ~5 minutes</div>
+    </a>
+
+  </div>
+
+  
+  <div class="sk-features">
+    <span class="sk-feat"><i class="bi bi-shield-check"></i> Private & Secure</span>
+    <span class="sk-feat"><i class="bi bi-cpu"></i> GPT-4o Vision</span>
+    <span class="sk-feat"><i class="bi bi-palette2"></i> Personalized Routine</span>
+    <span class="sk-feat"><i class="bi bi-heart"></i> Dermatologist-Backed Logic</span>
+  </div>
+
+  
+  <div class="sk-disclaimer">
+    <i class="bi bi-shield-check"></i>
+    For <strong>informational purposes only</strong> — not a medical diagnosis.
+    Consult a dermatologist for medical skin conditions.
+  </div>
+
+</div>
+{% endblock %}

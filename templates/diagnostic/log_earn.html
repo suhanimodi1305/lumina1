@@ -1,0 +1,392 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Log & Earn — Lumina{% endblock %}
+{% block page_title %}Log &amp; Earn{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── HABIT GRID ── */
+.habit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.habit-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg, 16px);
+  padding: 1.1rem .9rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s ease;
+  position: relative;
+  user-select: none;
+}
+.habit-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+.habit-card.logged {
+  background: rgba(13,148,136,.08);
+  border-color: var(--lux-teal, #0d9488);
+  opacity: .75;
+  cursor: default;
+}
+.habit-card.logging { opacity: .6; pointer-events: none; }
+.habit-card .habit-icon  { font-size: 2rem; display: block; margin-bottom: .4rem; }
+.habit-card .habit-title { font-size: .82rem; font-weight: 600; color: var(--text); display: block; margin-bottom: .25rem; }
+.habit-card .habit-pts   { font-size: .72rem; color: var(--lux-teal, #0d9488); font-weight: 700; }
+.habit-card .logged-badge {
+  position: absolute; top: .45rem; right: .5rem;
+  font-size: .65rem; background: var(--lux-teal, #0d9488); color: #fff;
+  padding: .1rem .4rem; border-radius: 100px; font-weight: 700;
+}
+
+/* ── STATS ROW ── */
+.earn-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.earn-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg, 16px);
+  padding: 1rem;
+  text-align: center;
+}
+.earn-stat-card .stat-val { font-size: 1.6rem; font-weight: 700; color: var(--text); display: block; }
+.earn-stat-card .stat-lbl { font-size: .72rem; color: var(--text-muted, #64748b); }
+
+/* ── RING CHART ── */
+.ring-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.ring-svg circle.track  { fill: none; stroke: var(--border); stroke-width: 18; }
+.ring-svg circle.fill   { fill: none; stroke: var(--lux-teal, #0d9488); stroke-width: 18;
+                           stroke-linecap: round; stroke-dasharray: 283;
+                           transition: stroke-dashoffset .6s ease; transform: rotate(-90deg);
+                           transform-origin: 50% 50%; }
+
+/* ── TIER PROGRESS BAR ── */
+.tier-progress-bar {
+  height: 8px; background: var(--border); border-radius: 100px; overflow: hidden; margin: .5rem 0;
+}
+.tier-progress-fill {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, var(--lux-teal, #0d9488), #a78bfa);
+  transition: width .6s ease;
+}
+
+/* ── LEADERBOARD ── */
+.leaderboard-row {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .6rem 0; border-bottom: 1px solid var(--border);
+}
+.leaderboard-row:last-child { border-bottom: none; }
+.lb-rank {
+  width: 28px; text-align: center; font-weight: 700; font-size: .85rem;
+  color: var(--text-muted, #64748b);
+}
+.lb-rank.top3 { color: var(--lux-gold, #c9a96e); }
+.lb-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--lux-teal, #0d9488), #a78bfa);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.lb-name  { flex: 1; font-size: .85rem; font-weight: 600; color: var(--text); }
+.lb-pts   { font-size: .8rem; font-weight: 700; color: var(--lux-teal, #0d9488); }
+
+/* ── TOAST ── */
+#earnToast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(30px);
+  background: #0d9488; color: #fff; padding: .65rem 1.25rem; border-radius: 100px;
+  font-size: .88rem; font-weight: 600; opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s; z-index: 9999; white-space: nowrap;
+}
+#earnToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── LOG HISTORY ── */
+.log-history-item {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem 0; border-bottom: 1px solid var(--border);
+  font-size: .83rem;
+}
+.log-history-item:last-child { border-bottom: none; }
+.log-habit-icon { font-size: 1.2rem; }
+.log-pts-badge {
+  margin-left: auto; font-size: .72rem; font-weight: 700;
+  color: var(--lux-teal, #0d9488); white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+  .earn-stats-row { grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .earn-stat-card .stat-val { font-size: 1.2rem; }
+  .habit-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="earnToast"></div>
+
+<div class="page-header" style="margin:-1.5rem -1.75rem 0;padding:2rem 2rem 1.75rem;">
+  <div style="position:relative;z-index:1;">
+    <p style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--lux-teal);margin-bottom:.3rem;">
+      Log &amp; Earn 🏆
+    </p>
+    <h1 style="font-size:clamp(1.3rem,3vw,1.8rem);color:#fff;margin-bottom:.4rem;">
+      Build Your Streak, Earn Points
+    </h1>
+    <p style="color:rgba(255,255,255,.6);font-size:.87rem;">
+      Log a healthy habit every day — earn loyalty points &amp; unlock better tiers.
+    </p>
+  </div>
+</div>
+
+<div class="earn-stats-row" style="margin-top:1.5rem;">
+  <div class="earn-stat-card">
+    <span class="stat-val" id="totalPtsVal">{{ user_points }}</span>
+    <span class="stat-lbl">Total Points</span>
+  </div>
+  <div class="earn-stat-card">
+    <span class="stat-val" style="color:var(--lux-gold);">{{ streak }}🔥</span>
+    <span class="stat-lbl">Day Streak</span>
+  </div>
+  <div class="earn-stat-card">
+    <span class="stat-val" id="todayPtsVal">{{ points_today }}</span>
+    <span class="stat-lbl">Points Today</span>
+  </div>
+</div>
+
+<div class="card-lumina" style="margin-bottom:1.25rem;">
+  <div class="ring-wrap">
+    
+    <svg class="ring-svg" width="90" height="90" viewBox="0 0 100 100">
+      <circle class="track" cx="50" cy="50" r="45"/>
+      <circle class="fill" id="ringFill" cx="50" cy="50" r="45"
+              stroke-dashoffset="{{ ring_offset }}"/>
+    </svg>
+    <div style="flex:1;">
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.2rem;">Daily Goal Progress</div>
+      <div style="font-size:1.35rem;font-weight:700;color:var(--text);" id="dailyPtsDisplay">
+        <span id="dPtsVal">{{ points_today }}</span> / {{ daily_goal }} pts
+      </div>
+      {% if points_today >= daily_goal %}
+      <div style="color:var(--lux-teal);font-size:.8rem;font-weight:600;margin-top:.3rem;">
+        🎉 Daily goal reached!
+      </div>
+      {% else %}
+      <div style="color:var(--text-muted);font-size:.78rem;margin-top:.25rem;">
+        {{ daily_goal }} pts daily goal — keep going!
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  
+  {% if tier_goal %}
+  <div style="border-top:1px solid var(--border);padding-top:.9rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;">
+      <span style="font-size:.8rem;font-weight:600;color:var(--text);">
+        Progress to {{ next_tier }}
+        {% if current_tier == 'normal' %}💜{% else %}👑{% endif %}
+      </span>
+      <span style="font-size:.78rem;color:var(--text-muted);">
+        {{ user_points }} / {{ tier_goal }} pts
+      </span>
+    </div>
+    <div class="tier-progress-bar">
+      <div class="tier-progress-fill" style="width:{{ tier_progress_pct }}%;"></div>
+    </div>
+    <div style="font-size:.72rem;color:var(--text-muted);">{{ tier_progress_pct }}% complete</div>
+  </div>
+  {% else %}
+  <div style="border-top:1px solid var(--border);padding-top:.9rem;text-align:center;">
+    <span style="font-size:.85rem;font-weight:700;color:var(--lux-gold);">👑 VIP — Maximum tier achieved!</span>
+  </div>
+  {% endif %}
+</div>
+
+<h3 style="font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.9rem;">
+  Log a habit today
+  <span style="font-size:.75rem;font-weight:400;color:var(--text-muted);margin-left:.5rem;">
+    ({{ logged_slugs|length }} logged today)
+  </span>
+</h3>
+
+<div class="habit-grid">
+  {% for habit in habits %}
+  <div class="habit-card {% if habit.slug in logged_slugs %}logged{% endif %}"
+       id="hcard-{{ habit.slug }}"
+       {% if habit.slug not in logged_slugs %}onclick="logHabit('{{ habit.slug }}')"{% endif %}>
+    {% if habit.slug in logged_slugs %}
+    <span class="logged-badge">✓ Done</span>
+    {% endif %}
+    <span class="habit-icon">{{ habit.icon }}</span>
+    <span class="habit-title">{{ habit.title }}</span>
+    <span class="habit-pts">+{{ habit.points }} pts</span>
+  </div>
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem 0;">
+    No habits configured yet.
+  </div>
+  {% endfor %}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;">
+
+  
+  <div class="card-lumina" style="margin:0;">
+    <h4 style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.9rem;">
+      Today's Logs
+    </h4>
+    <div id="todayLogsList">
+      {% for log in user_logs_today %}
+      <div class="log-history-item">
+        <span class="log-habit-icon">{{ log.habit.icon }}</span>
+        <span style="color:var(--text);font-weight:500;">{{ log.habit.title }}</span>
+        <span class="log-pts-badge">+{{ log.points_earned }} pts</span>
+      </div>
+      {% empty %}
+      <div style="text-align:center;color:var(--text-muted);padding:1.5rem 0;font-size:.85rem;">
+        Nothing logged yet today.<br>
+        <span style="font-size:1.5rem;">🌅</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="card-lumina" style="margin:0;">
+    <h4 style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.9rem;">
+      🏆 Top Members
+    </h4>
+    {% for profile in leaderboard %}
+    <div class="leaderboard-row">
+      <div class="lb-rank {% if forloop.counter <= 3 %}top3{% endif %}">
+        {% if forloop.counter == 1 %}🥇
+        {% elif forloop.counter == 2 %}🥈
+        {% elif forloop.counter == 3 %}🥉
+        {% else %}{{ forloop.counter }}{% endif %}
+      </div>
+      <div class="lb-avatar">
+        {{ profile.user.username|slice:":1"|upper }}
+      </div>
+      <span class="lb-name">{{ profile.user.username }}</span>
+      <span class="lb-pts">{{ profile.loyalty_points }} pts</span>
+    </div>
+    {% empty %}
+    <div style="text-align:center;color:var(--text-muted);padding:1.5rem 0;font-size:.85rem;">
+      No entries yet.
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+{% if all_logs %}
+<div class="card-lumina">
+  <h4 style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.9rem;">
+    Recent Activity
+  </h4>
+  {% for log in all_logs %}
+  <div class="log-history-item">
+    <span class="log-habit-icon">{{ log.habit.icon }}</span>
+    <div>
+      <div style="font-weight:600;color:var(--text);">{{ log.habit.title }}</div>
+      <div style="font-size:.72rem;color:var(--text-muted);">{{ log.logged_at|date:"d M Y, g:i A" }}</div>
+    </div>
+    <span class="log-pts-badge">+{{ log.points_earned }} pts</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CSRF = '{{ csrf_token }}';
+const LOG_URL = '{% url "diagnostic:log_habit" %}';
+
+async function logHabit(slug) {
+  const card = document.getElementById('hcard-' + slug);
+  if (!card || card.classList.contains('logged') || card.classList.contains('logging')) return;
+
+  card.classList.add('logging');
+
+  try {
+    const resp = await fetch(LOG_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ habit_slug: slug }),
+    });
+    const data = await resp.json();
+
+    if (data.ok) {
+      // Mark card as logged
+      card.classList.remove('logging');
+      card.classList.add('logged');
+      card.onclick = null;
+      card.innerHTML = `
+        <span class="logged-badge">✓ Done</span>
+        ${card.innerHTML}
+      `;
+
+      // Update stats
+      document.getElementById('totalPtsVal').textContent = data.total_points;
+      document.getElementById('todayPtsVal').textContent = data.points_today;
+      document.getElementById('dPtsVal').textContent     = data.points_today;
+
+      // Update SVG ring
+      const daily_goal = {{ daily_goal }};
+      const pct = Math.min(1.0, data.points_today / daily_goal);
+      const offset = Math.round(283 - (283 * pct));
+      const ring = document.getElementById('ringFill');
+      if (ring) ring.setAttribute('stroke-dashoffset', offset);
+
+      // Append to today's log list
+      const list = document.getElementById('todayLogsList');
+      if (list) {
+        const empty = list.querySelector('[style*="Nothing logged"]');
+        if (empty) empty.remove();
+
+        const item = document.createElement('div');
+        item.className = 'log-history-item';
+        item.innerHTML = `
+          <span class="log-habit-icon">${data.message.split(' ')[0]}</span>
+          <span style="color:var(--text);font-weight:500;">${slug.replace(/-/g,' ')}</span>
+          <span class="log-pts-badge">+${data.points_earned} pts</span>
+        `;
+        list.appendChild(item);
+      }
+
+      showToast(data.message);
+
+      if (data.daily_goal_reached) {
+        setTimeout(() => showToast('🎉 Daily goal reached! Keep going!'), 1800);
+      }
+
+    } else {
+      card.classList.remove('logging');
+      showToast(data.message || 'Already logged today!', true);
+    }
+  } catch (e) {
+    card.classList.remove('logging');
+    showToast('Something went wrong. Try again.', true);
+  }
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('earnToast');
+  t.textContent = msg;
+  t.style.background = isError ? '#ef4444' : '#0d9488';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+{% endblock %}

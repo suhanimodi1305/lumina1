@@ -1,0 +1,86 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Do you have <em>dark spots</em> or uneven tone?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=4 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Do you have pigmentation concerns?</label>
+    <div class="ac-options">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="has_pigmentation" value="yes" id="pig_yes" class="pig-rb"
+               {% if sess.pigmentation_concerns %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🟤</div>
+          <div class="ac-opt-label">Yes, I do</div>
+          <div class="ac-opt-desc">Dark spots, uneven tone etc.</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="has_pigmentation" value="no" id="pig_no" class="pig-rb"
+               {% if not sess.pigmentation_concerns %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">✨</div>
+          <div class="ac-opt-label">No, my tone is even</div>
+          <div class="ac-opt-desc">No visible dark marks</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="has_pigmentation" value="unsure" id="pig_unsure" class="pig-rb">
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🤔</div>
+          <div class="ac-opt-label">Not sure</div>
+          <div class="ac-opt-desc">I'm not certain</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div id="pigDetails" style="display:none; width:100%;">
+    <div class="ac-field">
+      <label class="ac-label">What kind of pigmentation? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+      <div class="ac-toggle-list">
+        {% for o in pigmentation_options %}
+        <label class="ac-toggle-wrap">
+          <input type="checkbox" name="pigmentation_concerns" value="{{ o.value }}"
+                 {% if o.value in sess.pigmentation_concerns %}checked{% endif %}>
+          <div class="ac-toggle-item">
+            <span class="ac-toggle-icon">{{ o.icon }}</span>
+            <span class="ac-toggle-label">{{ o.label }}</span>
+            <span class="ac-toggle-check"></span>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=3 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}
+
+{% block step_js %}
+const pigRbs    = document.querySelectorAll('.pig-rb');
+const pigDets   = document.getElementById('pigDetails');
+function togglePig() {
+  const val = document.querySelector('.pig-rb:checked')?.value;
+  pigDets.style.display = (val === 'yes') ? 'block' : 'none';
+}
+pigRbs.forEach(r => r.addEventListener('change', togglePig));
+togglePig();
+{% endblock %}

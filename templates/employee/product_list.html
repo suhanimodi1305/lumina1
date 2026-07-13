@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block title %}Products — Employee Portal{% endblock %}
 {% block page_title %}Product Management{% endblock %}
 
@@ -61,7 +61,7 @@
 {% endblock %}
 
 {% block content %}
-<!-- Toolbar -->
+
 <form method="get" class="emp-toolbar">
   <a href="{% url 'employee:product_add' %}" style="padding:.48rem 1rem;background:#0d9488;color:#fff;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:.4rem;white-space:nowrap;">
     <i class="bi bi-plus-circle"></i> Add Product
@@ -91,7 +91,6 @@
 
 <div class="result-count">Showing {{ total }} product{{ total|pluralize }}</div>
 
-<!-- Table -->
 <div class="emp-table-wrap">
   <table class="emp-table">
     <thead>

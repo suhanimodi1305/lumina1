@@ -1,0 +1,276 @@
+﻿{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Create Your Profile — Lumina{% endblock %}
+
+{% block content %}
+<style>
+.pc-wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+.pc-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.pc-hero-icon {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; color: #fff; margin: 0 auto 1rem;
+  box-shadow: 0 6px 24px rgba(13,148,136,.35);
+}
+.pc-hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem; font-weight: 700;
+  color: var(--text); margin-bottom: .35rem;
+}
+.pc-hero p {
+  font-size: .88rem; color: var(--muted); line-height: 1.65;
+}
+
+/* Steps progress */
+.pc-steps {
+  display: flex; align-items: center; gap: 0;
+  margin: 0 auto 2rem; max-width: 360px;
+}
+.pc-step-dot {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 700;
+}
+.pc-step-dot.done  { background: #0d9488; color: #fff; }
+.pc-step-dot.active{ background: #0d9488; color: #fff; box-shadow: 0 0 0 4px rgba(13,148,136,.2); }
+.pc-step-dot.pend  { background: var(--border); color: var(--muted); }
+.pc-step-line {
+  flex: 1; height: 2px;
+  background: linear-gradient(90deg, #0d9488, var(--border));
+}
+.pc-step-line.done { background: #0d9488; }
+.pc-step-lbl {
+  font-size: .58rem; text-align: center; margin-top: .3rem;
+  color: var(--muted); white-space: nowrap;
+}
+
+/* Form card */
+.pc-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+.pc-field { margin-bottom: 1.1rem; }
+.pc-label {
+  display: block; font-size: .78rem; font-weight: 700;
+  color: var(--text); margin-bottom: .4rem; letter-spacing: .02em;
+}
+.pc-input {
+  width: 100%; padding: .7rem 1rem;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  background: var(--surface); color: var(--text);
+  font-size: .9rem; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+.pc-input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+}
+.pc-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+/* Options grid (age / goal) */
+.pc-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.pc-opt {
+  position: relative;
+}
+.pc-opt input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.pc-opt-label {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .2rem; padding: .65rem .4rem;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  cursor: pointer; font-size: .72rem; font-weight: 600;
+  color: var(--muted); text-align: center;
+  transition: all .15s;
+}
+.pc-opt-label .opt-icon { font-size: 1.25rem; }
+.pc-opt input:checked + .pc-opt-label {
+  border-color: #0d9488;
+  background: rgba(13,148,136,.08);
+  color: #0d9488;
+}
+.pc-opt-label:hover {
+  border-color: rgba(13,148,136,.4);
+  color: var(--text);
+}
+
+/* Goal options — 2 columns */
+.pc-opts-2 { grid-template-columns: repeat(2, 1fr); }
+
+/* Submit */
+.pc-submit {
+  width: 100%; padding: .85rem;
+  background: linear-gradient(135deg, #0d9488, #0891b2);
+  color: #fff; border: none; border-radius: 100px;
+  font-size: .95rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(13,148,136,.35);
+  transition: all .15s; display: flex; align-items: center;
+  justify-content: center; gap: .5rem;
+  margin-top: 1.5rem;
+}
+.pc-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(13,148,136,.45); }
+
+.pc-skip {
+  display: block; text-align: center; margin-top: .85rem;
+  font-size: .78rem; color: var(--muted); text-decoration: none;
+}
+.pc-skip:hover { color: #0d9488; }
+
+/* Dark mode adjustments */
+[data-theme="dark"] .pc-card {
+  background: #1a1a28; border-color: rgba(255,255,255,.1);
+}
+[data-theme="dark"] .pc-input {
+  background: #12121a; border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.9);
+}
+[data-theme="dark"] .pc-opt-label { border-color: rgba(255,255,255,.1); }
+[data-theme="dark"] .pc-hero h1 { color: rgba(255,255,255,.95); }
+[data-theme="dark"] .pc-hero p  { color: rgba(255,255,255,.45); }
+
+@media (max-width: 480px) {
+  .pc-row { grid-template-columns: 1fr; }
+  .pc-opts { grid-template-columns: repeat(2, 1fr); }
+  .pc-opts-2 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<div class="pc-wrap">
+
+  
+  <div class="pc-hero">
+    <div class="pc-hero-icon"><i class="bi bi-person-badge"></i></div>
+    <h1>Set Up Your Profile</h1>
+    <p>Just a few quick details so we can personalise your AI skin analysis and product recommendations.</p>
+  </div>
+
+  
+  <div>
+    <div class="pc-steps">
+      <div>
+        <div class="pc-step-dot done"><i class="bi bi-check"></i></div>
+        <div class="pc-step-lbl">Account</div>
+      </div>
+      <div class="pc-step-line done"></div>
+      <div>
+        <div class="pc-step-dot active">2</div>
+        <div class="pc-step-lbl">Profile</div>
+      </div>
+      <div class="pc-step-line"></div>
+      <div>
+        <div class="pc-step-dot pend">3</div>
+        <div class="pc-step-lbl">Skin Scan</div>
+      </div>
+      <div class="pc-step-line"></div>
+      <div>
+        <div class="pc-step-dot pend">4</div>
+        <div class="pc-step-lbl">Analysis</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <form method="post" action="{% url 'profile_create' %}">
+    {% csrf_token %}
+    <div class="pc-card">
+
+      
+      <div class="pc-row">
+        <div class="pc-field">
+          <label class="pc-label" for="first_name">First Name</label>
+          <input class="pc-input" type="text" id="first_name" name="first_name"
+                 value="{{ user.first_name }}" placeholder="e.g. Priya" maxlength="50">
+        </div>
+        <div class="pc-field">
+          <label class="pc-label" for="last_name">Last Name</label>
+          <input class="pc-input" type="text" id="last_name" name="last_name"
+                 value="{{ user.last_name }}" placeholder="e.g. Sharma" maxlength="50">
+        </div>
+      </div>
+
+      
+      <div class="pc-field">
+        <label class="pc-label">Age Group</label>
+        <div class="pc-opts">
+          <label class="pc-opt">
+            <input type="radio" name="age_group" value="under18">
+            <span class="pc-opt-label"><span class="opt-icon">🧒</span>Under 18</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="age_group" value="18_24" checked>
+            <span class="pc-opt-label"><span class="opt-icon">🧑</span>18 – 24</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="age_group" value="25_34">
+            <span class="pc-opt-label"><span class="opt-icon">👤</span>25 – 34</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="age_group" value="35_44">
+            <span class="pc-opt-label"><span class="opt-icon">🧔</span>35 – 44</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="age_group" value="45_54">
+            <span class="pc-opt-label"><span class="opt-icon">👩</span>45 – 54</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="age_group" value="55plus">
+            <span class="pc-opt-label"><span class="opt-icon">🧓</span>55+</span>
+          </label>
+        </div>
+      </div>
+
+      
+      <div class="pc-field">
+        <label class="pc-label">Primary Skin Goal</label>
+        <div class="pc-opts pc-opts-2">
+          <label class="pc-opt">
+            <input type="radio" name="skin_goal" value="clear_acne" checked>
+            <span class="pc-opt-label"><span class="opt-icon">🔬</span>Clear Acne</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="skin_goal" value="anti_aging">
+            <span class="pc-opt-label"><span class="opt-icon">⏳</span>Anti-Aging</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="skin_goal" value="brightening">
+            <span class="pc-opt-label"><span class="opt-icon">✨</span>Brightening</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="skin_goal" value="hydration">
+            <span class="pc-opt-label"><span class="opt-icon">💧</span>Hydration</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="skin_goal" value="glass_skin">
+            <span class="pc-opt-label"><span class="opt-icon">🌸</span>Glass Skin</span>
+          </label>
+          <label class="pc-opt">
+            <input type="radio" name="skin_goal" value="general">
+            <span class="pc-opt-label"><span class="opt-icon">🌿</span>General Care</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="pc-submit">
+        <i class="bi bi-camera-fill"></i> Continue to Skin Scan
+      </button>
+
+    </div>
+  </form>
+
+  <a href="{% url 'scanner:upload' %}" class="pc-skip">
+    Skip for now — go straight to scan →
+  </a>
+
+</div>
+{% endblock %}

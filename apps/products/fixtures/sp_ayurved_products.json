@@ -1,0 +1,542 @@
+[
+  {
+    "model": "products.product", "pk": 400,
+    "fields": {
+      "name": "Rice Shampoo 200ml", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Homemade herbal shampoo for all hair types. Cleanses, strengthens and adds shine with rice water.",
+      "key_ingredients": "Rice Water, Herbal Extracts", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-HAIR-001", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": true, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 401,
+    "fields": {
+      "name": "Rice Shampoo 500ml", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Homemade herbal shampoo for all hair types. Cleanses, strengthens and adds shine with rice water.",
+      "key_ingredients": "Rice Water, Herbal Extracts", "full_ingredients": "",
+      "price": "520.00", "sku": "SPA-HAIR-002", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 402,
+    "fields": {
+      "name": "Amla Shampoo 200ml", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Herbal shampoo enriched with Amla for weak hair. Reduces hair fall with regular use.",
+      "key_ingredients": "Amla", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-HAIR-003", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 403,
+    "fields": {
+      "name": "Amla Shampoo 500ml", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Herbal shampoo enriched with Amla for weak hair. Reduces hair fall with regular use.",
+      "key_ingredients": "Amla", "full_ingredients": "",
+      "price": "520.00", "sku": "SPA-HAIR-004", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 404,
+    "fields": {
+      "name": "Hair Oil 200ml", "brand": "SP Ayurved", "category": "oil", "product_range": "ayurvedic",
+      "description": "Herbal hair oil for all hair types. Nourishes scalp and promotes healthy hair growth.",
+      "key_ingredients": "Herbal Oils", "full_ingredients": "",
+      "price": "420.00", "sku": "SPA-HAIR-005", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": true, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 405,
+    "fields": {
+      "name": "Hair Oil 500ml", "brand": "SP Ayurved", "category": "oil", "product_range": "ayurvedic",
+      "description": "Herbal hair oil for all hair types. Nourishes scalp and promotes healthy hair growth.",
+      "key_ingredients": "Herbal Oils", "full_ingredients": "",
+      "price": "870.00", "sku": "SPA-HAIR-006", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 406,
+    "fields": {
+      "name": "Hair Mask 100ml", "brand": "SP Ayurved", "category": "mask", "product_range": "ayurvedic",
+      "description": "Deep conditioning hair mask for dry hair. Apply for 20 minutes then rinse.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "240.00", "sku": "SPA-HAIR-007", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 407,
+    "fields": {
+      "name": "Hair Mask 200ml", "brand": "SP Ayurved", "category": "mask", "product_range": "ayurvedic",
+      "description": "Deep conditioning hair mask for dry hair. Apply for 20 minutes then rinse.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "410.00", "sku": "SPA-HAIR-008", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 408,
+    "fields": {
+      "name": "Hair Mask 500ml", "brand": "SP Ayurved", "category": "mask", "product_range": "ayurvedic",
+      "description": "Deep conditioning hair mask for dry hair. Apply for 20 minutes then rinse.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "820.00", "sku": "SPA-HAIR-009", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 409,
+    "fields": {
+      "name": "Hair Pack", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Ayurvedic hair pack for damaged hair. Repairs and revitalises with weekly use.",
+      "key_ingredients": "Ayurvedic Herbs", "full_ingredients": "",
+      "price": "220.00", "sku": "SPA-HAIR-010", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 410,
+    "fields": {
+      "name": "Hair Mehandi", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Natural henna for all hair types. Provides natural colour and conditioning.",
+      "key_ingredients": "Henna", "full_ingredients": "",
+      "price": "220.00", "sku": "SPA-HAIR-011", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 411,
+    "fields": {
+      "name": "Hair Colour", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal hair colour for grey hair. Natural colour blend without harsh chemicals.",
+      "key_ingredients": "Herbal Colour Blend", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-HAIR-012", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 412,
+    "fields": {
+      "name": "Neem Comb", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Neem wooden comb for all hair types. Reduces static and promotes scalp health.",
+      "key_ingredients": "Neem Wood", "full_ingredients": "",
+      "price": "220.00", "sku": "SPA-HAIR-013", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 413,
+    "fields": {
+      "name": "SP Special Skin Care Kit", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Complete herbal skincare kit for all skin types. Comprehensive care in one package.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "1069.00", "sku": "SPA-SKIN-001", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": true, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 414,
+    "fields": {
+      "name": "Night Cream", "brand": "SP Ayurved", "category": "cream", "product_range": "ayurvedic",
+      "description": "Herbal night cream for dry skin. Overnight nourishment — apply before bed.",
+      "key_ingredients": "Herbal Oils", "full_ingredients": "",
+      "price": "470.00", "sku": "SPA-SKIN-002", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 415,
+    "fields": {
+      "name": "Day Cream", "brand": "SP Ayurved", "category": "cream", "product_range": "ayurvedic",
+      "description": "Herbal day cream for all skin types. Daily hydration — apply every morning.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "470.00", "sku": "SPA-SKIN-003", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 416,
+    "fields": {
+      "name": "Korean Cream", "brand": "SP Ayurved", "category": "cream", "product_range": "ayurvedic",
+      "description": "Herbal face cream inspired by Korean beauty rituals. Moisturizes and revitalises.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "520.00", "sku": "SPA-SKIN-004", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 417,
+    "fields": {
+      "name": "US Cream", "brand": "SP Ayurved", "category": "cream", "product_range": "ayurvedic",
+      "description": "Premium herbal cream for dry skin. Intense hydration with daily use.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "870.00", "sku": "SPA-SKIN-005", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": true, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 418,
+    "fields": {
+      "name": "Open Pore Gel", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal gel for oily skin. Minimises open pores — apply on a clean face.",
+      "key_ingredients": "Herbal Extracts", "full_ingredients": "",
+      "price": "420.00", "sku": "SPA-SKIN-006", "image_url": "",
+      "suitable_for_skin_types": ["oily"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 419,
+    "fields": {
+      "name": "Regular Scrub", "brand": "SP Ayurved", "category": "exfoliator", "product_range": "ayurvedic",
+      "description": "Natural scrub for all skin types. Removes dead skin cells — use twice weekly.",
+      "key_ingredients": "Natural Scrub", "full_ingredients": "",
+      "price": "140.00", "sku": "SPA-SKIN-007", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 420,
+    "fields": {
+      "name": "Neela Moroccan Facial Kit", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Moroccan clay facial kit for all skin types. Provides an instant glow — use weekly.",
+      "key_ingredients": "Moroccan Clay", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-SKIN-008", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 421,
+    "fields": {
+      "name": "Sugar Scrub", "brand": "SP Ayurved", "category": "exfoliator", "product_range": "ayurvedic",
+      "description": "Sugar-based exfoliating scrub for all skin types. Massage gently for smooth skin.",
+      "key_ingredients": "Sugar", "full_ingredients": "",
+      "price": "290.00", "sku": "SPA-SKIN-009", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 422,
+    "fields": {
+      "name": "Face Massager Gel", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal massage gel for all skin types. Provides a smooth massage experience.",
+      "key_ingredients": "Herbal Gel", "full_ingredients": "",
+      "price": "370.00", "sku": "SPA-SKIN-010", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 423,
+    "fields": {
+      "name": "Regular Facial Kit", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal facial kit for all skin types. Complete facial care — use weekly.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-SKIN-011", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 424,
+    "fields": {
+      "name": "Bridal Facial Kit", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal bridal facial kit for instant glow. Use before special events.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "420.00", "sku": "SPA-SKIN-012", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": true, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 425,
+    "fields": {
+      "name": "Neela Murakkan Facial Kit", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal brightening facial kit. Illuminates and evens skin tone — use weekly.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "570.00", "sku": "SPA-SKIN-013", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 426,
+    "fields": {
+      "name": "Face Wash", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Rice and Moroccan clay face wash for daily cleansing. Use morning and evening.",
+      "key_ingredients": "Rice, Moroccan Clay", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-SKIN-014", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 427,
+    "fields": {
+      "name": "Face Serum", "brand": "SP Ayurved", "category": "serum", "product_range": "ayurvedic",
+      "description": "Herbal active face serum for all skin types. Provides deep hydration — apply a few drops daily.",
+      "key_ingredients": "Herbal Actives", "full_ingredients": "",
+      "price": "220.00", "sku": "SPA-SKIN-015", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 428,
+    "fields": {
+      "name": "Lip Balm", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Natural butter lip balm for dry lips. Softens and moisturises — apply anytime.",
+      "key_ingredients": "Natural Butter", "full_ingredients": "",
+      "price": "170.00", "sku": "SPA-SKIN-016", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 429,
+    "fields": {
+      "name": "Foot Balm", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal foot balm for dry feet. Repairs cracked heels — use at night.",
+      "key_ingredients": "Herbal Oils", "full_ingredients": "",
+      "price": "220.00", "sku": "SPA-SKIN-017", "image_url": "",
+      "suitable_for_skin_types": ["dry"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 430,
+    "fields": {
+      "name": "D10 Pack", "brand": "SP Ayurved", "category": "mask", "product_range": "ayurvedic",
+      "description": "Herbal face pack for all skin types. Reveals a natural glow — use weekly.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "220.00", "sku": "SPA-SKIN-018", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 431,
+    "fields": {
+      "name": "Face Pack", "brand": "SP Ayurved", "category": "mask", "product_range": "ayurvedic",
+      "description": "Herbal face pack for all skin types. Refreshes and revitalises skin — use weekly.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SKIN-019", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 432,
+    "fields": {
+      "name": "Sunscreen Lotion", "brand": "SP Ayurved", "category": "sunscreen", "product_range": "ayurvedic",
+      "description": "Herbal sunscreen lotion for all skin types. UV protection — apply before sun exposure.",
+      "key_ingredients": "UV Filters", "full_ingredients": "",
+      "price": "270.00", "sku": "SPA-SKIN-020", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 433,
+    "fields": {
+      "name": "Hair Remover Spray", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal hair removal spray for body. Gentle and effective — use as directed.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "320.00", "sku": "SPA-SKIN-021", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 434,
+    "fields": {
+      "name": "Weight Loss Powder", "brand": "SP Ayurved", "category": "treatment", "product_range": "ayurvedic",
+      "description": "Herbal wellness powder for adults. Supports fitness goals — mix with water daily.",
+      "key_ingredients": "Herbal Mix", "full_ingredients": "",
+      "price": "670.00", "sku": "SPA-WELL-001", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 435,
+    "fields": {
+      "name": "Facial Bar", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Herbal facial soap bar for all skin types. Gentle daily cleansing.",
+      "key_ingredients": "Herbal Base", "full_ingredients": "",
+      "price": "80.00", "sku": "SPA-SOAP-001", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 436,
+    "fields": {
+      "name": "Rice Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Rice-enriched soap for all skin types. Brightens and evens skin tone with daily use.",
+      "key_ingredients": "Rice", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SOAP-002", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 437,
+    "fields": {
+      "name": "Keshuda Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Herbal soap for all skin types. Deep cleansing for healthy skin.",
+      "key_ingredients": "Herbs", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SOAP-003", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 438,
+    "fields": {
+      "name": "Haldi Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Turmeric soap for all skin types. Promotes healthy, glowing skin with daily use.",
+      "key_ingredients": "Turmeric", "full_ingredients": "",
+      "price": "170.00", "sku": "SPA-SOAP-004", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": true, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 439,
+    "fields": {
+      "name": "Bridal Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Herbal bridal soap for all skin types. Gives a natural bridal glow with daily use.",
+      "key_ingredients": "Herbal Blend", "full_ingredients": "",
+      "price": "170.00", "sku": "SPA-SOAP-005", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 440,
+    "fields": {
+      "name": "Hyaluronic Scrub Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Hyaluronic blend soap for all skin types. Exfoliates and hydrates in one step.",
+      "key_ingredients": "Hyaluronic Blend", "full_ingredients": "",
+      "price": "190.00", "sku": "SPA-SOAP-006", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 441,
+    "fields": {
+      "name": "Neem Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Neem soap for oily skin. Controls excess oil and keeps skin fresh.",
+      "key_ingredients": "Neem", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SOAP-007", "image_url": "",
+      "suitable_for_skin_types": ["oily"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 442,
+    "fields": {
+      "name": "Multani Mitti Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Multani Mitti soap for oily skin. Deep cleansing for a matte, fresh complexion.",
+      "key_ingredients": "Multani Mitti", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SOAP-008", "image_url": "",
+      "suitable_for_skin_types": ["oily"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 443,
+    "fields": {
+      "name": "Coffee D10 Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Coffee-enriched soap for all skin types. Refreshes and energises skin.",
+      "key_ingredients": "Coffee", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SOAP-009", "image_url": "",
+      "suitable_for_skin_types": ["all"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product", "pk": 444,
+    "fields": {
+      "name": "Lemon Soap", "brand": "SP Ayurved", "category": "cleanser", "product_range": "ayurvedic",
+      "description": "Lemon soap for oily skin. Fresh citrus cleansing for a bright, clean complexion.",
+      "key_ingredients": "Lemon", "full_ingredients": "",
+      "price": "120.00", "sku": "SPA-SOAP-010", "image_url": "",
+      "suitable_for_skin_types": ["oily"], "targets": [], "shades_available": [],
+      "undertone_match": "", "skin_tone_match": "", "coverage": "", "finish": "",
+      "is_featured": false, "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

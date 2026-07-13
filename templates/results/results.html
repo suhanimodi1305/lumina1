@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Skin Analysis Result — Lumina{% endblock %}
 {% block page_title %}Skin Analysis Result{% endblock %}
@@ -464,7 +464,7 @@
 {% with gender=scan.gender|default:"female" %}
 <div class="res-shell">
 
-  <!-- ── TOP BAR ── -->
+  
   <div class="res-topbar">
     <a href="{% url 'scanner:upload' %}" class="res-back-btn">
       <i class="bi bi-arrow-left"></i> New Scan
@@ -477,12 +477,10 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════
-       HERO — PHOTO + OVERALL SCORE
-       ═══════════════════════════════════════════ -->
+  
   <div class="res-hero">
 
-    <!-- Left: Photo card -->
+    
     <div class="res-photo-card">
       <div class="res-photo-wrap">
         {% if gender == 'male' %}
@@ -512,7 +510,7 @@
       </div>
     </div>
 
-    <!-- Right: Overall score + summary -->
+    
     <div class="res-scores-panel">
       <div class="res-scores-top">
         <div class="res-overall-wrap">
@@ -542,7 +540,7 @@
         </div>
       </div>
 
-      <!-- 4 quick score cells -->
+      
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:.25rem;">
         <div style="text-align:center;padding:.85rem .5rem;background:var(--r-surf2);border-radius:var(--r-radius-sm);border:1px solid var(--r-border);">
           <div style="font-size:1.4rem;font-weight:800;color:{% if scan.hydration_score > 60 %}#22c55e{% elif scan.hydration_score > 35 %}#f59e0b{% else %}#ef4444{% endif %};">{{ scan.hydration_score }}</div>
@@ -562,15 +560,13 @@
         </div>
       </div>
     </div>
-  </div><!-- /res-hero -->
+  </div>
 
-  <!-- ═══════════════════════════════════════════════
-       SKIN METRICS GRID — 5 Donut Charts
-       ═══════════════════════════════════════════════ -->
+  
   {% with cs=condition_cards %}
   <div class="res-metrics-grid">
 
-    <!-- Acne -->
+    
     {% with pct=scan.acne_score %}
     <div class="res-metric-card">
       <div class="res-donut-wrap">
@@ -588,7 +584,7 @@
     </div>
     {% endwith %}
 
-    <!-- Pigmentation / Dark Spots -->
+    
     {% with pct=scan.pigmentation_score %}
     <div class="res-metric-card">
       <div class="res-donut-wrap">
@@ -606,7 +602,7 @@
     </div>
     {% endwith %}
 
-    <!-- Oiliness — derived from skin_type + hydration (accurate, not proxy) -->
+    
     <div class="res-metric-card">
       <div class="res-donut-wrap">
         <svg class="res-donut-svg" viewBox="0 0 80 80">
@@ -622,7 +618,7 @@
       </span>
     </div>
 
-    <!-- Large Pores — derived from acne_score + skin_type + elasticity -->
+    
     <div class="res-metric-card">
       <div class="res-donut-wrap">
         <svg class="res-donut-svg" viewBox="0 0 80 80">
@@ -638,7 +634,7 @@
       </span>
     </div>
 
-    <!-- Uneven Tone -->
+    
     {% with pct=scan.harmony_score %}
     <div class="res-metric-card">
       <div class="res-donut-wrap">
@@ -656,18 +652,16 @@
     </div>
     {% endwith %}
 
-  </div><!-- /metrics-grid -->
+  </div>
   {% endwith %}
 
-  <!-- ═══════════════════════════════════════════
-       MAIN CONTENT — 2/3 LEFT + 1/3 RIGHT
-       ═══════════════════════════════════════════ -->
+  
   <div class="res-main-grid">
 
-    <!-- ── LEFT COLUMN ── -->
+    
     <div>
 
-      <!-- TAB NAVIGATION -->
+      
       <div class="res-card" style="margin-bottom:1.25rem;">
         <div class="res-tabs">
           <button class="res-tab active" data-rpanel="rp-diagnosis">🩺 Diagnosis</button>
@@ -676,9 +670,10 @@
           <button class="res-tab" data-rpanel="rp-makeup">💄 Makeup</button>
           {% endif %}
           <button class="res-tab" data-rpanel="rp-kbeauty">🌸 K-Beauty</button>
+          <button class="res-tab" data-rpanel="rp-ayurvedic">🌿 Ayurvedic</button>
         </div>
 
-        <!-- ── PANEL: DIAGNOSIS ── -->
+        
         <div class="res-panel active" id="rp-diagnosis">
           <div style="padding:.3rem 1.25rem .5rem;display:flex;align-items:center;justify-content:space-between;">
             <div>
@@ -731,16 +726,16 @@
             ✨ No major concerns detected — your skin looks great!
           </div>
           {% endfor %}
-        </div><!-- /rp-diagnosis -->
+        </div>
 
-        <!-- ── PANEL: SKINCARE ROUTINE (Step Flow) ── -->
+        
         <div class="res-panel" id="rp-routine">
           <div style="padding:.5rem 1.25rem .2rem;">
             <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">Recommended Skincare Regimen</div>
             <div style="font-size:.68rem;color:var(--r-muted);margin-bottom:.5rem;">5-step daily routine personalised for your {{ scan.skin_type }} skin</div>
           </div>
 
-          <!-- Horizontal step flow with arrows -->
+          
           <div class="res-routine-flow">
             {% for step in morning_routine %}
             <div class="res-step-card">
@@ -769,7 +764,7 @@
             {% endfor %}
           </div>
 
-          <!-- Evening routine flow -->
+          
           {% if evening_routine %}
           <div style="padding:.25rem 1.25rem .2rem;border-top:1px solid var(--r-border);">
             <div style="font-size:.75rem;font-weight:700;color:var(--r-text);margin-top:.75rem;">🌙 Evening Routine</div>
@@ -810,9 +805,9 @@
               <i class="bi bi-bag-heart"></i> Shop All Routine Products →
             </a>
           </div>
-        </div><!-- /rp-routine -->
+        </div>
 
-        <!-- ── PANEL: MAKEUP (female only) ── -->
+        
         {% if gender == 'female' %}
         <div class="res-panel" id="rp-makeup">
           <div style="padding:.5rem 1.25rem .2rem;">
@@ -926,10 +921,10 @@
               💄 Ask Makeup AI for More
             </a>
           </div>
-        </div><!-- /rp-makeup -->
+        </div>
         {% endif %}
 
-        <!-- ── PANEL: K-BEAUTY ── -->
+        
         <div class="res-panel" id="rp-kbeauty">
           <div style="padding:.5rem 1.25rem .2rem;">
             <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">K-Beauty Routine</div>
@@ -985,15 +980,92 @@
               🌸 Build Full K-Beauty Routine
             </a>
           </div>
-        </div><!-- /rp-kbeauty -->
+        </div>
 
-      </div><!-- /res-card (tabs) -->
-    </div><!-- /left column -->
+        
+        <div class="res-panel" id="rp-ayurvedic">
+          <div style="padding:.5rem 1.25rem .2rem;">
+            <div style="font-size:.75rem;font-weight:700;color:var(--r-text);">Ayurvedic Herbal Suggestions</div>
+            <div style="font-size:.68rem;color:var(--r-muted);margin-bottom:.5rem;">Natural Ayurvedic products matched to your skin concerns & type</div>
+          </div>
 
-    <!-- ── RIGHT COLUMN ── -->
+          {% if ayurvedic_products %}
+            {% regroup ayurvedic_products by get_category_display as ayur_groups %}
+            {% for group in ayur_groups %}
+            <div style="padding:.3rem 1.25rem .1rem;font-size:.65rem;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:.08em;border-top:1px solid var(--r-border);">
+              🌿 {{ group.grouper }}
+            </div>
+            {% for p in group.list %}
+            <div class="res-mk-step">
+              <div class="res-mk-icon">
+                {% if p.category == 'cleanser' %}🫧
+                {% elif p.category == 'oil' %}🫙
+                {% elif p.category == 'mask' %}🎭
+                {% elif p.category == 'serum' %}💧
+                {% elif p.category == 'cream' %}🌸
+                {% elif p.category == 'treatment' %}🌿
+                {% elif p.category == 'exfoliator' %}✨
+                {% elif p.category == 'sunscreen' %}☀️
+                {% else %}🌿{% endif %}
+              </div>
+              <div class="res-mk-body">
+                <div class="res-mk-tag" style="color:#16a34a;">{{ p.get_category_display }} — {{ p.brand }}</div>
+                <div class="res-mk-prod">{{ p.name }}</div>
+                {% if p.price %}
+                <div class="res-mk-meta">{{ p.brand }} · ₹{{ p.price }}</div>
+                {% endif %}
+                {% if p.key_ingredients %}
+                <div class="res-mk-note">
+                  <i class="bi bi-leaf" style="color:#16a34a;"></i>
+                  {{ p.key_ingredients|truncatechars:80 }}
+                </div>
+                {% elif p.description %}
+                <div class="res-mk-note">{{ p.description|truncatechars:90 }}</div>
+                {% endif %}
+                {% if p.suitable_for_skin_types %}
+                <div style="margin-top:.3rem;display:flex;flex-wrap:wrap;gap:.2rem;">
+                  {% for st in p.suitable_for_skin_types|slice:":3" %}
+                  <span style="background:rgba(34,197,94,.1);color:#14532d;border:1px solid rgba(34,197,94,.2);padding:.1rem .4rem;border-radius:20px;font-size:.6rem;font-weight:600;">
+                    {% if st == 'all' %}All Types{% else %}{{ st|title }}{% endif %}
+                  </span>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              <div style="flex-shrink:0;">
+                <a href="{% url 'products:detail' pk=p.pk %}" style="display:inline-flex;align-items:center;gap:.25rem;padding:.3rem .75rem;background:#16a34a;color:#fff;border-radius:20px;font-size:.68rem;font-weight:700;text-decoration:none;">
+                  View
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+
+            <div style="padding:.5rem 1.25rem 1rem;">
+              <a href="{% url 'products:list' %}?product_range=ayurvedic" class="res-cta-btn" style="display:inline-flex;width:auto;background:#16a34a;color:#fff;box-shadow:0 3px 12px rgba(22,163,74,.3);">
+                🌿 Shop All Ayurvedic Products
+              </a>
+            </div>
+
+          {% else %}
+          <div style="padding:2rem 1.25rem;text-align:center;color:var(--r-muted);font-size:.85rem;">
+            <div style="font-size:2rem;margin-bottom:.5rem;">🌿</div>
+            <div style="font-weight:700;margin-bottom:.3rem;color:var(--r-text);">Ayurvedic Products Coming Soon</div>
+            <div style="font-size:.78rem;">Explore our herbal collection for natural skin care.</div>
+            <a href="{% url 'products:list' %}?product_range=ayurvedic" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.9rem;padding:.45rem 1.1rem;background:#16a34a;color:#fff;border-radius:100px;font-size:.78rem;font-weight:700;text-decoration:none;">
+              🌿 Browse Ayurvedic Range
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    
     <div>
 
-      <!-- Skin Health Bars -->
+      
       <div class="res-card" style="margin-bottom:1.25rem;">
         <div class="res-card-hdr">
           <div>
@@ -1035,7 +1107,7 @@
         </div>
       </div>
 
-      <!-- AI Consultation CTAs -->
+      
       <div class="res-card" style="margin-bottom:1.25rem;">
         <div class="res-card-hdr">
           <div>
@@ -1058,7 +1130,7 @@
         </div>
       </div>
 
-      <!-- Lifestyle Tips -->
+      
       <div class="res-card" style="margin-bottom:1.25rem;">
         <div class="res-card-hdr">
           <div>
@@ -1079,7 +1151,7 @@
         </div>
       </div>
 
-      <!-- Shop CTA -->
+      
       <div class="res-card">
         <div style="padding:1.1rem 1.25rem;background:linear-gradient(135deg,#f5f3ff,#fdf4ff);border-radius:var(--r-radius);">
           <div style="font-size:.85rem;font-weight:800;color:var(--r-purple);margin-bottom:.2rem;">🛍️ Shop Your Regimen</div>
@@ -1090,14 +1162,13 @@
         </div>
       </div>
 
-    </div><!-- /right column -->
+    </div>
 
-  </div><!-- /res-main-grid -->
+  </div>
 
-</div><!-- /res-shell -->
+</div>
 {% endwith %}
 {% endblock %}
-
 
 {% block extra_js %}
 <script>

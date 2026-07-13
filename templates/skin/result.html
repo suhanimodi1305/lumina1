@@ -1,0 +1,504 @@
+﻿{% extends "base.html" %}
+{% load static skin_filters %}
+{% block title %}Your AI Skin Report — Lumina{% endblock %}
+{% block page_title %}AI Skin Report{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════
+   AI SKIN REPORT — Result Page
+   ═══════════════════════════════════════ */
+.lux-content { padding: 0 !important; }
+
+/* ── HERO ── */
+.sr-hero {
+  background: linear-gradient(135deg, #050810 0%, #0a1a1a 55%, #050c10 100%);
+  padding: 3rem 1.75rem 2.5rem;
+  position: relative; overflow: hidden;
+}
+.sr-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 55% 55% at 85% 10%, rgba(13,148,136,.25) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 12% 88%, rgba(8,145,178,.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+.sr-hero-inner { position: relative; z-index: 1; max-width: 720px; }
+.sr-hero-tag {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #5eead4; background: rgba(13,148,136,.15); border: 1px solid rgba(13,148,136,.3);
+  padding: .3rem .85rem; border-radius: 100px; margin-bottom: 1rem;
+}
+.sr-hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 700; color: #fff; line-height: 1.15;
+  margin-bottom: .65rem; letter-spacing: -.01em;
+}
+.sr-hero h1 em { color: #5eead4; font-style: normal; }
+.sr-hero-sub { color: rgba(255,255,255,.5); font-size: .9rem; margin-bottom: 1.5rem; }
+
+/* ── CONFIDENCE + SKIN TYPE CHIPS ── */
+.sr-hero-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.75rem; }
+.sr-chip {
+  padding: .3rem .85rem; border-radius: 100px;
+  font-size: .72rem; font-weight: 700;
+  background: rgba(13,148,136,.15); color: #5eead4;
+  border: 1px solid rgba(13,148,136,.3);
+}
+.sr-chip.gold {
+  background: rgba(201,169,110,.12); color: #c9a96e;
+  border-color: rgba(201,169,110,.25);
+}
+.sr-chip.rose {
+  background: rgba(244,63,94,.1); color: #fb7185;
+  border-color: rgba(244,63,94,.2);
+}
+
+/* ── AI CONFIDENCE BAR ── */
+.sr-conf-row {
+  display: flex; align-items: center; gap: 1rem;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px; padding: .9rem 1.1rem; max-width: 420px;
+}
+.sr-conf-icon { font-size: 1.5rem; flex-shrink: 0; }
+.sr-conf-body { flex: 1; }
+.sr-conf-label { font-size: .72rem; color: rgba(255,255,255,.45); margin-bottom: .35rem; }
+.sr-conf-bar-bg { height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; }
+.sr-conf-bar-fill { height: 100%; background: linear-gradient(90deg, #0d9488, #5eead4); border-radius: 3px; }
+.sr-conf-pct { font-size: .88rem; font-weight: 700; color: #5eead4; margin-top: .3rem; }
+
+/* ── BODY ── */
+.sr-body { max-width: 760px; margin: 0 auto; padding: 2rem 1.75rem 3rem; }
+
+/* ── SECTION HEADER ── */
+.sr-section {
+  display: flex; align-items: center; gap: .6rem;
+  margin: 2.25rem 0 1.1rem;
+}
+.sr-section-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(13,148,136,.12); border: 1.5px solid rgba(13,148,136,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.sr-section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+.sr-section-sub   { font-size: .78rem; color: var(--muted); }
+
+/* ── SKIN TYPE CARD ── */
+.sr-skin-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 1.5rem; display: flex;
+  align-items: center; gap: 1.25rem; margin-bottom: 1.25rem;
+}
+.sr-skin-icon {
+  width: 72px; height: 72px; border-radius: 18px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(13,148,136,.15), rgba(8,145,178,.1));
+  border: 2px solid rgba(13,148,136,.25);
+  display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
+}
+.sr-skin-type-label {
+  font-size: 1.35rem; font-weight: 700; color: #0d9488; margin-bottom: .2rem;
+}
+.sr-skin-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+.sr-concerns-row {
+  display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem;
+}
+.sr-concern-tag {
+  padding: .22rem .7rem; border-radius: 100px; font-size: .68rem; font-weight: 700;
+  background: rgba(13,148,136,.1); color: #0d9488; border: 1px solid rgba(13,148,136,.2);
+}
+.sr-concern-tag.acne  { background: rgba(239,68,68,.09); color: #ef4444; border-color: rgba(239,68,68,.2); }
+.sr-concern-tag.pig   { background: rgba(245,158,11,.09); color: #f59e0b; border-color: rgba(245,158,11,.2); }
+
+/* ── INGREDIENT CARDS ── */
+.sr-ingr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+@media (max-width: 560px) { .sr-ingr-grid { grid-template-columns: 1fr; } }
+.sr-ingr-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 1.1rem 1.25rem;
+}
+.sr-ingr-card.avoid { border-color: rgba(239,68,68,.2); background: rgba(239,68,68,.03); }
+.sr-ingr-header {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: #0d9488; margin-bottom: .75rem;
+}
+.sr-ingr-card.avoid .sr-ingr-header { color: #ef4444; }
+.sr-ingr-list { list-style: none; padding: 0; }
+.sr-ingr-list li {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .35rem 0; border-bottom: 1px solid var(--border);
+  font-size: .82rem; color: var(--text);
+}
+.sr-ingr-list li:last-child { border-bottom: none; }
+.ingr-dot { width: 7px; height: 7px; border-radius: 50%; background: #0d9488; flex-shrink: 0; }
+.sr-ingr-card.avoid .ingr-dot { background: #ef4444; }
+
+/* ── ROUTINE CARD ── */
+.sr-routine-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+@media (max-width: 560px) { .sr-routine-wrap { grid-template-columns: 1fr; } }
+.sr-routine-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 18px; padding: 1.25rem;
+}
+.sr-routine-head {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); margin-bottom: 1rem;
+}
+.sr-routine-step {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border);
+  font-size: .82rem; color: var(--text);
+}
+.sr-routine-step:last-child { border-bottom: none; }
+.sr-step-num {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(13,148,136,.12); border: 1px solid rgba(13,148,136,.25);
+  color: #0d9488; font-size: .65rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.sr-weekly-list {
+  list-style: none; padding: 0;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 1rem 1.25rem;
+}
+.sr-weekly-list li {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .4rem 0; border-bottom: 1px solid var(--border);
+  font-size: .82rem; color: var(--text);
+}
+.sr-weekly-list li:last-child { border-bottom: none; }
+.sr-weekly-list li::before { content: '📅'; font-size: .85rem; flex-shrink: 0; }
+
+/* ── DERM ALERT ── */
+.sr-derm-alert {
+  background: linear-gradient(135deg, rgba(239,68,68,.08), rgba(245,158,11,.06));
+  border: 1.5px solid rgba(239,68,68,.2); border-radius: 18px;
+  padding: 1.25rem 1.4rem; display: flex; gap: 1rem; align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+.sr-derm-icon { font-size: 1.75rem; flex-shrink: 0; }
+.sr-derm-title { font-size: .9rem; font-weight: 700; color: #ef4444; margin-bottom: .3rem; }
+.sr-derm-desc { font-size: .8rem; color: var(--muted); line-height: 1.55; }
+
+/* ── ACNE SEVERITY BADGE ── */
+.sr-acne-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .3rem .9rem; border-radius: 100px;
+  font-size: .75rem; font-weight: 700;
+}
+.sr-acne-badge.none     { background: #dcfce7; color: #166534; }
+.sr-acne-badge.mild     { background: #fef9c3; color: #92400e; }
+.sr-acne-badge.moderate { background: #ffedd5; color: #c2410c; }
+.sr-acne-badge.severe   { background: #fee2e2; color: #991b1b; }
+
+/* ── CTA GRID ── */
+.sr-cta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width: 560px) { .sr-cta-grid { grid-template-columns: 1fr; } }
+.sr-cta-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 1.25rem 1rem;
+  text-align: center; text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  transition: all .2s ease;
+}
+.sr-cta-card:hover {
+  transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.1);
+  border-color: #0d9488;
+}
+.sr-cta-icon  { font-size: 1.75rem; }
+.sr-cta-label { font-size: .84rem; font-weight: 700; color: var(--text); }
+.sr-cta-desc  { font-size: .72rem; color: var(--muted); line-height: 1.35; }
+
+/* ── DISCLAIMER ── */
+.sr-final-disclaimer {
+  font-size: .73rem; color: var(--muted); text-align: center;
+  line-height: 1.6; padding: .75rem 0; border-top: 1px solid var(--border);
+  margin-top: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<canvas id="confetti-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></canvas>
+
+<div class="sr-hero">
+  <div class="sr-hero-inner">
+    <div class="sr-hero-tag"><i class="bi bi-stars"></i> AI Analysis Complete</div>
+    <h1>Your <em>Skin Report</em><br>is Ready ✨</h1>
+    <p class="sr-hero-sub">Based on your {{ total_steps|default:12 }}-step consultation, here is your personalised skin analysis and recommended routine.</p>
+
+    <div class="sr-hero-chips">
+      <span class="sr-chip gold">{{ skin_type_label }} Skin</span>
+      {% if sess.acne_severity and sess.acne_severity != 'none' %}
+      <span class="sr-chip rose">{{ acne_label }}</span>
+      {% endif %}
+      {% for c in sess.skin_concerns|slice:":3" %}
+      <span class="sr-chip">{{ c|capfirst|replace:"_: " }}</span>
+      {% endfor %}
+      {% if sess.pigmentation_concerns %}
+      <span class="sr-chip gold">Pigmentation Detected</span>
+      {% endif %}
+      <span class="sr-chip">AI Confidence {{ ai_confidence }}%</span>
+    </div>
+
+    <div class="sr-conf-row">
+      <div class="sr-conf-icon">🤖</div>
+      <div class="sr-conf-body">
+        <div class="sr-conf-label">AI Analysis Confidence</div>
+        <div class="sr-conf-bar-bg">
+          <div class="sr-conf-bar-fill" style="width:{{ ai_confidence }}%;"></div>
+        </div>
+        <div class="sr-conf-pct">{{ ai_confidence }}% — Based on your full questionnaire</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sr-body">
+
+  
+  <div class="sr-section">
+    <div class="sr-section-icon">🔬</div>
+    <div>
+      <div class="sr-section-title">Your Skin Type</div>
+      <div class="sr-section-sub">Detected from your answers</div>
+    </div>
+  </div>
+
+  <div class="sr-skin-card">
+    <div class="sr-skin-icon">
+      {% if skin_type == 'oily' %}💧
+      {% elif skin_type == 'dry' %}🏜️
+      {% elif skin_type == 'combination' %}☯️
+      {% elif skin_type == 'sensitive' %}🌸
+      {% else %}✨{% endif %}
+    </div>
+    <div>
+      <div class="sr-skin-type-label">{{ skin_type_label }} Skin</div>
+      <div class="sr-skin-desc">
+        {% if skin_type == 'oily' %}Your skin produces excess sebum — we'll focus on oil control, pore minimising, and lightweight non-comedogenic products.
+        {% elif skin_type == 'dry' %}Your skin lacks moisture and natural oils — we'll focus on deep hydration, barrier repair, and nourishing formulations.
+        {% elif skin_type == 'combination' %}You have both oily and dry zones — we'll balance oil control in the T-zone while hydrating your cheeks.
+        {% elif skin_type == 'sensitive' %}Your skin reacts easily — we'll prioritise gentle, fragrance-free, barrier-strengthening formulas.
+        {% else %}Your skin is well-balanced — we'll focus on maintenance, prevention, and keeping it glowing.{% endif %}
+      </div>
+      {% if sess.skin_concerns %}
+      <div class="sr-concerns-row">
+        {% for c in sess.skin_concerns|slice:":4" %}
+        <span class="sr-concern-tag">{{ c|capfirst|replace:"_: " }}</span>
+        {% endfor %}
+        {% if sess.acne_severity != 'none' %}
+        <span class="sr-concern-tag acne">{{ acne_label }}</span>
+        {% endif %}
+        {% if sess.pigmentation_concerns %}
+        <span class="sr-concern-tag pig">Pigmentation</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  
+  <div class="sr-section">
+    <div class="sr-section-icon">🧪</div>
+    <div>
+      <div class="sr-section-title">Ingredients for Your Skin</div>
+      <div class="sr-section-sub">AI-matched to your skin type and concerns</div>
+    </div>
+  </div>
+
+  <div class="sr-ingr-grid">
+    <div class="sr-ingr-card">
+      <div class="sr-ingr-header"><i class="bi bi-check-circle-fill"></i> Use These</div>
+      <ul class="sr-ingr-list">
+        {% for ing in recommended_ingredients %}
+        <li><span class="ingr-dot"></span>{{ ing }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="sr-ingr-card avoid">
+      <div class="sr-ingr-header"><i class="bi bi-x-circle-fill"></i> Avoid These</div>
+      <ul class="sr-ingr-list">
+        {% for ing in avoid_ingredients %}
+        <li><span class="ingr-dot"></span>{{ ing }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  
+  <div class="sr-section">
+    <div class="sr-section-icon">🧴</div>
+    <div>
+      <div class="sr-section-title">Your Personalised Routine</div>
+      <div class="sr-section-sub">Morning, night, and weekly steps — tailored for {{ skin_type_label }} skin</div>
+    </div>
+  </div>
+
+  <div class="sr-routine-wrap">
+    <div class="sr-routine-card">
+      <div class="sr-routine-head">☀️ Morning Routine</div>
+      {% for step in morning_routine %}
+      <div class="sr-routine-step">
+        <div class="sr-step-num">{{ forloop.counter }}</div>
+        {{ step }}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="sr-routine-card">
+      <div class="sr-routine-head">🌙 Night Routine</div>
+      {% for step in night_routine %}
+      <div class="sr-routine-step">
+        <div class="sr-step-num">{{ forloop.counter }}</div>
+        {{ step }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div style="margin-top:.75rem; margin-bottom:.25rem;">
+    <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.65rem;">📅 Weekly Treatments</div>
+    <ul class="sr-weekly-list">
+      {% for step in weekly_routine %}
+      <li>{{ step }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  
+  {% if acne_products %}
+  <div class="sr-section">
+    <div class="sr-section-icon">🔴</div>
+    <div>
+      <div class="sr-section-title">Acne Recommendations</div>
+      <div class="sr-section-sub">
+        <span class="sr-acne-badge {{ sess.acne_severity }}">{{ acne_label }}</span>
+      </div>
+    </div>
+  </div>
+  <ul class="sr-weekly-list">
+    {% for p in acne_products %}
+    <li style="{% if '⚠️' in p %}color:#ef4444;{% endif %}">{{ p }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  
+  {% if pigment_products %}
+  <div class="sr-section">
+    <div class="sr-section-icon">☀️</div>
+    <div>
+      <div class="sr-section-title">Pigmentation Care</div>
+      <div class="sr-section-sub">Brightening & dark spot correction</div>
+    </div>
+  </div>
+  <ul class="sr-weekly-list">
+    {% for p in pigment_products %}
+    <li>{{ p }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  
+  {% if needs_derm %}
+  <div class="sr-section">
+    <div class="sr-section-icon">👩‍⚕️</div>
+    <div>
+      <div class="sr-section-title">Consult a Dermatologist</div>
+    </div>
+  </div>
+  <div class="sr-derm-alert">
+    <div class="sr-derm-icon">🩺</div>
+    <div>
+      <div class="sr-derm-title">Professional Consultation Recommended</div>
+      <div class="sr-derm-desc">
+        Based on your answers, we strongly recommend consulting a qualified dermatologist.
+        This may be due to: severe or cystic acne, PCOS or thyroid conditions affecting your skin,
+        prescription medication use, or other factors that require professional evaluation.
+        <br><br>
+        <strong>Lumina AI is not a substitute for a licensed dermatologist or medical doctor.</strong>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  
+  <div class="sr-section">
+    <div class="sr-section-icon">✨</div>
+    <div>
+      <div class="sr-section-title">What's Next?</div>
+    </div>
+  </div>
+  <div class="sr-cta-grid">
+    <a href="{% url 'chat:create' %}?mode=doctor" class="sr-cta-card">
+      <div class="sr-cta-icon">🩺</div>
+      <div class="sr-cta-label">AI Doctor Chat</div>
+      <div class="sr-cta-desc">Deep-dive into your concerns with Dr. Lumina AI</div>
+    </a>
+    <a href="{% url 'products:list' %}" class="sr-cta-card">
+      <div class="sr-cta-icon">🛍️</div>
+      <div class="sr-cta-label">Shop Products</div>
+      <div class="sr-cta-desc">Browse products matched to your skin profile</div>
+    </a>
+    <a href="{% url 'chat:create' %}?mode=kbeauty" class="sr-cta-card">
+      <div class="sr-cta-icon">🌸</div>
+      <div class="sr-cta-label">K-Beauty Routine</div>
+      <div class="sr-cta-desc">Korean skincare routine built for your skin</div>
+    </a>
+  </div>
+
+  
+  <div style="text-align:center; padding:.5rem 0;">
+    <a href="{% url 'skin:restart' %}" style="font-size:.8rem;color:var(--muted);text-decoration:none;">
+      <i class="bi bi-arrow-repeat"></i> Retake the consultation
+    </a>
+  </div>
+
+  
+  <div class="sr-final-disclaimer">
+    <i class="bi bi-shield-check"></i>
+    This report is generated by AI based on your answers. It is for <strong>informational purposes only</strong>
+    and is <strong>not a medical diagnosis</strong>. Always consult a qualified dermatologist for any skin conditions.
+    Lumina AI — Powered by your personalised consultation.
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Confetti
+(function(){
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const colors = ['#0d9488','#5eead4','#c9a96e','#a78bfa','#f472b6','#fff'];
+  const particles = Array.from({length:70}, () => ({
+    x: Math.random()*canvas.width, y: -10,
+    r: Math.random()*6+3, d: Math.random()*80+20,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random()*10-10, tiltAngle: 0, tiltSpeed: Math.random()*.1+.04
+  }));
+  let angle=0, frame=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    angle+=.01; frame++;
+    particles.forEach(p=>{
+      p.tiltAngle+=p.tiltSpeed;
+      p.y+=(Math.cos(angle+p.d)+1+p.r/2)*1.4;
+      p.x+=Math.sin(angle)*2;
+      p.tilt=Math.sin(p.tiltAngle)*15;
+      ctx.beginPath(); ctx.lineWidth=p.r/2; ctx.strokeStyle=p.color;
+      ctx.moveTo(p.x+p.tilt+p.r/4,p.y); ctx.lineTo(p.x+p.tilt,p.y+p.tilt+p.r/4); ctx.stroke();
+    });
+    if(frame<200) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+})();
+</script>
+{% endblock %}

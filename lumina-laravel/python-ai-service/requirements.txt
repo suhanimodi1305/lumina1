@@ -1,0 +1,22 @@
+# FastAPI wrapper for Lumina AI service
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+pydantic==2.10.3
+
+# ── Testing ────────────────────────────────────────────────────────────────
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.27.2            # Required by FastAPI TestClient (starlette)
+
+# Existing Django AI dependencies (already in lumina1/requirements.txt)
+# Listed here for reference when running as standalone service:
+# django==4.2.7
+# groq>=0.9.0
+# openai>=1.30.0
+# mediapipe==0.10.14
+# opencv-python-headless==4.8.1.78
+# numpy==1.26.0
+# pillow==10.1.0
+# requests==2.31.0
+# python-decouple==3.8

@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lumina Profile Export — {{ user.get_full_name|default:user.username }}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Cormorant+Garamond:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;font-size:13px;line-height:1.6;padding:2.5rem 2rem;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:#0d9488;margin-bottom:.2rem;}
+  h2{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#64748b;margin:1.75rem 0 .75rem;border-bottom:1px solid #e8e4df;padding-bottom:.35rem;}
+  .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #e8e4df;}
+  .header-left strong{display:block;font-size:.78rem;color:#64748b;margin-bottom:.2rem;}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem;}
+  .meta-box{background:#f5f3f0;border-radius:10px;padding:.75rem 1rem;}
+  .meta-box-val{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:#0d9488;line-height:1;}
+  .meta-box-lbl{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-top:.15rem;}
+  table{width:100%;border-collapse:collapse;margin-bottom:.5rem;}
+  th{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;text-align:left;padding:.4rem .6rem;background:#f5f3f0;border-bottom:1px solid #e8e4df;}
+  td{padding:.45rem .6rem;border-bottom:1px solid #f0eee9;font-size:.8rem;color:#1a1a2e;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;font-size:.58rem;font-weight:700;padding:.1rem .5rem;border-radius:20px;text-transform:uppercase;}
+  .badge-green{background:#dcfce7;color:#166534;}
+  .badge-yellow{background:#fef9c3;color:#854d0e;}
+  .badge-red{background:#fee2e2;color:#991b1b;}
+  .badge-blue{background:#dbeafe;color:#1e40af;}
+  .badge-teal{background:rgba(13,148,136,.12);color:#0d9488;}
+  .footer{margin-top:2rem;padding-top:.85rem;border-top:1px solid #e8e4df;font-size:.68rem;color:#94a3b8;display:flex;justify-content:space-between;}
+  @media print{
+    body{padding:1.5rem 1rem;}
+    .no-print{display:none!important;}
+  }
+</style>
+</head>
+<body>
+
+{% if print_mode %}
+<div class="no-print" style="background:#0d9488;color:#fff;padding:.85rem 1.25rem;border-radius:10px;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;">
+  <span><strong>Print-ready view</strong> — weasyprint not installed. Use browser print (Ctrl+P / Cmd+P) to save as PDF.</span>
+  <button onclick="window.print()" style="background:#fff;color:#0d9488;border:none;border-radius:100px;padding:.35rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;">🖨️ Print / Save PDF</button>
+</div>
+{% endif %}
+
+<div class="header">
+  <div class="header-left">
+    <h1>Lumina</h1>
+    <strong>Profile Export</strong>
+    <div style="font-size:.78rem;color:#64748b;">Generated {{ now|date:"d F Y, g:i A" }}</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:1rem;font-weight:700;color:#1a1a2e;">{{ user.get_full_name|default:user.username }}</div>
+    <div style="font-size:.78rem;color:#64748b;">{{ user.email }}</div>
+    <div style="font-size:.72rem;color:#94a3b8;">Member since {{ user.date_joined|date:"F Y" }}</div>
+    {% if profile %}
+    <div style="margin-top:.35rem;">
+      <span class="badge {% if profile.effective_tier == 'vip' %}badge-yellow{% elif profile.effective_tier == 'medium' %}badge-teal{% else %}badge-blue{% endif %}">
+        {{ profile.effective_tier|upper }}
+      </span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# Stats #}
+<div class="meta-grid">
+  <div class="meta-box">
+    <div class="meta-box-val">{{ scans|length }}</div>
+    <div class="meta-box-lbl">AI Scans</div>
+  </div>
+  <div class="meta-box">
+    <div class="meta-box-val">{{ orders|length }}</div>
+    <div class="meta-box-lbl">Orders</div>
+  </div>
+  <div class="meta-box">
+    <div class="meta-box-val">{{ profile.loyalty_points|default:0 }}</div>
+    <div class="meta-box-lbl">Loyalty Points</div>
+  </div>
+</div>
+
+{# Scan History #}
+<h2>AI Scan History (last 10)</h2>
+{% if scans %}
+<table>
+  <thead><tr><th>Date</th><th>Skin Type</th><th>Undertone</th><th>Harmony Score</th><th>Acne</th></tr></thead>
+  <tbody>
+    {% for scan in scans %}
+    <tr>
+      <td>{{ scan.created_at|date:"d M Y" }}</td>
+      <td>{{ scan.skin_type|title }}</td>
+      <td>{{ scan.undertone|title }}</td>
+      <td><strong style="color:#0d9488;">{{ scan.harmony_score }}%</strong></td>
+      <td>{{ scan.hf_acne_severity|title }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}<p style="font-size:.8rem;color:#94a3b8;">No scans recorded.</p>{% endif %}
+
+{# Orders #}
+<h2>Order History (last 10)</h2>
+{% if orders %}
+<table>
+  <thead><tr><th>Order ID</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td style="font-family:monospace;">{{ order.order_id }}</td>
+      <td>{{ order.created_at|date:"d M Y" }}</td>
+      <td>₹{{ order.total }}</td>
+      <td>{{ order.get_payment_method_display }}</td>
+      <td>
+        <span class="badge {% if order.status == 'delivered' %}badge-green{% elif order.status == 'cancelled' %}badge-red{% else %}badge-blue{% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}<p style="font-size:.8rem;color:#94a3b8;">No orders placed.</p>{% endif %}
+
+{# Referrals #}
+{% if referrals %}
+<h2>Referral History</h2>
+<table>
+  <thead><tr><th>Referred User</th><th>Date</th><th>Points Awarded</th></tr></thead>
+  <tbody>
+    {% for ref in referrals %}
+    <tr>
+      <td>{{ ref.referred_user.user.get_full_name|default:ref.referred_user.user.username }}</td>
+      <td>{{ ref.created_at|date:"d M Y" }}</td>
+      <td style="color:#0d9488;font-weight:700;">+{{ ref.points_awarded }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{# Coupon Usage #}
+{% if coupon_uses %}
+<h2>Coupons Used (last 10)</h2>
+<table>
+  <thead><tr><th>Code</th><th>Date</th><th>Discount Applied</th><th>Order</th></tr></thead>
+  <tbody>
+    {% for usage in coupon_uses %}
+    <tr>
+      <td style="font-family:monospace;font-weight:700;">{{ usage.coupon.code }}</td>
+      <td>{{ usage.used_at|date:"d M Y" }}</td>
+      <td style="color:#0d9488;">₹{{ usage.discount_applied }}</td>
+      <td style="font-family:monospace;">{{ usage.order_ref|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{# Recent Login History #}
+<h2>Recent Login Activity (last 10)</h2>
+{% if login_hist %}
+<table>
+  <thead><tr><th>Date &amp; Time</th><th>Browser</th><th>OS</th><th>Device</th><th>IP</th></tr></thead>
+  <tbody>
+    {% for entry in login_hist %}
+    <tr>
+      <td>{{ entry.logged_in_at|date:"d M Y, g:i A" }}</td>
+      <td>{{ entry.browser|default:"—" }}</td>
+      <td>{{ entry.os|default:"—" }}</td>
+      <td>{{ entry.device_type|title|default:"Desktop" }}</td>
+      <td style="font-family:monospace;">{{ entry.ip_address|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}<p style="font-size:.8rem;color:#94a3b8;">No login history recorded.</p>{% endif %}
+
+<div class="footer">
+  <span>Lumina AI — lumina.app</span>
+  <span>Exported for {{ user.username }} · {{ now|date:"d M Y" }}</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Your AI Skin Analysis — Lumina{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   LUMINA SMART DIAGNOSTIC — AI Result Page
+   ═══════════════════════════════════════════════════════════ */
+.lux-content { padding: 0 !important; }
+
+.sr-hero { background: linear-gradient(135deg,#0d9488 0%,#0891b2 100%); color: #fff; padding: 3rem 1.5rem 5rem; text-align: center; }
+.sr-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.7rem,4vw,2.4rem); font-weight: 700; margin-bottom: .5rem; }
+.sr-hero p  { font-size: .92rem; opacity: .85; max-width: 540px; margin: 0 auto; line-height: 1.6; }
+.sr-hero-badges { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-top: 1.25rem; }
+.sr-hero-badge { display: inline-flex; align-items: center; gap: .4rem; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); padding: .35rem .9rem; border-radius: 100px; font-size: .78rem; font-weight: 600; }
+
+/* Pull cards up from hero */
+.sr-body { max-width: 800px; margin: -3.5rem auto 0; padding: 0 1rem 4rem; position: relative; z-index: 2; }
+
+/* Card base */
+.sr-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
+[data-theme="dark"] .sr-card { box-shadow: 0 4px 24px rgba(0,0,0,.3); }
+.sr-card-title { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: #0d9488; margin-bottom: 1rem; display: flex; align-items: center; gap: .45rem; }
+.sr-card-title::after { content:''; flex:1; height:1px; background: rgba(13,148,136,.18); }
+
+/* Severity meter */
+.sr-severity-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .75rem; }
+.sr-sev-badge { padding: .45rem 1.2rem; border-radius: 100px; font-size: .82rem; font-weight: 800; }
+.sev-minimal { background: rgba(34,197,94,.12); color: #16a34a; }
+.sev-mild    { background: rgba(245,158,11,.12); color: #d97706; }
+.sev-moderate{ background: rgba(249,115,22,.12); color: #ea580c; }
+.sev-severe  { background: rgba(239,68,68,.12);  color: #dc2626; }
+.sr-sev-bar  { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.sr-sev-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+.fill-minimal{ background: #22c55e; width: 15%; }
+.fill-mild   { background: #f59e0b; width: 40%; }
+.fill-moderate{ background: #f97316; width: 68%; }
+.fill-severe { background: #ef4444; width: 92%; }
+
+/* Issues list */
+.sr-issues { display: flex; flex-wrap: wrap; gap: .5rem; }
+.sr-issue-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .4rem .85rem; border-radius: 100px; font-size: .8rem; font-weight: 600; }
+.cat-acne       { background: rgba(239,68,68,.1); color: #dc2626; border: 1px solid rgba(239,68,68,.2); }
+.cat-pigment    { background: rgba(245,158,11,.1); color: #d97706; border: 1px solid rgba(245,158,11,.2); }
+.cat-aging      { background: rgba(139,92,246,.1); color: #7c3aed; border: 1px solid rgba(139,92,246,.2); }
+.cat-hydration  { background: rgba(6,182,212,.1); color: #0891b2; border: 1px solid rgba(6,182,212,.2); }
+.cat-texture    { background: rgba(16,185,129,.1); color: #059669; border: 1px solid rgba(16,185,129,.2); }
+.cat-sensitivity{ background: rgba(236,72,153,.1); color: #db2777; border: 1px solid rgba(236,72,153,.2); }
+.cat-eyes       { background: rgba(59,130,246,.1); color: #2563eb; border: 1px solid rgba(59,130,246,.2); }
+
+/* Skin type badge */
+.sr-skin-type { display: inline-flex; align-items: center; gap: .4rem; background: rgba(13,148,136,.1); color: #0d9488; border: 1px solid rgba(13,148,136,.25); padding: .45rem 1.1rem; border-radius: 100px; font-size: .88rem; font-weight: 700; }
+
+/* Notes (warnings / info) */
+.sr-note { display: flex; gap: .65rem; padding: .85rem 1rem; border-radius: 12px; font-size: .81rem; line-height: 1.55; margin-bottom: .65rem; }
+.sr-note.warning { background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.2); color: var(--text); }
+.sr-note.info    { background: rgba(245,158,11,.07); border: 1px solid rgba(245,158,11,.2); color: var(--text); }
+.sr-note-icon    { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; }
+
+/* Lifestyle flags */
+.sr-flag { display: flex; align-items: flex-start; gap: .65rem; padding: .75rem .9rem; background: rgba(249,115,22,.06); border: 1px solid rgba(249,115,22,.15); border-radius: 12px; font-size: .81rem; line-height: 1.5; color: var(--text); margin-bottom: .5rem; }
+.sr-flag-icon { font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+
+/* Ingredient grid */
+.sr-ing-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+.sr-ing-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .42rem .85rem; border-radius: 100px; background: rgba(13,148,136,.08); border: 1px solid rgba(13,148,136,.2); color: #0d9488; font-size: .8rem; font-weight: 600; }
+
+/* Avoid list */
+.sr-avoid-item { display: flex; align-items: flex-start; gap: .55rem; font-size: .82rem; color: var(--text); margin-bottom: .5rem; line-height: 1.4; }
+.sr-avoid-icon { color: #ef4444; flex-shrink: 0; font-size: .85rem; margin-top: .18rem; }
+
+/* Routine */
+.sr-routine-col h3 { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .75rem; display: flex; align-items: center; gap: .4rem; }
+.sr-routine-step { display: flex; gap: .7rem; align-items: flex-start; padding: .6rem 0; border-bottom: 1px solid var(--border); font-size: .83rem; color: var(--text); line-height: 1.4; }
+.sr-routine-step:last-child { border-bottom: none; }
+.sr-step-num { width: 24px; height: 24px; border-radius: 50%; background: rgba(13,148,136,.12); color: #0d9488; font-size: .7rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* Product cards */
+.sr-prod-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: .9rem; }
+@media (max-width: 480px) { .sr-prod-grid { grid-template-columns: 1fr; } }
+.sr-prod-card { padding: 1rem; border: 1.5px solid var(--border); border-radius: 14px; background: var(--surface); transition: all .18s; }
+.sr-prod-card:hover { border-color: #0d9488; transform: translateY(-2px); box-shadow: 0 4px 18px rgba(13,148,136,.12); }
+.sr-prod-brand { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #0d9488; margin-bottom: .2rem; }
+.sr-prod-name  { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: .25rem; line-height: 1.25; }
+.sr-prod-cat   { display: inline-block; font-size: .68rem; font-weight: 600; padding: .18rem .55rem; border-radius: 100px; background: rgba(13,148,136,.1); color: #0d9488; margin-bottom: .45rem; }
+.sr-prod-why   { font-size: .76rem; color: var(--muted); line-height: 1.45; }
+
+/* Makeup shades */
+.sr-shade-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+.sr-shade-item { flex: 1; min-width: 140px; padding: .85rem 1rem; border: 1.5px solid var(--border); border-radius: 14px; }
+.sr-shade-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .3rem; }
+.sr-shade-val   { font-size: .86rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+
+/* CTA cards */
+.sr-cta-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; }
+@media (max-width: 600px) { .sr-cta-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 400px) { .sr-cta-grid { grid-template-columns: 1fr; } }
+.sr-cta-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.2rem .75rem; border: 1.5px solid var(--border); border-radius: 16px; text-decoration: none; transition: all .18s; gap: .5rem; background: var(--surface); }
+.sr-cta-card:hover { border-color: #0d9488; transform: translateY(-2px); box-shadow: 0 4px 18px rgba(13,148,136,.12); }
+.sr-cta-icon { font-size: 1.8rem; }
+.sr-cta-label { font-size: .82rem; font-weight: 700; color: var(--text); }
+.sr-cta-desc  { font-size: .72rem; color: var(--muted); line-height: 1.4; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% with a=analysis %}
+
+<div class="sr-hero">
+  <h1>✨ Your AI Skin Analysis</h1>
+  <p>{{ a.summary }}</p>
+  <div class="sr-hero-badges">
+    {% if a.skin_type %}<span class="sr-hero-badge">💧 {{ a.skin_type }} Skin</span>{% endif %}
+    <span class="sr-hero-badge">
+      {% if a.severity == 'severe' %}🔴{% elif a.severity == 'moderate' %}🟠{% elif a.severity == 'mild' %}🟡{% else %}🟢{% endif %}
+      {{ a.severity|title }} Level
+    </span>
+    <span class="sr-hero-badge">🧴 {{ a.products|length }} Products Recommended</span>
+    <span class="sr-hero-badge">📋 {{ a.routine_am|length|add:a.routine_pm|length }} Routine Steps</span>
+  </div>
+</div>
+
+<div class="sr-body">
+
+  
+  {% if a.ai_notes %}
+  <div class="sr-card">
+    <div class="sr-card-title">⚠️ Important Notes</div>
+    {% for note in a.ai_notes %}
+    <div class="sr-note {{ note.type }}">
+      <span class="sr-note-icon">{{ note.icon }}</span>
+      <span>{{ note.text }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  
+  <div class="sr-card">
+    <div class="sr-card-title">🔬 Your Skin Profile</div>
+    <div class="sr-severity-row">
+      <div class="sr-sev-badge sev-{{ a.severity }}">{{ a.severity|title }} Concern Level</div>
+      <div class="sr-sev-bar">
+        <div class="sr-sev-fill fill-{{ a.severity }}"></div>
+      </div>
+    </div>
+    {% if a.skin_type %}
+    <div style="margin-bottom:.85rem;">
+      <span class="sr-skin-type">💧 {{ a.skin_type }} Skin Type</span>
+    </div>
+    {% endif %}
+    {% if a.detected_issues %}
+    <div class="sr-issues">
+      {% for issue in a.detected_issues %}
+      <span class="sr-issue-chip cat-{{ issue.cat }}">{{ issue.label }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  
+  {% if a.lifestyle_flags %}
+  <div class="sr-card">
+    <div class="sr-card-title">🧠 Lifestyle Factors Affecting Your Skin</div>
+    {% for f in a.lifestyle_flags %}
+    <div class="sr-flag">
+      <span class="sr-flag-icon">{{ f.icon }}</span>
+      <span>{{ f.text }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  
+  {% if a.top_ingredients %}
+  <div class="sr-card">
+    <div class="sr-card-title">⚗️ Key Ingredients to Look For</div>
+    <div class="sr-ing-grid">
+      {% for ing in a.top_ingredients %}
+      <span class="sr-ing-chip"><i class="bi bi-check-circle-fill" style="font-size:.7rem;"></i> {{ ing }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  
+  {% if a.avoid_list %}
+  <div class="sr-card">
+    <div class="sr-card-title">🚫 Ingredients & Habits to Avoid</div>
+    {% for item in a.avoid_list %}
+    <div class="sr-avoid-item">
+      <i class="bi bi-x-circle-fill sr-avoid-icon"></i>
+      <span>{{ item }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  
+  {% if a.routine_am or a.routine_pm %}
+  <div class="sr-card">
+    <div class="sr-card-title">🧴 Your Personalised Routine</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+      <div class="sr-routine-col">
+        <h3>☀️ Morning</h3>
+        {% for step in a.routine_am %}
+        <div class="sr-routine-step">
+          <div class="sr-step-num">{{ forloop.counter }}</div>
+          <span>{{ step }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="sr-routine-col">
+        <h3>🌙 Night</h3>
+        {% for step in a.routine_pm %}
+        <div class="sr-routine-step">
+          <div class="sr-step-num">{{ forloop.counter }}</div>
+          <span>{{ step }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  
+  {% if a.products %}
+  <div class="sr-card">
+    <div class="sr-card-title">🛍️ Recommended Products for You</div>
+    <div class="sr-prod-grid">
+      {% for prod in a.products %}
+      <div class="sr-prod-card">
+        <div class="sr-prod-brand">{{ prod.brand }}</div>
+        <div class="sr-prod-name">{{ prod.name }}</div>
+        <span class="sr-prod-cat">{{ prod.cat }}</span>
+        <div class="sr-prod-why">{{ prod.why }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  
+  {% if a.makeup_shades %}
+  <div class="sr-card">
+    <div class="sr-card-title">💄 Your Shade Matches</div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:.9rem;">
+      Based on your <strong>{{ a.makeup_shades.tone }} skin tone</strong> + <strong>{{ a.makeup_shades.undertone }} undertone</strong>:
+    </p>
+    <div class="sr-shade-row">
+      <div class="sr-shade-item">
+        <div class="sr-shade-label">Foundation</div>
+        <div class="sr-shade-val">{{ a.makeup_shades.fdn }}</div>
+      </div>
+      <div class="sr-shade-item">
+        <div class="sr-shade-label">Lip Colours</div>
+        <div class="sr-shade-val">{{ a.makeup_shades.lip }}</div>
+      </div>
+      <div class="sr-shade-item">
+        <div class="sr-shade-label">Blush</div>
+        <div class="sr-shade-val">{{ a.makeup_shades.blush }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  
+  {% if a.derm_needed %}
+  <div class="sr-card" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04);">
+    <div class="sr-card-title" style="color:#dc2626;">🩺 Dermatologist Recommendation</div>
+    <p style="font-size:.85rem;color:var(--text);line-height:1.6;margin:0;">
+      Based on what you've told us, we strongly recommend booking a consultation with a certified dermatologist.
+      Severe or painful acne, hormonal concerns, and persistent conditions often need prescription-strength treatment
+      that goes beyond over-the-counter products. Our AI recommendations are a starting point — not a diagnosis.
+    </p>
+  </div>
+  {% endif %}
+
+  
+  <div class="sr-card">
+    <div class="sr-card-title">🚀 What Would You Like to Do Next?</div>
+    <div class="sr-cta-grid">
+      <a href="{% url 'chat:index' %}" class="sr-cta-card">
+        <span class="sr-cta-icon">💬</span>
+        <span class="sr-cta-label">Ask Dr. Lumina</span>
+        <span class="sr-cta-desc">Chat with your AI skin specialist for deeper advice</span>
+      </a>
+      <a href="/products/" class="sr-cta-card">
+        <span class="sr-cta-icon">🛍️</span>
+        <span class="sr-cta-label">Shop Products</span>
+        <span class="sr-cta-desc">Browse products matched to your skin type and concerns</span>
+      </a>
+      <a href="{% url 'diagnostic:smart_start' %}" class="sr-cta-card">
+        <span class="sr-cta-icon">🔄</span>
+        <span class="sr-cta-label">Retake Quiz</span>
+        <span class="sr-cta-desc">Update your answers or start fresh for new results</span>
+      </a>
+      <a href="{% url 'progress:daily_log' %}" class="sr-cta-card">
+        <span class="sr-cta-icon">📅</span>
+        <span class="sr-cta-label">Daily Routine</span>
+        <span class="sr-cta-desc">Log today's AM/PM skincare steps and earn streak points</span>
+      </a>
+      <a href="{% url 'progress:weekly_checkin' %}" class="sr-cta-card">
+        <span class="sr-cta-icon">📋</span>
+        <span class="sr-cta-label">Weekly Check-in</span>
+        <span class="sr-cta-desc">Rate your skin this week and update your progress tracker</span>
+      </a>
+      <a href="{% url 'scanner:upload' %}" class="sr-cta-card">
+        <span class="sr-cta-icon">📸</span>
+        <span class="sr-cta-label">Progress Scan</span>
+        <span class="sr-cta-desc">Upload a new selfie in 14–30 days to track improvement</span>
+      </a>
+    </div>
+  </div>
+
+  
+  <div style="text-align:center;font-size:.72rem;color:var(--muted);padding:.75rem 1rem;line-height:1.6;">
+    <i class="bi bi-info-circle"></i>
+    This AI analysis is for informational purposes only and does not constitute a medical diagnosis.
+    For skin conditions requiring prescription treatment, please consult a certified dermatologist in person.
+  </div>
+
+  
+  <div style="text-align:center;padding:1.5rem 1rem 2rem;">
+    {% if latest_scan %}
+    <a href="{% url 'results:detail' scan_id=latest_scan.id %}"
+       style="display:inline-flex;align-items:center;gap:.6rem;padding:.85rem 2rem;
+              background:linear-gradient(135deg,#0d9488,#0891b2);color:#fff;
+              border-radius:100px;font-size:.95rem;font-weight:700;text-decoration:none;
+              box-shadow:0 6px 22px rgba(13,148,136,.35);margin-right:.75rem;">
+      <i class="bi bi-bar-chart-line"></i> View My Skin Report
+    </a>
+    {% endif %}
+    <a href="{% url 'user_home' %}"
+       style="display:inline-flex;align-items:center;gap:.6rem;padding:.85rem 2rem;
+              background:rgba(13,148,136,.12);color:#0d9488;
+              border:1.5px solid rgba(13,148,136,.3);
+              border-radius:100px;font-size:.95rem;font-weight:700;text-decoration:none;">
+      <i class="bi bi-house-door"></i> Go to My Dashboard
+    </a>
+  </div>
+
+</div>
+{% endwith %}
+{% endblock %}

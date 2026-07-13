@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}My Orders — Lumina{% endblock %}
 {% block extra_css %}
@@ -53,7 +53,7 @@
       <span class="status-pill sp-{{ order.status }}">{{ order.get_status_display }}</span>
     </div>
     <div class="order-card-body">
-      <!-- Item thumbnails -->
+      
       <div class="order-items-thumb">
         {% for item in order.items.all|slice:":3" %}
         <div class="order-thumb">

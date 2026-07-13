@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Address Book — Lumina{% endblock %}
+{% block page_title %}Address Book{% endblock %}
+
+{% block extra_css %}
+<style>
+.addr-wrap{max-width:760px;margin:0 auto;padding-bottom:3rem;}
+.addr-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.25rem 1.4rem;display:flex;align-items:flex-start;gap:1rem;position:relative;transition:box-shadow .14s;}
+.addr-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.07);}
+.addr-card.is-default{border-color:rgba(13,148,136,.35);}
+.addr-icon{width:40px;height:40px;border-radius:12px;background:rgba(13,148,136,.12);color:#0d9488;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.addr-body{flex:1;min-width:0;}
+.addr-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0d9488;margin-bottom:.2rem;}
+.addr-name{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.1rem;}
+.addr-line{font-size:.8rem;color:var(--muted);line-height:1.55;}
+.addr-phone{font-size:.76rem;color:var(--muted);margin-top:.25rem;}
+.addr-default-badge{position:absolute;top:.9rem;right:1rem;font-size:.58rem;font-weight:700;background:rgba(13,148,136,.12);color:#0d9488;border:1px solid rgba(13,148,136,.25);padding:.1rem .55rem;border-radius:100px;}
+.addr-actions{display:flex;gap:.5rem;margin-top:.85rem;flex-wrap:wrap;}
+.btn-sm-teal{font-size:.72rem;font-weight:600;color:#0d9488;text-decoration:none;padding:.28rem .7rem;border-radius:100px;border:1px solid rgba(13,148,136,.3);background:rgba(13,148,136,.08);transition:background .12s;}
+.btn-sm-teal:hover{background:rgba(13,148,136,.18);color:#0d9488;}
+.btn-sm-danger{font-size:.72rem;font-weight:600;color:#ef4444;text-decoration:none;padding:.28rem .7rem;border-radius:100px;border:1px solid rgba(239,68,68,.2);background:rgba(239,68,68,.06);cursor:pointer;transition:background .12s;}
+.btn-sm-danger:hover{background:rgba(239,68,68,.14);}
+.btn-sm-muted{font-size:.72rem;font-weight:600;color:var(--muted);text-decoration:none;padding:.28rem .7rem;border-radius:100px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:background .12s;}
+.btn-sm-muted:hover{background:var(--page-bg);}
+/* Add form */
+.add-form-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;}
+.add-form-card h6{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1.25rem;}
+.form-control,.form-select{font-size:.83rem;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:.5rem .8rem;}
+.form-control:focus,.form-select:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.1);outline:none;}
+[data-theme="dark"] .form-control,[data-theme="dark"] .form-select{background:#1a1a28;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.9);}
+.form-label{font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:.3rem;}
+.btn-add-addr{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.35rem;background:#0d9488;color:#fff;border:none;border-radius:100px;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .13s;}
+.btn-add-addr:hover{background:#0f766e;}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);}
+.empty-state i{font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.3;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="addr-wrap">
+
+  <div style="display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--muted);margin-bottom:1.25rem;">
+    <a href="{% url 'user_home' %}" style="color:var(--muted);text-decoration:none;">My Hub</a>
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    <span style="color:var(--text);">Address Book</span>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <h5 style="font-size:1rem;font-weight:700;margin:0;">Saved Addresses</h5>
+    <span style="font-size:.76rem;color:var(--muted);">{{ addresses.count }} address{{ addresses.count|pluralize:"es" }}</span>
+  </div>
+
+  {# Existing addresses #}
+  <div style="display:flex;flex-direction:column;gap:.85rem;margin-bottom:1.75rem;">
+    {% for addr in addresses %}
+    <div class="addr-card {% if addr.is_default %}is-default{% endif %}">
+      <div class="addr-icon">
+        {% if addr.label == 'home' %}<i class="bi bi-house-heart"></i>
+        {% elif addr.label == 'work' %}<i class="bi bi-briefcase"></i>
+        {% else %}<i class="bi bi-geo-alt"></i>{% endif %}
+      </div>
+      <div class="addr-body">
+        <div class="addr-label">{{ addr.get_label_display }}</div>
+        <div class="addr-name">{{ addr.full_name }}</div>
+        <div class="addr-line">
+          {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+          {{ addr.city }}, {{ addr.state }} – {{ addr.pincode }}
+        </div>
+        <div class="addr-phone"><i class="bi bi-telephone" style="font-size:.7rem;"></i> {{ addr.phone }}</div>
+        <div class="addr-actions">
+          <a href="{% url 'accounts:address_edit' addr.pk %}" class="btn-sm-teal"><i class="bi bi-pencil"></i> Edit</a>
+          {% if not addr.is_default %}
+          <form method="post" action="{% url 'accounts:address_default' addr.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm-muted"><i class="bi bi-star"></i> Set Default</button>
+          </form>
+          {% endif %}
+          <form method="post" action="{% url 'accounts:address_delete' addr.pk %}" style="display:inline;"
+                onsubmit="return confirm('Remove this address?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm-danger"><i class="bi bi-trash3"></i> Remove</button>
+          </form>
+        </div>
+      </div>
+      {% if addr.is_default %}<div class="addr-default-badge"><i class="bi bi-check-circle-fill"></i> Default</div>{% endif %}
+    </div>
+    {% empty %}
+    <div class="empty-state">
+      <i class="bi bi-geo-alt-fill"></i>
+      <p style="font-size:.88rem;">No saved addresses yet.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Add new address #}
+  <div class="add-form-card">
+    <h6><i class="bi bi-plus-circle" style="margin-right:.4rem;"></i> Add New Address</h6>
+    <form method="post" action="{% url 'accounts:address_add' %}">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-sm-4">
+          <label class="form-label">Type</label>
+          {{ form.label }}
+        </div>
+        <div class="col-sm-8">
+          <label class="form-label">Full Name</label>
+          {{ form.full_name }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Phone</label>
+          {{ form.phone }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">PIN Code</label>
+          {{ form.pincode }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address Line 1</label>
+          {{ form.address_line1 }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address Line 2 <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          {{ form.address_line2 }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">City</label>
+          {{ form.city }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">State</label>
+          {{ form.state }}
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            {{ form.is_default }}
+            <label class="form-check-label" style="font-size:.8rem;color:var(--muted);">Set as default address</label>
+          </div>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn-add-addr"><i class="bi bi-plus-lg"></i> Save Address</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

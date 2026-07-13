@@ -1,0 +1,148 @@
+﻿{% extends "hair/base_step.html" %}
+{% load static %}
+
+{% block hero_content %}
+<h1 class="hw-hero-q">
+  Almost Done —<br><em>Your Details</em>
+</h1>
+<p class="hw-hero-sub">
+  A few details to personalise your hair plan. We use this to tailor recommendations for your age, lifestyle, and daily habits.
+  <br><span style="font-size:.78rem; color:rgba(255,255,255,.3); margin-top:.3rem; display:block;">Your information is 100% private and never shared.</span>
+</p>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'hair:save_step' step=6 %}" class="hw-form" id="step6Form">
+  {% csrf_token %}
+
+  
+  <div class="hw-field-group">
+    <label class="hw-label" for="firstName">Your First Name</label>
+    <input type="text" name="first_name" id="firstName" class="hw-input"
+           placeholder="e.g. Priya" autocomplete="given-name">
+  </div>
+
+  
+  <div class="hw-field-group">
+    <label class="hw-label">Your Age</label>
+    <div class="hw-age-row">
+      <button type="button" class="hw-age-btn" id="ageDec">−</button>
+      <div class="hw-age-display" id="ageDisplay">25</div>
+      <div class="hw-age-unit">years old</div>
+      <button type="button" class="hw-age-btn" id="ageInc">+</button>
+    </div>
+    <input type="hidden" name="age" id="ageInput" value="25">
+  </div>
+
+  
+  <div class="hw-field-group">
+    <label class="hw-label">Gender</label>
+    <div class="hw-pill-row">
+      <label class="hw-pill-wrap">
+        <input type="radio" name="gender" value="female" required>
+        <div class="hw-pill">♀ Female</div>
+      </label>
+      <label class="hw-pill-wrap">
+        <input type="radio" name="gender" value="male">
+        <div class="hw-pill">♂ Male</div>
+      </label>
+      <label class="hw-pill-wrap">
+        <input type="radio" name="gender" value="other">
+        <div class="hw-pill">⚧ Other</div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="hw-field-group">
+    <label class="hw-label">Daily Water Intake</label>
+    <div class="hw-lifestyle-row">
+      <label class="hw-ls-wrap">
+        <input type="radio" name="water_intake" value="low" required>
+        <div class="hw-ls-card">
+          <div class="hw-ls-icon">💧</div>
+          <div class="hw-ls-label">Low</div>
+          <div style="font-size:.65rem; color:var(--text-muted);">&lt;6 glasses</div>
+        </div>
+      </label>
+      <label class="hw-ls-wrap">
+        <input type="radio" name="water_intake" value="moderate">
+        <div class="hw-ls-card">
+          <div class="hw-ls-icon">🥤</div>
+          <div class="hw-ls-label">Moderate</div>
+          <div style="font-size:.65rem; color:var(--text-muted);">6–8 glasses</div>
+        </div>
+      </label>
+      <label class="hw-ls-wrap">
+        <input type="radio" name="water_intake" value="high">
+        <div class="hw-ls-card">
+          <div class="hw-ls-icon">🫙</div>
+          <div class="hw-ls-label">High</div>
+          <div style="font-size:.65rem; color:var(--text-muted);">&gt;8 glasses</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="hw-field-group">
+    <label class="hw-label">Average Sleep</label>
+    <div class="hw-lifestyle-row">
+      <label class="hw-ls-wrap">
+        <input type="radio" name="sleep_quality" value="lt6" required>
+        <div class="hw-ls-card">
+          <div class="hw-ls-icon">😴</div>
+          <div class="hw-ls-label">&lt;6 hrs</div>
+        </div>
+      </label>
+      <label class="hw-ls-wrap">
+        <input type="radio" name="sleep_quality" value="6to8">
+        <div class="hw-ls-card">
+          <div class="hw-ls-icon">🌙</div>
+          <div class="hw-ls-label">6–8 hrs</div>
+        </div>
+      </label>
+      <label class="hw-ls-wrap">
+        <input type="radio" name="sleep_quality" value="gt8">
+        <div class="hw-ls-card">
+          <div class="hw-ls-icon">⭐</div>
+          <div class="hw-ls-label">&gt;8 hrs</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="hw-next-btn" id="nextBtn">
+    <i class="bi bi-stars"></i>
+    <span>🔬 Analyse My Hair Profile</span>
+  </button>
+
+  <a href="{% url 'hair:question' step=5 %}" class="hw-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+
+  <div style="text-align:center; margin-top:.85rem; font-size:.72rem; color:var(--text-muted);">
+    <i class="bi bi-lock-fill"></i> Formulated by certified trichologists · 100% private
+  </div>
+</form>
+{% endblock %}
+
+{% block step_js %}
+// ── Age stepper ──────────────────────────────────────────────
+let age = 25;
+const display  = document.getElementById('ageDisplay');
+const ageInput = document.getElementById('ageInput');
+
+document.getElementById('ageDec').addEventListener('click', () => {
+  if (age > 10) { age--; display.textContent = age; ageInput.value = age; }
+});
+document.getElementById('ageInc').addEventListener('click', () => {
+  if (age < 90) { age++; display.textContent = age; ageInput.value = age; }
+});
+
+// ── Loading text override ──────────────────────────────────────
+document.getElementById('step6Form').addEventListener('submit', function() {
+  const el = document.querySelector('#hwLoading .hw-loading-text');
+  if (el) el.textContent = '🔬 Analysing your hair profile…';
+});
+{% endblock %}

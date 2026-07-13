@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════════════════════════
+   LUMINA AI BEAUTY PLATFORM — Core Stylesheet
+   Matches the existing Django branding palette
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── CSS Variables ────────────────────────────────────────────── */
+:root {
+    --lumina-primary:      #c9a84c;
+    --lumina-primary-rgb:  201,168,76;
+    --lumina-accent:       #9b7cb8;
+    --lumina-accent-rgb:   155,124,184;
+    --lumina-dark:         #1a1a2e;
+    --lumina-soft-bg:      #f8f5f0;
+    --lumina-card-bg:      #ffffff;
+    --lumina-border:       rgba(201,168,76,.2);
+    --lumina-text:         #2c2c3e;
+    --lumina-muted:        #6c757d;
+    --font-main:           'Poppins', system-ui, sans-serif;
+}
+
+/* ── Reset & Base ─────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+body { font-family: var(--font-main); color: var(--lumina-text); background: #fafaf8; }
+
+/* ── Navbar ───────────────────────────────────────────────────── */
+.lumina-navbar {
+    background: rgba(26,26,46,.97);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(201,168,76,.15);
+    padding: .75rem 0;
+}
+.lumina-navbar .nav-link { color: rgba(255,255,255,.8) !important; font-size: .88rem; font-weight: 500; transition: color .2s; }
+.lumina-navbar .nav-link:hover { color: var(--lumina-primary) !important; }
+.lumina-navbar .dropdown-menu { border: 1px solid var(--lumina-border); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.12); }
+
+/* ── Brand ────────────────────────────────────────────────────── */
+.lumina-brand { color: var(--lumina-primary) !important; font-weight: 700; letter-spacing: -.5px; }
+.brand-icon { font-size: 1.1em; }
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn-lumina {
+    background: linear-gradient(135deg, var(--lumina-primary), #e8c76a);
+    color: #1a1a2e;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    transition: all .25s;
+}
+.btn-lumina:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(var(--lumina-primary-rgb),.4); color: #1a1a2e; }
+.btn-outline-lumina {
+    border: 2px solid var(--lumina-primary);
+    color: var(--lumina-primary);
+    font-weight: 600;
+    border-radius: 10px;
+    background: transparent;
+    transition: all .25s;
+}
+.btn-outline-lumina:hover { background: var(--lumina-primary); color: #1a1a2e; transform: translateY(-2px); }
+.btn-lumina-gold {
+    background: linear-gradient(135deg, #c9a84c, #ffd700, #c9a84c);
+    color: #1a1a2e;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.lumina-card {
+    border: 1px solid var(--lumina-border);
+    border-radius: 16px;
+    background: var(--lumina-card-bg);
+    transition: box-shadow .25s, transform .25s;
+}
+.lumina-card:hover { box-shadow: 0 8px 32px rgba(var(--lumina-primary-rgb),.12); }
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+.hero-section { background: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 50%, #1a1a2e 100%); color: #fff; padding: 4rem 0; }
+.hero-bg-glow { position:absolute;inset:0;background:radial-gradient(ellipse at 60% 50%, rgba(201,168,76,.15),transparent 60%);pointer-events:none; }
+.hero-badge { background: rgba(201,168,76,.15); color: var(--lumina-primary); padding: .4rem 1rem; border-radius: 50px; font-size: .82rem; font-weight: 600; border: 1px solid rgba(201,168,76,.3); }
+.hero-title { line-height: 1.15; }
+.gradient-text { background: linear-gradient(135deg, var(--lumina-primary), #e8c76a, var(--lumina-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-subtitle { color: rgba(255,255,255,.7); }
+.stat-number { color: var(--lumina-primary); font-size: 1.5rem; }
+.stat-label { font-size: .75rem; }
+
+/* ── Scan demo visual ─────────────────────────────────────────── */
+.hero-scan-demo { position:relative;display:inline-block;padding:3rem; }
+.scan-ring { position:absolute;inset:0;border-radius:50%;border:2px solid rgba(201,168,76,.3);animation:scanPulse 2.5s infinite; }
+.scan-ring-1 { inset:-10px; animation-delay:0s; }
+.scan-ring-2 { inset:-25px; animation-delay:.5s; }
+.scan-ring-3 { inset:-40px; animation-delay:1s; }
+.hero-face-icon { font-size: 7rem; color: rgba(255,255,255,.7); }
+.scan-result-card { position:absolute; background:rgba(26,26,46,.9); border:1px solid rgba(201,168,76,.3); border-radius:10px; padding:.4rem .8rem; backdrop-filter:blur(4px); }
+.scan-card-1 { top:10%; right:-10px; }
+.scan-card-2 { bottom:30%; right:-20px; }
+.scan-card-3 { bottom:10%; left:-10px; }
+
+/* ── Steps ────────────────────────────────────────────────────── */
+.step-card { background: #fff; border-radius: 16px; padding: 2rem 1.5rem; border: 1px solid rgba(0,0,0,.05); transition: transform .25s, box-shadow .25s; }
+.step-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(var(--lumina-primary-rgb),.1); }
+.step-number { width: 32px; height: 32px; background: var(--lumina-primary); color: #1a1a2e; border-radius: 50%; font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+
+/* ── Category cards ───────────────────────────────────────────── */
+.category-card { display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:14px;padding:1.2rem 1rem;transition:all .25s;color:var(--lumina-text); }
+.category-card:hover { border-color:var(--lumina-primary);transform:translateY(-4px);box-shadow:0 6px 20px rgba(var(--lumina-primary-rgb),.15); }
+.category-icon { font-size: 2rem; margin-bottom: .5rem; }
+.category-name { font-weight: 600; font-size: .82rem; text-align: center; }
+
+/* ── Product cards ────────────────────────────────────────────── */
+.product-card { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 14px; overflow: hidden; transition: transform .25s, box-shadow .25s; position: relative; }
+.product-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,.1); }
+.product-img-wrap { aspect-ratio: 1; overflow: hidden; background: #f5f5f5; }
+.product-img { width:100%;height:100%;object-fit:cover;transition:transform .35s; }
+.product-card:hover .product-img { transform: scale(1.06); }
+.product-img-placeholder { width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem; }
+.product-discount-badge { position:absolute;top:.5rem;left:.5rem;background:#e74c3c;color:#fff;font-size:.68rem;font-weight:700;padding:.2rem .5rem;border-radius:6px; }
+.product-featured-badge { position:absolute;top:.5rem;right:.5rem;font-size:.9rem; }
+.product-name { font-size: .9rem; }
+.product-brand { font-size: .75rem; }
+
+/* ── Membership plan cards ────────────────────────────────────── */
+.membership-plan-card { background:#fff;border:2px solid rgba(0,0,0,.08);border-radius:20px;overflow:hidden;position:relative;transition:transform .3s,box-shadow .3s; }
+.membership-plan-card:hover { transform:translateY(-8px);box-shadow:0 20px 50px rgba(0,0,0,.12); }
+.membership-vip { border-color:var(--lumina-primary);background:linear-gradient(180deg,#1a1a2e 0%,#2d1b4e 100%);color:#fff; }
+.membership-vip .text-muted { color:rgba(255,255,255,.6)!important; }
+.membership-current { border-color: #27ae60; }
+.membership-current-badge { position:absolute;top:.75rem;right:.75rem;background:#27ae60;color:#fff;font-size:.72rem;font-weight:700;padding:.2rem .6rem;border-radius:6px; }
+.membership-popular-badge { position:absolute;top:.75rem;left:.75rem;background:var(--lumina-primary);color:#1a1a2e;font-size:.72rem;font-weight:700;padding:.2rem .6rem;border-radius:6px; }
+.plan-icon { font-size:3.5rem; }
+.price-cap-badge { display:inline-block;background:rgba(201,168,76,.15);color:var(--lumina-primary);padding:.3rem .8rem;border-radius:20px;font-size:.78rem;font-weight:600; }
+.price-cap-vip { background:rgba(201,168,76,.3); }
+
+/* ── Rewards ──────────────────────────────────────────────────── */
+.points-pill { background:rgba(201,168,76,.15);color:var(--lumina-primary);padding:.3rem .7rem;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid rgba(201,168,76,.3); }
+
+/* ── Tier badges ──────────────────────────────────────────────── */
+.tier-badge { padding:.25rem .6rem;border-radius:6px;font-size:.7rem;font-weight:700;letter-spacing:.05em; }
+.tier-normal { background:#f0f0f0;color:#555; }
+.tier-medium { background:rgba(13,110,253,.1);color:#0d6efd; }
+.tier-vip { background:linear-gradient(135deg,#c9a84c,#ffd700);color:#1a1a2e; }
+
+/* ── Concern badge ────────────────────────────────────────────── */
+.concern-badge { background:rgba(var(--lumina-primary-rgb),.1);border:1px solid rgba(var(--lumina-primary-rgb),.3);color:var(--lumina-text);padding:.3rem .8rem;border-radius:20px;font-size:.8rem;font-weight:500; }
+
+/* ── Harmony score circle ─────────────────────────────────────── */
+.result-harmony-badge { display:inline-block; }
+.harmony-circle { width:100px;height:100px;border-radius:50%;background:conic-gradient(var(--lumina-primary) calc(var(--score)*1%),#f0f0f0 0);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative; }
+.harmony-circle::before { content:'';position:absolute;inset:8px;border-radius:50%;background:#fff; }
+.harmony-value { font-size:1.4rem;font-weight:700;position:relative;z-index:1; }
+.harmony-label { font-size:.65rem;color:var(--lumina-muted);position:relative;z-index:1; }
+
+/* ── Progress bars ────────────────────────────────────────────── */
+.lumina-progress { background:#f0f0f0;border-radius:50px; }
+.score-bar { border-radius:50px;transition:width 1s ease; }
+
+/* ── Doctor ───────────────────────────────────────────────────── */
+.membership-cta-section { background:linear-gradient(135deg,#f8f5f0,#fff); }
+.membership-cta-card { background:#fff;border:1px solid var(--lumina-border);border-radius:24px;box-shadow:0 4px 30px rgba(var(--lumina-primary-rgb),.08); }
+
+/* ── Section titles ───────────────────────────────────────────── */
+.section-title { font-weight: 700; font-size: 1.75rem; }
+
+/* ── Soft bg ──────────────────────────────────────────────────── */
+.bg-lumina-soft { background: var(--lumina-soft-bg); }
+
+/* ── Avatar ───────────────────────────────────────────────────── */
+.avatar-xs { width:32px;height:32px;font-size:.75rem;font-weight:700; }
+
+/* ── Cart badge ───────────────────────────────────────────────── */
+.cart-badge { position:absolute;top:-4px;right:-4px;font-size:.6rem;padding:.2rem .4rem; }
+.bg-lumina-primary { background: var(--lumina-primary) !important; }
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.lumina-footer { background:#1a1a2e;color:rgba(255,255,255,.7); }
+.footer-link { color:rgba(255,255,255,.6);text-decoration:none;font-size:.85rem;transition:color .2s; }
+.footer-link:hover { color:var(--lumina-primary); }
+
+/* ── Soft colour helpers ──────────────────────────────────────── */
+.bg-success-soft { background:rgba(39,174,96,.12)!important; }
+.bg-primary-soft { background:rgba(13,110,253,.1)!important; }
+.bg-warning-soft { background:rgba(255,193,7,.12)!important; }
+.text-lumina-primary { color: var(--lumina-primary) !important; }
+
+/* ── Guest bg ─────────────────────────────────────────────────── */
+.lumina-guest-bg { background:linear-gradient(135deg,#1a1a2e,#2d1b4e); }
+
+/* ── Border dashed ────────────────────────────────────────────── */
+.border-dashed { border-style:dashed!important; }
+
+/* ── Cursor ───────────────────────────────────────────────────── */
+.cursor-pointer { cursor: pointer; }
+
+/* ── Gender check selected ────────────────────────────────────── */
+.gender-check.selected { border-color:var(--lumina-primary)!important;background:rgba(var(--lumina-primary-rgb),.08); }
+
+/* ── Analysis step ────────────────────────────────────────────── */
+.step-dot { width:36px;height:36px;border-radius:50%;background:rgba(var(--lumina-primary-rgb),.1);display:flex;align-items:center;justify-content:center;color:var(--lumina-primary);flex-shrink:0; }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .hero-title { font-size:2rem; }
+    .hero-scan-demo { display:none; }
+    .chat-wrapper { height:calc(100vh - 120px); }
+}

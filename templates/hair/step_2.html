@@ -1,0 +1,46 @@
+{% extends "hair/base_step.html" %}
+{% load static %}
+
+{% block hero_content %}
+<h1 class="hw-hero-q">
+  How does your <em>scalp</em><br>feel right now?
+</h1>
+<p class="hw-hero-sub">
+  Your scalp health is the foundation of healthy hair. Pick the option that best describes it.
+</p>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'hair:save_step' step=2 %}" class="hw-form" id="step2Form">
+  {% csrf_token %}
+
+  <div class="hw-option-grid col3" id="scalpGrid">
+    {% for s in scalp_options %}
+    <label class="hw-opt-wrap">
+      <input type="radio" name="scalp_condition" value="{{ s.value }}" class="hw-scalp-rb" required>
+      <div class="hw-opt-card">
+        <div class="hw-opt-check"><i class="bi bi-check-lg"></i></div>
+        <div class="hw-opt-icon">{{ s.icon }}</div>
+        <div class="hw-opt-label">{{ s.label }}</div>
+        <div class="hw-opt-desc">{{ s.desc }}</div>
+      </div>
+    </label>
+    {% endfor %}
+  </div>
+
+  <button type="submit" class="hw-next-btn" id="nextBtn" disabled>
+    <span>Next — Root Causes</span>
+    <i class="bi bi-arrow-right"></i>
+  </button>
+
+  <a href="{% url 'hair:question' step=1 %}" class="hw-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}
+
+{% block step_js %}
+const rbs = document.querySelectorAll('.hw-scalp-rb');
+const btn = document.getElementById('nextBtn');
+rbs.forEach(r => r.addEventListener('change', () => { btn.disabled = false; }));
+{% endblock %}

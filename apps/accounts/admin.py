@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 from apps.employee.models import EmployeeLoginLog
 from apps.orders.models import Order
-from apps.accounts.models import EmailLog
+from apps.accounts.models import EmailLog, SavedAddress, LoginHistory, UserDevice
 
 
 # ── Inlines ───────────────────────────────────────────────────────────────────
@@ -231,3 +231,42 @@ class EmailLogAdmin(admin.ModelAdmin):
     @admin.display(description='Subject')
     def subject_short(self, obj):
         return obj.subject[:60] + ('…' if len(obj.subject) > 60 else '')
+
+
+# ── Saved Address admin ───────────────────────────────────────────────────────
+
+@admin.register(SavedAddress)
+class SavedAddressAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'label', 'full_name', 'city', 'state', 'pincode', 'is_default')
+    list_filter   = ('label', 'is_default', 'state')
+    search_fields = ('user__username', 'full_name', 'city', 'pincode')
+    ordering      = ('user__username',)
+
+
+# ── Login History admin ───────────────────────────────────────────────────────
+
+@admin.register(LoginHistory)
+class LoginHistoryAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'ip_address', 'browser', 'os', 'device_type', 'logged_in_at')
+    list_filter   = ('device_type', 'browser', 'os', 'logged_in_at')
+    search_fields = ('user__username', 'ip_address', 'browser')
+    ordering      = ('-logged_in_at',)
+    readonly_fields = ('user', 'ip_address', 'user_agent', 'device_type',
+                       'browser', 'os', 'logged_in_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+# ── User Device admin ─────────────────────────────────────────────────────────
+
+@admin.register(UserDevice)
+class UserDeviceAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'device_name', 'device_type', 'browser', 'os',
+                     'is_trusted', 'is_current', 'last_seen')
+    list_filter   = ('device_type', 'browser', 'is_trusted', 'is_current')
+    search_fields = ('user__username', 'device_name', 'ip_address')
+    ordering      = ('-last_seen',)

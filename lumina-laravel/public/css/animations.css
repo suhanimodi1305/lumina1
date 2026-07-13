@@ -1,0 +1,173 @@
+/* ═══════════════════════════════════════════════════════════════
+   LUMINA — Animations & Transitions
+   Lightweight CSS only — no jQuery
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Fade + Slide Up ──────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+    from { opacity:0; transform:translateY(28px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.fade-in-up {
+    animation: fadeSlideUp 0.65s ease-out both;
+}
+
+/* ── Fade In ──────────────────────────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+}
+.fade-in { animation: fadeIn 0.5s ease both; }
+
+/* ── Scale In ─────────────────────────────────────────────────── */
+@keyframes scaleIn {
+    from { opacity:0; transform:scale(.88); }
+    to   { opacity:1; transform:scale(1); }
+}
+.scale-in { animation: scaleIn 0.4s ease both; }
+
+/* ── Scan pulse ring ──────────────────────────────────────────── */
+@keyframes scanPulse {
+    0%   { transform:scale(.95); opacity:.7; }
+    50%  { transform:scale(1.05); opacity:.3; }
+    100% { transform:scale(.95); opacity:.7; }
+}
+
+/* ── Pulse button ─────────────────────────────────────────────── */
+.pulse-btn { position:relative; }
+.pulse-btn::after {
+    content:'';
+    position:absolute;inset:0;
+    border-radius:inherit;
+    border:2px solid var(--lumina-primary);
+    animation:pulseBtnRing 2s infinite;
+}
+@keyframes pulseBtnRing {
+    0%   { transform:scale(1); opacity:.7; }
+    70%  { transform:scale(1.12); opacity:0; }
+    100% { transform:scale(1.12); opacity:0; }
+}
+
+/* ── Analysis step appear ─────────────────────────────────────── */
+@keyframes stepAppear {
+    from { opacity:0; transform:translateX(-16px); }
+    to   { opacity:1; transform:translateX(0); }
+}
+.analysis-step {
+    opacity:0;
+    animation: stepAppear 0.4s ease forwards;
+}
+/* JS controls delay via inline style, but CSS fallback: */
+.analysis-step:nth-child(1) { animation-delay:0.2s; }
+.analysis-step:nth-child(2) { animation-delay:1.0s; }
+.analysis-step:nth-child(3) { animation-delay:1.8s; }
+.analysis-step:nth-child(4) { animation-delay:2.6s; }
+.analysis-step:nth-child(5) { animation-delay:3.4s; }
+
+/* ── Face mesh draw lines ─────────────────────────────────────── */
+@keyframes drawLine {
+    from { stroke-dashoffset:100; opacity:0; }
+    to   { stroke-dashoffset:0;   opacity:1; }
+}
+.face-mesh-line {
+    stroke-dasharray:100;
+    stroke-dashoffset:100;
+    animation: drawLine 1.5s ease forwards;
+}
+
+/* ── Progress bar animate ─────────────────────────────────────── */
+@keyframes progressFill {
+    from { width:0%; }
+}
+.progress-animated .progress-bar {
+    animation: progressFill 1.2s ease-out forwards;
+}
+
+/* ── Dashboard count-up (requires JS trigger) ─────────────────── */
+.count-up { display:inline-block; }
+
+/* ── Membership card hover ─────────────────────────────────────── */
+.membership-plan-card {
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+}
+.membership-plan-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 24px 60px rgba(var(--lumina-primary-rgb),.2);
+}
+.membership-vip:hover {
+    box-shadow: 0 24px 60px rgba(201,168,76,.35);
+}
+
+/* ── Product card hover ───────────────────────────────────────── */
+.product-card {
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+}
+.product-card:hover {
+    transform: translateY(-6px) scale(1.025);
+    box-shadow: 0 12px 40px rgba(0,0,0,.1);
+}
+
+/* ── Rewards points pop ───────────────────────────────────────── */
+@keyframes pointsPop {
+    0%   { transform:scale(0) rotate(-10deg); opacity:0; }
+    60%  { transform:scale(1.25) rotate(3deg); opacity:1; }
+    100% { transform:scale(1) rotate(0); opacity:1; }
+}
+.points-pop {
+    animation: pointsPop 0.5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* ── Checkout step slide ──────────────────────────────────────── */
+@keyframes slideRight {
+    from { opacity:0; transform:translateX(30px); }
+    to   { opacity:1; transform:translateX(0); }
+}
+.checkout-step-enter { animation: slideRight 0.3s ease both; }
+
+/* ── Typing indicator ─────────────────────────────────────────── */
+@keyframes typingBounce {
+    0%,80%,100% { transform:translateY(0); }
+    40%         { transform:translateY(-8px); }
+}
+
+/* ── Step card hover ──────────────────────────────────────────── */
+.step-card {
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+}
+.step-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(var(--lumina-primary-rgb),.12);
+}
+
+/* ── Category card hover ──────────────────────────────────────── */
+.category-card {
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease, border-color 0.2s;
+}
+.category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(var(--lumina-primary-rgb),.15);
+    border-color: var(--lumina-primary) !important;
+}
+
+/* ── Shimmer loading skeleton ─────────────────────────────────── */
+@keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+}
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+/* ── Smooth scrollbar ─────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+/* ── Reduced motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

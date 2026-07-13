@@ -1,0 +1,141 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Your <em>makeup</em> & preferences</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=11 %}" class="ac-form" id="step11Form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">How often do you wear makeup?</label>
+    <div class="ac-options">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="makeup_freq" value="daily" id="mf_daily" class="makeup-freq" required>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">💄</div>
+          <div class="ac-opt-label">Daily</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="makeup_freq" value="few" id="mf_few" class="makeup-freq">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🗓️</div>
+          <div class="ac-opt-label">A few times/week</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="makeup_freq" value="occasional" id="mf_occ" class="makeup-freq">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🎉</div>
+          <div class="ac-opt-label">Occasionally</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="makeup_freq" value="never" id="mf_never" class="makeup-freq">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🚫</div>
+          <div class="ac-opt-label">Never</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div id="makeupDetails" style="width:100%;">
+    <div class="ac-field">
+      <label class="ac-label">Which makeup products do you use? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+      <div class="ac-toggle-list">
+        {% for o in makeup_items %}
+        <label class="ac-toggle-wrap">
+          <input type="checkbox" name="makeup_items" value="{{ o.value }}"
+                 {% if o.checked %}checked{% endif %}>
+          <div class="ac-toggle-item">
+            <span class="ac-toggle-icon">{{ o.icon }}</span>
+            <span class="ac-toggle-label">{{ o.label }}</span>
+            <span class="ac-toggle-check"></span>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    
+    <div class="ac-field">
+      <label class="ac-label">Do you ever sleep with makeup on?</label>
+      <div class="ac-options col-3">
+        <label class="ac-opt-wrap">
+          <input type="radio" name="sleeps_with_makeup" value="never"
+                 {% if sess.sleeps_with_makeup == 'never' %}checked{% endif %}>
+          <div class="ac-opt-card" style="min-height:80px;">
+            <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+            <div class="ac-opt-icon">✅</div>
+            <div class="ac-opt-label">Never</div>
+          </div>
+        </label>
+        <label class="ac-opt-wrap">
+          <input type="radio" name="sleeps_with_makeup" value="sometimes"
+                 {% if sess.sleeps_with_makeup == 'sometimes' %}checked{% endif %}>
+          <div class="ac-opt-card" style="min-height:80px;">
+            <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+            <div class="ac-opt-icon">😅</div>
+            <div class="ac-opt-label">Sometimes</div>
+          </div>
+        </label>
+        <label class="ac-opt-wrap">
+          <input type="radio" name="sleeps_with_makeup" value="often"
+                 {% if sess.sleeps_with_makeup == 'often' %}checked{% endif %}>
+          <div class="ac-opt-card" style="min-height:80px;">
+            <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+            <div class="ac-opt-icon">😬</div>
+            <div class="ac-opt-label">Often</div>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="ac-section-divider"><i class="bi bi-bag-heart"></i> Product Preferences</div>
+  <div class="ac-field">
+    <label class="ac-label">What kind of products would you like recommended? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-toggle-list">
+      {% for o in product_prefs %}
+      <label class="ac-toggle-wrap">
+        <input type="checkbox" name="product_prefs" value="{{ o.value }}">
+        <div class="ac-toggle-item">
+          <span class="ac-toggle-icon">{{ o.icon }}</span>
+          <span class="ac-toggle-label">{{ o.label }}</span>
+          <span class="ac-toggle-check"></span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue — Final Step <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=10 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}
+
+{% block step_js %}
+const makeupFreqRbs = document.querySelectorAll('.makeup-freq');
+const makeupDetails = document.getElementById('makeupDetails');
+function toggleMakeup() {
+  const val = document.querySelector('.makeup-freq:checked')?.value;
+  makeupDetails.style.display = (val === 'never') ? 'none' : 'block';
+}
+makeupFreqRbs.forEach(r => r.addEventListener('change', toggleMakeup));
+toggleMakeup();
+{% endblock %}

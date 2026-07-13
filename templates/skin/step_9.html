@@ -1,0 +1,40 @@
+{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">What do you usually <em>eat</em>?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=9 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  <div class="ac-field">
+    <label class="ac-label">Which foods are a regular part of your diet? <span style="font-weight:400;color:var(--muted);">(select all that apply)</span></label>
+    <div class="ac-options">
+      {% for o in food_options %}
+      <label class="ac-opt-wrap">
+        <input type="checkbox" name="food_habits" value="{{ o.value }}"
+               {% if o.value in sess.food_habits %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:110px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ o.icon }}</div>
+          <div class="ac-opt-label">{{ o.label }}</div>
+          <div class="ac-opt-desc">{{ o.desc }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:.5rem;">
+      Diet has a huge impact on skin health — especially acne and inflammation 🥗
+    </p>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=8 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

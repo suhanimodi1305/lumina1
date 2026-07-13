@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Payment — Lumina Shop{% endblock %}
 {% block extra_css %}
@@ -56,7 +56,7 @@
     <span style="font-size:.78rem;color:rgba(255,255,255,.5);"><i class="bi bi-lock-fill" style="color:#0d9488;"></i> Secured by SSL</span>
   </div>
 
-  <!-- Steps -->
+  
   <div class="ck-steps">
     <div class="ck-step done"><i class="bi bi-check-circle-fill"></i> Address</div>
     <div class="ck-step active"><i class="bi bi-credit-card-fill"></i> Payment</div>
@@ -66,9 +66,9 @@
   <form method="post" id="payForm">
     {% csrf_token %}
     <div class="py-grid">
-      <!-- LEFT -->
+      
       <div>
-        <!-- Address recap -->
+        
         <div class="py-card">
           <h3><i class="bi bi-house-fill" style="color:var(--teal);"></i> Delivering To</h3>
           <div class="addr-recap">
@@ -84,7 +84,7 @@
           </a>
         </div>
 
-        <!-- Payment methods -->
+        
         <div class="py-card">
           <h3><i class="bi bi-wallet2" style="color:var(--gold);"></i> Choose Payment Method</h3>
 
@@ -126,7 +126,7 @@
             </div>
           </label>
 
-          <!-- COD info box -->
+          
           <div class="cod-infobox show" id="codInfo">
             <div style="font-weight:700;color:#166534;font-size:.82rem;margin-bottom:.4rem;">💵 How Cash on Delivery Works</div>
             <ul>
@@ -139,7 +139,7 @@
         </div>
       </div>
 
-      <!-- RIGHT: Order summary -->
+      
       <div>
         <div class="py-card" style="position:sticky;top:70px;">
           <h3><i class="bi bi-receipt" style="color:var(--gold);"></i> Order Summary</h3>

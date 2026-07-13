@@ -1,0 +1,101 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">Tell us about <em>yourself</em></h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=1 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">What is your age group?</label>
+    <div class="ac-options col-3">
+      {% for val, label, icon in age_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="age_group" value="{{ val }}"
+               {% if sess.age_group == val %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ icon }}</div>
+          <div class="ac-opt-label">{{ label }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">What best describes you?</label>
+    <div class="ac-options">
+      {% for val, label, icon in gender_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="gender" value="{{ val }}"
+               {% if sess.gender == val %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ icon }}</div>
+          <div class="ac-opt-label">{{ label }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">What climate do you live in?</label>
+    <div class="ac-options col-3" style="grid-template-columns:repeat(3,1fr);">
+      {% for c in climate_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="climate" value="{{ c.value }}"
+               {% if sess.climate == c.value %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:100px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ c.icon }}</div>
+          <div class="ac-opt-label">{{ c.label }}</div>
+          <div class="ac-opt-desc">{{ c.desc }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Your work environment?</label>
+    <div class="ac-options">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="occupation" value="indoor"
+               {% if sess.occupation == 'indoor' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🏢</div>
+          <div class="ac-opt-label">Indoor</div>
+          <div class="ac-opt-desc">Office, home, AC environment</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="occupation" value="outdoor"
+               {% if sess.occupation == 'outdoor' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:90px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🌤️</div>
+          <div class="ac-opt-label">Outdoor</div>
+          <div class="ac-opt-desc">Sun, pollution, field work</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'core:home' %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back to Home
+  </a>
+</form>
+{% endblock %}

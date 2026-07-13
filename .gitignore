@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# Virtual environments
+.venv/
+.venv-1/
+venv/
+env/
+
+# Django
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+logs/
+media/
+staticfiles/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+api\ key.txt
+api*.txt
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Kiro
+.kiro/
+
+# Misc
+*.log
+*.bak
+*.tmp
+pip_install_out.txt
+structure.txt
+django_check_out.txt
+_final_test.py
+_test_face_shape.py
+fix_encoding.py
+fix_template.py

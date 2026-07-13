@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login History — Lumina{% endblock %}
+{% block page_title %}Login History{% endblock %}
+
+{% block extra_css %}
+<style>
+.lh-wrap{max-width:760px;margin:0 auto;padding-bottom:3rem;}
+.lh-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.lh-head{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:.75rem;padding:.65rem 1.2rem;background:var(--page-bg);border-bottom:1px solid var(--border);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
+.lh-row{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:.75rem;padding:.9rem 1.2rem;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;}
+.lh-row:last-child{border-bottom:none;}
+.lh-row:hover{background:var(--page-bg);}
+.lh-device-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.lh-device-icon.desktop{background:rgba(13,148,136,.12);color:#0d9488;}
+.lh-device-icon.mobile{background:rgba(99,102,241,.12);color:#6366f1;}
+.lh-device-icon.tablet{background:rgba(201,169,110,.12);color:#c9a96e;}
+.lh-browser{font-size:.84rem;font-weight:600;color:var(--text);}
+.lh-os{font-size:.72rem;color:var(--muted);}
+.lh-ip{font-size:.76rem;color:var(--muted);font-family:monospace;}
+.lh-time{font-size:.74rem;color:var(--muted);text-align:right;white-space:nowrap;}
+.lh-time strong{display:block;font-size:.82rem;color:var(--text);}
+.security-banner{background:linear-gradient(135deg,rgba(13,148,136,.1),rgba(13,148,136,.04));border:1px solid rgba(13,148,136,.2);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.85rem;}
+.empty-state{text-align:center;padding:3.5rem;color:var(--muted);}
+.empty-state i{font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.25;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lh-wrap">
+
+  <div style="display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--muted);margin-bottom:1.25rem;">
+    <a href="{% url 'user_home' %}" style="color:var(--muted);text-decoration:none;">My Hub</a>
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    <span style="color:var(--text);">Login History</span>
+  </div>
+
+  <div class="security-banner">
+    <i class="bi bi-shield-check" style="font-size:1.4rem;color:#0d9488;flex-shrink:0;"></i>
+    <div>
+      <div style="font-size:.85rem;font-weight:700;color:var(--text);">Account Security</div>
+      <div style="font-size:.76rem;color:var(--muted);">Showing last {{ history|length }} login events. If you see anything suspicious, change your password immediately.</div>
+    </div>
+    <a href="{% url 'accounts:password_reset' %}" style="margin-left:auto;font-size:.75rem;font-weight:700;color:#0d9488;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+      <i class="bi bi-lock"></i> Change Password
+    </a>
+  </div>
+
+  <div class="lh-card">
+    {% if history %}
+    <div class="lh-head">
+      <span style="width:34px;"></span>
+      <span>Device / Browser</span>
+      <span>IP Address</span>
+      <span>OS</span>
+      <span>Date &amp; Time</span>
+    </div>
+    {% for entry in history %}
+    <div class="lh-row">
+      <div class="lh-device-icon {{ entry.device_type|default:'desktop' }}">
+        {% if entry.device_type == 'mobile' %}<i class="bi bi-phone"></i>
+        {% elif entry.device_type == 'tablet' %}<i class="bi bi-tablet"></i>
+        {% else %}<i class="bi bi-display"></i>{% endif %}
+      </div>
+      <div>
+        <div class="lh-browser">{{ entry.browser|default:"Unknown Browser" }}</div>
+        <div class="lh-os">{{ entry.device_type|title|default:"Desktop" }}</div>
+      </div>
+      <div class="lh-ip">{{ entry.ip_address|default:"—" }}</div>
+      <div class="lh-os">{{ entry.os|default:"—" }}</div>
+      <div class="lh-time">
+        <strong>{{ entry.logged_in_at|date:"d M Y" }}</strong>
+        {{ entry.logged_in_at|date:"g:i A" }}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-shield-check"></i>
+      <p style="font-size:.88rem;">No login history recorded yet.</p>
+      <p style="font-size:.76rem;">History is recorded from your next login onwards.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="margin-top:1rem;font-size:.74rem;color:var(--muted);text-align:center;">
+    <i class="bi bi-info-circle"></i> Login history is stored for security purposes only. Showing last 50 entries.
+  </div>
+
+</div>
+{% endblock %}

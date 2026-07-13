@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Address — Lumina{% endblock %}
+{% block page_title %}Edit Address{% endblock %}
+
+{% block extra_css %}
+<style>
+.addr-edit-wrap{max-width:600px;margin:0 auto;padding-bottom:3rem;}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.75rem;}
+.form-label{font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:.3rem;}
+.form-control,.form-select{font-size:.83rem;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:.5rem .8rem;}
+.form-control:focus,.form-select:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.1);outline:none;}
+[data-theme="dark"] .form-control,[data-theme="dark"] .form-select{background:#1a1a28;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.9);}
+.btn-save{display:inline-flex;align-items:center;gap:.4rem;padding:.58rem 1.4rem;background:#0d9488;color:#fff;border:none;border-radius:100px;font-size:.83rem;font-weight:700;cursor:pointer;transition:background .13s;}
+.btn-save:hover{background:#0f766e;}
+.btn-back{display:inline-flex;align-items:center;gap:.4rem;padding:.58rem 1.2rem;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:100px;font-size:.83rem;font-weight:600;text-decoration:none;transition:all .13s;}
+.btn-back:hover{background:var(--page-bg);color:var(--text);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="addr-edit-wrap">
+  <div style="display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--muted);margin-bottom:1.25rem;">
+    <a href="{% url 'user_home' %}" style="color:var(--muted);text-decoration:none;">My Hub</a>
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    <a href="{% url 'accounts:address_list' %}" style="color:var(--muted);text-decoration:none;">Address Book</a>
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    <span style="color:var(--text);">Edit</span>
+  </div>
+
+  <div class="form-card">
+    <h5 style="font-size:.95rem;font-weight:700;margin-bottom:1.5rem;">Edit {{ address.get_label_display }} Address</h5>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-sm-4">
+          <label class="form-label">Type</label>{{ form.label }}
+        </div>
+        <div class="col-sm-8">
+          <label class="form-label">Full Name</label>{{ form.full_name }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Phone</label>{{ form.phone }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">PIN Code</label>{{ form.pincode }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address Line 1</label>{{ form.address_line1 }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address Line 2 <span style="color:var(--muted);font-weight:400;">(optional)</span></label>{{ form.address_line2 }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">City</label>{{ form.city }}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">State</label>{{ form.state }}
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            {{ form.is_default }}
+            <label class="form-check-label" style="font-size:.8rem;color:var(--muted);">Set as default address</label>
+          </div>
+        </div>
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn-save"><i class="bi bi-check-lg"></i> Update Address</button>
+          <a href="{% url 'accounts:address_list' %}" class="btn-back"><i class="bi bi-arrow-left"></i> Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

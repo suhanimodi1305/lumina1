@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}FAQs — Lumina{% endblock %}
+{% block page_title %}FAQs{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --faq-teal: #0d9488;
+  --faq-teal-lt: rgba(13,148,136,.12);
+  --faq-gold: #c9a96e;
+}
+
+.faq-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+/* Hero */
+.faq-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 2rem;
+}
+.faq-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .3rem .9rem;
+  border-radius: 100px;
+  background: var(--faq-teal-lt);
+  border: 1px solid rgba(13,148,136,.3);
+  color: var(--faq-teal);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  margin-bottom: 1rem;
+}
+.faq-hero h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: .6rem;
+}
+.faq-hero h1 em {
+  color: var(--faq-teal);
+  font-style: italic;
+}
+.faq-hero p {
+  font-size: .9rem;
+  color: var(--muted);
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.65;
+}
+.faq-search {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: .5rem 1rem;
+}
+.faq-search i {
+  color: var(--muted);
+  font-size: .9rem;
+  flex-shrink: 0;
+}
+.faq-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: .85rem;
+  outline: none;
+}
+.faq-search input::placeholder {
+  color: var(--muted);
+}
+
+/* Category section */
+.faq-category {
+  margin-bottom: 1.5rem;
+}
+.faq-cat-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  margin-bottom: .75rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.faq-cat-icon {
+  font-size: 1rem;
+}
+
+/* Accordion items */
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: .5rem;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.faq-item:hover {
+  border-color: rgba(13,148,136,.3);
+}
+.faq-item.open {
+  border-color: rgba(13,148,136,.35);
+}
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  cursor: pointer;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+  list-style: none;
+}
+.faq-q::-webkit-details-marker {
+  display: none;
+}
+.faq-q-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--faq-teal-lt);
+  color: var(--faq-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .75rem;
+  transition: transform .2s, background .15s;
+}
+.faq-item.open .faq-q-icon {
+  background: var(--faq-teal);
+  color: #fff;
+  transform: rotate(45deg);
+}
+.faq-a {
+  padding: 0 1.15rem 1rem 1.15rem;
+  font-size: .84rem;
+  color: var(--muted);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+  padding-top: .75rem;
+  display: none;
+}
+.faq-item.open .faq-a {
+  display: block;
+}
+
+/* Support CTA */
+.faq-cta {
+  background: linear-gradient(135deg, var(--surface), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+.faq-cta-icon {
+  font-size: 2rem;
+  margin-bottom: .65rem;
+  display: block;
+}
+.faq-cta h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .4rem;
+}
+.faq-cta p {
+  font-size: .84rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+.btn-teal {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem 1.3rem;
+  background: var(--faq-teal);
+  color: #fff;
+  border-radius: 100px;
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .13s;
+}
+.btn-teal:hover {
+  background: #0f766e;
+  color: #fff;
+}
+
+/* Hide items on search no-match */
+.faq-item.hidden {
+  display: none;
+}
+.faq-category.hidden {
+  display: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="faq-wrap">
+
+  {# ── HERO ── #}
+  <div class="faq-hero">
+    <div class="faq-hero-badge"><i class="bi bi-question-circle-fill"></i> Support</div>
+    <h1>Frequently Asked <em>Questions</em></h1>
+    <p>Everything you need to know about Lumina — scans, privacy, results, and membership.</p>
+    <div class="faq-search">
+      <i class="bi bi-search"></i>
+      <input type="text" id="faq-search" placeholder="Search questions…" autocomplete="off">
+    </div>
+  </div>
+
+  {# ── FAQ CATEGORIES ── #}
+  {% for category in faqs %}
+  <div class="faq-category" data-category="{{ category.category }}">
+    <div class="faq-cat-header">
+      <span class="faq-cat-icon">{{ category.icon }}</span>
+      {{ category.category }}
+    </div>
+    {% for item in category.items %}
+    <div class="faq-item" data-q="{{ item.q|lower }}">
+      <div class="faq-q" onclick="toggleFaq(this.parentElement)">
+        <span>{{ item.q }}</span>
+        <span class="faq-q-icon"><i class="bi bi-plus"></i></span>
+      </div>
+      <div class="faq-a">{{ item.a }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  {# ── SUPPORT CTA ── #}
+  <div class="faq-cta">
+    <span class="faq-cta-icon">🎧</span>
+    <h3>Still have questions?</h3>
+    <p>Our support team is here to help. Send us a message and we'll get back to you promptly.</p>
+    <a href="{% url 'accounts:support_tickets' %}" class="btn-teal">
+      <i class="bi bi-headset"></i> Contact Support
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle accordion
+function toggleFaq(item) {
+  const isOpen = item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  // Open clicked if it wasn't open
+  if (!isOpen) item.classList.add('open');
+}
+
+// Live search
+document.getElementById('faq-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.faq-category').forEach(cat => {
+    let anyVisible = false;
+    cat.querySelectorAll('.faq-item').forEach(item => {
+      const text = item.dataset.q + ' ' + item.querySelector('.faq-a').textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      item.classList.toggle('hidden', !match);
+      if (match) anyVisible = true;
+    });
+    cat.classList.toggle('hidden', !anyVisible);
+  });
+});
+
+// Open item if URL hash matches a question keyword
+(function() {
+  const hash = window.location.hash.replace('#', '').toLowerCase();
+  if (!hash) return;
+  document.querySelectorAll('.faq-item').forEach(item => {
+    if (item.dataset.q.includes(hash)) {
+      item.classList.add('open');
+      setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+    }
+  });
+})();
+</script>
+{% endblock %}

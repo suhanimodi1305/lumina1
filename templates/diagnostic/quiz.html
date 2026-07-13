@@ -1,0 +1,477 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Skin Profile Quiz — Lumina{% endblock %}
+{% block page_title %}Skin Profile Quiz{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─── PROGRESS BAR ─── */
+.quiz-progress-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--r-pill);
+  margin: 0 0 2rem;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--lux-teal), #0891b2);
+  transition: width .4s ease;
+}
+
+/* ─── SECTION CARDS ─── */
+.quiz-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 1.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.quiz-section-hdr {
+  display: flex; align-items: flex-start; gap: .85rem;
+  margin-bottom: 1.5rem; padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.quiz-section-icon {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  background: var(--lux-teal-lt);
+  border: 1.5px solid rgba(13,148,136,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; flex-shrink: 0;
+}
+.quiz-section-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+.quiz-section-sub   { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ─── QUESTION LABEL ─── */
+.q-label {
+  font-size: .82rem; font-weight: 700; color: var(--text);
+  margin-bottom: .65rem; display: block;
+}
+
+/* ─── SKIN TYPE PILLS ─── */
+.skin-pill-row {
+  display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem;
+}
+.skin-pill-wrap { position: relative; }
+.skin-pill-wrap input[type="radio"] {
+  position: absolute; opacity: 0; pointer-events: none;
+}
+.skin-pill {
+  padding: .55rem 1.15rem; border-radius: var(--r-pill);
+  border: 2px solid var(--border); background: var(--surface);
+  font-size: .84rem; font-weight: 600; color: var(--text-muted);
+  cursor: pointer; transition: all .18s ease; display: inline-flex;
+  align-items: center; gap: .35rem;
+}
+.skin-pill:hover { border-color: var(--lux-teal); color: var(--lux-teal); }
+.skin-pill-wrap input:checked ~ .skin-pill {
+  background: var(--lux-teal); color: #fff; border-color: var(--lux-teal);
+}
+
+/* ─── SELECT ─── */
+.q-select {
+  width: 100%;
+  padding: .7rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: .88rem;
+  font-family: var(--font-body);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+  transition: border-color .18s;
+  margin-bottom: 1.5rem;
+}
+.q-select:focus { outline: none; border-color: var(--lux-teal); }
+
+/* ─── BUDGET GRID ─── */
+.budget-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+@media (max-width: 400px) { .budget-grid { grid-template-columns: 1fr; } }
+.budget-wrap { position: relative; }
+.budget-wrap input[type="radio"] {
+  position: absolute; opacity: 0; pointer-events: none;
+}
+.budget-card {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 1rem .75rem; border-radius: var(--r-lg);
+  border: 2px solid var(--border); background: var(--surface);
+  cursor: pointer; text-align: center; transition: all .2s ease;
+}
+.budget-card:hover {
+  border-color: var(--lux-teal); transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(13,148,136,.12);
+}
+.budget-wrap input:checked ~ .budget-card {
+  background: var(--lux-teal-lt); border-color: var(--lux-teal);
+  box-shadow: 0 4px 16px rgba(13,148,136,.18);
+}
+.budget-icon  { font-size: 1.6rem; margin-bottom: .4rem; }
+.budget-name  { font-size: .82rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+.budget-range { font-size: .7rem; color: var(--text-muted); }
+
+/* ─── SLIDERS ─── */
+.slider-block { margin-bottom: 1.5rem; }
+.slider-block:last-child { margin-bottom: 0; }
+.slider-head {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: .6rem;
+}
+.slider-title {
+  font-size: .85rem; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: .45rem;
+}
+.slider-badge {
+  padding: .18rem .6rem; border-radius: var(--r-pill);
+  background: var(--lux-teal); color: #fff;
+  font-size: .78rem; font-weight: 700; min-width: 2.2rem;
+  text-align: center; transition: background .25s ease;
+}
+.slider-badge.amber { background: #f59e0b; }
+.slider-badge.red   { background: #ef4444; }
+
+input[type="range"].lux-range {
+  width: 100%; height: 6px;
+  -webkit-appearance: none; appearance: none;
+  background: linear-gradient(
+    to right,
+    var(--lux-teal) 0%,
+    var(--lux-teal) var(--pct, 45%),
+    var(--border) var(--pct, 45%),
+    var(--border) 100%
+  );
+  border-radius: var(--r-pill); outline: none; cursor: pointer;
+}
+input[type="range"].lux-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--lux-teal);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(13,148,136,.4);
+  cursor: pointer; transition: transform .15s;
+}
+input[type="range"].lux-range::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider-labels {
+  display: flex; justify-content: space-between;
+  font-size: .66rem; color: var(--text-muted); margin-top: .3rem;
+}
+
+/* ─── SUBMIT ─── */
+.quiz-submit-area {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 1.5rem 1.75rem;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap;
+}
+.quiz-submit-info { flex: 1; min-width: 200px; }
+.quiz-submit-info h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: .25rem; }
+.quiz-submit-info p  { font-size: .8rem; color: var(--text-muted); margin: 0; }
+.quiz-submit-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .85rem 2rem; border: none; border-radius: var(--r-pill);
+  background: var(--lux-teal); color: #fff;
+  font-size: .95rem; font-weight: 700; cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 4px 20px rgba(13,148,136,.35);
+  flex-shrink: 0;
+}
+.quiz-submit-btn:hover {
+  background: #0b7d74;
+  box-shadow: 0 6px 28px rgba(13,148,136,.45);
+  transform: translateY(-1px);
+}
+
+/* ─── LOADING OVERLAY ─── */
+.quiz-loading-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(10,10,15,.85);
+  backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 1.25rem;
+}
+.quiz-loading-overlay.show { display: flex; }
+.quiz-loading-ring {
+  width: 60px; height: 60px; border-radius: 50%;
+  border: 4px solid rgba(13,148,136,.2);
+  border-top-color: var(--lux-teal);
+  animation: quiz-spin 1s linear infinite;
+}
+@keyframes quiz-spin { to { transform: rotate(360deg); } }
+.quiz-loading-text {
+  font-size: .95rem; font-weight: 600; color: rgba(255,255,255,.8);
+  text-align: center;
+}
+.quiz-loading-sub {
+  font-size: .78rem; color: rgba(255,255,255,.4);
+  text-align: center;
+}
+
+/* ─── STEPS ─── */
+.steps-row {
+  display: flex; align-items: center; gap: 0; margin-bottom: 2rem;
+}
+.step-item {
+  display: flex; align-items: center; gap: .4rem; flex: 1;
+  font-size: .75rem; font-weight: 600; color: var(--text-muted);
+}
+.step-item.active { color: var(--lux-teal); }
+.step-item.done   { color: var(--text-muted); }
+.step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 700; flex-shrink: 0;
+  background: var(--surface); color: var(--text-muted);
+  transition: all .2s;
+}
+.step-item.active .step-num { background: var(--lux-teal); border-color: var(--lux-teal); color: #fff; }
+.step-item.done  .step-num  { background: var(--lux-teal); border-color: var(--lux-teal); color: #fff; }
+.step-connector { flex: 1; height: 2px; background: var(--border); margin: 0 .4rem; }
+.step-connector.done { background: var(--lux-teal); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="quiz-loading-overlay" id="loadingOverlay">
+  <div class="quiz-loading-ring"></div>
+  <div class="quiz-loading-text">Analysing your skin profile…</div>
+  <div class="quiz-loading-sub">Finding your personalised plan ✨</div>
+</div>
+
+<div class="steps-row">
+  <div class="step-item done">
+    <div class="step-num"><i class="bi bi-check-lg" style="font-size:.65rem;"></i></div>
+    <span class="d-none d-sm-inline">Category</span>
+  </div>
+  <div class="step-connector done"></div>
+  <div class="step-item active">
+    <div class="step-num">2</div>
+    <span class="d-none d-sm-inline">Skin Profile</span>
+  </div>
+  <div class="step-connector"></div>
+  <div class="step-item active">
+    <div class="step-num">3</div>
+    <span class="d-none d-sm-inline">Lifestyle</span>
+  </div>
+  <div class="step-connector"></div>
+  <div class="step-item">
+    <div class="step-num"><i class="bi bi-stars" style="font-size:.6rem;"></i></div>
+    <span class="d-none d-sm-inline">Your Plan</span>
+  </div>
+</div>
+
+<div style="display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1.5rem;">
+  {% for cat in selected_categories %}
+  <span style="
+    background: var(--lux-teal-lt);
+    border: 1px solid rgba(13,148,136,.3);
+    color: var(--lux-teal);
+    padding: .28rem .75rem;
+    border-radius: var(--r-pill);
+    font-size: .75rem; font-weight: 700;
+  ">
+    {% if cat == 'makeup' %}💄 Makeup
+    {% elif cat == 'korean' %}🧴 Korean Skincare
+    {% elif cat == 'ayurvedic' %}🌿 Ayurvedic
+    {% elif cat == 'pharmacy' %}🧪 Pharmacy{% endif %}
+  </span>
+  {% endfor %}
+</div>
+
+<form method="post" action="{% url 'diagnostic:step' %}" id="quizForm">
+  {% csrf_token %}
+  <input type="hidden" name="session_id" value="{{ session_id }}">
+
+  
+  {% for cat in selected_categories %}
+  <input type="hidden" name="categories" value="{{ cat }}">
+  {% endfor %}
+
+  
+  <div class="quiz-section">
+    <div class="quiz-section-hdr">
+      <div class="quiz-section-icon">🌿</div>
+      <div>
+        <div class="quiz-section-title">Skin Profile</div>
+        <div class="quiz-section-sub">Help us understand your skin so we can match the right formulas.</div>
+      </div>
+    </div>
+
+    
+    <label class="q-label">What's your skin type?</label>
+    <div class="skin-pill-row">
+      {% for st in skin_types %}
+      <label class="skin-pill-wrap">
+        <input type="radio" name="skin_type" value="{{ st.value }}" {% if forloop.first %}checked{% endif %}>
+        <div class="skin-pill">{{ st.icon }} {{ st.label }}</div>
+      </label>
+      {% endfor %}
+    </div>
+
+    
+    <label class="q-label">Primary skin concern</label>
+    <select name="primary_concern" class="q-select">
+      <option value="acne">😤 Acne &amp; Breakouts</option>
+      <option value="pigmentation">🌑 Pigmentation &amp; Dark Spots</option>
+      <option value="dryness">💧 Dryness &amp; Dehydration</option>
+      <option value="antiaging">⏳ Anti-Aging &amp; Fine Lines</option>
+      <option value="brightening">✨ Brightening &amp; Glow</option>
+      <option value="sensitivity">🌸 Sensitivity &amp; Redness</option>
+    </select>
+
+    
+    <label class="q-label">What's your monthly skincare budget?</label>
+    <div class="budget-grid">
+      <label class="budget-wrap">
+        <input type="radio" name="budget" value="low" checked>
+        <div class="budget-card">
+          <div class="budget-icon">💰</div>
+          <div class="budget-name">Budget-Friendly</div>
+          <div class="budget-range">₹99 – ₹999</div>
+        </div>
+      </label>
+      <label class="budget-wrap">
+        <input type="radio" name="budget" value="mid">
+        <div class="budget-card">
+          <div class="budget-icon">⚖️</div>
+          <div class="budget-name">Mid-Range</div>
+          <div class="budget-range">₹1,000 – ₹2,499</div>
+        </div>
+      </label>
+      <label class="budget-wrap">
+        <input type="radio" name="budget" value="high">
+        <div class="budget-card">
+          <div class="budget-icon">✨</div>
+          <div class="budget-name">Premium</div>
+          <div class="budget-range">₹2,500+</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="quiz-section">
+    <div class="quiz-section-hdr">
+      <div class="quiz-section-icon">🧘</div>
+      <div>
+        <div class="quiz-section-title">Lifestyle Habits</div>
+        <div class="quiz-section-sub">Your daily habits have a big impact on skin health.</div>
+      </div>
+    </div>
+
+    
+    <div class="slider-block">
+      <div class="slider-head">
+        <span class="slider-title">💧 Daily Water Intake</span>
+        <span class="slider-badge" id="waterBadge">5</span>
+      </div>
+      <input type="range" name="water_intake" id="waterSlider"
+             class="lux-range" min="1" max="10" value="5"
+             oninput="updateRange(this,'waterBadge',false)">
+      <div class="slider-labels">
+        <span>1 glass / day</span>
+        <span>10 glasses / day</span>
+      </div>
+    </div>
+
+    
+    <div class="slider-block">
+      <div class="slider-head">
+        <span class="slider-title">😴 Average Sleep</span>
+        <span class="slider-badge" id="sleepBadge">6</span>
+      </div>
+      <input type="range" name="sleep_hours" id="sleepSlider"
+             class="lux-range" min="1" max="10" value="6"
+             oninput="updateRange(this,'sleepBadge',false)">
+      <div class="slider-labels">
+        <span>1 hr / night</span>
+        <span>10 hrs / night</span>
+      </div>
+    </div>
+
+    
+    <div class="slider-block">
+      <div class="slider-head">
+        <span class="slider-title">🧘 Stress Level</span>
+        <span class="slider-badge" id="stressBadge">5</span>
+      </div>
+      <input type="range" name="stress_level" id="stressSlider"
+             class="lux-range" min="1" max="10" value="5"
+             oninput="updateRange(this,'stressBadge',true)">
+      <div class="slider-labels">
+        <span>Calm 😌</span>
+        <span>Very stressed 😰</span>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="quiz-submit-area">
+    <div class="quiz-submit-info">
+      <h3>Ready for your personalised plan? ✨</h3>
+      <p>Our AI will match products and routines to your unique skin profile.</p>
+    </div>
+    <button type="submit" class="quiz-submit-btn" id="submitBtn">
+      <i class="bi bi-stars"></i>
+      Analyse My Skin
+    </button>
+  </div>
+
+  <div style="text-align:center; margin-top:.85rem;">
+    <a href="{% url 'diagnostic:wizard' %}" style="font-size:.78rem; color:var(--text-muted); text-decoration:none;">
+      <i class="bi bi-arrow-left"></i> Back to categories
+    </a>
+    &nbsp;·&nbsp;
+    <span style="font-size:.78rem; color:var(--text-muted);">
+      <i class="bi bi-lock-fill"></i> Answers are private &amp; never shared
+    </span>
+  </div>
+
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Init all slider fills ──
+function updateRange(el, badgeId, isStress) {
+  const val = parseInt(el.value);
+  const badge = document.getElementById(badgeId);
+  badge.textContent = val;
+  const pct = ((val - 1) / 9 * 100).toFixed(1);
+  el.style.setProperty('--pct', pct + '%');
+  if (isStress) {
+    badge.className = 'slider-badge' + (val >= 8 ? ' red' : val >= 5 ? ' amber' : '');
+  }
+}
+
+['waterSlider','sleepSlider','stressSlider'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    const isStress = id === 'stressSlider';
+    const badgeId  = id.replace('Slider','Badge');
+    updateRange(el, badgeId, isStress);
+  }
+});
+
+// ── Submit — show loading overlay ──
+document.getElementById('quizForm').addEventListener('submit', function() {
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('submitBtn').disabled = true;
+});
+</script>
+{% endblock %}

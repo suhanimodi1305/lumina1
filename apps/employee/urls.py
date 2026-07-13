@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from apps.memberships.views import memberships_admin
 
 app_name = 'employee'
 
@@ -24,5 +25,5 @@ urlpatterns = [
     # Requirement management
     path('requirements/',                 views.requirement_list,        name='requirement_list'),
     path('requirements/<str:req_id>/',    views.requirement_detail_emp,  name='requirement_detail'),
-    path('memberships/',                  views.memberships_admin,        name='memberships_admin'),
+    path('memberships/',                  memberships_admin,              name='memberships_admin'),
 ]

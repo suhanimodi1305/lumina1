@@ -1,0 +1,1268 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daily Routine — Lumina{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════
+   DAILY ROUTINE PAGE — Lumina Design
+   ═══════════════════════════════════════ */
+:root {
+  --gold-1: #D4AF37;
+  --gold-2: #F4D35E;
+  --gold-grad: linear-gradient(135deg, #D4AF37, #F4D35E);
+  --dr-radius: 20px;
+  --dr-radius-sm: 14px;
+  --dr-border: rgba(255,255,255,.09);
+}
+
+.dr-page { padding: 0 0 100px; }
+
+/* Glass cards */
+[data-theme="dark"] .dr-glass {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.09);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--dr-radius);
+  box-shadow: 0 4px 32px rgba(0,0,0,.4), 0 0 12px rgba(212,175,55,.08);
+}
+[data-theme="light"] .dr-glass {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: var(--dr-radius);
+  box-shadow: 0 2px 20px rgba(0,0,0,.07);
+}
+
+/* Gold text gradient */
+.dr-gold {
+  background: var(--gold-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</style>
+
+<style>
+/* ── HERO HEADER ── */
+.dr-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 var(--dr-radius) var(--dr-radius);
+  padding: 36px 24px 40px;
+  margin-bottom: 24px;
+}
+[data-theme="dark"] .dr-hero {
+  background: linear-gradient(145deg, #131320 0%, #0B0B0F 60%, #1a1408 100%);
+  border-bottom: 1px solid rgba(212,175,55,.15);
+}
+[data-theme="light"] .dr-hero {
+  background: linear-gradient(145deg, #fff9ee 0%, #F6F4F1 60%, #fffdf5 100%);
+  border-bottom: 1px solid rgba(212,175,55,.2);
+}
+.dr-hero-orb {
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: .3;
+}
+.dr-hero-orb-1 { background: #D4AF37; top: -80px; right: -40px; }
+.dr-hero-orb-2 { background: #8B5CF6; bottom: -120px; left: -60px; opacity: .12; }
+</style>
+
+<style>
+/* ── CIRCULAR PROGRESS ── */
+.dr-circ-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.dr-circ-svg { transform: rotate(-90deg); }
+.dr-circ-track { fill: none; }
+[data-theme="dark"]  .dr-circ-track { stroke: rgba(255,255,255,.08); }
+[data-theme="light"] .dr-circ-track { stroke: rgba(0,0,0,.07); }
+.dr-circ-fill { fill: none; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1); }
+.dr-circ-label { position: absolute; text-align: center; }
+
+/* ── SECTION HEADERS ── */
+.dr-section-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem; font-weight: 700; letter-spacing: .3px; margin-bottom: 4px;
+}
+[data-theme="dark"]  .dr-section-title { color: rgba(255,255,255,.92); }
+[data-theme="light"] .dr-section-title { color: #1A1A2E; }
+.dr-section-sub { font-size: .8rem; opacity: .55; }
+
+/* ── WEEK DOTS ── */
+.week-dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 600;
+}
+.week-dot.done { background: var(--gold-grad); color: #0B0B0F; }
+[data-theme="dark"]  .week-dot:not(.done) { background: rgba(255,255,255,.06); color: rgba(255,255,255,.4); }
+[data-theme="light"] .week-dot:not(.done) { background: rgba(0,0,0,.06); color: rgba(0,0,0,.4); }
+.week-dot.today-dot { box-shadow: 0 0 0 2px #D4AF37; }
+
+/* ── PROGRESS BARS ── */
+.dr-progress-bar { height: 8px; border-radius: 8px; overflow: hidden; }
+[data-theme="dark"]  .dr-progress-bar { background: rgba(255,255,255,.07); }
+[data-theme="light"] .dr-progress-bar { background: rgba(0,0,0,.07); }
+.dr-progress-fill { height: 100%; border-radius: 8px; background: var(--gold-grad); transition: width 1s cubic-bezier(.4,0,.2,1); }
+.dr-progress-fill.green  { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.dr-progress-fill.purple { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+.dr-progress-fill.blue   { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+.dr-progress-fill.rose   { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+
+/* ── GOLD BUTTONS ── */
+.dr-gold-btn {
+  background: var(--gold-grad); color: #0B0B0F; border: none; border-radius: 50px;
+  font-weight: 700; letter-spacing: .3px; transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 18px rgba(212,175,55,.35);
+}
+.dr-gold-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(212,175,55,.5); color: #0B0B0F; }
+.dr-ghost-btn {
+  background: transparent; border: 1px solid rgba(212,175,55,.4); color: #D4AF37;
+  border-radius: 50px; font-weight: 500; transition: all .2s;
+}
+.dr-ghost-btn:hover { background: rgba(212,175,55,.1); border-color: #D4AF37; color: #D4AF37; }
+</style>
+
+<style>
+/* ── STEP CARDS ── */
+.dr-step-card {
+  border-radius: var(--dr-radius-sm); padding: 16px;
+  transition: transform .2s, box-shadow .2s; position: relative; overflow: hidden;
+}
+.dr-step-card:hover { transform: translateY(-2px); }
+.dr-step-card.done-step { border-color: rgba(34,197,94,.3) !important; }
+[data-theme="dark"]  .dr-step-card.done-step { background: rgba(34,197,94,.06) !important; }
+[data-theme="light"] .dr-step-card.done-step { background: rgba(34,197,94,.04) !important; }
+
+.dr-step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--gold-grad);
+  color: #0B0B0F; font-size: .75rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.dr-step-num-pm { background: linear-gradient(135deg,#8B5CF6,#A78BFA); color: #fff; }
+
+.dr-step-icon {
+  width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+[data-theme="dark"]  .dr-step-icon { background: rgba(212,175,55,.1); }
+[data-theme="light"] .dr-step-icon { background: rgba(212,175,55,.12); }
+.dr-step-icon-pm { background: rgba(139,92,246,.1) !important; }
+
+.dr-step-badge {
+  font-size: .65rem; font-weight: 600; letter-spacing: .5px;
+  padding: 2px 8px; border-radius: 20px; text-transform: uppercase;
+}
+[data-theme="dark"]  .dr-step-badge { background: rgba(212,175,55,.12); color: #D4AF37; }
+[data-theme="light"] .dr-step-badge { background: rgba(212,175,55,.15); color: #9A7B1A; }
+.dr-step-badge-pm { background: rgba(139,92,246,.12) !important; color: #a78bfa !important; }
+
+.dr-wait-pill {
+  font-size: .68rem; padding: 3px 10px; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+[data-theme="dark"]  .dr-wait-pill { background: rgba(255,255,255,.06); color: rgba(255,255,255,.5); }
+[data-theme="light"] .dr-wait-pill { background: rgba(0,0,0,.05); color: #64748b; }
+
+.step-done-check {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .72rem; color: #4ade80; font-weight: 600;
+}
+
+/* ── AI REMINDER CARD ── */
+.dr-ai-card {
+  border-radius: var(--dr-radius); padding: 20px 22px;
+  position: relative; overflow: hidden;
+}
+[data-theme="dark"]  .dr-ai-card { background: linear-gradient(135deg,rgba(139,92,246,.15),rgba(59,130,246,.1)); border: 1px solid rgba(139,92,246,.25); }
+[data-theme="light"] .dr-ai-card { background: linear-gradient(135deg,rgba(139,92,246,.06),rgba(59,130,246,.04)); border: 1px solid rgba(139,92,246,.15); }
+
+.ai-pulse-ring {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative;
+}
+[data-theme="dark"]  .ai-pulse-ring { background: rgba(139,92,246,.2); }
+[data-theme="light"] .ai-pulse-ring { background: rgba(139,92,246,.1); }
+.ai-pulse-ring::before {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid rgba(139,92,246,.4);
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+@keyframes pulse-ring { 0%,100%{ transform:scale(1); opacity:.6; } 50%{ transform:scale(1.15); opacity:1; } }
+</style>
+
+<style>
+/* ── LIFESTYLE CARDS ── */
+.dr-lifestyle-card {
+  border-radius: var(--dr-radius-sm); padding: 16px 14px;
+  text-align: center; transition: transform .2s;
+}
+.dr-lifestyle-card:hover { transform: translateY(-2px); }
+.dr-lifestyle-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; margin: 0 auto 10px;
+}
+
+/* ── WATER TRACKER ── */
+.water-glass-btn {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  font-size: 1.4rem; transition: transform .15s, filter .15s; opacity: .3;
+}
+.water-glass-btn.filled { opacity: 1; filter: drop-shadow(0 0 4px rgba(59,130,246,.6)); }
+.water-glass-btn:hover { transform: scale(1.2); }
+
+/* ── METRIC ROWS ── */
+.dr-metric-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.dr-metric-row + .dr-metric-row { border-top: 1px solid; }
+[data-theme="dark"]  .dr-metric-row + .dr-metric-row { border-color: rgba(255,255,255,.06); }
+[data-theme="light"] .dr-metric-row + .dr-metric-row { border-color: rgba(0,0,0,.06); }
+
+/* ── TIP CARD ── */
+.dr-tip-card {
+  border-radius: var(--dr-radius); padding: 22px; position: relative; overflow: hidden;
+}
+[data-theme="dark"]  .dr-tip-card { background: linear-gradient(135deg,rgba(212,175,55,.1),rgba(244,211,94,.06)); border: 1px solid rgba(212,175,55,.2); }
+[data-theme="light"] .dr-tip-card { background: linear-gradient(135deg,rgba(212,175,55,.08),rgba(244,211,94,.05)); border: 1px solid rgba(212,175,55,.2); }
+.dr-tip-glow {
+  position: absolute; top: -40px; right: -40px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(212,175,55,.15); filter: blur(30px); pointer-events: none;
+}
+
+/* ── STREAK ── */
+.dr-streak-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem; font-weight: 900; line-height: 1;
+  background: var(--gold-grad); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── SCAN CARD ── */
+.dr-scan-card {
+  border-radius: var(--dr-radius); padding: 28px; text-align: center; position: relative; overflow: hidden;
+}
+[data-theme="dark"]  .dr-scan-card { background: linear-gradient(135deg,#0f0f1a,#1a1a2e); border: 1px solid rgba(212,175,55,.2); }
+[data-theme="light"] .dr-scan-card { background: linear-gradient(135deg,#f0f4ff,#e8f0ff); border: 1px solid rgba(99,102,241,.2); }
+.scan-orb { position: absolute; width: 180px; height: 180px; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+.scan-orb-1 { background: #D4AF37; opacity: .12; top: -60px; right: -40px; }
+.scan-orb-2 { background: #8B5CF6; opacity: .08; bottom: -60px; left: -40px; }
+
+/* ── PRODUCT CAROUSEL ── */
+.dr-carousel { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 12px; scrollbar-width: none; }
+.dr-carousel::-webkit-scrollbar { display: none; }
+.dr-prod-card { flex-shrink: 0; width: 160px; border-radius: var(--dr-radius-sm); padding: 14px; transition: transform .2s; }
+.dr-prod-card:hover { transform: translateY(-4px); }
+.dr-prod-img { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
+.dr-prod-img-ph {
+  width: 100%; height: 110px; border-radius: 10px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+}
+[data-theme="dark"]  .dr-prod-img-ph { background: rgba(212,175,55,.08); }
+[data-theme="light"] .dr-prod-img-ph { background: rgba(212,175,55,.1); }
+
+/* ── SIDEBAR ── */
+.dr-sidebar { position: sticky; top: 72px; }
+@media (max-width: 991px) { .dr-sidebar { display: none; } }
+
+/* ── BOTTOM ACTION BAR ── */
+.dr-action-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  display: flex; gap: 10px;
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+}
+[data-theme="dark"]  .dr-action-bar { background: rgba(11,11,15,.88); border-top: 1px solid rgba(255,255,255,.08); }
+[data-theme="light"] .dr-action-bar { background: rgba(246,244,241,.92); border-top: 1px solid rgba(0,0,0,.08); }
+.dr-action-btn {
+  flex: 1; padding: 10px 6px; border-radius: 12px; border: none;
+  font-size: .76rem; font-weight: 600; letter-spacing: .2px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; transition: transform .15s, background .2s;
+}
+.dr-action-btn:active { transform: scale(.95); }
+.dr-action-btn .btn-icon { font-size: 1.1rem; }
+[data-theme="dark"]  .dr-action-btn { background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); }
+[data-theme="light"] .dr-action-btn { background: rgba(0,0,0,.05); color: #555; }
+.dr-action-btn.primary { background: var(--gold-grad); color: #0B0B0F; box-shadow: 0 4px 18px rgba(212,175,55,.35); }
+
+/* ── TOAST ── */
+.dr-toast {
+  position: fixed; top: 80px; right: 20px; z-index: 9999;
+  border-radius: 14px; padding: 14px 20px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: .88rem; font-weight: 600;
+  transform: translateX(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  min-width: 240px; max-width: 320px; pointer-events: none;
+}
+.dr-toast.show { transform: translateX(0); pointer-events: auto; }
+[data-theme="dark"]  .dr-toast { background: #1a2a1a; border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
+[data-theme="light"] .dr-toast { background: #f0fff4; border: 1px solid rgba(34,197,94,.3); color: #166534; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 576px) {
+  .dr-hero { padding: 24px 16px 32px; }
+  .dr-section-title { font-size: 1.15rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% with user=request.user %}
+<div class="dr-page">
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="dr-hero">
+  <div class="dr-hero-orb dr-hero-orb-1"></div>
+  <div class="dr-hero-orb dr-hero-orb-2"></div>
+  <div class="row align-items-center g-3" style="position:relative;z-index:1;">
+    <div class="col-auto">
+      <div class="dr-circ-wrap" style="width:90px;height:90px;">
+        <svg class="dr-circ-svg" width="90" height="90" viewBox="0 0 90 90">
+          <circle class="dr-circ-track" cx="45" cy="45" r="38" stroke-width="6"/>
+          <circle class="dr-circ-fill" cx="45" cy="45" r="38" stroke-width="6"
+            stroke="url(#goldGrad)"
+            stroke-dasharray="238.76"
+            stroke-dashoffset="238.76"
+            id="heroCircFill"
+            data-pct="{{ overall_pct }}"
+          />
+          <defs>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#D4AF37"/>
+              <stop offset="100%" stop-color="#F4D35E"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="dr-circ-label">
+          <div style="font-size:1.1rem;font-weight:800;color:#D4AF37;line-height:1;">{{ overall_pct }}%</div>
+          <div style="font-size:.5rem;opacity:.55;letter-spacing:.5px;">DONE</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div style="font-size:.78rem;opacity:.5;margin-bottom:2px;">
+        {% now "H" as hour_str %}{% if hour_str < "12" %}<i class="bi bi-sunrise"></i> Good Morning{% elif hour_str < "17" %}<i class="bi bi-sun"></i> Good Afternoon{% else %}<i class="bi bi-moon-stars"></i> Good Evening{% endif %}
+      </div>
+      <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;line-height:1.1;margin:0 0 4px;">
+        <span class="dr-gold">{{ user.first_name|default:user.username }}</span>
+      </h1>
+      <div style="font-size:.78rem;opacity:.5;margin-bottom:10px;">{{ today|date:"l, j F Y" }}</div>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="dr-glass d-inline-flex align-items-center gap-2" style="padding:6px 14px;border-radius:30px;font-size:.78rem;">
+          <span style="color:#D4AF37;font-weight:700;">{{ skin_score }}/100</span>
+          <span style="opacity:.5;">AI Skin Score</span>
+          {% if score_delta > 0 %}<span style="font-size:.65rem;background:rgba(34,197,94,.15);color:#4ade80;padding:2px 7px;border-radius:20px;">+{{ score_delta }} this week</span>{% endif %}
+        </div>
+        <div class="dr-glass d-inline-flex align-items-center gap-2" style="padding:6px 14px;border-radius:30px;font-size:.78rem;">
+          <i class="bi bi-bullseye" style="color:#D4AF37;"></i>
+          <span style="opacity:.7;">{{ skin_goal }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto d-none d-md-block text-end">
+      <div style="font-size:.7rem;opacity:.45;margin-bottom:6px;">THIS WEEK</div>
+      <div class="d-flex gap-2">
+        {% for day in week_grid %}
+        <div class="week-dot {% if day.done %}done{% endif %} {% if day.is_today %}today-dot{% endif %}">
+          <span>{{ day.label|slice:":1" }}</span>
+          <span style="font-size:.5rem;opacity:.7;">{{ day.short_date }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN GRID ═══════════════ -->
+<div class="container-fluid px-3 px-md-4">
+<div class="row g-4">
+
+<!-- ─── LEFT / MAIN COLUMN (col-lg-8) ─── -->
+<div class="col-12 col-lg-8">
+
+  <!-- SECTION 1: Today's Progress Summary -->
+  <div class="dr-glass p-4 mb-4" data-aos="fade-up">
+    <div class="row g-3 align-items-center mb-3">
+      <div class="col">
+        <div class="dr-section-title">Today's Routine Progress</div>
+        <div class="dr-section-sub">{{ today|date:"l, j F" }}</div>
+      </div>
+      <div class="col-auto">
+        <span class="fw-700" style="font-size:1.1rem;color:#D4AF37;">{{ overall_pct }}%</span>
+        <span style="font-size:.75rem;opacity:.5;"> Complete</span>
+      </div>
+    </div>
+    <div class="dr-progress-bar mb-3">
+      <div class="dr-progress-fill" id="overallBar" style="width:0%;" data-width="{{ overall_pct }}%"></div>
+    </div>
+    <div class="row g-3">
+      <div class="col-6">
+        <div class="dr-glass p-3" style="border-radius:14px;">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-sunrise" style="font-size:1.1rem;color:#D4AF37;"></i>
+            <span style="font-size:.82rem;font-weight:600;">Morning</span>
+            {% if log.am_done %}<span style="font-size:.65rem;background:rgba(34,197,94,.15);color:#4ade80;padding:2px 7px;border-radius:20px;margin-left:auto;">Done <i class="bi bi-check-circle-fill"></i></span>{% endif %}
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-700" style="color:#D4AF37;">{{ am_completed }}/{{ am_steps_total }}</span>
+            <div class="flex-grow-1 dr-progress-bar" style="height:5px;">
+              <div class="dr-progress-fill green" style="width:{% if log.am_done %}100{% else %}0{% endif %}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="dr-glass p-3" style="border-radius:14px;">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-moon-stars" style="font-size:1.1rem;color:#8B5CF6;"></i>
+            <span style="font-size:.82rem;font-weight:600;">Night</span>
+            {% if log.pm_done %}<span style="font-size:.65rem;background:rgba(139,92,246,.15);color:#a78bfa;padding:2px 7px;border-radius:20px;margin-left:auto;">Done <i class="bi bi-check-circle-fill"></i></span>{% endif %}
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-700" style="color:#8B5CF6;">{{ pm_completed }}/{{ pm_steps_total }}</span>
+            <div class="flex-grow-1 dr-progress-bar" style="height:5px;">
+              <div class="dr-progress-fill purple" style="width:{% if log.pm_done %}100{% else %}0{% endif %}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Morning Routine -->
+  <div class="mb-4" data-aos="fade-up" data-aos-delay="40">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <div class="dr-section-title"><i class="bi bi-sunrise" style="color:#D4AF37;"></i> Morning Routine</div>
+        <div class="dr-section-sub">Est. 7 minutes &middot; 5 steps</div>
+      </div>
+      {% if log.am_done %}
+      <span style="font-size:.75rem;background:rgba(34,197,94,.12);color:#4ade80;padding:6px 14px;border-radius:20px;font-weight:600;"><i class="bi bi-check-circle-fill"></i> All Complete</span>
+      {% else %}
+      <button class="dr-gold-btn btn px-4 py-2" style="font-size:.8rem;" onclick="logSession('am')"><i class="bi bi-check2-all"></i> Mark All Done</button>
+      {% endif %}
+    </div>
+    <div class="d-flex flex-column gap-3">
+      <!-- AM Step 1 -->
+      <div class="dr-glass dr-step-card {% if log.am_done %}done-step{% endif %}" data-step="am-1">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num">1</div>
+          <div class="dr-step-icon"><i class="bi bi-droplet-fill" style="color:#D4AF37;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <span class="fw-600" style="font-size:.9rem;">COSRX Low pH Cleanser</span>
+              <span class="dr-step-badge">Cleanser</span>
+            </div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Massage gently for 60 seconds &middot; rinse with lukewarm water</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 30s</span>
+              {% if not log.am_done %}
+              <button class="btn btn-sm dr-ghost-btn" style="font-size:.72rem;padding:3px 12px;" onclick="markStep('am-1',this)">Complete</button>
+              <button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('am-1',this)">Skip</button>
+              {% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- AM Step 2 -->
+      <div class="dr-glass dr-step-card {% if log.am_done %}done-step{% endif %}" data-step="am-2">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num">2</div>
+          <div class="dr-step-icon"><i class="bi bi-moisture" style="color:#D4AF37;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <span class="fw-600" style="font-size:.9rem;">SOME BY MI Toner</span>
+              <span class="dr-step-badge">Toner</span>
+            </div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Pat gently onto skin with fingertips</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 1 min</span>
+              {% if not log.am_done %}
+              <button class="btn btn-sm dr-ghost-btn" style="font-size:.72rem;padding:3px 12px;" onclick="markStep('am-2',this)">Complete</button>
+              <button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('am-2',this)">Skip</button>
+              {% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- AM Step 3 -->
+      <div class="dr-glass dr-step-card {% if log.am_done %}done-step{% endif %}" data-step="am-3">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num">3</div>
+          <div class="dr-step-icon"><i class="bi bi-stars" style="color:#D4AF37;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <span class="fw-600" style="font-size:.9rem;">Vitamin C Brightening Serum</span>
+              <span class="dr-step-badge">Serum</span>
+            </div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Apply 3&ndash;4 drops, press into skin &middot; AM only</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 2 min</span>
+              {% if not log.am_done %}
+              <button class="btn btn-sm dr-ghost-btn" style="font-size:.72rem;padding:3px 12px;" onclick="markStep('am-3',this)">Complete</button>
+              <button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('am-3',this)">Skip</button>
+              {% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AM Step 4 -->
+      <div class="dr-glass dr-step-card {% if log.am_done %}done-step{% endif %}" data-step="am-4">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num">4</div>
+          <div class="dr-step-icon"><i class="bi bi-heart-fill" style="color:#D4AF37;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <span class="fw-600" style="font-size:.9rem;">Laneige Water Bank Moisturizer</span>
+              <span class="dr-step-badge">Moisturizer</span>
+            </div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Apply with upward circular motions</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 2 min</span>
+              {% if not log.am_done %}
+              <button class="btn btn-sm dr-ghost-btn" style="font-size:.72rem;padding:3px 12px;" onclick="markStep('am-4',this)">Complete</button>
+              <button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('am-4',this)">Skip</button>
+              {% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- AM Step 5: Sunscreen -->
+      <div class="dr-glass dr-step-card {% if log.am_done %}done-step{% endif %}{% if spf_skipped_yesterday %} dr-gold-border{% endif %}" data-step="am-5">
+        {% if spf_skipped_yesterday %}
+        <div style="font-size:.65rem;color:#D4AF37;margin-bottom:8px;font-weight:600;"><i class="bi bi-exclamation-triangle-fill"></i> You skipped SPF yesterday &mdash; don't miss today!</div>
+        {% endif %}
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num">5</div>
+          <div class="dr-step-icon"><i class="bi bi-sun-fill" style="color:#D4AF37;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <span class="fw-600" style="font-size:.9rem;">ISNTREE Hyaluronic Acid SPF 50+</span>
+              <span class="dr-step-badge">Sunscreen</span>
+            </div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Apply generously as the last AM step</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-shield-check"></i> SPF 50+</span>
+              {% if not log.am_done %}
+              <button class="btn btn-sm dr-gold-btn" style="font-size:.72rem;padding:3px 14px;" onclick="markStep('am-5',this);toggleSPF(true)">Complete + SPF <i class="bi bi-check2"></i></button>
+              <button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('am-5',this)">Skip</button>
+              {% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /morning steps -->
+  </div><!-- /section 2 -->
+
+  <!-- SECTION 3: Night Routine -->
+  <div class="mb-4" data-aos="fade-up" data-aos-delay="60">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <div class="dr-section-title"><i class="bi bi-moon-stars-fill" style="color:#8B5CF6;"></i> Night Routine</div>
+        <div class="dr-section-sub">Est. 10 minutes &middot; 6 steps</div>
+      </div>
+      {% if log.pm_done %}
+      <span style="font-size:.75rem;background:rgba(139,92,246,.12);color:#a78bfa;padding:6px 14px;border-radius:20px;font-weight:600;"><i class="bi bi-check-circle-fill"></i> All Complete</span>
+      {% else %}
+      <button class="btn" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);color:#fff;border:none;border-radius:50px;font-size:.8rem;font-weight:700;padding:8px 18px;" onclick="logSession('pm')"><i class="bi bi-moon-stars"></i> Mark All Done</button>
+      {% endif %}
+    </div>
+    <div class="d-flex flex-column gap-3">
+      <!-- PM Step 1 -->
+      <div class="dr-glass dr-step-card {% if log.pm_done %}done-step{% endif %}" data-step="pm-1">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num dr-step-num-pm">1</div>
+          <div class="dr-step-icon dr-step-icon-pm"><i class="bi bi-droplet-half" style="color:#8B5CF6;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1"><span class="fw-600" style="font-size:.9rem;">Banila Co Clean It Zero Cleansing Balm</span><span class="dr-step-badge dr-step-badge-pm">Cleansing Oil</span></div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Massage on dry face 60 seconds to remove makeup &amp; SPF</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-arrow-repeat"></i> Then double cleanse</span>
+              {% if not log.pm_done %}<button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;border:1px solid rgba(139,92,246,.4);color:#8B5CF6;border-radius:50px;" onclick="markStep('pm-1',this)">Complete</button><button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('pm-1',this)">Skip</button>{% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PM Step 2 -->
+      <div class="dr-glass dr-step-card {% if log.pm_done %}done-step{% endif %}" data-step="pm-2">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num dr-step-num-pm">2</div>
+          <div class="dr-step-icon dr-step-icon-pm"><i class="bi bi-droplet" style="color:#8B5CF6;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1"><span class="fw-600" style="font-size:.9rem;">COSRX Low pH Face Wash</span><span class="dr-step-badge dr-step-badge-pm">Face Wash</span></div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Second cleanse &middot; lather 30 seconds then rinse</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 1 min</span>
+              {% if not log.pm_done %}<button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;border:1px solid rgba(139,92,246,.4);color:#8B5CF6;border-radius:50px;" onclick="markStep('pm-2',this)">Complete</button><button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('pm-2',this)">Skip</button>{% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PM Step 3 -->
+      <div class="dr-glass dr-step-card {% if log.pm_done %}done-step{% endif %}" data-step="pm-3">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num dr-step-num-pm">3</div>
+          <div class="dr-step-icon dr-step-icon-pm"><i class="bi bi-water" style="color:#8B5CF6;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1"><span class="fw-600" style="font-size:.9rem;">Pyunkang Yul Essence Toner</span><span class="dr-step-badge dr-step-badge-pm">Toner</span></div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Pat in gently with palms &middot; 7-skin method optional</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 1 min</span>
+              {% if not log.pm_done %}<button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;border:1px solid rgba(139,92,246,.4);color:#8B5CF6;border-radius:50px;" onclick="markStep('pm-3',this)">Complete</button><button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('pm-3',this)">Skip</button>{% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PM Step 4 -->
+      <div class="dr-glass dr-step-card {% if log.pm_done %}done-step{% endif %}" data-step="pm-4">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num dr-step-num-pm">4</div>
+          <div class="dr-step-icon dr-step-icon-pm"><i class="bi bi-capsule" style="color:#8B5CF6;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1"><span class="fw-600" style="font-size:.9rem;">Niacinamide + Retinol Treatment Serum</span><span class="dr-step-badge dr-step-badge-pm">Treatment</span></div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Apply 2 drops on acne-prone areas &middot; PM only</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-clock"></i> Wait 10 min</span>
+              {% if not log.pm_done %}<button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;border:1px solid rgba(139,92,246,.4);color:#8B5CF6;border-radius:50px;" onclick="markStep('pm-4',this)">Complete</button><button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('pm-4',this)">Skip</button>{% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PM Step 5 -->
+      <div class="dr-glass dr-step-card {% if log.pm_done %}done-step{% endif %}" data-step="pm-5">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num dr-step-num-pm">5</div>
+          <div class="dr-step-icon dr-step-icon-pm"><i class="bi bi-cloud-fill" style="color:#8B5CF6;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1"><span class="fw-600" style="font-size:.9rem;">Belif True Cream Aqua Bomb</span><span class="dr-step-badge dr-step-badge-pm">Moisturizer</span></div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Apply a generous layer &middot; also apply to neck</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-arrow-down-circle"></i> Let absorb</span>
+              {% if not log.pm_done %}<button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;border:1px solid rgba(139,92,246,.4);color:#8B5CF6;border-radius:50px;" onclick="markStep('pm-5',this)">Complete</button><button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('pm-5',this)">Skip</button>{% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PM Step 6 -->
+      <div class="dr-glass dr-step-card {% if log.pm_done %}done-step{% endif %}" data-step="pm-6">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="dr-step-num dr-step-num-pm">6</div>
+          <div class="dr-step-icon dr-step-icon-pm"><i class="bi bi-eye" style="color:#8B5CF6;"></i></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1"><span class="fw-600" style="font-size:.9rem;">Eye Cream + Lip Sleeping Mask</span><span class="dr-step-badge dr-step-badge-pm">Eye + Lips</span></div>
+            <div style="font-size:.75rem;opacity:.55;margin-bottom:6px;">Dab eye cream gently &middot; apply Laneige lip mask as last step</div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="dr-wait-pill"><i class="bi bi-moon-fill"></i> Sleep &amp; glow</span>
+              {% if not log.pm_done %}<button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;border:1px solid rgba(139,92,246,.4);color:#8B5CF6;border-radius:50px;" onclick="markStep('pm-6',this)">Complete</button><button class="btn btn-sm" style="font-size:.72rem;padding:3px 12px;opacity:.5;" onclick="skipStep('pm-6',this)">Skip</button>{% else %}<span class="step-done-check"><i class="bi bi-check-circle-fill"></i> Done</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /night steps -->
+  </div><!-- /section 3 -->
+
+  <!-- SECTION 4: AI Reminder -->
+  <div class="dr-ai-card mb-4" data-aos="fade-up" data-aos-delay="80">
+    <div class="d-flex gap-3 align-items-start">
+      <div class="ai-pulse-ring flex-shrink-0">
+        <i class="bi bi-robot" style="font-size:1.4rem;color:#8B5CF6;"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;color:#8B5CF6;margin-bottom:4px;">AI REMINDER</div>
+        <div class="fw-600" style="font-size:.95rem;margin-bottom:10px;">Today's Skin Intelligence</div>
+        <div class="d-flex flex-column gap-2">
+          {% if spf_skipped_yesterday %}
+          <div style="font-size:.82rem;padding:8px 12px;border-radius:10px;background:rgba(212,175,55,.08);border-left:3px solid #D4AF37;">
+            <i class="bi bi-exclamation-triangle-fill text-warning"></i> You skipped sunscreen yesterday. SPF is non-negotiable today!
+          </div>
+          {% endif %}
+          <div class="dr-glass" style="font-size:.82rem;padding:8px 12px;border-radius:10px;">
+            <i class="bi bi-droplet-fill" style="color:#3B82F6;"></i> Drink at least 8 glasses of water today &mdash; hydration = glow
+          </div>
+          <div class="dr-glass" style="font-size:.82rem;padding:8px 12px;border-radius:10px;">
+            <i class="bi bi-hand-index" style="color:#D4AF37;"></i> Avoid touching your face throughout the day
+          </div>
+          <div class="dr-glass" style="font-size:.82rem;padding:8px 12px;border-radius:10px;">
+            <i class="bi bi-stars" style="color:#D4AF37;"></i> Use Vitamin C only in the morning &middot; Retinol for night only
+          </div>
+          <div class="dr-glass" style="font-size:.82rem;padding:8px 12px;border-radius:10px;">
+            <i class="bi bi-sun" style="color:#F59E0B;"></i> Avoid direct sunlight between 12 PM &ndash; 3 PM today
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Hydration & Lifestyle -->
+  <div class="dr-glass p-4 mb-4" data-aos="fade-up" data-aos-delay="90">
+    <div class="dr-section-title mb-1"><i class="bi bi-heart-pulse" style="color:#D4AF37;"></i> Hydration &amp; Lifestyle</div>
+    <div class="dr-section-sub mb-4">Track your daily wellness for better skin</div>
+    <!-- Water Intake -->
+    <div class="mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span style="font-size:.85rem;font-weight:600;"><i class="bi bi-droplet-fill" style="color:#3B82F6;"></i> Water Intake</span>
+        <span style="font-size:.78rem;color:#D4AF37;font-weight:700;" id="waterCount">{{ log.water_glasses }}/8 glasses</span>
+      </div>
+      <div class="d-flex gap-1 flex-wrap" id="waterGlasses">
+        {% for i in "12345678" %}
+        <button class="water-glass-btn {% if forloop.counter <= log.water_glasses %}filled{% endif %}"
+                data-glass="{{ forloop.counter }}" onclick="setWater({{ forloop.counter }})">
+          <i class="bi bi-cup-straw" style="color:#3B82F6;font-size:1.4rem;"></i>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-sm-3">
+        <div class="dr-lifestyle-card dr-glass" style="cursor:pointer;" onclick="toggleSPF()">
+          <div class="dr-lifestyle-icon" style="background:rgba(251,191,36,.1);">
+            <i class="bi bi-sun-fill" style="color:#F59E0B;"></i>
+          </div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:4px;">SPF Applied</div>
+          <div id="spfStatus" style="font-size:.72rem;font-weight:700;{% if log.spf_applied %}color:#4ade80;{% else %}color:#ef4444;{% endif %}">
+            {% if log.spf_applied %}<i class="bi bi-check-circle-fill"></i> Yes{% else %}<i class="bi bi-x-circle-fill"></i> No{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-3">
+        <div class="dr-lifestyle-card dr-glass">
+          <div class="dr-lifestyle-icon" style="background:rgba(139,92,246,.1);">
+            <i class="bi bi-moon-stars-fill" style="color:#8B5CF6;"></i>
+          </div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:4px;">Sleep</div>
+          <div style="font-size:.82rem;font-weight:700;color:#a78bfa;">7&ndash;8 hrs</div>
+          <div class="dr-progress-bar mt-2" style="height:4px;"><div class="dr-progress-fill purple" style="width:87%;"></div></div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-3">
+        <div class="dr-lifestyle-card dr-glass">
+          <div class="dr-lifestyle-icon" style="background:rgba(34,197,94,.1);">
+            <i class="bi bi-egg-fried" style="color:#22c55e;"></i>
+          </div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:4px;">Nutrition</div>
+          <div style="font-size:.82rem;font-weight:700;color:#4ade80;">On Track</div>
+          <div class="dr-progress-bar mt-2" style="height:4px;"><div class="dr-progress-fill green" style="width:70%;"></div></div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-3">
+        <div class="dr-lifestyle-card dr-glass">
+          <div class="dr-lifestyle-icon" style="background:rgba(251,113,133,.1);">
+            <i class="bi bi-activity" style="color:#f43f5e;"></i>
+          </div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:4px;">Stress</div>
+          <div style="font-size:.82rem;font-weight:700;color:#f43f5e;">Medium</div>
+          <div class="dr-progress-bar mt-2" style="height:4px;"><div class="dr-progress-fill rose" style="width:50%;"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Skin Rating -->
+    <div class="mt-4 pt-3" style="border-top:1px solid rgba(128,128,128,.12);">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span style="font-size:.85rem;font-weight:600;"><i class="bi bi-star-fill" style="color:#F59E0B;"></i> How's your skin today?</span>
+        <span style="font-size:.78rem;opacity:.5;">{{ log.skin_rating }}/5</span>
+      </div>
+      <div class="d-flex gap-3 align-items-center" id="starRating">
+        {% for i in "12345" %}
+        <button class="star-btn" data-val="{{ forloop.counter }}"
+                style="background:none;border:none;padding:0;font-size:1.8rem;cursor:pointer;transition:transform .15s;{% if forloop.counter <= log.skin_rating %}filter:drop-shadow(0 0 6px rgba(251,191,36,.8));opacity:1;{% else %}opacity:.3;{% endif %}"
+                onclick="setRating({{ forloop.counter }})">
+          <i class="bi bi-star-fill" style="color:#F59E0B;"></i>
+        </button>
+        {% endfor %}
+      </div>
+      <input type="hidden" id="skinRatingVal" value="{{ log.skin_rating }}">
+    </div>
+    <button class="dr-ghost-btn btn w-100 mt-4 py-2" onclick="saveExtras()">
+      <i class="bi bi-cloud-upload"></i> Save Lifestyle Data
+    </button>
+  </div>
+
+  <!-- SECTION 6: Skin Progress Charts -->
+  <div class="dr-glass p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+    <div class="dr-section-title mb-1"><i class="bi bi-graph-up-arrow" style="color:#D4AF37;"></i> Skin Progress</div>
+    <div class="dr-section-sub mb-4">AI-tracked improvements over time</div>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3 text-center">
+        <div class="dr-circ-wrap mb-2" style="width:72px;height:72px;">
+          <svg class="dr-circ-svg" width="72" height="72" viewBox="0 0 72 72">
+            <circle class="dr-circ-track" cx="36" cy="36" r="30" stroke-width="5"/>
+            <circle class="dr-circ-fill" cx="36" cy="36" r="30" stroke-width="5" stroke="#F43F5E" stroke-dasharray="188.5" stroke-dashoffset="94"/>
+          </svg>
+          <div class="dr-circ-label"><div style="font-size:.9rem;font-weight:800;color:#F43F5E;">50%</div></div>
+        </div>
+        <div style="font-size:.72rem;font-weight:600;">Acne</div>
+        <div style="font-size:.65rem;color:#4ade80;"><i class="bi bi-arrow-up-short"></i> +12%</div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="dr-circ-wrap mb-2" style="width:72px;height:72px;">
+          <svg class="dr-circ-svg" width="72" height="72" viewBox="0 0 72 72">
+            <circle class="dr-circ-track" cx="36" cy="36" r="30" stroke-width="5"/>
+            <circle class="dr-circ-fill" cx="36" cy="36" r="30" stroke-width="5" stroke="#3B82F6" stroke-dasharray="188.5" stroke-dashoffset="47"/>
+          </svg>
+          <div class="dr-circ-label"><div style="font-size:.9rem;font-weight:800;color:#3B82F6;">75%</div></div>
+        </div>
+        <div style="font-size:.72rem;font-weight:600;">Hydration</div>
+        <div style="font-size:.65rem;color:#4ade80;"><i class="bi bi-arrow-up-short"></i> +8%</div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="dr-circ-wrap mb-2" style="width:72px;height:72px;">
+          <svg class="dr-circ-svg" width="72" height="72" viewBox="0 0 72 72">
+            <circle class="dr-circ-track" cx="36" cy="36" r="30" stroke-width="5"/>
+            <circle class="dr-circ-fill" cx="36" cy="36" r="30" stroke-width="5" stroke="#D4AF37" stroke-dasharray="188.5" stroke-dashoffset="75"/>
+          </svg>
+          <div class="dr-circ-label"><div style="font-size:.9rem;font-weight:800;color:#D4AF37;">60%</div></div>
+        </div>
+        <div style="font-size:.72rem;font-weight:600;">Pigmentation</div>
+        <div style="font-size:.65rem;color:#4ade80;"><i class="bi bi-arrow-up-short"></i> +5%</div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="dr-circ-wrap mb-2" style="width:72px;height:72px;">
+          <svg class="dr-circ-svg" width="72" height="72" viewBox="0 0 72 72">
+            <circle class="dr-circ-track" cx="36" cy="36" r="30" stroke-width="5"/>
+            <circle class="dr-circ-fill" cx="36" cy="36" r="30" stroke-width="5" stroke="#8B5CF6" stroke-dasharray="188.5" stroke-dashoffset="56"/>
+          </svg>
+          <div class="dr-circ-label"><div style="font-size:.9rem;font-weight:800;color:#8B5CF6;">70%</div></div>
+        </div>
+        <div style="font-size:.72rem;font-weight:600;">Oiliness</div>
+        <div style="font-size:.65rem;color:#4ade80;"><i class="bi bi-arrow-up-short"></i> Improving</div>
+      </div>
+    </div>
+    <div class="dr-glass p-3" style="border-radius:14px;">
+      <div class="dr-metric-row">
+        <i class="bi bi-eye" style="color:#3B82F6;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;">
+            <span class="fw-600">Dark Circles</span><span style="opacity:.5;">Current: {{ log.skin_rating }}/5</span>
+          </div>
+          <div class="dr-progress-bar" style="height:5px;"><div class="dr-progress-fill blue" style="width:55%;"></div></div>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-thermometer-half" style="color:#f43f5e;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;">
+            <span class="fw-600">Sensitivity</span><span style="opacity:.5;">Low Risk</span>
+          </div>
+          <div class="dr-progress-bar" style="height:5px;"><div class="dr-progress-fill rose" style="width:30%;"></div></div>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-stars" style="color:#D4AF37;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;">
+            <span class="fw-600">Overall Skin Score</span><span style="color:#D4AF37;font-weight:700;">{{ skin_score }}/100</span>
+          </div>
+          <div class="dr-progress-bar" style="height:5px;"><div class="dr-progress-fill" style="width:{{ skin_score }}%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Today's AI Tip -->
+  <div class="dr-tip-card mb-4" data-aos="fade-up" data-aos-delay="110">
+    <div class="dr-tip-glow"></div>
+    <div style="position:relative;z-index:1;">
+      <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;color:#D4AF37;margin-bottom:6px;"><i class="bi bi-lightbulb-fill"></i> AI TODAY'S RECOMMENDATION</div>
+      <div class="dr-section-title mb-3">Today's Skincare Tips</div>
+      <div class="d-flex flex-column gap-2">
+        <div class="dr-glass p-3" style="border-radius:12px;font-size:.84rem;">
+          <i class="bi bi-sun" style="color:#F59E0B;"></i> <strong>Avoid direct sunlight</strong> between 12 PM and 3 PM &mdash; UV index is high today
+        </div>
+        <div class="dr-glass p-3" style="border-radius:12px;font-size:.84rem;">
+          <i class="bi bi-stars" style="color:#D4AF37;"></i> <strong>Vitamin C</strong> works best in the morning when applied before sunscreen
+        </div>
+        <div class="dr-glass p-3" style="border-radius:12px;font-size:.84rem;">
+          <i class="bi bi-moon-stars" style="color:#8B5CF6;"></i> Tonight is a great night to use your <strong>Retinol treatment</strong> &mdash; your skin repairs while you sleep
+        </div>
+        <div class="dr-glass p-3" style="border-radius:12px;font-size:.84rem;">
+          <i class="bi bi-clock-history" style="color:#3B82F6;"></i> Get at least 7 hours of sleep &mdash; skin regeneration peaks between 10 PM &ndash; 2 AM
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Streak -->
+  <div class="dr-glass p-4 mb-4 text-center" data-aos="fade-up" data-aos-delay="120">
+    <i class="bi bi-fire" style="font-size:2.5rem;color:#F59E0B;"></i>
+    <div class="dr-streak-num mt-1">{{ streak }}</div>
+    <div style="font-size:.85rem;font-weight:600;margin-bottom:2px;">Day Streak</div>
+    <div style="font-size:.75rem;opacity:.5;margin-bottom:20px;">Keep it going!</div>
+    <div class="dr-glass p-3" style="border-radius:14px;max-width:280px;margin:0 auto;">
+      <div style="font-size:.75rem;font-weight:600;margin-bottom:8px;"><i class="bi bi-trophy-fill" style="color:#D4AF37;"></i> Next Reward</div>
+      <div class="dr-progress-bar mb-2">
+        <div class="dr-progress-fill" style="width:{% widthratio total_points 200 100 %}%;max-width:100%;"></div>
+      </div>
+      <div style="font-size:.72rem;opacity:.6;"><span style="color:#D4AF37;font-weight:700;">{{ points_to_next }}</span> points to next reward &middot; {{ total_points }} total</div>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Next AI Scan -->
+  <div class="dr-scan-card mb-4" data-aos="fade-up" data-aos-delay="130">
+    <div class="scan-orb scan-orb-1"></div>
+    <div class="scan-orb scan-orb-2"></div>
+    <div style="position:relative;z-index:1;">
+      <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;color:#D4AF37;margin-bottom:10px;"><i class="bi bi-camera-fill"></i> NEXT AI SCAN</div>
+      <div class="dr-streak-num">{{ days_to_scan }}</div>
+      <div style="font-size:.9rem;font-weight:600;margin-bottom:6px;">Days Remaining</div>
+      <div style="font-size:.75rem;opacity:.5;margin-bottom:24px;">Your next progress scan unlocks soon</div>
+      <a href="{% url 'scanner:upload' %}" class="dr-gold-btn btn px-5 py-3" style="font-size:.9rem;">
+        <i class="bi bi-stars"></i> Start New Face Scan
+      </a>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Recommended Products -->
+  <div class="mb-4" data-aos="fade-up" data-aos-delay="140">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <div class="dr-section-title"><i class="bi bi-bag-heart-fill" style="color:#D4AF37;"></i> Recommended Products</div>
+        <div class="dr-section-sub">Curated by AI for your skin type</div>
+      </div>
+      <a href="{% url 'products:list' %}" style="font-size:.78rem;color:#D4AF37;font-weight:600;text-decoration:none;">View All <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="dr-carousel">
+      {% if featured_products %}
+        {% for p in featured_products %}
+        <div class="dr-glass dr-prod-card">
+          {% if p.image_url %}<img src="{{ p.image_url }}" alt="{{ p.name }}" class="dr-prod-img">
+          {% else %}
+          <div class="dr-prod-img-ph">
+            {% if p.category == 'cleanser' %}<i class="bi bi-droplet-fill" style="color:#D4AF37;"></i>
+            {% elif p.category == 'serum' %}<i class="bi bi-stars" style="color:#D4AF37;"></i>
+            {% elif p.category == 'sunscreen' %}<i class="bi bi-sun-fill" style="color:#F59E0B;"></i>
+            {% else %}<i class="bi bi-heart-fill" style="color:#D4AF37;"></i>{% endif %}
+          </div>
+          {% endif %}
+          <div style="font-size:.65rem;opacity:.5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">{{ p.brand }}</div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:6px;line-height:1.3;">{{ p.name|truncatechars:28 }}</div>
+          <div style="font-size:.82rem;font-weight:700;color:#D4AF37;margin-bottom:8px;">{{ p.get_price_display }}</div>
+          <a href="{% url 'products:detail' p.pk %}" class="dr-gold-btn btn w-100" style="font-size:.72rem;padding:6px;">View Details</a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="dr-glass dr-prod-card">
+          <div class="dr-prod-img-ph"><i class="bi bi-stars" style="color:#D4AF37;"></i></div>
+          <div style="font-size:.65rem;opacity:.5;margin-bottom:3px;">COSRX</div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:6px;">Advanced Snail Serum</div>
+          <div style="font-size:.82rem;font-weight:700;color:#D4AF37;margin-bottom:8px;">&#8377;1,499</div>
+          <a href="{% url 'products:list' %}" class="dr-gold-btn btn w-100" style="font-size:.72rem;padding:6px;">View</a>
+        </div>
+        <div class="dr-glass dr-prod-card">
+          <div class="dr-prod-img-ph"><i class="bi bi-droplet-fill" style="color:#3B82F6;"></i></div>
+          <div style="font-size:.65rem;opacity:.5;margin-bottom:3px;">LANEIGE</div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:6px;">Water Sleeping Mask</div>
+          <div style="font-size:.82rem;font-weight:700;color:#D4AF37;margin-bottom:8px;">&#8377;2,100</div>
+          <a href="{% url 'products:list' %}" class="dr-gold-btn btn w-100" style="font-size:.72rem;padding:6px;">View</a>
+        </div>
+        <div class="dr-glass dr-prod-card">
+          <div class="dr-prod-img-ph"><i class="bi bi-sun-fill" style="color:#F59E0B;"></i></div>
+          <div style="font-size:.65rem;opacity:.5;margin-bottom:3px;">ISNTREE</div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:6px;">Hyaluronic Acid SPF50</div>
+          <div style="font-size:.82rem;font-weight:700;color:#D4AF37;margin-bottom:8px;">&#8377;950</div>
+          <a href="{% url 'products:list' %}" class="dr-gold-btn btn w-100" style="font-size:.72rem;padding:6px;">View</a>
+        </div>
+        <div class="dr-glass dr-prod-card">
+          <div class="dr-prod-img-ph"><i class="bi bi-heart-fill" style="color:#f43f5e;"></i></div>
+          <div style="font-size:.65rem;opacity:.5;margin-bottom:3px;">BELIF</div>
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:6px;">Aqua Bomb Moisturizer</div>
+          <div style="font-size:.82rem;font-weight:700;color:#D4AF37;margin-bottom:8px;">&#8377;3,200</div>
+          <a href="{% url 'products:list' %}" class="dr-gold-btn btn w-100" style="font-size:.72rem;padding:6px;">View</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div><!-- /col-lg-8 ── CLOSE of main left column -->
+
+<!-- ─── RIGHT SIDEBAR (col-lg-4) ─── -->
+<div class="col-lg-4 d-none d-lg-block">
+  <div class="dr-sidebar">
+
+    <!-- Quick Summary -->
+    <div class="dr-glass p-4 mb-4">
+      <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;opacity:.5;margin-bottom:14px;">QUICK SUMMARY</div>
+      <div class="d-flex align-items-center gap-3 mb-3 pb-3" style="border-bottom:1px solid rgba(128,128,128,.12);">
+        <div class="dr-circ-wrap" style="width:56px;height:56px;">
+          <svg class="dr-circ-svg" width="56" height="56" viewBox="0 0 56 56">
+            <circle class="dr-circ-track" cx="28" cy="28" r="23" stroke-width="4"/>
+            <circle class="dr-circ-fill" cx="28" cy="28" r="23" stroke-width="4"
+              stroke="url(#goldGrad2)"
+              stroke-dasharray="144.5" stroke-dashoffset="144.5"
+              id="sbCircFill" data-pct="{{ overall_pct }}"/>
+            <defs>
+              <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#D4AF37"/><stop offset="100%" stop-color="#F4D35E"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="dr-circ-label"><div style="font-size:.7rem;font-weight:800;color:#D4AF37;">{{ overall_pct }}%</div></div>
+        </div>
+        <div>
+          <div style="font-size:.82rem;font-weight:600;">Today's Completion</div>
+          <div style="font-size:.72rem;opacity:.5;">{{ am_completed }}/{{ am_steps_total }} AM &middot; {{ pm_completed }}/{{ pm_steps_total }} PM</div>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-stars" style="color:#D4AF37;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1 d-flex justify-content-between" style="font-size:.8rem;">
+          <span>Skin Score</span><span class="fw-700" style="color:#D4AF37;">{{ skin_score }}/100</span>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-bullseye" style="color:#3B82F6;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1 d-flex justify-content-between" style="font-size:.8rem;">
+          <span>Skin Goal</span><span class="fw-600" style="opacity:.7;">{{ skin_goal|truncatechars:14 }}</span>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-fire" style="color:#F59E0B;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1 d-flex justify-content-between" style="font-size:.8rem;">
+          <span>Streak</span><span class="fw-700" style="color:#F59E0B;">{{ streak }} days</span>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-camera" style="color:#8B5CF6;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1 d-flex justify-content-between" style="font-size:.8rem;">
+          <span>Next Scan</span><span class="fw-600" style="color:#8B5CF6;">{{ days_to_scan }}d left</span>
+        </div>
+      </div>
+      <div class="dr-metric-row">
+        <i class="bi bi-trophy-fill" style="color:#D4AF37;width:22px;text-align:center;"></i>
+        <div class="flex-grow-1 d-flex justify-content-between" style="font-size:.8rem;">
+          <span>Points</span><span class="fw-700" style="color:#D4AF37;">{{ total_points }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Notifications -->
+    <div class="dr-glass p-4 mb-4">
+      <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;opacity:.5;margin-bottom:14px;"><i class="bi bi-bell-fill"></i> AI NOTIFICATIONS</div>
+      <div class="d-flex flex-column gap-2">
+        {% if spf_skipped_yesterday %}
+        <div style="font-size:.78rem;padding:10px 12px;border-radius:10px;background:rgba(212,175,55,.08);border-left:3px solid #D4AF37;">
+          <i class="bi bi-exclamation-triangle-fill text-warning"></i> SPF skipped yesterday
+        </div>
+        {% endif %}
+        <div style="font-size:.78rem;padding:10px 12px;border-radius:10px;background:{% if log.am_done %}rgba(34,197,94,.06){% else %}rgba(245,158,11,.06){% endif %};border-left:3px solid {% if log.am_done %}#22c55e{% else %}#f59e0b{% endif %};">
+          {% if log.am_done %}<i class="bi bi-check-circle-fill text-success"></i> Morning routine complete{% else %}<i class="bi bi-clock text-warning"></i> Morning routine pending{% endif %}
+        </div>
+        <div style="font-size:.78rem;padding:10px 12px;border-radius:10px;background:{% if log.pm_done %}rgba(34,197,94,.06){% else %}rgba(139,92,246,.06){% endif %};border-left:3px solid {% if log.pm_done %}#22c55e{% else %}#8B5CF6{% endif %};">
+          {% if log.pm_done %}<i class="bi bi-check-circle-fill text-success"></i> Night routine complete{% else %}<i class="bi bi-moon-stars" style="color:#8B5CF6;"></i> Night routine pending{% endif %}
+        </div>
+        <div class="dr-glass" style="font-size:.78rem;padding:10px 12px;border-radius:10px;">
+          <i class="bi bi-droplet-fill" style="color:#3B82F6;"></i> Water: {{ log.water_glasses }}/8 glasses today
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dr-glass p-4 mb-4">
+      <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;opacity:.5;margin-bottom:14px;">QUICK ACTIONS</div>
+      <div class="d-flex flex-column gap-2">
+        <a href="{% url 'scanner:upload' %}" class="dr-gold-btn btn w-100 py-2" style="font-size:.82rem;"><i class="bi bi-camera-fill"></i> Face Scan</a>
+        <a href="{% url 'progress:analytics' %}" class="dr-ghost-btn btn w-100 py-2" style="font-size:.82rem;"><i class="bi bi-graph-up-arrow"></i> Analytics</a>
+        <a href="{% url 'products:list' %}" class="dr-ghost-btn btn w-100 py-2" style="font-size:.82rem;"><i class="bi bi-bag"></i> Shop</a>
+        <a href="{% url 'chat:index' %}" class="dr-ghost-btn btn w-100 py-2" style="font-size:.82rem;"><i class="bi bi-chat-heart"></i> Ask AI</a>
+      </div>
+    </div>
+
+    <!-- 14-Day History -->
+    <div class="dr-glass p-4">
+      <div style="font-size:.7rem;letter-spacing:.8px;font-weight:700;opacity:.5;margin-bottom:14px;">14-DAY HISTORY</div>
+      {% for h in history %}
+      <div class="d-flex align-items-center justify-content-between py-2" style="{% if not forloop.last %}border-bottom:1px solid rgba(128,128,128,.08);{% endif %}font-size:.75rem;">
+        <span style="opacity:.6;width:50px;">{{ h.log_date|date:"d M" }}</span>
+        <span>{% if h.am_done %}<i class="bi bi-sunrise-fill" style="color:#D4AF37;"></i>{% else %}<i class="bi bi-sunrise" style="opacity:.25;"></i>{% endif %}</span>
+        <span>{% if h.pm_done %}<i class="bi bi-moon-stars-fill" style="color:#8B5CF6;"></i>{% else %}<i class="bi bi-moon-stars" style="opacity:.25;"></i>{% endif %}</span>
+        <span><i class="bi bi-droplet-fill" style="color:#3B82F6;font-size:.7rem;"></i>{{ h.water_glasses }}</span>
+        <span>{% if h.spf_applied %}<i class="bi bi-sun-fill" style="color:#F59E0B;"></i>{% else %}<span style="opacity:.2;">&mdash;</span>{% endif %}</span>
+        <span>{{ h.skin_rating }}/5</span>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div><!-- /col-lg-4 -->
+
+</div><!-- /row -->
+</div><!-- /container-fluid -->
+
+<!-- ═══════════════ BOTTOM ACTION BAR ═══════════════ -->
+<div class="dr-action-bar">
+  <button class="dr-action-btn primary" onclick="logSession('am');logSession('pm');">
+    <i class="bi bi-check2-all btn-icon"></i>
+    <span>Complete</span>
+  </button>
+  <a href="{% url 'scanner:upload' %}" class="dr-action-btn text-decoration-none">
+    <i class="bi bi-camera-fill btn-icon"></i>
+    <span>Face Scan</span>
+  </a>
+  <a href="{% url 'products:list' %}" class="dr-action-btn text-decoration-none">
+    <i class="bi bi-bag-heart btn-icon"></i>
+    <span>Shop</span>
+  </a>
+  <a href="{% url 'chat:index' %}" class="dr-action-btn text-decoration-none">
+    <i class="bi bi-chat-heart btn-icon"></i>
+    <span>Ask AI</span>
+  </a>
+</div>
+
+<!-- Toast -->
+<div class="dr-toast" id="drToast">
+  <span id="drToastIcon"><i class="bi bi-check-circle-fill"></i></span>
+  <span id="drToastMsg">Routine saved!</span>
+</div>
+
+</div><!-- /dr-page -->
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ═══════════════════════════════════════════
+   LUMINA DAILY ROUTINE — Interactive JS
+   ═══════════════════════════════════════════ */
+
+function getCsrf() {
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+
+function showToast(msg, iconHtml) {
+  const t = document.getElementById('drToast');
+  document.getElementById('drToastMsg').textContent = msg;
+  if (iconHtml) document.getElementById('drToastIcon').innerHTML = iconHtml;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ── Circular Progress ── */
+function initCircle(el, pct) {
+  if (!el) return;
+  const r = parseFloat(el.getAttribute('r') || 38);
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  setTimeout(() => { el.style.strokeDashoffset = offset; }, 150);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Hero ring
+  const heroEl = document.getElementById('heroCircFill');
+  if (heroEl) initCircle(heroEl, parseInt(heroEl.dataset.pct || 0));
+
+  // Sidebar ring
+  const sbEl = document.getElementById('sbCircFill');
+  if (sbEl) initCircle(sbEl, parseInt(sbEl.dataset.pct || 0));
+
+  // Overall bar
+  const bar = document.getElementById('overallBar');
+  if (bar) setTimeout(() => { bar.style.width = bar.dataset.width; }, 200);
+});
+
+/* ── Log Full Session ── */
+async function logSession(session) {
+  const water = document.querySelectorAll('.water-glass-btn.filled').length;
+  const spf   = (document.getElementById('spfStatus')?.textContent || '').includes('Yes');
+  const rating = parseInt(document.getElementById('skinRatingVal')?.value || 3);
+  try {
+    const res = await fetch('{% url "progress:save_daily_log" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify({ session, water_glasses: water, spf_applied: spf, skin_rating: rating })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast(
+        (session === 'am' ? 'Morning' : 'Night') + ' routine complete! +' + (data.pts_earned || 10) + ' pts',
+        '<i class="bi bi-check-circle-fill"></i>'
+      );
+      setTimeout(() => location.reload(), 1400);
+    }
+  } catch (e) {
+    showToast('Something went wrong. Try again.', '<i class="bi bi-exclamation-circle-fill"></i>');
+  }
+}
+
+/* ── Mark Individual Step ── */
+function markStep(stepId, btn) {
+  const card = document.querySelector('[data-step="' + stepId + '"]');
+  if (!card) return;
+  card.classList.add('done-step');
+  btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Done';
+  btn.disabled = true;
+  btn.style.color = '#4ade80';
+  btn.style.borderColor = 'rgba(34,197,94,.3)';
+  const session = stepId.startsWith('am') ? 'am' : 'pm';
+  const total = document.querySelectorAll('[data-step^="' + session + '-"]').length;
+  const done  = document.querySelectorAll('[data-step^="' + session + '-"].done-step').length;
+  if (done === total) setTimeout(() => logSession(session), 500);
+}
+
+/* ── Skip Step ── */
+function skipStep(stepId, btn) {
+  const card = document.querySelector('[data-step="' + stepId + '"]');
+  if (!card) return;
+  card.style.opacity = '0.45';
+  btn.textContent = 'Skipped';
+  btn.disabled = true;
+}
+
+/* ── Water Tracker ── */
+function setWater(n) {
+  document.querySelectorAll('.water-glass-btn').forEach(function (g, i) {
+    g.classList.toggle('filled', i < n);
+  });
+  const el = document.getElementById('waterCount');
+  if (el) el.textContent = n + '/8 glasses';
+  fetch('{% url "progress:save_daily_log" %}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ session: 'extras', water_glasses: n, spf_applied: (document.getElementById('spfStatus')?.textContent || '').includes('Yes'), skin_rating: parseInt(document.getElementById('skinRatingVal')?.value || 3) })
+  }).then(() => showToast(n + ' glasses logged', '<i class="bi bi-droplet-fill" style="color:#3B82F6;"></i>'));
+}
+
+/* ── SPF Toggle ── */
+function toggleSPF(forceOn) {
+  const el = document.getElementById('spfStatus');
+  if (!el) return;
+  const isOn = forceOn !== undefined ? forceOn : !el.textContent.includes('Yes');
+  el.innerHTML = isOn
+    ? '<i class="bi bi-check-circle-fill"></i> Yes'
+    : '<i class="bi bi-x-circle-fill"></i> No';
+  el.style.color = isOn ? '#4ade80' : '#ef4444';
+}
+
+/* ── Star Rating ── */
+function setRating(val) {
+  document.getElementById('skinRatingVal').value = val;
+  document.querySelectorAll('.star-btn').forEach(function (s, i) {
+    s.style.opacity      = i < val ? '1' : '0.3';
+    s.style.filter       = i < val ? 'drop-shadow(0 0 6px rgba(251,191,36,.8))' : 'none';
+    s.style.transform    = i < val ? 'scale(1.15)' : 'scale(1)';
+  });
+}
+
+/* ── Save Extras ── */
+async function saveExtras() {
+  const water  = document.querySelectorAll('.water-glass-btn.filled').length;
+  const spf    = (document.getElementById('spfStatus')?.textContent || '').includes('Yes');
+  const rating = parseInt(document.getElementById('skinRatingVal')?.value || 3);
+  try {
+    const res = await fetch('{% url "progress:save_daily_log" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify({ session: 'extras', water_glasses: water, spf_applied: spf, skin_rating: rating })
+    });
+    const data = await res.json();
+    if (data.ok) showToast('Lifestyle data saved!', '<i class="bi bi-cloud-check-fill"></i>');
+  } catch (e) { showToast('Error saving.', '<i class="bi bi-exclamation-circle-fill"></i>'); }
+}
+</script>
+{% endblock %}

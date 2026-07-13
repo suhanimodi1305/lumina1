@@ -63,7 +63,7 @@ class ScanResult(models.Model):
     
     # Ages
     skin_age = models.IntegerField(default=25)
-    real_age = models.IntegerField(default=25)
+    real_age = models.IntegerField(default=25)  # updated by post-scan questionnaire
     
     # Scores (0-100)
     harmony_score = models.IntegerField(default=75)
@@ -92,6 +92,17 @@ class ScanResult(models.Model):
     # Detected concerns (Many-to-Many with SkinConcern)
     detected_concerns = models.ManyToManyField('products.SkinConcern', blank=True, related_name='scans')
     
+    # ── Post-scan questionnaire answers (improves accuracy) ──────────────────
+    # real_age (declared above in # Ages section) is updated by the questionnaire
+    qa_age        = models.IntegerField(null=True, blank=True)
+    qa_water_intake  = models.CharField(max_length=20, blank=True)  # low / moderate / high
+    qa_sleep_hours   = models.CharField(max_length=20, blank=True)  # <6 / 6-8 / >8
+    qa_stress_level  = models.CharField(max_length=20, blank=True)  # low / moderate / high
+    qa_diet          = models.CharField(max_length=20, blank=True)  # balanced / oily / sugary
+    qa_outdoor_hours = models.CharField(max_length=20, blank=True)  # low / moderate / high
+    qa_skin_concerns = models.JSONField(default=list, blank=True)   # user-selected concerns
+    qa_completed     = models.BooleanField(default=False)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -103,3 +114,47 @@ class ScanResult(models.Model):
         if self.user:
             return f"{self.user.username} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
         return f"Anonymous - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class ProgressComparison(models.Model):
+    """Stores computed comparison between two ScanResult objects."""
+
+    VERDICT_CHOICES = [
+        ('improved',  'Improved'),
+        ('unchanged', 'Unchanged'),
+        ('declined',  'Declined'),
+    ]
+
+    user            = models.ForeignKey(User, on_delete=models.CASCADE,
+                                        null=True, blank=True,
+                                        related_name='progress_comparisons')
+    baseline_scan   = models.ForeignKey(ScanResult, on_delete=models.CASCADE,
+                                        related_name='as_baseline')
+    latest_scan     = models.ForeignKey(ScanResult, on_delete=models.CASCADE,
+                                        related_name='as_latest')
+
+    # Deltas (latest - baseline; positive = increase)
+    harmony_delta      = models.IntegerField(default=0)
+    hydration_delta    = models.IntegerField(default=0)
+    acne_delta         = models.IntegerField(default=0,
+                                             help_text='Positive = more acne (worse); negative = improvement')
+    pigmentation_delta = models.IntegerField(default=0)
+    aging_delta        = models.IntegerField(default=0)
+    elasticity_delta   = models.IntegerField(default=0)
+
+    days_between       = models.IntegerField(default=0)
+
+    ai_verdict         = models.CharField(max_length=20, choices=VERDICT_CHOICES,
+                                          default='unchanged')
+    ai_recommendation  = models.TextField(blank=True)
+
+    created_at  = models.DateTimeField(auto_now_add=True)
+    updated_at  = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Progress Comparison'
+
+    def __str__(self):
+        u = self.user.username if self.user else 'anon'
+        return f"{u}: {self.baseline_scan_id} → {self.latest_scan_id} [{self.ai_verdict}]"

@@ -19,10 +19,16 @@ def dashboard_view(request):
     avg_harmony = 0
     if total_scans:
         avg_harmony = int(sum(s.harmony_score for s in all_scans) / total_scans)
+    oldest_scan = (
+        ScanResult.objects.filter(user=request.user, is_demo=False)
+        .order_by('created_at')
+        .first()
+    ) if total_scans else None
     return render(request, 'dashboard/dashboard.html', {
         'all_scans':   all_scans,
         'total_scans': total_scans,
         'latest_scan': latest_scan,
+        'oldest_scan': oldest_scan,
         'progress':    progress,
         'avg_harmony': avg_harmony,
     })

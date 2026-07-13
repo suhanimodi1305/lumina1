@@ -1,0 +1,125 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">How does your <em>skin behave</em>?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=2 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  
+  <div class="ac-field">
+    <label class="ac-label">How does your face feel <strong>30 minutes</strong> after washing?</label>
+    <div class="ac-options">
+      {% for o in face_feel_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="face_feel_after_wash" value="{{ o.value }}"
+               {% if sess.face_feel_after_wash == o.value %}checked{% endif %} required>
+        <div class="ac-opt-card">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ o.icon }}</div>
+          <div class="ac-opt-label">{{ o.label }}</div>
+          <div class="ac-opt-desc">{{ o.desc }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Where does your face become oily first?</label>
+    <div class="ac-options col-3">
+      {% for o in oiliness_zone_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="oiliness_timing" value="{{ o.value }}"
+               {% if sess.oiliness_timing == o.value %}checked{% endif %} required>
+        <div class="ac-opt-card" style="min-height:100px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">{{ o.icon }}</div>
+          <div class="ac-opt-label">{{ o.label }}</div>
+          <div class="ac-opt-desc">{{ o.desc }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Are your pores noticeable?</label>
+    <div class="ac-options col-3">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="pores_visible" value="yes"
+               {% if sess.pores_visible == 'yes' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🔍</div>
+          <div class="ac-opt-label">Yes, clearly</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="pores_visible" value="tzone"
+               {% if sess.pores_visible == 'tzone' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">☯️</div>
+          <div class="ac-opt-label">Only T-zone</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="pores_visible" value="no"
+               {% if sess.pores_visible == 'no' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">✨</div>
+          <div class="ac-opt-label">Not visible</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  
+  <div class="ac-field">
+    <label class="ac-label">Does your skin peel or flake?</label>
+    <div class="ac-options col-3">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="skin_peels" value="yes"
+               {% if sess.skin_peels == 'yes' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">❄️</div>
+          <div class="ac-opt-label">Yes, often</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="skin_peels" value="sometimes"
+               {% if sess.skin_peels == 'sometimes' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🔄</div>
+          <div class="ac-opt-label">Sometimes</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="skin_peels" value="no"
+               {% if sess.skin_peels == 'no' %}checked{% endif %}>
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">✅</div>
+          <div class="ac-opt-label">No, never</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=1 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

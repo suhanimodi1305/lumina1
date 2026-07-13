@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}{{ product.name }} — {{ product.brand }} | Lumina Shop{% endblock %}
 
@@ -90,7 +90,7 @@
 {% block content %}
 <div style="max-width:1100px;margin:0 auto;padding:0 1rem 3rem;">
 
-  <!-- Breadcrumb -->
+  
   <div class="pd-breadcrumb">
     <a href="{% url 'core:home' %}"><i class="bi bi-house"></i> Home</a>
     <i class="bi bi-chevron-right"></i>
@@ -99,10 +99,10 @@
     <span>{{ product.name }}</span>
   </div>
 
-  <!-- ═══ MAIN PRODUCT GRID ═══ -->
+  
   <div class="pd-grid">
 
-    <!-- LEFT: Image Panel -->
+    
     <div class="pd-img-panel">
       {% if product.image_url %}
         <img src="{{ product.image_url }}" alt="{{ product.name }}"
@@ -123,9 +123,9 @@
       {% endif %}
     </div>
 
-    <!-- RIGHT: Info Panel -->
+    
     <div class="pd-info">
-      <!-- Range + Category badges -->
+      
       <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
         <span class="pd-range-badge {% if product.product_range == 'makeup' %}rb-makeup{% else %}rb-korean{% endif %}">
           {% if product.product_range == 'makeup' %}💄 Makeup{% else %}🌸 K-Beauty{% endif %}
@@ -141,13 +141,13 @@
       <h1 class="pd-name">{{ product.name }}</h1>
       <div class="pd-brand">by {{ product.brand }}</div>
 
-      <!-- Rating (static display) -->
+      
       <div class="pd-rating-row">
         <div class="pd-stars">★★★★<span style="color:#d1d5db;">★</span></div>
         <span class="pd-rating-count">4.2 · 128 reviews</span>
       </div>
 
-      <!-- Price -->
+      
       <div class="pd-price-block">
         {% if product.price %}
           <span class="pd-price">₹{{ product.price }}</span>
@@ -158,7 +158,7 @@
         {% endif %}
       </div>
 
-      <!-- Shade Selector (makeup only) -->
+      
       {% if product.shades_available %}
       <div>
         <div class="pd-shade-label">Select Shade: <span id="pdSelectedShade" style="color:var(--teal);font-weight:700;">{{ product.shades_available.0.name }}</span></div>
@@ -174,7 +174,7 @@
       </div>
       {% endif %}
 
-      <!-- Skin type tags -->
+      
       {% if product.suitable_for_skin_types %}
       <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;">
         <span style="font-size:.72rem;font-weight:700;color:var(--muted,#64748b);">For:</span>
@@ -186,7 +186,7 @@
       </div>
       {% endif %}
 
-      <!-- COD Badge -->
+      
       <div class="cod-badge">
         <div class="cod-icon">💵</div>
         <div class="cod-text">
@@ -195,7 +195,7 @@
         </div>
       </div>
 
-      <!-- Delivery chips -->
+      
       <div class="pd-delivery-row">
         <div class="pd-delivery-chip"><i class="bi bi-truck" style="color:var(--teal);"></i> Free Delivery ₹499+</div>
         <div class="pd-delivery-chip"><i class="bi bi-arrow-return-left" style="color:#f59e0b;"></i> 7-Day Returns</div>
@@ -203,7 +203,7 @@
         <div class="pd-delivery-chip"><i class="bi bi-box-seam" style="color:#6366f1;"></i> Secure Packaging</div>
       </div>
 
-      <!-- Action Buttons -->
+      
       <div class="pd-actions">
         <form method="post" action="{% url 'orders:cart_add' pk=product.pk %}">
           {% csrf_token %}
@@ -220,15 +220,15 @@
         </button>
       </div>
 
-      <!-- SKU -->
+      
       <div style="font-size:.65rem;color:var(--muted,#64748b);font-family:monospace;">
         SKU: {{ product.sku }}
       </div>
 
-    </div><!-- /info panel -->
-  </div><!-- /main grid -->
+    </div>
+  </div>
 
-  <!-- ═══ DETAIL TABS ═══ -->
+  
   <div style="background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem;">
     <div class="pd-tabs">
       <button class="pd-tab active" data-pane="pane-desc" onclick="switchTab(this)">Description</button>
@@ -237,7 +237,7 @@
       <button class="pd-tab" data-pane="pane-policy" onclick="switchTab(this)">Shop Policy</button>
     </div>
 
-    <!-- Description -->
+    
     <div class="pd-tab-pane active" id="pane-desc">
       {% if product.description %}
         <p style="font-size:.85rem;line-height:1.8;color:var(--text,#0f172a);">{{ product.description }}</p>
@@ -258,7 +258,7 @@
       {% endif %}
     </div>
 
-    <!-- Ingredients -->
+    
     <div class="pd-tab-pane" id="pane-ingredients">
       {% if ingredients_list %}
       <div style="margin-bottom:.75rem;">
@@ -279,7 +279,7 @@
       {% endif %}
     </div>
 
-    <!-- How to Use -->
+    
     <div class="pd-tab-pane" id="pane-howto">
       <div style="display:flex;flex-direction:column;gap:.85rem;">
         {% if product.category == 'cleanser' or product.category == 'toner' or product.category == 'serum' or product.category == 'essence' or product.category == 'moisturizer' or product.category == 'cream' or product.category == 'sunscreen' %}
@@ -302,7 +302,7 @@
       </div>
     </div>
 
-    <!-- Shop Policy -->
+    
     <div class="pd-tab-pane" id="pane-policy">
       <div class="pd-policy-grid">
         <div class="pd-policy-card">
@@ -347,9 +347,9 @@
         </div>
       </div>
     </div>
-  </div><!-- /tabs card -->
+  </div>
 
-  <!-- ═══ RELATED PRODUCTS ═══ -->
+  
   {% if related %}
   <div style="margin-bottom:1.5rem;">
     <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">
@@ -376,7 +376,7 @@
   </div>
   {% endif %}
 
-  <!-- ═══ SAME BRAND ═══ -->
+  
   {% if same_brand %}
   <div style="margin-bottom:1.5rem;">
     <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;">
@@ -402,7 +402,7 @@
   </div>
   {% endif %}
 
-</div><!-- /container -->
+</div>
 {% endblock %}
 
 {% block extra_js %}

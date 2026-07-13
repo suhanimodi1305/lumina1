@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 {% load static %}
 <html lang="en" data-theme="light">
 <head>
@@ -10,23 +10,39 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons — self-hosted (no CDN dependency) -->
+  
   <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
   {# Apply saved theme before first paint — prevents flash #}
   <script>
     (function(){
-      var t = localStorage.getItem('lux_theme') || 'light';
+      var t = 'light';
+      try {
+        var stored = localStorage.getItem('lux_theme');
+        // Only honour 'dark' — any other value (null, corrupted) defaults to light
+        if (stored === 'dark') { t = 'dark'; }
+        else { localStorage.setItem('lux_theme', 'light'); }
+      } catch(e) {}
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
   <style>
     /* ── APP-LIKE PAGE TRANSITIONS ── */
-    .lux-content { animation: lux-fadein .18s ease; }
+    .lux-content {
+      /* Always visible — animation is purely cosmetic */
+      opacity: 1;
+    }
     @keyframes lux-fadein {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0.01; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+    /* Only apply animation when we're confident CSS has loaded */
+    .lux-content.anim-ready {
+      animation: lux-fadein .18s ease forwards;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lux-content, .lux-content.anim-ready { animation: none !important; opacity: 1 !important; }
     }
     /* Hide footer on all inner pages by default */
     .lux-footer { display: none; }
@@ -58,11 +74,28 @@
   --font-sans:   'Inter', system-ui, sans-serif;
 }
 [data-theme="dark"] {
-  --page-bg: #0d0d14;
-  --surface:  #12121a;
-  --border:   rgba(255,255,255,.08);
-  --text:     rgba(255,255,255,.9);
-  --muted:    rgba(255,255,255,.45);
+  /* Layout vars */
+  --page-bg:     #0d0d14;
+  --surface:     #12121a;
+  --border:      rgba(255,255,255,.08);
+  --text:        rgba(255,255,255,.9);
+  --muted:       rgba(255,255,255,.45);
+  /* Mirror style.css dark tokens so both sheets stay in sync */
+  --surface-alt: #1a1a28;
+  --text-muted:  rgba(255,255,255,.45);
+  --text-light:  rgba(255,255,255,.3);
+  --shadow-sm:   0 1px 6px rgba(0,0,0,.3);
+  --shadow:      0 2px 14px rgba(0,0,0,.35);
+  --shadow-md:   0 4px 28px rgba(0,0,0,.45);
+  --charcoal:    rgba(255,255,255,.9);
+  --charcoal-light: rgba(255,255,255,.6);
+  --charcoal-muted: rgba(255,255,255,.4);
+  --marble:      #1a1a28;
+  --ivory:       #12121a;
+  --white:       #1e1e2e;
+  --lux-gold-lt: rgba(201,169,110,.14);
+  --lux-teal-lt: rgba(13,148,136,.12);
+  --lux-card-dk: #1a1a28;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -70,6 +103,7 @@ html{
   scroll-behavior:smooth;
   zoom:0.9;
   font-size:14px;
+  overflow-x:hidden;
 }
 body{
   font-family:var(--font-sans);
@@ -78,6 +112,7 @@ body{
   font-size:15px;
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 
 /* ── LAYOUT SHELL ── */
@@ -191,8 +226,8 @@ body{
 .lux-sidebar.collapsed .sb-premium-badge { opacity: 0; width: 0; padding: 0; }
 
 /* Sub-items (collapse expand) */
-.sb-sub { overflow: hidden; max-height: 0; transition: max-height .25s ease; }
-.sb-sub.open { max-height: 300px; }
+.sb-sub { overflow: hidden; max-height: 0; transition: max-height .3s ease; }
+.sb-sub.open { max-height: 900px; }
 .sb-sub-item {
   display: flex; align-items: center; gap: .6rem;
   padding: .42rem .9rem .42rem 2.7rem;
@@ -203,18 +238,96 @@ body{
 }
 .sb-sub-item:hover { background: var(--sb-hover); color: rgba(255,255,255,.7); }
 .sb-sub-item.active { color: var(--sb-teal); }
+/* Sub-section heading inside collapsed profile menu */
+.sb-sub-section-hd {
+  font-size:.52rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.1em; color:rgba(255,255,255,.18);
+  padding:.55rem 1rem .2rem 2.7rem;
+}
+/* Profile item wrapper — link + chevron side by side */
+.sb-item-profile-wrap {
+  display:flex; align-items:center;
+  margin:.05rem .5rem;
+  border-radius: 9px;
+  transition: background .12s;
+}
+.sb-item-profile-wrap:hover { background: var(--sb-hover); }
+.sb-item-profile-wrap .sb-item {
+  margin: 0; border-radius: 0;
+  background: transparent !important;
+}
+.sb-item-profile-wrap .sb-item:hover { background: transparent !important; }
+.sb-profile-chevron { color: rgba(255,255,255,.35); transition: color .12s, transform .2s; }
+.sb-profile-chevron:hover { color: rgba(255,255,255,.7); }
+.sb-sub.open ~ * .sb-profile-chevron,
+.sb-item-profile-wrap.open .sb-profile-chevron { transform: rotate(180deg); }
 
 /* Sidebar footer */
 .sb-footer {
   padding: .75rem .5rem;
   border-top: 1px solid var(--sb-border);
   flex-shrink: 0;
+  position: relative;
 }
 .sb-user-card {
   display: flex; align-items: center; gap: .65rem;
   padding: .55rem .65rem; border-radius: 9px;
   background: rgba(255,255,255,.04); overflow: hidden;
 }
+.sb-user-card-link {
+  transition: background .15s, box-shadow .15s;
+  border: 1px solid transparent;
+}
+.sb-user-card-link:hover {
+  background: rgba(13,148,136,.14) !important;
+  border-color: rgba(13,148,136,.25);
+  box-shadow: 0 0 0 1px rgba(13,148,136,.12);
+}
+.sb-user-card-active {
+  background: rgba(13,148,136,.2) !important;
+  border-color: rgba(13,148,136,.35) !important;
+}
+
+/* ── Profile popup (above footer card) ── */
+.sb-profile-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 0; right: 0;
+  margin: 0 .5rem .35rem;
+  background: #18181f;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: .5rem .4rem;
+  display: none;
+  flex-direction: column;
+  gap: .05rem;
+  box-shadow: 0 -8px 32px rgba(0,0,0,.55);
+  z-index: 10;
+  animation: ppFadeIn .18s ease;
+}
+.sb-profile-popup.open { display: flex; }
+@keyframes ppFadeIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.sb-profile-popup-hd {
+  font-size: .6rem; font-weight: 700; letter-spacing: .08em;
+  color: rgba(255,255,255,.3); text-transform: uppercase;
+  padding: .25rem .6rem .4rem;
+}
+.sb-pp-item {
+  display: flex; align-items: center; gap: .55rem;
+  padding: .52rem .65rem; border-radius: 8px;
+  font-size: .8rem; color: rgba(255,255,255,.65);
+  text-decoration: none; transition: background .14s, color .14s;
+}
+.sb-pp-item i { font-size: .85rem; flex-shrink:0; color: rgba(255,255,255,.4); }
+.sb-pp-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.9); }
+.sb-pp-item:hover i { color: var(--sb-teal); }
+.sb-pp-item.active { background: rgba(13,148,136,.15); color: var(--sb-teal); }
+.sb-pp-item.active i { color: var(--sb-teal); }
+/* hide popup when sidebar is collapsed */
+.lux-sidebar.collapsed .sb-profile-popup { display: none !important; }
 .sb-user-avatar {
   width: 30px; height: 30px; border-radius: 50%;
   background: linear-gradient(135deg, var(--sb-teal), #0891b2);
@@ -236,6 +349,8 @@ body{
   flex-direction: column;
   min-height: 100vh;
   transition: margin-left .25s ease;
+  min-width: 0;         /* prevent flex overflow */
+  overflow-x: hidden;
 }
 .lux-main.sb-collapsed { margin-left: var(--sb-w-col); }
 
@@ -272,6 +387,9 @@ body{
 .lux-content {
   flex: 1;
   padding: 1.5rem clamp(.75rem, 3vw, 1.75rem);
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
 }
 
 /* Messages */
@@ -388,85 +506,98 @@ body{
 <body>
 <div class="lux-shell">
 
-<!-- ═══════════════ SIDEBAR ═══════════════ -->
 <aside class="lux-sidebar" id="lux-sidebar">
 
-  <!-- Brand -->
+  
   <div class="sb-brand">
     <img src="{% static 'images/lumina-icon.svg' %}" alt="Lumina" class="sb-brand-icon" style="width:34px;height:34px;flex-shrink:0;">
     <img src="{% static 'images/lumina-wordmark.svg' %}" alt="Lumina" class="sb-brand-wordmark">
   </div>
 
-  <!-- Nav -->
+  
   <nav class="sb-nav">
 
-    <!-- MAIN -->
-    <div class="sb-section-label">Main</div>
+    {# 🏠 DASHBOARD #}
+    <div class="sb-section-label">🏠 Dashboard</div>
     <a href="{% url 'core:home' %}" class="sb-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
       <i class="bi bi-house sb-icon"></i>
       <span class="sb-label">Home</span>
     </a>
-    <a href="{% url 'scanner:upload' %}" class="sb-item {% if 'scanner' in request.path %}active{% endif %}">
-      <i class="bi bi-camera-fill sb-icon"></i>
-      <span class="sb-label">Face Scan</span>
+    {% if user.is_authenticated %}
+    <a href="{% url 'progress:daily_log' %}" class="sb-item {% if 'progress/daily' in request.path %}active{% endif %}">
+      <i class="bi bi-grid-1x2 sb-icon"></i>
+      <span class="sb-label">Daily Routine</span>
     </a>
+    <a href="{% url 'progress:progress_home' %}" class="sb-item {% if request.path == '/progress/' or request.path == '/progress' %}active{% endif %}">
+      <i class="bi bi-calendar-heart sb-icon"></i>
+      <span class="sb-label">Skin Journey</span>
+    </a>
+    <a href="{% url 'results:progress' %}" class="sb-item {% if 'results/progress' in request.path %}active{% endif %}">
+      <i class="bi bi-bar-chart-line sb-icon"></i>
+      <span class="sb-label">AI Skin Score</span>
+    </a>
+    {% endif %}
 
-    <!-- AI CONSULTANTS -->
-    <div class="sb-section-label">AI Consultants</div>
+    {# 🤖 AI BEAUTY #}
+    <div class="sb-section-label">🤖 AI Beauty</div>
     <a href="{% url 'chat:create' %}?mode=doctor" class="sb-item {% if 'chat' in request.path and request.GET.mode == 'doctor' %}active{% endif %}">
       <i class="bi bi-heart-pulse sb-icon"></i>
       <span class="sb-label">AI Doctor</span>
     </a>
     <a href="{% url 'chat:create' %}?mode=makeup" class="sb-item {% if 'chat' in request.path and request.GET.mode == 'makeup' %}active{% endif %}">
       <i class="bi bi-palette sb-icon"></i>
-      <span class="sb-label">Makeup AI</span>
-      {% if user_tier == 'normal' %}
-        <span class="sb-premium-badge">PRO</span>
-      {% endif %}
+      <span class="sb-label">AI Beauty Chat</span>
+      {% if user_tier == 'normal' %}<span class="sb-premium-badge">PRO</span>{% endif %}
     </a>
     <a href="{% url 'chat:create' %}?mode=kbeauty" class="sb-item {% if 'chat' in request.path and request.GET.mode == 'kbeauty' %}active{% endif %}">
       <i class="bi bi-flower1 sb-icon"></i>
-      <span class="sb-label">K-Beauty AI</span>
-      {% if user_tier == 'normal' %}
-        <span class="sb-premium-badge">PRO</span>
-      {% endif %}
+      <span class="sb-label">AI K-Beauty Chat</span>
+      {% if user_tier == 'normal' %}<span class="sb-premium-badge">PRO</span>{% endif %}
     </a>
     <a href="{% url 'chat:index' %}" class="sb-item {% if 'chat' in request.path and 'create' not in request.path %}active{% endif %}">
       <i class="bi bi-chat-heart sb-icon"></i>
       <span class="sb-label">All Chats</span>
     </a>
     {% if user_tier == 'vip' %}
-    <a href="{% url 'memberships:doctor' %}" class="sb-item {% if 'doctor' in request.path %}active{% endif %}" style="color: var(--sb-gold);">
-      <i class="bi bi-heart-pulse-fill sb-icon" style="color: var(--sb-gold);"></i>
+    <a href="{% url 'memberships:doctor' %}" class="sb-item {% if 'doctor' in request.path %}active{% endif %}" style="color:var(--sb-gold);">
+      <i class="bi bi-heart-pulse-fill sb-icon" style="color:var(--sb-gold);"></i>
       <span class="sb-label">VIP Doctor</span>
     </a>
     {% endif %}
 
-    <!-- MY RESULTS -->
-    {% if user.is_authenticated %}
-    <div class="sb-section-label">My Account</div>
-    <a href="{% url 'user_home' %}" class="sb-item {% if '/me/' in request.path %}active{% endif %}">
-      <i class="bi bi-person-circle sb-icon"></i>
-      <span class="sb-label">My Home</span>
+    {# 📷 SKIN ANALYSIS #}
+    <div class="sb-section-label">📷 Skin Analysis</div>
+    <a href="{% url 'skin:start' %}" class="sb-item {% if 'skin' in request.path %}active{% endif %}">
+      <i class="bi bi-stars sb-icon"></i>
+      <span class="sb-label">New Face Scan</span>
     </a>
-    <a href="{% url 'dashboard:dashboard' %}" class="sb-item {% if 'dashboard' in request.path %}active{% endif %}">
+    {% if user.is_authenticated %}
+    <a href="{% url 'dashboard:dashboard' %}" class="sb-item {% if '/dashboard/' in request.path %}active{% endif %}">
       <i class="bi bi-clock-history sb-icon"></i>
       <span class="sb-label">Scan History</span>
       {% if user_real_scan_count %}<span class="sb-badge">{{ user_real_scan_count }}</span>{% endif %}
     </a>
     {% if user_latest_real_scan %}
-    <a href="{% url 'results:detail' scan_id=user_latest_real_scan.id %}" class="sb-item {% if 'results' in request.path %}active{% endif %}">
-      <i class="bi bi-bar-chart-line sb-icon"></i>
+    <a href="{% url 'results:detail' scan_id=user_latest_real_scan.id %}" class="sb-item {% if 'results' in request.path and 'progress' not in request.path %}active{% endif %}">
+      <i class="bi bi-file-earmark-bar-graph sb-icon"></i>
       <span class="sb-label">Latest Results</span>
     </a>
     {% endif %}
+    <a href="{% url 'results:progress' %}" class="sb-item {% if 'results/progress' in request.path %}active{% endif %}">
+      <i class="bi bi-graph-up-arrow sb-icon"></i>
+      <span class="sb-label">Beauty Progress</span>
+    </a>
     {% endif %}
 
-    <!-- SHOP -->
-    <div class="sb-section-label">Shop</div>
+    {# 🛍 SHOP #}
+    <div class="sb-section-label">🛍 Shop</div>
+    <a href="{% url 'products:list' %}" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and not request.GET.product_range %}active{% endif %}">
+      <i class="bi bi-grid sb-icon"></i>
+      <span class="sb-label">All Products</span>
+    </a>
     <a href="{% url 'products:list' %}?product_range=korean" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'korean' %}active{% endif %}">
       <i class="bi bi-stars sb-icon"></i>
-      <span class="sb-label">K-Beauty</span>
+      <span class="sb-label">Korean Beauty</span>
     </a>
     <a href="{% url 'products:list' %}?product_range=makeup" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'makeup' %}active{% endif %}">
       <i class="bi bi-palette2 sb-icon"></i>
@@ -476,30 +607,67 @@ body{
       <i class="bi bi-flower2 sb-icon"></i>
       <span class="sb-label">Ayurvedic</span>
     </a>
-    <a href="{% url 'products:list' %}?product_range=pharmacy" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and request.GET.product_range == 'pharmacy' %}active{% endif %}">
-      <i class="bi bi-capsule sb-icon"></i>
-      <span class="sb-label">Pharmacy</span>
-    </a>
-    <a href="{% url 'products:list' %}" class="sb-item {% if 'products' in request.path and 'employee' not in request.path and not request.GET.product_range %}active{% endif %}">
-      <i class="bi bi-grid sb-icon"></i>
-      <span class="sb-label">All Products</span>
-    </a>
+
+    {# 📦 ORDERS (auth only) #}
     {% if user.is_authenticated %}
+    <div class="sb-section-label">📦 Orders</div>
     <a href="{% url 'orders:my_orders' %}" class="sb-item {% if 'orders/my-orders' in request.path %}active{% endif %}">
       <i class="bi bi-bag-heart sb-icon"></i>
       <span class="sb-label">My Orders</span>
     </a>
     <a href="{% url 'orders:my_requirements' %}" class="sb-item {% if 'orders/requirements' in request.path %}active{% endif %}">
       <i class="bi bi-clipboard-heart sb-icon"></i>
-      <span class="sb-label">My Requirements</span>
+      <span class="sb-label">Purchased Products</span>
     </a>
-    {% endif %}
+    <a href="{% url 'hair:start' %}" class="sb-item {% if 'hair' in request.path %}active{% endif %}">
+      <i class="bi bi-heart sb-icon"></i>
+      <span class="sb-label">Wishlist</span>
+    </a>
     <a href="{% url 'orders:checkout' %}" class="sb-item {% if 'orders/checkout' in request.path %}active{% endif %}">
       <i class="bi bi-cart sb-icon"></i>
-      <span class="sb-label">Cart {% if request.session.cart %}<span style="background:#0d9488;color:#fff;font-size:.58rem;padding:.08rem .35rem;border-radius:20px;font-weight:700;margin-left:.2rem;">{{ request.session.cart|length }}</span>{% endif %}</span>
+      <span class="sb-label">Cart{% if request.session.cart %} <span style="background:#0d9488;color:#fff;font-size:.58rem;padding:.08rem .35rem;border-radius:20px;font-weight:700;margin-left:.2rem;">{{ request.session.cart|length }}</span>{% endif %}</span>
+    </a>
+    <a href="{% url 'coupons:my_coupons' %}" class="sb-item {% if 'coupons' in request.path %}active{% endif %}">
+      <i class="bi bi-ticket-perforated sb-icon"></i>
+      <span class="sb-label">Coupons</span>
     </a>
 
-    <!-- ADMIN / EMPLOYEE -->
+    {# 👤 PROFILE section removed from nav — now lives in footer popup #}
+
+    {# 🎁 REWARDS (auth only) #}
+    <div class="sb-section-label">🎁 Rewards</div>
+    <a href="{% url 'memberships:upgrade' %}" class="sb-item {% if 'membership' in request.path %}active{% endif %}">
+      <i class="bi bi-star sb-icon"></i>
+      <span class="sb-label">Membership</span>
+      {% if user_tier == 'vip' %}<span class="sb-badge" style="background:var(--sb-gold);color:#0a0a0f;font-size:.55rem;padding:.06rem .35rem;">VIP</span>
+      {% elif user_tier == 'medium' %}<span class="sb-badge" style="font-size:.55rem;padding:.06rem .35rem;">PLUS</span>{% endif %}
+    </a>
+    <a href="{% url 'memberships:redeem' %}" class="sb-item {% if 'redeem' in request.path %}active{% endif %}">
+      <i class="bi bi-trophy sb-icon"></i>
+      <span class="sb-label">Rewards</span>
+    </a>
+    <a href="{% url 'accounts:referral_history' %}" class="sb-item {% if 'accounts/referrals' in request.path %}active{% endif %}">
+      <i class="bi bi-people sb-icon"></i>
+      <span class="sb-label">Referral Program</span>
+    </a>
+    {% endif %}{# end auth only #}
+
+    {# 📚 RESOURCES #}
+    <div class="sb-section-label">📚 Resources</div>
+    <a href="{% url 'blog:list' %}" class="sb-item {% if 'blog' in request.path %}active{% endif %}">
+      <i class="bi bi-journal-text sb-icon"></i>
+      <span class="sb-label">Blog</span>
+    </a>
+    <a href="{% url 'core:faq' %}" class="sb-item {% if request.resolver_match.url_name == 'faq' and request.resolver_match.app_name == 'core' %}active{% endif %}">
+      <i class="bi bi-question-circle sb-icon"></i>
+      <span class="sb-label">FAQs</span>
+    </a>
+    <a href="{% url 'accounts:support_tickets' %}" class="sb-item {% if 'accounts/support' in request.path %}active{% endif %}">
+      <i class="bi bi-headset sb-icon"></i>
+      <span class="sb-label">Contact Support</span>
+    </a>
+
+    {# 🔧 ADMIN (staff/superuser only) #}
     {% if user.is_staff or user.is_superuser %}
     <div class="sb-section-label">Admin</div>
     <a href="{% url 'employee:portal' %}" class="sb-item {% if 'employee' in request.path %}active{% endif %}">
@@ -534,27 +702,72 @@ body{
       <i class="bi bi-shield-lock sb-icon"></i>
       <span class="sb-label">Django Admin</span>
     </a>
+    <a href="{% url 'diagnostic:admin_panel' %}" class="sb-item">
+      <i class="bi bi-clipboard-data sb-icon"></i>
+      <span class="sb-label">Diagnostic Panel</span>
+    </a>
+    <a href="{% url 'diagnostic:marketing' %}" class="sb-item">
+      <i class="bi bi-bar-chart sb-icon"></i>
+      <span class="sb-label">Marketing Portal</span>
+    </a>
     {% endif %}
 
   </nav>
 
-  <!-- Footer user card -->
+  
   <div class="sb-footer">
     {% if user.is_authenticated %}
-    <div class="sb-user-card">
-      <div class="sb-user-avatar">{{ user.username|first|upper }}</div>
-      <div>
-        <div class="sb-user-name">{{ user.get_full_name|default:user.username }}</div>
-        <div class="sb-user-role">
-          <a href="{% url 'memberships:upgrade' %}" style="text-decoration:none;">
-            {% if user_tier == 'vip' %}<span class="tier-badge tier-vip">VIP</span>
-            {% elif user_tier == 'medium' %}<span class="tier-badge tier-medium">PLUS</span>
-            {% else %}<span class="tier-badge tier-normal">FREE</span>{% endif %}
-          </a>
-          <span style="margin-left:.35rem;">{% if user_tier == 'vip' %}VIP Member{% elif user_tier == 'medium' %}Plus Member{% else %}Free Member{% endif %}</span>
+
+    {# ── Profile popup — opens above the footer card when clicked ── #}
+    <div class="sb-profile-popup" id="sb-profile-popup">
+      <div class="sb-profile-popup-hd">Account</div>
+      <a href="{% url 'user_home' %}" class="sb-pp-item {% if request.path == '/me/' %}active{% endif %}">
+        <i class="bi bi-person-vcard"></i> Personal Information
+      </a>
+      <a href="{% url 'accounts:edit_profile' %}" class="sb-pp-item {% if 'accounts/edit' in request.path %}active{% endif %}">
+        <i class="bi bi-pencil-square"></i> Edit Profile
+      </a>
+      <a href="{% url 'skin:start' %}" class="sb-pp-item {% if 'skin' in request.path %}active{% endif %}">
+        <i class="bi bi-clipboard-pulse"></i> Skin Questionnaire
+      </a>
+      <a href="{% url 'accounts:address_list' %}" class="sb-pp-item {% if 'accounts/addresses' in request.path %}active{% endif %}">
+        <i class="bi bi-geo-alt"></i> Address Book
+      </a>
+      <a href="{% url 'accounts:devices' %}" class="sb-pp-item {% if 'accounts/devices' in request.path %}active{% endif %}">
+        <i class="bi bi-phone"></i> Devices
+      </a>
+      <a href="{% url 'notifications:list' %}" class="sb-pp-item {% if 'notifications' in request.path %}active{% endif %}">
+        <i class="bi bi-bell"></i> Notifications
+        {% if unread_notif_count > 0 %}<span class="sb-badge" style="font-size:.55rem;padding:.06rem .35rem;margin-left:.3rem;">{{ unread_notif_count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'accounts:login_history' %}" class="sb-pp-item {% if 'accounts/login-history' in request.path %}active{% endif %}">
+        <i class="bi bi-shield-check"></i> Login History
+      </a>
+    </div>
+
+    {# ── Footer user card — click toggles the popup above ── #}
+    <button type="button" id="sb-profile-card-btn" class="sb-user-card {% if request.path == '/me/' %}sb-user-card-active{% endif %}" title="Account menu" style="width:100%;background:none;border:none;text-align:left;cursor:pointer;display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:12px;transition:background .14s;">
+      <div class="sb-user-avatar" style="flex-shrink:0;">{{ user.username|first|upper }}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="sb-user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ user.get_full_name|default:user.username }}</div>
+        <div class="sb-user-role" style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">
+          {% if user.is_superuser %}
+            <span class="tier-badge" style="background:#e0e7ff;color:#3730a3;padding:.12rem .5rem;border-radius:20px;font-size:.6rem;font-weight:700;">ADMIN</span>
+            <span style="margin-left:.2rem;font-size:.68rem;opacity:.55;">Administrator</span>
+          {% elif user.is_staff %}
+            <span class="tier-badge" style="background:#fce7f3;color:#9d174d;padding:.12rem .5rem;border-radius:20px;font-size:.6rem;font-weight:700;">STAFF</span>
+            <span style="margin-left:.2rem;font-size:.68rem;opacity:.55;">Employee</span>
+          {% else %}
+            {% if user_tier == 'vip' %}<span class="tier-badge tier-vip" style="font-size:.6rem;">VIP</span>
+            {% elif user_tier == 'medium' %}<span class="tier-badge tier-medium" style="font-size:.6rem;">PLUS</span>
+            {% else %}<span class="tier-badge tier-normal" style="font-size:.6rem;">FREE</span>{% endif %}
+            <span style="margin-left:.2rem;font-size:.68rem;opacity:.55;">{% if user_tier == 'vip' %}VIP Member{% elif user_tier == 'medium' %}Plus Member{% else %}Free Member{% endif %}</span>
+          {% endif %}
         </div>
       </div>
-    </div>
+      <i class="bi bi-chevron-up" id="sb-profile-card-chevron" style="font-size:.65rem;color:rgba(255,255,255,.25);flex-shrink:0;transition:transform .2s;"></i>
+    </button>
+
     <a href="{% url 'accounts:logout' %}" class="sb-item" style="margin-top:.4rem;">
       <i class="bi bi-box-arrow-left sb-icon"></i>
       <span class="sb-label">Logout</span>
@@ -569,13 +782,11 @@ body{
 
 </aside>
 
-<!-- Mobile overlay -->
 <div class="lux-mob-overlay" id="mob-overlay"></div>
 
-<!-- ═══════════════ MAIN ═══════════════ -->
 <div class="lux-main" id="lux-main">
 
-  <!-- Top bar -->
+  
   <div class="lux-topbar">
     <button class="tb-toggle" id="sb-toggle" title="Toggle sidebar">
       <i class="bi bi-layout-sidebar"></i>
@@ -586,8 +797,14 @@ body{
         <i class="bi bi-moon-stars" id="theme-icon"></i>
       </button>
       {% if user.is_authenticated %}
-      <a href="{% url 'scanner:upload' %}" class="tb-icon-btn" title="New scan" style="text-decoration:none;">
-        <i class="bi bi-camera-fill"></i>
+      <a href="{% url 'notifications:list' %}" class="tb-icon-btn" title="Notifications" style="text-decoration:none;position:relative;">
+        <i class="bi bi-bell"></i>
+        {% if unread_notif_count > 0 %}
+        <span style="position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .35rem;border-radius:20px;min-width:16px;text-align:center;">{{ unread_notif_count }}</span>
+        {% endif %}
+      </a>
+      <a href="{% url 'skin:start' %}" class="tb-icon-btn" title="AI Consultation" style="text-decoration:none;">
+        <i class="bi bi-stars"></i>
       </a>
       {% else %}
       <a href="{% url 'accounts:login' %}" class="tb-icon-btn" style="text-decoration:none;">
@@ -597,7 +814,7 @@ body{
     </div>
   </div>
 
-  <!-- Messages -->
+  
   {% if messages %}
   <div class="lux-messages">
     {% for message in messages %}
@@ -609,12 +826,12 @@ body{
   </div>
   {% endif %}
 
-  <!-- Content -->
+  
   <main class="lux-content">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer — only on public landing, not on inner app pages -->
+  
   {% block footer %}
   <footer class="lux-footer">
     &copy; 2025 Lumina by SAS Global &nbsp;·&nbsp;
@@ -623,40 +840,43 @@ body{
   </footer>
   {% endblock %}
 
-</div><!-- /lux-main -->
+</div>
 
-<!-- ═══════════════ MOBILE BOTTOM BAR ═══════════════ -->
 <div class="lux-bottom-bar">
   <a href="{% url 'core:home' %}" class="bbar-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
     <i class="bi bi-house"></i> Home
   </a>
-  <a href="{% url 'chat:index' %}" class="bbar-item {% if 'chat' in request.path %}active{% endif %}">
+  <a href="{% url 'skin:start' %}" class="bbar-scan">
+    <i class="bi bi-stars"></i>
+  </a>
+  <a href="{% url 'chat:create' %}?mode=doctor" class="bbar-item {% if 'chat' in request.path %}active{% endif %}">
     <i class="bi bi-heart-pulse"></i> Doctor
   </a>
-  <a href="{% url 'scanner:upload' %}" class="bbar-scan">
-    <i class="bi bi-camera-fill"></i>
-  </a>
-  {% if user.is_authenticated %}
-    {% with ls=user.scans.first %}
-    <a href="{% if ls %}{% url 'results:detail' scan_id=ls.id %}{% else %}{% url 'scanner:upload' %}{% endif %}" class="bbar-item {% if 'results' in request.path %}active{% endif %}">
-      <i class="bi bi-bar-chart-line"></i> Results
-    </a>
-    {% endwith %}
-  {% else %}
-    <a href="{% url 'products:list' %}" class="bbar-item">
-      <i class="bi bi-grid"></i> Shop
-    </a>
-  {% endif %}
   <button class="bbar-item" id="mob-menu-btn">
     <i class="bi bi-list"></i> Menu
   </button>
 </div>
 
-</div><!-- /lux-shell -->
+</div>
 
-<!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/main.js' %}"></script>
+<script>
+  /* Trigger page-entry animation only after CSS is confirmed painted.
+     Uses requestAnimationFrame so the class is added after first render,
+     meaning the element is always visible even if the animation never fires. */
+  (function() {
+    var el = document.querySelector('.lux-content');
+    if (!el) return;
+    // Skip animation if user prefers reduced motion
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        el.classList.add('anim-ready');
+      });
+    });
+  })();
+</script>
 <script>
 // ── SIDEBAR TOGGLE
 const sidebar   = document.getElementById('lux-sidebar');
@@ -678,7 +898,7 @@ function closeMobileSidebar() {
 function toggleDesktopSidebar() {
   const collapsed = sidebar.classList.toggle('collapsed');
   main.classList.toggle('sb-collapsed', collapsed);
-  localStorage.setItem('sb_collapsed', collapsed ? '1' : '0');
+  lsSet('sb_collapsed', collapsed ? '1' : '0');
 }
 
 sbToggle?.addEventListener('click', () => {
@@ -689,7 +909,7 @@ mobMenu?.addEventListener('click', openMobileSidebar);
 overlay?.addEventListener('click', closeMobileSidebar);
 
 // Restore sidebar state on desktop
-if (!isMobile() && localStorage.getItem('sb_collapsed') === '1') {
+if (!isMobile() && lsGet('sb_collapsed', '0') === '1') {
   sidebar.classList.add('collapsed');
   main.classList.add('sb-collapsed');
 }
@@ -703,29 +923,77 @@ document.querySelectorAll('[data-sb-toggle]').forEach(btn => {
   btn.addEventListener('click', e => {
     e.preventDefault();
     const target = document.getElementById(btn.dataset.sbToggle);
-    if (target) target.classList.toggle('open');
+    if (target) {
+      target.classList.toggle('open');
+      // Rotate chevron inside the button
+      const chevron = btn.querySelector('.bi-chevron-down');
+      if (chevron) {
+        chevron.style.transform = target.classList.contains('open') ? 'rotate(180deg)' : '';
+      }
+    }
   });
+  // Set initial chevron state
+  const target = document.getElementById(btn.dataset.sbToggle);
+  if (target && target.classList.contains('open')) {
+    const chevron = btn.querySelector('.bi-chevron-down');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
 });
+
+// ── PROFILE POPUP TOGGLE (footer card → account menu above)
+(function() {
+  const cardBtn  = document.getElementById('sb-profile-card-btn');
+  const popup    = document.getElementById('sb-profile-popup');
+  const chevron  = document.getElementById('sb-profile-card-chevron');
+  if (!cardBtn || !popup) return;
+
+  function openPopup() {
+    popup.classList.add('open');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
+  function closePopup() {
+    popup.classList.remove('open');
+    if (chevron) chevron.style.transform = '';
+  }
+
+  cardBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    popup.classList.contains('open') ? closePopup() : openPopup();
+  });
+
+  // Close when clicking anywhere outside
+  document.addEventListener('click', function(e) {
+    if (!popup.contains(e.target) && e.target !== cardBtn) {
+      closePopup();
+    }
+  });
+
+  // Close when sidebar collapses
+  document.getElementById('sb-toggle')?.addEventListener('click', function() {
+    if (sidebar && sidebar.classList.contains('collapsed')) closePopup();
+  });
+})();
 
 // ── THEME
 const themeBtn  = document.getElementById('theme-btn');
 const themeIcon = document.getElementById('theme-icon');
-// Apply theme before first paint to avoid flash
-const savedTheme = localStorage.getItem('lux_theme') || 'light';
-document.documentElement.setAttribute('data-theme', savedTheme);
-themeIcon.className = savedTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+function lsGet(key, def) { try { var v = localStorage.getItem(key); return (v !== null) ? v : def; } catch(e) { return def; } }
+function lsSet(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+// Read the already-applied theme from the <html> attribute (set by early-paint script above)
+const savedTheme = document.documentElement.getAttribute('data-theme') || 'light';
+if (themeIcon) themeIcon.className = savedTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
 
 themeBtn?.addEventListener('click', () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const next = isDark ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
-  themeIcon.className = next === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
-  localStorage.setItem('lux_theme', next);
+  if (themeIcon) themeIcon.className = next === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+  lsSet('lux_theme', next);
 });
 
 // ── SESSION EXPIRY — countdown modal with auto-logout
 (function() {
-  const SESSION_SECONDS = {{ request.session.SESSION_COOKIE_AGE|default:7200 }};
+  const SESSION_SECONDS = {{ SESSION_COOKIE_AGE|default:7200 }};
   {% if user.is_authenticated %}
 
   // Inject modal HTML once
@@ -902,7 +1170,6 @@ themeBtn?.addEventListener('click', () => {
         : '/accounts/login/?expired=1';
     }
   });
-
   // Initial poll on page load
   pollServer();
   // Periodic background poll to stay in sync
@@ -917,18 +1184,69 @@ themeBtn?.addEventListener('click', () => {
 })();
 
 // ── ACTIVE NAV HIGHLIGHT
-const path = window.location.pathname;
-document.querySelectorAll('.sb-item[href]').forEach(a => {
-  if (a.getAttribute('href') !== '/' && path.startsWith(a.pathname || '')) {
-    a.classList.add('active');
+// Server-side Django template already sets .active on the correct item.
+// This JS block handles two cases the template can't cover:
+//   1. Auto-open the profile popup if the active page is one of its sub-items.
+//   2. Save/restore sidebar scroll position across page navigations.
+
+(function() {
+  // ── 1. Auto-open profile popup when current page is inside it
+  const popup   = document.getElementById('sb-profile-popup');
+  const chevron = document.getElementById('sb-profile-card-chevron');
+  if (popup) {
+    const hasActiveChild = popup.querySelector('.sb-pp-item.active');
+    if (hasActiveChild) {
+      popup.classList.add('open');
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
   }
-});
+
+  // ── 2. Sidebar scroll position persistence
+  const sbNav = document.querySelector('.sb-nav');
+  if (sbNav) {
+    // Restore saved scroll position
+    const savedScroll = lsGet('sb_scroll', '0');
+    sbNav.scrollTop = parseInt(savedScroll, 10) || 0;
+
+    // Save scroll position on every scroll (throttled)
+    let scrollTimer = null;
+    sbNav.addEventListener('scroll', function() {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(function() {
+        lsSet('sb_scroll', sbNav.scrollTop);
+      }, 120);
+    });
+  }
+
+  // ── 3. Ensure only one .active highlight exists in the sidebar nav
+  // (guards against duplicate active states)
+  const sbNavEl = document.querySelector('.sb-nav');
+  if (sbNavEl) {
+    const activeItems = sbNavEl.querySelectorAll('.sb-item.active');
+    // If more than one is active, keep only the first (most specific match)
+    if (activeItems.length > 1) {
+      for (let i = 1; i < activeItems.length; i++) {
+        activeItems[i].classList.remove('active');
+      }
+    }
+
+    // ── 4. Scroll the active item into view (only if user hasn't manually scrolled)
+    // We only do this if there's no saved scroll position, meaning it's a fresh
+    // page load rather than a back-navigation where user had scrolled the sidebar.
+    const hadSavedScroll = parseInt(lsGet('sb_scroll', '0'), 10) > 0;
+    if (!hadSavedScroll) {
+      const firstActive = sbNavEl.querySelector('.sb-item.active');
+      if (firstActive) {
+        // Use scrollIntoView with 'nearest' so it only scrolls if out of view
+        firstActive.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      }
+    }
+  }
+})();
 </script>
 {% block extra_js %}{% endblock %}
 
 {% if request.path != '/orders/checkout/' %}
-
-<!-- ═══════════════ FLOATING HELP WIDGET ═══════════════ -->
 
 <style>
 .help-fab{position:fixed;bottom:calc(var(--mob-bot-h,58px) + 1rem);right:1rem;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:.5rem;}
@@ -1019,7 +1337,9 @@ function toggleHelp(){
 {% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-<script>AOS.init({ once: true, duration: 400 });</script>
+<script>
+try { if (typeof AOS !== 'undefined') AOS.init({ once: true, duration: 400 }); } catch(e) {}
+</script>
 </body>
 </html>
 

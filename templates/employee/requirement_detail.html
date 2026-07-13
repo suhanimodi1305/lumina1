@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block title %}{{ req.req_id }} — Requirement{% endblock %}
 {% block page_title %}Requirement Detail{% endblock %}
 
@@ -67,9 +67,9 @@
   </div>
 
   <div class="rde-grid">
-    <!-- LEFT -->
+    
     <div>
-      <!-- User Info -->
+      
       <div class="rde-card">
         <h3><i class="bi bi-person" style="color:var(--teal);"></i> User Details</h3>
         <div class="rde-row"><span class="rde-label">Username</span><span>{{ req.user.username }}</span></div>
@@ -77,7 +77,7 @@
         <div class="rde-row"><span class="rde-label">Member since</span><span>{{ req.user.date_joined|date:"d M Y" }}</span></div>
       </div>
 
-      <!-- Requirement -->
+      
       <div class="rde-card">
         <h3><i class="bi bi-stars" style="color:var(--gold);"></i> Requirement Details</h3>
         <div class="rde-row"><span class="rde-label">Quantity</span><span>{{ req.quantity }}</span></div>
@@ -89,7 +89,7 @@
         {% endif %}
       </div>
 
-      <!-- Products -->
+      
       <div class="rde-card">
         <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Requested Products</h3>
         {% for p in req.products.all %}
@@ -104,7 +104,7 @@
         {% endif %}
       </div>
 
-      <!-- Address -->
+      
       <div class="rde-card">
         <h3><i class="bi bi-geo-alt-fill" style="color:var(--teal);"></i> Delivery Address</h3>
         <div class="addr-box">
@@ -114,7 +114,7 @@
         </div>
       </div>
 
-      <!-- Linked Order -->
+      
       {% if req.linked_order %}
       <div class="rde-card">
         <h3><i class="bi bi-bag-check" style="color:var(--teal);"></i> Linked Order</h3>
@@ -128,7 +128,7 @@
       {% endif %}
     </div>
 
-    <!-- RIGHT: Update Panel -->
+    
     <div>
       <div class="rde-card">
         <h3><i class="bi bi-pencil-square" style="color:var(--gold);"></i> Manage Requirement</h3>

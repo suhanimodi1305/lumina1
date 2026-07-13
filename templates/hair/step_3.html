@@ -1,0 +1,43 @@
+{% extends "hair/base_step.html" %}
+{% load static %}
+
+{% block hero_content %}
+<h1 class="hw-hero-q">
+  Select any <em>symptoms</em><br>you face regularly
+</h1>
+<p class="hw-hero-sub">
+  Hair health is deeply connected to gut health, sleep, and stress. This helps us identify root causes beyond just your scalp's surface.
+</p>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'hair:save_step' step=3 %}" class="hw-form" id="step3Form">
+  {% csrf_token %}
+
+  <div class="hw-chip-grid">
+    {% for s in root_symptoms %}
+    <label class="hw-chip-wrap">
+      <input type="checkbox" name="root_symptoms" value="{{ s.value }}" class="hw-sym-cb">
+      <div class="hw-chip">{{ s.label }}</div>
+    </label>
+    {% endfor %}
+  </div>
+
+  <p style="font-size:.74rem; color:var(--text-muted); margin-bottom:1.5rem; text-align:center;">
+    Select all that apply — or skip if none apply
+  </p>
+
+  <button type="submit" class="hw-next-btn">
+    <span>Next — Hair Type</span>
+    <i class="bi bi-arrow-right"></i>
+  </button>
+
+  <a href="{% url 'hair:question' step=2 %}" class="hw-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}
+
+{% block step_js %}
+// Step 3 has no mandatory selection — next always enabled
+{% endblock %}

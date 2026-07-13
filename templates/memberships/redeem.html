@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static %}
 
 {% block title %}Redeem Points — Lumina{% endblock %}
@@ -9,7 +9,7 @@
 
   <div style="background:var(--surface);border-radius:var(--r-xl);padding:2rem;border:1px solid var(--border);box-shadow:var(--shadow);">
 
-    <!-- Header -->
+    
     <div style="text-align:center;margin-bottom:2rem;">
       <div style="font-size:3rem;margin-bottom:.75rem;">⭐</div>
       <h2 style="margin-bottom:.5rem;">Your Loyalty Points</h2>
@@ -17,7 +17,7 @@
       <p style="color:var(--muted);font-size:.85rem;margin-top:.35rem;">points available</p>
     </div>
 
-    <!-- Current tier -->
+    
     <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--page-bg);border-radius:var(--r-md);margin-bottom:1.5rem;">
       <span style="font-size:.85rem;color:var(--muted);">Current Tier</span>
       <span class="tier-badge tier-{{ current_tier }}" style="font-size:.78rem;">
@@ -26,7 +26,7 @@
     </div>
 
     {% if current_tier == 'vip' %}
-    <!-- VIP congratulations -->
+    
     <div style="text-align:center;padding:1.5rem;background:rgba(201,169,110,.08);border:1px solid rgba(201,169,110,.2);border-radius:var(--r-md);">
       <div style="font-size:1.5rem;margin-bottom:.5rem;">👑</div>
       <p style="color:var(--sb-gold);font-weight:600;margin:0;">You're already a VIP member!</p>
@@ -34,7 +34,7 @@
     </div>
 
     {% elif upgrade_info %}
-    <!-- Progress bar -->
+    
     <div style="margin-bottom:1.5rem;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
         <span style="font-size:.82rem;color:var(--muted);">Progress to {{ upgrade_info.label }}</span>
@@ -48,7 +48,7 @@
       </p>
     </div>
 
-    <!-- Redeem form -->
+    
     {% if points >= threshold %}
     <form method="post" action="{% url 'memberships:redeem' %}">
       {% csrf_token %}
@@ -78,7 +78,7 @@
 
     {% endif %}
 
-    <!-- Back link -->
+    
     <div style="text-align:center;margin-top:1.5rem;">
       <a href="{% url 'memberships:upgrade' %}" style="color:var(--muted);font-size:.82rem;">
         ← View all membership plans

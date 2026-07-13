@@ -136,7 +136,10 @@ def cart_remove(request, pk):
 def cart_update(request, pk):
     cart  = _get_cart(request)
     shade = request.POST.get('shade', '')
-    qty   = int(request.POST.get('qty', 1))
+    try:
+        qty = int(request.POST.get('qty', 1))
+    except (ValueError, TypeError):
+        qty = 1
     for item in cart:
         if item['product_id'] == pk and item.get('shade', '') == shade:
             if qty <= 0:

@@ -40,6 +40,22 @@ class UserProfile(models.Model):
                                                blank=True, default='')
     admin_override_active   = models.BooleanField(default=False)
 
+    # ── Onboarding ────────────────────────────────────────────────────────────
+    # Tracks how far through the first-time onboarding flow the user has gotten.
+    # Steps: profile_setup → scan → quiz → done
+    ONBOARDING_STEP_CHOICES = [
+        ('profile_setup', 'Profile Setup'),
+        ('scan',          'Selfie Scan'),
+        ('quiz',          'Smart Quiz'),
+        ('done',          'Completed'),
+    ]
+    onboarding_step = models.CharField(
+        max_length=20,
+        choices=ONBOARDING_STEP_CHOICES,
+        default='profile_setup',
+    )
+    onboarding_complete = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = 'User Profile'
 

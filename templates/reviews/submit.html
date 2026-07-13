@@ -1,0 +1,118 @@
+﻿{% extends "base.html" %}
+{% block title %}Review {{ product.name }} — Lumina{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:640px;">
+
+  <a href="{% url 'products:detail' product.pk %}" class="btn btn-sm btn-outline-secondary mb-4">
+    ← Back to Product
+  </a>
+
+  <h4 class="fw-bold mb-1">⭐ Write a Review</h4>
+  <p class="text-muted small mb-4">{{ product.brand }} — {{ product.name }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    
+    <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+      <label class="form-label fw-semibold mb-2">Overall Rating</label>
+      <div class="d-flex gap-2 mb-1" id="star-row">
+        {% for i in "12345" %}
+        <span class="review-star" data-val="{{ forloop.counter }}"
+              style="font-size:2rem;cursor:pointer;color:#e2e8f0;">★</span>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="rating" id="rating-input" value="5">
+    </div>
+
+    
+    <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Review Title</label>
+        <input type="text" name="title" class="form-control" maxlength="200"
+               placeholder="e.g. 'Cleared my acne in 3 weeks!'" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Your Review</label>
+        <textarea name="body" class="form-control" rows="5" maxlength="2000" required
+                  placeholder="Share your experience — how long you used it, visible results, texture, smell…"></textarea>
+      </div>
+    </div>
+
+    
+    <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+      <h6 class="fw-semibold mb-3">About Your Skin (helps others)</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label small text-muted">Skin Type</label>
+          <select name="skin_type" class="form-select form-select-sm">
+            <option value="">— Select —</option>
+            {% for val, label in skin_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-muted">Main Concern</label>
+          <select name="concern" class="form-select form-select-sm">
+            <option value="">— Select —</option>
+            {% for val, label in concern_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-muted">Weeks Used</label>
+          <input type="number" name="used_for_weeks" class="form-control form-control-sm"
+                 min="0" max="52" value="4">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-muted">Would Recommend?</label>
+          <div class="d-flex gap-3 mt-1">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="would_recommend" id="rec_yes" value="yes" checked>
+              <label class="form-check-label small" for="rec_yes">Yes 👍</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="would_recommend" id="rec_no" value="no">
+              <label class="form-check-label small" for="rec_no">No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary btn-lg" style="border-radius:12px;">
+        Submit Review
+      </button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+const stars = document.querySelectorAll('.review-star');
+const input = document.getElementById('rating-input');
+let currentRating = 5;
+
+function updateStars(val) {
+  stars.forEach((s, i) => {
+    s.style.color = i < val ? '#f59e0b' : '#e2e8f0';
+  });
+}
+
+updateStars(5);
+
+stars.forEach(star => {
+  star.addEventListener('click', () => {
+    currentRating = parseInt(star.dataset.val);
+    input.value = currentRating;
+    updateStars(currentRating);
+  });
+  star.addEventListener('mouseenter', () => updateStars(parseInt(star.dataset.val)));
+  star.addEventListener('mouseleave', () => updateStars(currentRating));
+});
+</script>
+{% endblock %}

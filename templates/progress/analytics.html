@@ -1,0 +1,190 @@
+﻿{% extends "base.html" %}
+{% block title %}My Analytics — Lumina{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="mb-4">
+    <a href="{% url 'progress:progress_home' %}" class="btn btn-sm btn-outline-secondary mb-3">← Back</a>
+    <h4 class="fw-bold mb-0">📈 My Analytics</h4>
+    <p class="text-muted small">Track your skin health, routine consistency, and progress over time</p>
+  </div>
+
+  
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3" style="border-radius:14px;">
+        <div style="font-size:1.6rem;">📸</div>
+        <div class="fw-bold fs-4 mt-1">{{ total_scans }}</div>
+        <div class="text-muted small">Total Scans</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3" style="border-radius:14px;">
+        <div style="font-size:1.6rem;">📅</div>
+        <div class="fw-bold fs-4 mt-1">{{ total_logs }}</div>
+        <div class="text-muted small">Days Logged</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3" style="border-radius:14px;">
+        <div style="font-size:1.6rem;">🔥</div>
+        <div class="fw-bold fs-4 mt-1">{{ streak }}</div>
+        <div class="text-muted small">Current Streak</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3" style="border-radius:14px;">
+        <div style="font-size:1.6rem;">✅</div>
+        <div class="fw-bold fs-4 mt-1">{{ full_days }}</div>
+        <div class="text-muted small">Full AM+PM Days</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+
+      
+      {% if total_scans > 0 %}
+      <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+        <h6 class="fw-bold mb-3">Scan Score History</h6>
+        <canvas id="scanChart" height="120"></canvas>
+      </div>
+      {% endif %}
+
+      
+      <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0">Routine Consistency — Last 30 Days</h6>
+          <div class="d-flex gap-3 small">
+            <span>AM: <strong class="text-primary">{{ am_pct }}%</strong></span>
+            <span>PM: <strong style="color:#6c63ff;">{{ pm_pct }}%</strong></span>
+          </div>
+        </div>
+        <canvas id="routineChart" height="80"></canvas>
+      </div>
+
+      
+      {% if checkin_labels %}
+      <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+        <h6 class="fw-bold mb-3">Weekly Rating Trend</h6>
+        <canvas id="checkinChart" height="100"></canvas>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <div class="col-lg-4">
+
+      
+      <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius:16px;">
+        <h6 class="fw-bold mb-3">Routine Summary</h6>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small mb-1">
+            <span>AM Consistency</span>
+            <span class="fw-semibold">{{ am_pct }}%</span>
+          </div>
+          <div class="progress" style="height:8px;border-radius:20px;">
+            <div class="progress-bar bg-primary" style="width:{{ am_pct }}%;border-radius:20px;"></div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small mb-1">
+            <span>PM Consistency</span>
+            <span class="fw-semibold">{{ pm_pct }}%</span>
+          </div>
+          <div class="progress" style="height:8px;border-radius:20px;">
+            <div class="progress-bar" style="width:{{ pm_pct }}%;border-radius:20px;background:#6c63ff;"></div>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          <a href="{% url 'progress:daily_log' %}" class="btn btn-sm btn-primary w-100">
+            Log Today's Routine
+          </a>
+        </div>
+      </div>
+
+      
+      <div class="card border-0 shadow-sm p-4" style="border-radius:16px;">
+        <h6 class="fw-bold mb-3">Continue Your Journey</h6>
+        <div class="d-grid gap-2">
+          <a href="{% url 'scanner:upload' %}" class="btn btn-outline-primary btn-sm">📸 New Scan</a>
+          <a href="{% url 'progress:milestone_tracker' %}" class="btn btn-outline-secondary btn-sm">🏆 Milestones</a>
+          <a href="{% url 'progress:weekly_checkin' %}" class="btn btn-outline-secondary btn-sm">📋 Weekly Check-in</a>
+          <a href="{% url 'diagnostic:smart_start' %}" class="btn btn-outline-secondary btn-sm">🔬 Re-run AI Quiz</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const chartDefaults = {
+  responsive: true,
+  plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+};
+
+{% if total_scans > 0 %}
+const scanLabels = {{ scan_chart_labels|safe }};
+const scanScores = {{ scan_chart_scores|safe }};
+new Chart(document.getElementById('scanChart'), {
+  type: 'line',
+  data: {
+    labels: scanLabels,
+    datasets: [
+      { label: 'Harmony',      data: scanScores.harmony,      borderColor: '#6c63ff', tension: 0.4, fill: false },
+      { label: 'Hydration',    data: scanScores.hydration,    borderColor: '#22c55e', tension: 0.4, fill: false },
+      { label: 'Pigmentation', data: scanScores.pigmentation, borderColor: '#f59e0b', tension: 0.4, fill: false },
+      { label: 'Acne',         data: scanScores.acne,         borderColor: '#ef4444', tension: 0.4, fill: false },
+    ]
+  },
+  options: { ...chartDefaults, scales: { y: { min: 0, max: 100 } } }
+});
+{% endif %}
+
+const routineLabels = {{ routine_labels|safe }};
+new Chart(document.getElementById('routineChart'), {
+  type: 'bar',
+  data: {
+    labels: routineLabels,
+    datasets: [
+      { label: 'AM', data: {{ routine_am_data|safe }}, backgroundColor: '#3b82f6', barPercentage: 0.6 },
+      { label: 'PM', data: {{ routine_pm_data|safe }}, backgroundColor: '#6c63ff', barPercentage: 0.6 },
+    ]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      y: { min: 0, max: 1, ticks: { stepSize: 1 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+{% if checkin_labels %}
+new Chart(document.getElementById('checkinChart'), {
+  type: 'line',
+  data: {
+    labels: {{ checkin_labels|safe }},
+    datasets: [{
+      label: 'Skin Rating',
+      data: {{ checkin_scores|safe }},
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,.1)',
+      tension: 0.4,
+      fill: true,
+      pointRadius: 4,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: { y: { min: 1, max: 5, ticks: { stepSize: 1 } } }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

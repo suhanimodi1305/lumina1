@@ -1,0 +1,81 @@
+﻿{% extends "skin/base_step.html" %}
+{% load static %}
+
+{% block question_heading %}
+<h1 class="ac-q-title">How much <em>water</em> do you drink daily?</h1>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'skin:save_step' step=7 %}" class="ac-form" style="width:100%;">
+  {% csrf_token %}
+
+  <div class="ac-field">
+    <label class="ac-label" style="text-align:center;display:block;margin-bottom:1.25rem;">Water intake affects your skin's hydration, texture and glow</label>
+    <div class="ac-options">
+      {% for o in water_options %}
+      <label class="ac-opt-wrap">
+        <input type="radio" name="water_intake" value="{{ o.value }}"
+               {% if sess.water_intake == o.value %}checked{% endif %} required>
+        <div class="ac-opt-card" style="padding:1.5rem 1rem;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon" style="font-size:2.4rem;">{{ o.icon }}</div>
+          <div class="ac-opt-label" style="font-size:1rem;">{{ o.label }}</div>
+          <div class="ac-opt-desc">{{ o.desc }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="ac-section-divider"><i class="bi bi-sun"></i> Sun Protection</div>
+  <div class="ac-field">
+    <label class="ac-label">How often do you wear sunscreen?</label>
+    <div class="ac-options">
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sunscreen_usage" value="daily">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">☀️</div>
+          <div class="ac-opt-label">Every day</div>
+          <div class="ac-opt-desc">Best habit! 🌟</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sunscreen_usage" value="outside">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🚶</div>
+          <div class="ac-opt-label">When going outside</div>
+          <div class="ac-opt-desc">Good, but UV hits indoors too</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sunscreen_usage" value="rarely">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🙈</div>
+          <div class="ac-opt-label">Rarely</div>
+          <div class="ac-opt-desc">We'll help you build the habit</div>
+        </div>
+      </label>
+      <label class="ac-opt-wrap">
+        <input type="radio" name="sunscreen_usage" value="never">
+        <div class="ac-opt-card" style="min-height:85px;">
+          <div class="ac-opt-check"><i class="bi bi-check-lg"></i></div>
+          <div class="ac-opt-icon">🚫</div>
+          <div class="ac-opt-label">Never</div>
+          <div class="ac-opt-desc">SPF is the #1 anti-aging product</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="ac-next-btn">
+    Continue <i class="bi bi-arrow-right"></i>
+  </button>
+  <a href="{% url 'skin:question' step=6 %}" class="ac-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}

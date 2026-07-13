@@ -1,0 +1,65 @@
+{% extends "hair/base_step.html" %}
+{% load static %}
+
+{% block hero_content %}
+<h1 class="hw-hero-q">
+  How severe is your<br><em>hair concern?</em>
+</h1>
+<p class="hw-hero-sub">
+  Be honest — this helps us recommend the right strength of treatment, not just maintenance products.
+</p>
+{% endblock %}
+
+{% block step_css %}
+<style>
+.hw-sev-wrap input:checked ~ .hw-sev-card[data-stage="stage1"] {
+  border-color: #22c55e; background: rgba(34,197,94,.08);
+}
+.hw-sev-wrap input:checked ~ .hw-sev-card[data-stage="stage2"] {
+  border-color: #f59e0b; background: rgba(245,158,11,.08);
+}
+.hw-sev-wrap input:checked ~ .hw-sev-card[data-stage="stage3"] {
+  border-color: #f97316; background: rgba(249,115,22,.08);
+}
+.hw-sev-wrap input:checked ~ .hw-sev-card[data-stage="stage4"] {
+  border-color: #ef4444; background: rgba(239,68,68,.08);
+}
+</style>
+{% endblock %}
+
+{% block step_body %}
+<form method="post" action="{% url 'hair:save_step' step=5 %}" class="hw-form" id="step5Form">
+  {% csrf_token %}
+
+  <div class="hw-severity-grid">
+    {% for s in severity_stages %}
+    <label class="hw-sev-wrap">
+      <input type="radio" name="severity_stage" value="{{ s.value }}" class="hw-sev-rb" required>
+      <div class="hw-sev-card" data-stage="{{ s.value }}" style="border-color: var(--border);">
+        <div class="hw-sev-icon">{{ s.icon }}</div>
+        <div class="hw-sev-stage">{{ s.label }}</div>
+        <div class="hw-sev-label">{{ s.sublabel }}</div>
+        <div class="hw-sev-bar" style="background:{{ s.color }};"></div>
+        <div class="hw-sev-sub">{{ s.detail }}</div>
+        <div class="hw-sev-desc">{{ s.desc }}</div>
+      </div>
+    </label>
+    {% endfor %}
+  </div>
+
+  <button type="submit" class="hw-next-btn" id="nextBtn" disabled>
+    <span>Almost Done — Your Details</span>
+    <i class="bi bi-arrow-right"></i>
+  </button>
+
+  <a href="{% url 'hair:question' step=4 %}" class="hw-back-link">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</form>
+{% endblock %}
+
+{% block step_js %}
+const sevRbs = document.querySelectorAll('.hw-sev-rb');
+const btn    = document.getElementById('nextBtn');
+sevRbs.forEach(r => r.addEventListener('change', () => { btn.disabled = false; }));
+{% endblock %}

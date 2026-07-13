@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Order Placed! {{ order.order_id }} — Lumina{% endblock %}
 {% block extra_css %}
@@ -47,14 +47,14 @@
 
 {% block content %}
 <div class="sc-wrap">
-  <!-- Hero -->
+  
   <div class="sc-hero">
     <div class="sc-hero-icon">🎉</div>
     <h1>Order Placed Successfully!</h1>
     <p>Thank you, <strong style="color:#fff;">{{ order.full_name }}</strong>! Your order is confirmed and being processed.</p>
   </div>
 
-  <!-- Order IDs -->
+  
   <div class="sc-card">
     <h3><i class="bi bi-receipt-cutoff" style="color:var(--gold);"></i> Order Details</h3>
 
@@ -88,7 +88,7 @@
       </div>
     </div>
 
-    <!-- Estimated delivery -->
+    
     {% if order.estimated_delivery %}
     <div class="delivery-strip" style="margin-top:.75rem;">
       <div class="delivery-strip-icon">📦</div>
@@ -110,7 +110,7 @@
     {% endif %}
   </div>
 
-  <!-- Items -->
+  
   <div class="sc-card">
     <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Items Ordered ({{ order.items.count }})</h3>
     {% for item in order.items.all %}
@@ -137,7 +137,7 @@
     </div>
   </div>
 
-  <!-- Actions -->
+  
   <div class="sc-actions">
     <a href="{% url 'orders:tracking' order_id=order.order_id %}" class="sc-btn sc-btn-primary">
       <i class="bi bi-geo-alt-fill"></i> Track Order

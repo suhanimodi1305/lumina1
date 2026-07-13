@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Track Order {{ order.order_id }} — Lumina{% endblock %}
 {% block extra_css %}
@@ -51,13 +51,13 @@
 
 {% block content %}
 <div class="tk-wrap">
-  <!-- Header -->
+  
   <div class="tk-head">
     <h1><i class="bi bi-geo-alt-fill" style="color:#0d9488;margin-right:.4rem;"></i>Order Tracking</h1>
     <div class="sub">Order ID: <strong style="color:#fff;font-family:monospace;">{{ order.order_id }}</strong></div>
   </div>
 
-  <!-- Status overview -->
+  
   <div class="tk-card">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">
       <div>
@@ -80,7 +80,7 @@
       {% endif %}
     </div>
 
-    <!-- Progress bar -->
+    
     <div class="tk-progress">
       {% for slug, label, icon in steps %}
       <div class="tk-step {% if forloop.counter0 < current_step %}done{% elif forloop.counter0 == current_step %}active{% endif %}">
@@ -94,7 +94,7 @@
     </div>
   </div>
 
-  <!-- Timeline -->
+  
   <div class="tk-card">
     <h3><i class="bi bi-clock-history" style="color:var(--teal);"></i> Shipment Timeline</h3>
     {% if logs %}
@@ -125,7 +125,7 @@
     {% endif %}
   </div>
 
-  <!-- Order info -->
+  
   <div class="tk-card">
     <h3><i class="bi bi-info-circle" style="color:var(--gold);"></i> Order Information</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
@@ -156,7 +156,7 @@
     </div>
   </div>
 
-  <!-- Items -->
+  
   <div class="tk-card">
     <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Items ({{ order.items.count }})</h3>
     {% for item in order.items.all %}
@@ -177,7 +177,7 @@
     {% endfor %}
   </div>
 
-  <!-- Actions -->
+  
   <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
     <a href="{% url 'products:list' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:var(--teal);color:#fff;border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none;">
       <i class="bi bi-shop"></i> Continue Shopping

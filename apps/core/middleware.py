@@ -4,6 +4,7 @@ Lumina Security Middleware
 1. RateLimitMiddleware      – brute-force / DoS protection (in-memory, per-IP)
 2. SecurityHeadersMiddleware – extra hardening headers on every response
 3. SessionExpiryMiddleware  – server-side session expiry with clean logout
+4. OnboardingMiddleware     – redirect new users through onboarding flow
 """
 import time
 import logging
@@ -100,7 +101,7 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
             "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
             "img-src 'self' data: blob: https:; "
             "media-src 'self' blob:; "
-            "connect-src 'self'; "
+            "connect-src 'self' https://cdn.jsdelivr.net; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
             "form-action 'self';"
@@ -184,3 +185,6 @@ class SessionExpiryMiddleware(MiddlewareMixin):
         # Sliding window — refresh last activity on every request
         session['_last_activity'] = now
         return None
+
+
+# OnboardingMiddleware removed — first-time flow is handled by view-level redirects in accounts/views.py

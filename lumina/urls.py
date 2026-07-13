@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
+from django.contrib.auth import views as auth_views
 from apps.accounts.views import user_home
-from apps.memberships import views as memberships_views
+from apps.accounts import views as account_views
+from apps.accounts.forms import LuminaLoginForm
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,7 +22,30 @@ urlpatterns = [
     path('employee/', include('apps.employee.urls')),
     path('orders/',     include('apps.orders.urls')),
     path('membership/', include('apps.memberships.urls', namespace='memberships')),
-    path('doctor/',     memberships_views.doctor_consultation, name='doctor'),
+    path('diagnostic/', include('apps.diagnostic.urls', namespace='diagnostic')),
+    path('skin/', include('apps.skin.urls', namespace='skin')),
+    path('hair/', include('apps.hair.urls', namespace='hair')),
+    path('progress/', include('apps.progress.urls', namespace='progress')),
+    path('notifications/', include('apps.notifications.urls', namespace='notifications')),
+    path('reviews/', include('apps.reviews.urls', namespace='reviews')),
+    path('coupons/', include('apps.coupons.urls', namespace='coupons')),
+    path('blog/', include('apps.blog.urls', namespace='blog')),
+
+    # ── Navigation convenience shortcuts ─────────────────────────────────────
+    # These short URLs match the flow diagram so every page can use clean links.
+    path('login/',    auth_views.LoginView.as_view(
+        template_name='accounts/login.html',
+        authentication_form=LuminaLoginForm,
+        redirect_authenticated_user=True,
+    ), name='login'),
+    path('logout/',   auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+    path('register/', account_views.signup, name='register'),
+    path('verify/',   account_views.signup, name='verify'),          # placeholder — signup handles OTP if added later
+    path('profile/create/', account_views.profile_create, name='profile_create'),
+
+    # Routine / check-in shorthand (redirect to progress app views)
+    path('routine/', RedirectView.as_view(pattern_name='progress:daily_log',  permanent=False), name='routine'),
+    path('checkin/', RedirectView.as_view(pattern_name='progress:weekly_checkin', permanent=False), name='checkin'),
 ]
 
 if settings.DEBUG:

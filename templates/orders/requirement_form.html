@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Submit Requirement — Lumina{% endblock %}
 
@@ -51,7 +51,7 @@
   <form method="post" id="reqForm">
     {% csrf_token %}
 
-    <!-- Requirement Details -->
+    
     <div class="rf-card">
       <h3><i class="bi bi-stars" style="color:var(--gold);"></i> What Do You Need?</h3>
 
@@ -86,7 +86,7 @@
       </div>
     </div>
 
-    <!-- Product Selection -->
+    
     <div class="rf-card">
       <h3><i class="bi bi-box-seam" style="color:var(--teal);"></i> Select Products from Catalog</h3>
       {% if errors.products %}<div class="err-msg" style="margin-bottom:.65rem;">{{ errors.products }}</div>{% endif %}
@@ -118,7 +118,7 @@
       </div>
     </div>
 
-    <!-- Delivery Address -->
+    
     <div class="rf-card">
       <h3><i class="bi bi-house-fill" style="color:var(--teal);"></i> Delivery Address</h3>
 

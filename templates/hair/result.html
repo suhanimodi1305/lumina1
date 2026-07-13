@@ -1,0 +1,361 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Your Hair Plan — Lumina{% endblock %}
+{% block page_title %}Hair Analysis Results{% endblock %}
+
+{% block extra_css %}
+<style>
+.lux-content { padding: 0 !important; }
+
+/* ── HERO ── */
+.hr-hero {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 55%, #0a0a0f 100%);
+  padding: 2.5rem 1.75rem 2rem;
+  position: relative; overflow: hidden;
+}
+.hr-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 55% 55% at 88% 12%, rgba(124,58,237,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 12% 88%, rgba(13,148,136,.14) 0%, transparent 55%);
+  pointer-events: none;
+}
+.hr-hero-inner { position: relative; z-index: 1; }
+.hr-hero-tag {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #c4b5fd;
+  background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3);
+  padding: .28rem .8rem; border-radius: 100px; margin-bottom: .9rem;
+}
+.hr-hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+  font-weight: 700; color: #fff; line-height: 1.18; margin-bottom: .6rem;
+}
+.hr-hero p { color: rgba(255,255,255,.52); font-size: .9rem; margin-bottom: 1rem; }
+.hr-chips  { display: flex; flex-wrap: wrap; gap: .4rem; }
+.hr-chip {
+  background: rgba(124,58,237,.15); color: #c4b5fd;
+  border: 1px solid rgba(124,58,237,.3);
+  padding: .22rem .7rem; border-radius: 100px;
+  font-size: .72rem; font-weight: 700;
+}
+
+/* ── BODY ── */
+.hr-body { padding: 1.75rem; max-width: 760px; margin: 0 auto; }
+
+.hr-sec-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 2rem 0 1.25rem; flex-wrap: wrap; gap: .5rem;
+}
+.hr-sec-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.hr-sec-sub   { font-size: .78rem; color: var(--text-muted); }
+
+/* ── PLAN GRID ── */
+.hr-plan-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem; margin-bottom: 2rem;
+}
+@media (max-width: 800px) { .hr-plan-grid { grid-template-columns: 1fr; } }
+@media (min-width: 500px) and (max-width: 800px) {
+  .hr-plan-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.hr-plan-card {
+  border-radius: 22px; border: 2px solid var(--border);
+  background: var(--surface);
+  position: relative; transition: all .25s ease;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.hr-plan-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.12); }
+.hr-plan-card.recommended {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 16px 40px rgba(0,0,0,.12);
+}
+.hr-plan-card.plan-premium {
+  background: linear-gradient(145deg, #111122 0%, #1e1040 100%);
+  border-color: #5b21b6;
+}
+.hr-plan-card.plan-premium.recommended { border-color: #7c3aed; }
+
+.hr-ribbon {
+  background: #7c3aed; color: #fff;
+  font-size: .65rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+  padding: .3rem 0; text-align: center;
+}
+.hr-plan-card.plan-premium .hr-ribbon {
+  background: linear-gradient(90deg, #7c3aed, #c4b5fd); color: #1a1a1a;
+}
+
+.hr-plan-body { padding: 1.5rem 1.5rem 1.25rem; flex: 1; display: flex; flex-direction: column; }
+
+.hr-plan-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .25rem .75rem; border-radius: 100px;
+  font-size: .72rem; font-weight: 800; margin-bottom: .85rem;
+}
+.hr-plan-badge.basic    { background: #dcfce7; color: #166534; }
+.hr-plan-badge.advanced { background: #ede9fe; color: #6d28d9; }
+.hr-plan-badge.premium  { background: linear-gradient(135deg,#7c3aed,#a78bfa); color: #fff; }
+
+.hr-plan-title { font-size: 1.12rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+.plan-premium .hr-plan-title { color: #fff; }
+.hr-plan-sub   { font-size: .78rem; color: var(--text-muted); margin-bottom: .65rem; }
+.plan-premium .hr-plan-sub   { color: rgba(255,255,255,.48); }
+.hr-plan-price { font-size: 1.2rem; font-weight: 700; color: #7c3aed; margin-bottom: .2rem; }
+.plan-premium .hr-plan-price { color: #c4b5fd; }
+.hr-plan-strike { font-size: .75rem; color: var(--text-muted); text-decoration: line-through; margin-bottom: .85rem; }
+
+.hr-plan-features { list-style: none; flex: 1; margin-bottom: 1.25rem; padding: 0; }
+.hr-plan-features li {
+  display: flex; align-items: flex-start; gap: .45rem;
+  padding: .4rem 0; border-bottom: 1px solid var(--border);
+  font-size: .82rem; color: var(--text-muted);
+}
+.plan-premium .hr-plan-features li {
+  border-color: rgba(255,255,255,.07); color: rgba(255,255,255,.62);
+}
+.hr-plan-features li:last-child { border-bottom: none; }
+.feat-ok    { color: #7c3aed; flex-shrink: 0; margin-top: .1rem; }
+.plan-premium .feat-ok { color: #c4b5fd; }
+
+.hr-cta {
+  display: block; width: 100%; text-align: center;
+  padding: .75rem 1rem; border-radius: 100px;
+  font-size: .88rem; font-weight: 700; text-decoration: none;
+  transition: all .2s ease; border: none; cursor: pointer; margin-top: auto;
+}
+.hr-cta.basic    { background: transparent; border: 2px solid var(--border); color: var(--text); }
+.hr-cta.basic:hover { border-color: #7c3aed; color: #7c3aed; }
+.hr-cta.advanced { background: #7c3aed; color: #fff; }
+.hr-cta.advanced:hover { background: #6d28d9; }
+.hr-cta.premium  { background: linear-gradient(135deg, #7c3aed, #a78bfa); color: #fff; }
+.hr-cta.premium:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ── NEXT STEPS ── */
+.hr-next-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin-bottom: 2rem;
+}
+@media (max-width: 576px) { .hr-next-grid { grid-template-columns: 1fr; } }
+.hr-next-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 1.25rem 1rem;
+  text-align: center; text-decoration: none; display: block;
+  transition: all .2s ease;
+}
+.hr-next-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,.1); border-color: #7c3aed; }
+.hr-next-icon  { font-size: 1.75rem; margin-bottom: .5rem; }
+.hr-next-label { font-size: .84rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+.hr-next-desc  { font-size: .72rem; color: var(--text-muted); line-height: 1.35; }
+</style>
+{% endblock %}
+
+{% block content %}
+<canvas id="confetti-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></canvas>
+
+<div class="hr-hero">
+  <div class="hr-hero-inner">
+    <div class="hr-hero-tag">
+      <i class="bi bi-check-circle-fill"></i> Hair Analysis Complete
+    </div>
+    <h1>Your Hair Plan<br>is Ready ✨</h1>
+    <p>Based on your answers, we've curated 3 personalised hair care plans for you.</p>
+    <div class="hr-chips">
+      {% for concern_val in sess.hair_concerns %}
+        {% if concern_val in concern_labels %}
+        <span class="hr-chip">{{ concern_labels|dictsort:concern_val }}</span>
+        {% endif %}
+      {% endfor %}
+      {% if sess.severity_stage %}
+      <span class="hr-chip" style="background:rgba(239,68,68,.12); color:#fca5a5; border-color:rgba(239,68,68,.25);">
+        {% if sess.severity_stage == 'stage1' %}Stage 1 — Mild
+        {% elif sess.severity_stage == 'stage2' %}Stage 2 — Moderate
+        {% elif sess.severity_stage == 'stage3' %}Stage 3 — Significant
+        {% elif sess.severity_stage == 'stage4' %}Stage 4 — Severe
+        {% endif %}
+      </span>
+      {% endif %}
+      {% if sess.hair_type %}
+      <span class="hr-chip">{{ sess.hair_type|capfirst }} Hair</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="hr-body">
+
+  
+  <div class="hr-sec-hdr">
+    <div>
+      <div class="hr-sec-title">Your Personalised Plans</div>
+      <div class="hr-sec-sub">
+        We recommend the
+        <strong style="color:#7c3aed;">{{ rec_plan.name }}</strong>
+        plan for your hair profile
+      </div>
+    </div>
+    <span style="font-size:.72rem; color:var(--text-muted);">
+      <i class="bi bi-stars" style="color:#7c3aed;"></i>
+      AI-matched to your answers
+    </span>
+  </div>
+
+  
+  <div class="hr-plan-grid">
+    {% for key in plan_keys %}
+    {% with plan=plans|dictsort:key %}
+    {% endwith %}
+    {% endfor %}
+
+    {% for key in plan_keys %}
+    {% with p=plans|dictsort:key %}
+    {% endwith %}
+    {% endfor %}
+
+    
+    <div class="hr-plan-card {% if sess.recommended_plan == 'basic' %}recommended{% endif %}">
+      {% if sess.recommended_plan == 'basic' %}
+      <div class="hr-ribbon">⭐ Recommended for You</div>
+      {% endif %}
+      <div class="hr-plan-body">
+        <div class="hr-plan-badge basic">🌿 Basic</div>
+        <div class="hr-plan-title">{{ plans.basic.name }}</div>
+        <div class="hr-plan-sub">{{ plans.basic.tagline }}</div>
+        <div class="hr-plan-price">{{ plans.basic.price }}</div>
+        <ul class="hr-plan-features">
+          {% for f in plans.basic.features %}
+          <li><i class="bi bi-check-circle-fill feat-ok"></i> {{ f }}</li>
+          {% endfor %}
+        </ul>
+        <a href="{% url 'products:list' %}?product_range=ayurvedic" class="hr-cta basic">
+          Shop Basic Plan <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    
+    <div class="hr-plan-card {% if sess.recommended_plan == 'advanced' %}recommended{% endif %}">
+      {% if sess.recommended_plan == 'advanced' %}
+      <div class="hr-ribbon">⭐ Recommended for You</div>
+      {% endif %}
+      <div class="hr-plan-body">
+        <div class="hr-plan-badge advanced">💜 Advanced</div>
+        <div class="hr-plan-title">{{ plans.advanced.name }}</div>
+        <div class="hr-plan-sub">{{ plans.advanced.tagline }}</div>
+        <div class="hr-plan-price">{{ plans.advanced.price }}</div>
+        {% if plans.advanced.strike %}
+        <div class="hr-plan-strike">{{ plans.advanced.strike }}</div>
+        {% endif %}
+        <ul class="hr-plan-features">
+          {% for f in plans.advanced.features %}
+          <li><i class="bi bi-check-circle-fill feat-ok"></i> {{ f }}</li>
+          {% endfor %}
+        </ul>
+        <a href="{% url 'memberships:upgrade' %}" class="hr-cta advanced">
+          Upgrade to Advanced <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    
+    <div class="hr-plan-card plan-premium {% if sess.recommended_plan == 'premium' %}recommended{% endif %}">
+      {% if sess.recommended_plan == 'premium' %}
+      <div class="hr-ribbon">⭐ Recommended for You</div>
+      {% else %}
+      <div class="hr-ribbon">👑 Most Powerful</div>
+      {% endif %}
+      <div class="hr-plan-body">
+        <div class="hr-plan-badge premium">👑 Premium</div>
+        <div class="hr-plan-title">{{ plans.premium.name }}</div>
+        <div class="hr-plan-sub">{{ plans.premium.tagline }}</div>
+        <div class="hr-plan-price">{{ plans.premium.price }}</div>
+        <ul class="hr-plan-features">
+          {% for f in plans.premium.features %}
+          <li><i class="bi bi-check-circle-fill feat-ok"></i> {{ f }}</li>
+          {% endfor %}
+          <li>
+            <i class="bi bi-lock-fill" style="color:rgba(255,255,255,.25); flex-shrink:0; margin-top:.1rem;"></i>
+            <span style="font-style:italic; color:rgba(255,255,255,.25);">
+              {{ plans.premium.locked_feature }}
+            </span>
+          </li>
+        </ul>
+        <a href="{% url 'memberships:upgrade' %}" class="hr-cta premium">
+          Go Premium 👑 <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  
+  <div class="hr-sec-hdr" style="margin-top:0;">
+    <div class="hr-sec-title">What happens next?</div>
+  </div>
+  <div class="hr-next-grid">
+    <a href="{% url 'products:list' %}" class="hr-next-card">
+      <div class="hr-next-icon">🛍️</div>
+      <div class="hr-next-label">Browse Products</div>
+      <div class="hr-next-desc">Shop hair care products matched to your profile</div>
+    </a>
+    <a href="{% url 'chat:create' %}?mode=doctor" class="hr-next-card">
+      <div class="hr-next-icon">💬</div>
+      <div class="hr-next-label">AI Trichologist</div>
+      <div class="hr-next-desc">Chat with our AI for expert personalised advice</div>
+    </a>
+    <a href="{% url 'scanner:upload' %}" class="hr-next-card">
+      <div class="hr-next-icon">📸</div>
+      <div class="hr-next-label">Skin Scan</div>
+      <div class="hr-next-desc">Also run a full AI skin analysis for complete care</div>
+    </a>
+  </div>
+
+  
+  <div style="text-align:center; padding:.75rem 0 .5rem;">
+    <a href="{% url 'hair:restart' %}" style="font-size:.8rem; color:var(--text-muted); text-decoration:none;">
+      <i class="bi bi-arrow-repeat"></i> Retake the hair quiz
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Confetti ──────────────────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const colors = ['#7c3aed','#a78bfa','#c4b5fd','#0d9488','#f7c948','#fff','#f472b6'];
+  const particles = Array.from({length:70}, () => ({
+    x: Math.random()*canvas.width, y: -10,
+    r: Math.random()*6+3, d: Math.random()*90+20,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random()*10-10, tiltAngle:0, tiltSpeed:Math.random()*.1+.05
+  }));
+  let angle=0, frame=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    angle+=.01; frame++;
+    particles.forEach(p=>{
+      p.tiltAngle+=p.tiltSpeed;
+      p.y+=(Math.cos(angle+p.d)+1+p.r/2)*1.4;
+      p.x+=Math.sin(angle)*1.8;
+      p.tilt=Math.sin(p.tiltAngle)*15;
+      ctx.beginPath(); ctx.lineWidth=p.r/2;
+      ctx.strokeStyle=p.color;
+      ctx.moveTo(p.x+p.tilt+p.r/4, p.y);
+      ctx.lineTo(p.x+p.tilt, p.y+p.tilt+p.r/4);
+      ctx.stroke();
+    });
+    if(frame<180) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+})();
+</script>
+{% endblock %}

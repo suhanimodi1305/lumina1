@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% block title %}Bulk Import Products — Employee Portal{% endblock %}
 
@@ -39,7 +39,7 @@
     <p>Import multiple products via CSV upload, or add a single product manually.</p>
   </div>
 
-  <!-- Messages -->
+  
   {% for msg in messages %}
   <div style="padding:.7rem 1rem;border-radius:10px;margin-bottom:.75rem;font-size:.85rem;font-weight:600;
     {% if msg.tags == 'success' %}background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;
@@ -49,7 +49,7 @@
   </div>
   {% endfor %}
 
-  <!-- Mode Tabs -->
+  
   <div class="mode-tabs">
     <button class="mode-tab active" id="tabCsv" onclick="switchMode('csv')">
       <i class="bi bi-file-earmark-spreadsheet"></i> CSV Upload
@@ -59,7 +59,7 @@
     </button>
   </div>
 
-  <!-- ── CSV UPLOAD ── -->
+  
   <div id="modeCsv">
     <div class="bi-card">
       <h3><i class="bi bi-file-earmark-spreadsheet" style="color:var(--teal);"></i> CSV Bulk Upload</h3>
@@ -111,7 +111,7 @@
     </div>
   </div>
 
-  <!-- ── MANUAL ENTRY ── -->
+  
   <div id="modeManual" style="display:none;">
     <div class="bi-card">
       <h3><i class="bi bi-pencil-square" style="color:var(--gold);"></i> Manual Product Entry</h3>
@@ -232,7 +232,7 @@
     </div>
   </div>
 
-  <!-- ── IMPORT RESULTS ── -->
+  
   {% if results %}
   <div class="bi-card" style="margin-top:1rem;">
     <h3><i class="bi bi-list-check" style="color:var(--teal);"></i> Import Results ({{ results|length }})</h3>
@@ -246,7 +246,7 @@
   </div>
   {% endif %}
 
-  <!-- Back links -->
+  
   <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
     <a href="{% url 'employee:product_add' %}" style="font-size:.82rem;color:var(--teal);font-weight:600;text-decoration:none;">
       <i class="bi bi-plus-circle"></i> Add Single Product (Full Form)
@@ -257,7 +257,7 @@
     </a>
   </div>
 
-</div><!-- /container -->
+</div>
 {% endblock %}
 
 {% block extra_js %}

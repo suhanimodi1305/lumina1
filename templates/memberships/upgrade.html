@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static %}
 
 {% block title %}Upgrade Membership — Lumina{% endblock %}
@@ -7,7 +7,7 @@
 {% block content %}
 <div class="container" style="max-width:960px; padding-block:2rem;">
 
-  <!-- Header -->
+  
   <div style="text-align:center; margin-bottom:2.5rem;">
     <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.25);border-radius:100px;padding:.35rem 1rem;margin-bottom:1rem;">
       <i class="bi bi-stars" style="color:var(--sb-gold);"></i>
@@ -19,7 +19,7 @@
     </p>
   </div>
 
-  <!-- Tier Cards -->
+  
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-bottom:2rem;">
 
     {% for tier in tiers %}
@@ -35,7 +35,7 @@
            transition:transform .2s ease, box-shadow .2s ease;
          ">
 
-      <!-- Current badge -->
+      
       {% if tier.is_current %}
       <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);
            background:var(--sb-teal);color:#fff;padding:.2rem 1rem;border-radius:100px;
@@ -44,7 +44,7 @@
       </div>
       {% endif %}
 
-      <!-- Tier badge -->
+      
       <div style="margin-bottom:1rem;">
         <span class="tier-badge tier-{{ tier.key }}" style="font-size:.72rem;">{{ tier.badge }}</span>
       </div>
@@ -54,7 +54,7 @@
         {{ tier.price }}
       </div>
 
-      <!-- Benefits -->
+      
       <ul style="list-style:none;margin-bottom:1.5rem;padding:0;">
         {% for benefit in tier.benefits %}
         <li style="display:flex;align-items:flex-start;gap:.6rem;padding:.4rem 0;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--border);">
@@ -64,7 +64,7 @@
         {% endfor %}
       </ul>
 
-      <!-- CTA -->
+      
       {% if tier.key == 'normal' %}
         {% if current_tier == 'normal' %}
           <div style="text-align:center;padding:.65rem;border-radius:100px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:.85rem;font-weight:600;">
@@ -98,7 +98,7 @@
 
   </div>
 
-  <!-- Redeem points link -->
+  
   <p style="text-align:center;font-size:.85rem;color:var(--muted);">
     Have loyalty points?
     <a href="{% url 'memberships:redeem' %}" style="color:var(--sb-teal);font-weight:600;">Redeem them here →</a>
@@ -106,7 +106,6 @@
 
 </div>
 
-<!-- Confetti (triggered on tier upgrade) -->
 {% if request.session.tier_just_upgraded %}
 <canvas id="confetti-canvas"></canvas>
 <script>

@@ -386,7 +386,7 @@
           <button class="send-icon-btn" id="sendBtn"><i class="bi bi-send-fill"></i></button>
         </div>
       </div>
-      <div class="input-caption"><i class="bi bi-lock"></i> Powered by Lumina AI · Gemini 1.5 Flash</div>
+      <div class="input-caption"><i class="bi bi-lock"></i> Powered by Lumina AI · Groq LLaMA 3.3</div>
       <input type="file" id="photoInput" accept="image/*" style="display:none">
     </div>
   </div>
@@ -398,6 +398,12 @@
 const CONV_ID   = "{{ conversation.id }}";
 const CSRF      = "{{ csrf_token }}";
 let   CURR_MODE = "{{ conversation.mode }}";
+
+// Always get fresh CSRF token from cookie (handles token rotation)
+function getCsrf() {
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : CSRF;
+}
 document.addEventListener('DOMContentLoaded', () => {
 const chatMessages = document.getElementById('chatMessages');
 const msgInput     = document.getElementById('msgInput');
@@ -452,20 +458,33 @@ function doSend() {
   const typId = appendTyping();
   fetch(`/chat/${CONV_ID}/send/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
     body: JSON.stringify({ message: text })
   })
-  .then(r => r.json())
+  .then(r => {
+    if (r.status === 403) throw new Error('session_expired');
+    if (r.status === 429) throw new Error('rate_limited');
+    return r.json();
+  })
   .then(data => {
     removeTyping(typId);
-    if (data.error) appendBubble('assistant', '⚠�? ' + data.error);
+    if (data.error) appendBubble('assistant', '⚠️ ' + data.error);
     else {
       appendBubble('assistant', data.reply, null, data.timestamp);
       if (data.product_suggestions?.length) appendProductRow(data.product_suggestions);
       if (data.conversation_title) document.title = data.conversation_title + ' — Lumina';
     }
   })
-  .catch(() => { removeTyping(typId); appendBubble('assistant', '⚠�? Connection error. Please try again.'); })
+  .catch(err => {
+    removeTyping(typId);
+    if (err.message === 'session_expired') {
+      appendBubble('assistant', '⚠️ Your session has expired. Please <a href="/accounts/login/" style="color:var(--chat-accent);">log in again</a> to continue.');
+    } else if (err.message === 'rate_limited') {
+      appendBubble('assistant', '⚠️ Too many requests. Please wait a moment and try again.');
+    } else {
+      appendBubble('assistant', '⚠️ Could not connect to AI service. Please check your connection and try again.');
+    }
+  })
   .finally(() => setInputDisabled(false));
 }
 // ── SEND PHOTO
@@ -479,18 +498,28 @@ function doSendPhoto(file) {
   const fd = new FormData();
   fd.append('photo', file);
   fetch(`/chat/${CONV_ID}/photo/`, {
-    method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd
+    method: 'POST', headers: { 'X-CSRFToken': getCsrf() }, body: fd
   })
-  .then(r => r.json())
+  .then(r => {
+    if (r.status === 403) throw new Error('session_expired');
+    return r.json();
+  })
   .then(data => {
     removeTyping(typId);
-    if (data.error) appendBubble('assistant', '⚠�? ' + data.error);
+    if (data.error) appendBubble('assistant', '⚠️ ' + data.error);
     else {
       appendBubble('assistant', data.reply, null, data.timestamp);
       if (data.product_suggestions?.length) appendProductRow(data.product_suggestions);
     }
   })
-  .catch(() => { removeTyping(typId); appendBubble('assistant', '⚠�? Could not process image.'); })
+  .catch(err => {
+    removeTyping(typId);
+    if (err.message === 'session_expired') {
+      appendBubble('assistant', '⚠️ Your session has expired. Please <a href="/accounts/login/" style="color:var(--chat-accent);">log in again</a>.');
+    } else {
+      appendBubble('assistant', '⚠️ Could not process image. Please try again.');
+    }
+  })
   .finally(() => setInputDisabled(false));
 }
 // ── SWITCH MODE
@@ -498,7 +527,7 @@ function switchMode(newMode) {
   if (newMode === CURR_MODE) return;
   fetch(`/chat/${CONV_ID}/switch-mode/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
     body: JSON.stringify({ mode: newMode })
   })
   .then(r => r.json())

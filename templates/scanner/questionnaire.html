@@ -1,0 +1,1190 @@
+﻿{% extends 'base_auth.html' %}
+{% load static %}
+{% block title %}Skin Diagnosis — Lumina{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ══════════════════════════════════════════════════════════
+   LUMINA DIAGNOSIS WIZARD — Traya-inspired Medical-Tech UI
+   Palette: off-white #F7F5F2 · slate #4A5568 · accent #0B3C2A
+   ══════════════════════════════════════════════════════════ */
+:root {
+  --accent:       #0B3C2A;
+  --accent-light: #1a5c40;
+  --accent-glow:  rgba(11,60,42,.12);
+  --accent-border:rgba(11,60,42,.25);
+  --off-white:    #F7F5F2;
+  --surface:      #FFFFFF;
+  --slate:        #4A5568;
+  --slate-light:  #718096;
+  --slate-muted:  #A0AEC0;
+  --border:       #E2E0DC;
+  --text:         #1A202C;
+  --chip-bg:      #EDF2F0;
+  --chip-sel:     #0B3C2A;
+  --radius-card:  18px;
+  --radius-pill:  100px;
+  --shadow-card:  0 2px 16px rgba(0,0,0,.07);
+  --shadow-hover: 0 8px 30px rgba(11,60,42,.15);
+  --trans:        all .22s cubic-bezier(.4,0,.2,1);
+}
+
+/* Base reset for wizard */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.auth-shell { padding: 0 !important; background: var(--off-white) !important; }
+
+body.wiz-body {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  background: var(--off-white);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── WIZARD SHELL ── */
+.wiz-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--off-white);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+
+/* ── TOP STICKY HEADER ── */
+.wiz-header {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+}
+.wiz-header-inner {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .85rem 1.25rem;
+  max-width: 680px; margin: 0 auto; width: 100%;
+}
+.wiz-back-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: none; border: 1.5px solid var(--border);
+  color: var(--slate); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--trans); font-size: 1rem;
+}
+.wiz-back-btn:hover { background: var(--off-white); border-color: var(--accent); color: var(--accent); }
+.wiz-back-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+.wiz-progress-wrap { flex: 1; }
+.wiz-progress-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: .4rem;
+}
+.wiz-progress-pct {
+  font-size: .72rem; font-weight: 700; color: var(--accent);
+  letter-spacing: .04em;
+}
+.wiz-progress-step {
+  font-size: .68rem; color: var(--slate-muted); font-weight: 500;
+}
+.wiz-progress-track {
+  height: 5px; background: var(--border); border-radius: 5px; overflow: hidden;
+}
+.wiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #1a7a52);
+  border-radius: 5px;
+  transition: width .45s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── MAIN CONTENT ── */
+.wiz-body-area {
+  flex: 1;
+  padding: 2.5rem 1.25rem 7rem;
+  max-width: 680px;
+  margin: 0 auto; width: 100%;
+}
+</style>
+{% endblock %}
+<style>
+/* ── STEP HEADER ── */
+.wiz-step-header {
+  text-align: center;
+  margin-bottom: 2.25rem;
+}
+.wiz-step-eyebrow {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--accent);
+  background: var(--accent-glow); border: 1px solid var(--accent-border);
+  padding: .28rem .85rem; border-radius: var(--radius-pill);
+  margin-bottom: 1rem;
+}
+.wiz-step-q {
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  font-weight: 800; color: var(--text);
+  line-height: 1.2; letter-spacing: -.02em;
+  margin-bottom: .65rem;
+}
+.wiz-step-hint {
+  font-size: .875rem; color: var(--slate-light);
+  line-height: 1.6; max-width: 480px; margin: 0 auto;
+}
+
+/* ── STEP TRANSITIONS ── */
+.wiz-step { display: none; animation: wizIn .3s cubic-bezier(.4,0,.2,1); }
+.wiz-step.active { display: block; }
+@keyframes wizIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ══════════════════════════════
+   STEP 1 — TOKEN / CARD GRID
+   ══════════════════════════════ */
+.token-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 1rem;
+}
+.token-card {
+  position: relative;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem 1.1rem 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--trans);
+  box-shadow: var(--shadow-card);
+  user-select: none;
+}
+.token-card:hover {
+  border-color: var(--accent-light);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px) scale(1.015);
+}
+.token-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-hover);
+  transform: translateY(-2px) scale(1.02);
+}
+.token-check {
+  position: absolute; top: .65rem; right: .65rem;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: none; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 900;
+  box-shadow: 0 2px 8px rgba(11,60,42,.35);
+}
+.token-card.selected .token-check { display: flex; }
+.token-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  margin: 0 auto 1rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  background: var(--off-white);
+  transition: var(--trans);
+}
+.token-card.selected .token-icon { background: var(--accent-glow); }
+.token-title {
+  font-size: .92rem; font-weight: 800; color: var(--text);
+  margin-bottom: .3rem; line-height: 1.2;
+}
+.token-desc {
+  font-size: .72rem; color: var(--slate-muted); line-height: 1.4;
+}
+
+/* ══════════════════════════════
+   STEP 2 — VISUAL STAGE CARDS
+   ══════════════════════════════ */
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+.stage-card {
+  position: relative;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.25rem .85rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--trans);
+  box-shadow: var(--shadow-card);
+  user-select: none;
+}
+.stage-card:hover {
+  border-color: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+.stage-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-hover);
+}
+.stage-card .token-check { top: .6rem; right: .6rem; }
+.stage-card.selected .token-check { display: flex; }
+.stage-illus {
+  width: 100%; aspect-ratio: 1/1; max-width: 100px;
+  margin: 0 auto .85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.stage-num {
+  font-size: .58rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--slate-muted); margin-bottom: .3rem;
+}
+.stage-tag {
+  display: inline-block;
+  font-size: .7rem; font-weight: 700;
+  padding: .22rem .65rem; border-radius: var(--radius-pill);
+  background: var(--chip-bg); color: var(--slate);
+  margin-top: .45rem;
+  transition: var(--trans);
+}
+.stage-card.selected .stage-tag {
+  background: var(--accent); color: #fff;
+}
+.stage-desc {
+  font-size: .73rem; color: var(--slate-muted);
+  margin-top: .35rem; line-height: 1.4;
+}
+
+/* ══════════════════════════════
+   STEP 3 — PILL CHIP TOKENS
+   ══════════════════════════════ */
+.chip-grid {
+  display: flex; flex-wrap: wrap; gap: .7rem;
+  justify-content: center;
+}
+.chip-token {
+  position: relative; cursor: pointer;
+}
+.chip-token input { position: absolute; opacity: 0; width: 0; height: 0; }
+.chip-label {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .7rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: .85rem; font-weight: 700;
+  color: var(--slate);
+  background: var(--surface);
+  cursor: pointer;
+  transition: var(--trans);
+  user-select: none;
+}
+.chip-label:hover {
+  border-color: var(--accent-light);
+  color: var(--accent); background: var(--accent-glow);
+}
+.chip-token input:checked + .chip-label {
+  background: var(--accent); color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(11,60,42,.3);
+}
+.chip-emoji { font-size: 1.1rem; line-height: 1; }
+
+/* ══════════════════════════════
+   STEP 4 — FLOATING LABEL FORM
+   ══════════════════════════════ */
+.fl-group {
+  position: relative; margin-bottom: 1.35rem;
+}
+.fl-input {
+  width: 100%; padding: 1.35rem 1rem .5rem;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-size: 1rem; font-family: inherit;
+  color: var(--text); background: var(--surface);
+  transition: var(--trans);
+  -webkit-appearance: none;
+}
+.fl-input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.fl-label {
+  position: absolute; left: 1rem; top: 1rem;
+  font-size: .92rem; color: var(--slate-muted);
+  font-weight: 500; pointer-events: none;
+  transition: var(--trans); transform-origin: left top;
+}
+.fl-input:focus ~ .fl-label,
+.fl-input:not(:placeholder-shown) ~ .fl-label {
+  transform: translateY(-.55rem) scale(.75);
+  color: var(--accent); font-weight: 700;
+}
+.fl-input:focus { padding-top: 1.35rem; }
+
+/* Gender toggle */
+.gender-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem;
+  margin-bottom: 1.35rem;
+}
+.gender-opt { position: relative; cursor: pointer; }
+.gender-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+.gender-lbl {
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  padding: .85rem .5rem;
+  border: 2px solid var(--border); border-radius: 12px;
+  background: var(--surface); cursor: pointer;
+  font-size: .78rem; font-weight: 700; color: var(--slate);
+  transition: var(--trans); text-align: center;
+}
+.gender-lbl .g-icon { font-size: 1.5rem; }
+.gender-opt input:checked + .gender-lbl {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-glow);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* Age counter widget */
+.age-counter {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: .85rem 1.25rem;
+  margin-bottom: 1.35rem;
+}
+.age-counter-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid var(--border); background: none;
+  font-size: 1.2rem; font-weight: 700; color: var(--accent);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: var(--trans); flex-shrink: 0;
+}
+.age-counter-btn:hover { background: var(--accent-glow); border-color: var(--accent); }
+.age-counter-val {
+  flex: 1; text-align: center;
+  font-size: 2.25rem; font-weight: 800; color: var(--text); line-height: 1;
+}
+.age-counter-unit {
+  font-size: .72rem; color: var(--slate-muted); font-weight: 600;
+  margin-top: .2rem; text-align: center;
+}
+
+/* Trust badge inside step 4 */
+.trust-inline {
+  display: flex; align-items: center; gap: .5rem;
+  background: #F0FDF4; border: 1px solid #BBF7D0;
+  border-radius: 10px; padding: .7rem .9rem; margin-bottom: 1.25rem;
+  font-size: .78rem; color: #166534;
+}
+.trust-inline i { color: #16a34a; flex-shrink: 0; font-size: .95rem; }
+
+/* ══════════════════════════════
+   STICKY BOTTOM ACTION BAR
+   ══════════════════════════════ */
+.wiz-action-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: .9rem 1.25rem 1.1rem;
+  box-shadow: 0 -4px 24px rgba(0,0,0,.08);
+}
+.wiz-action-inner {
+  max-width: 680px; margin: 0 auto;
+}
+.wiz-cta-btn {
+  width: 100%; padding: 1rem 1.5rem;
+  background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius-pill);
+  font-family: 'Plus Jakarta Sans', inherit;
+  font-size: 1rem; font-weight: 800; cursor: pointer;
+  letter-spacing: .01em;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  transition: var(--trans);
+  box-shadow: 0 4px 20px rgba(11,60,42,.35);
+}
+.wiz-cta-btn:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(11,60,42,.45);
+}
+.wiz-cta-btn:active { transform: none; }
+.wiz-cta-btn:disabled {
+  opacity: .5; cursor: not-allowed; transform: none; box-shadow: none;
+}
+.wiz-trust-copy {
+  text-align: center; font-size: .7rem; color: var(--slate-muted);
+  margin-top: .55rem; font-weight: 500;
+}
+
+/* ── SUMMARY REVIEW (last step top card) ── */
+.wiz-summary-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius-card); padding: 1.25rem;
+  margin-bottom: 1.5rem; box-shadow: var(--shadow-card);
+}
+.wiz-summary-row {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .5rem 0; border-bottom: 1px solid var(--border);
+  font-size: .85rem;
+}
+.wiz-summary-row:last-child { border-bottom: none; }
+.wiz-summary-key { color: var(--slate-muted); font-weight: 600; width: 100px; flex-shrink: 0; }
+.wiz-summary-val { color: var(--text); font-weight: 700; }
+
+/* Step 4 lifestyle chips inside form */
+.lifestyle-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.35rem; }
+.ls-chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .42rem .85rem; border-radius: var(--radius-pill);
+  font-size: .78rem; font-weight: 700; background: var(--chip-bg);
+  color: var(--slate); border: 1.5px solid transparent;
+}
+
+/* ── SVG ILLUSTRATIONS (inline, accent-colored) ── */
+.stage-svg { width: 80px; height: 80px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .token-grid { grid-template-columns: 1fr 1fr; }
+  .stage-grid { grid-template-columns: 1fr 1fr; }
+  .wiz-step-q { font-size: 1.35rem; }
+}
+</style>
+
+{% block content %}
+<div class="wiz-shell">
+
+  
+  <header class="wiz-header">
+    <div class="wiz-header-inner">
+      <button class="wiz-back-btn" id="wizBack" disabled title="Previous question" aria-label="Back">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="wiz-progress-wrap">
+        <div class="wiz-progress-meta">
+          <span class="wiz-progress-pct" id="wizPct">15% Completed</span>
+          <span class="wiz-progress-step" id="wizStepMeta">Step 1 of 5</span>
+        </div>
+        <div class="wiz-progress-track">
+          <div class="wiz-progress-fill" id="wizProgressFill" style="width:15%;"></div>
+        </div>
+      </div>
+      <a href="{% url 'core:home' %}" style="flex-shrink:0;" title="Exit">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="color:var(--slate-muted);">
+          <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  
+  <main class="wiz-body-area" id="wizBody">
+
+    
+    <div class="wiz-step active" id="step-1">
+      <div class="wiz-step-header">
+        <div class="wiz-step-eyebrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="6"/></svg>
+          Skin Analysis · Question 1
+        </div>
+        <h1 class="wiz-step-q">What is your main skin concern?</h1>
+        <p class="wiz-step-hint">Select all that apply — our AI tailors your diagnosis to your exact combination of concerns.</p>
+      </div>
+
+      <div class="token-grid" id="concern-grid">
+
+        <div class="token-card" data-val="acne" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#FEF3C7"/>
+              <circle cx="15" cy="17" r="3" fill="#F59E0B"/>
+              <circle cx="24" cy="14" r="2" fill="#EF4444"/>
+              <circle cx="20" cy="24" r="2.5" fill="#F97316"/>
+              <circle cx="27" cy="22" r="1.5" fill="#EF4444"/>
+              <circle cx="13" cy="25" r="2" fill="#F59E0B"/>
+            </svg>
+          </div>
+          <div class="token-title">Acne &amp; Breakouts</div>
+          <div class="token-desc">Pimples, pustules, or recurring breakouts</div>
+        </div>
+
+        <div class="token-card" data-val="pigmentation" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#FDF4FF"/>
+              <ellipse cx="15" cy="16" rx="4" ry="3" fill="#C084FC" opacity=".7"/>
+              <ellipse cx="25" cy="22" rx="3" ry="2" fill="#A855F7" opacity=".6"/>
+              <ellipse cx="18" cy="26" rx="2.5" ry="1.8" fill="#9333EA" opacity=".5"/>
+            </svg>
+          </div>
+          <div class="token-title">Pigmentation</div>
+          <div class="token-desc">Dark spots, uneven tone, melasma</div>
+        </div>
+
+        <div class="token-card" data-val="dryness" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#EFF6FF"/>
+              <path d="M20 10 C16 15 12 18 12 23 C12 28 15.5 31 20 31 C24.5 31 28 28 28 23 C28 18 24 15 20 10Z" fill="#BFDBFE"/>
+              <path d="M20 15 C17 19 15 21 15 24 C15 27 17 29 20 29" stroke="#93C5FD" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div class="token-title">Dryness</div>
+          <div class="token-desc">Flaking, tightness, rough texture</div>
+        </div>
+
+        <div class="token-card" data-val="aging" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#FFF7ED"/>
+              <path d="M12 20 Q20 14 28 20" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M13 25 Q20 19 27 25" stroke="#FB923C" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M14 30 Q20 24 26 30" stroke="#FED7AA" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="token-title">Fine Lines &amp; Aging</div>
+          <div class="token-desc">Wrinkles, loss of firmness, sagging</div>
+        </div>
+
+        <div class="token-card" data-val="oiliness" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#ECFDF5"/>
+              <circle cx="15" cy="18" r="2" fill="#34D399" opacity=".8"/>
+              <circle cx="22" cy="15" r="1.5" fill="#10B981" opacity=".7"/>
+              <circle cx="25" cy="22" r="2" fill="#34D399" opacity=".8"/>
+              <circle cx="18" cy="25" r="1.8" fill="#6EE7B7" opacity=".6"/>
+              <path d="M20 12 L19 16 L20 17 L21 16Z" fill="#10B981"/>
+            </svg>
+          </div>
+          <div class="token-title">Oily Skin</div>
+          <div class="token-desc">Excess shine, enlarged pores</div>
+        </div>
+
+        <div class="token-card" data-val="dark_circles" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#F5F3FF"/>
+              <ellipse cx="14" cy="22" rx="6" ry="3.5" fill="#C4B5FD" opacity=".6"/>
+              <ellipse cx="26" cy="22" rx="6" ry="3.5" fill="#C4B5FD" opacity=".6"/>
+              <circle cx="14" cy="21" r="2.5" fill="#7C3AED" opacity=".5"/>
+              <circle cx="26" cy="21" r="2.5" fill="#7C3AED" opacity=".5"/>
+            </svg>
+          </div>
+          <div class="token-title">Dark Circles</div>
+          <div class="token-desc">Under-eye discolouration or puffiness</div>
+        </div>
+
+        <div class="token-card" data-val="sensitivity" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#FFF1F2"/>
+              <path d="M20 12 L22 18 L28 18 L23 22 L25 28 L20 24 L15 28 L17 22 L12 18 L18 18Z" fill="#FDA4AF" stroke="#FB7185" stroke-width=".5"/>
+            </svg>
+          </div>
+          <div class="token-title">Sensitive Skin</div>
+          <div class="token-desc">Redness, stinging, reactive skin</div>
+        </div>
+
+        <div class="token-card" data-val="dullness" onclick="toggleToken(this,'concerns')">
+          <div class="token-check">✓</div>
+          <div class="token-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" fill="#FEFCE8"/>
+              <circle cx="20" cy="20" r="8" fill="#FDE68A" opacity=".6"/>
+              <path d="M20 10 L20 12M20 28 L20 30M10 20 L12 20M28 20 L30 20" stroke="#EAB308" stroke-width="2" stroke-linecap="round"/>
+              <path d="M13.4 13.4 L14.8 14.8M25.2 25.2 L26.6 26.6M13.4 26.6 L14.8 25.2M25.2 14.8 L26.6 13.4" stroke="#EAB308" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="token-title">Dull Complexion</div>
+          <div class="token-desc">Lacklustre skin, no glow or radiance</div>
+        </div>
+
+      </div>
+    </div>
+
+    
+    <div class="wiz-step" id="step-2">
+      <div class="wiz-step-header">
+        <div class="wiz-step-eyebrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="6"/></svg>
+          Skin Analysis · Question 2
+        </div>
+        <h1 class="wiz-step-q">Which best describes your current skin condition?</h1>
+        <p class="wiz-step-hint">This helps our AI calibrate the severity of your concerns and recommend the right treatment intensity.</p>
+      </div>
+
+      <div class="stage-grid">
+
+        
+        <div class="stage-card" data-val="stage1" onclick="selectStage(this)">
+          <div class="token-check">✓</div>
+          <div class="stage-illus">
+            <svg class="stage-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="38" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="2"/>
+              <ellipse cx="40" cy="38" rx="22" ry="26" fill="#D1FAE5"/>
+              <ellipse cx="40" cy="35" rx="14" ry="10" fill="#6EE7B7" opacity=".5"/>
+              <circle cx="32" cy="32" r="5" fill="#A7F3D0" opacity=".7"/>
+              <circle cx="48" cy="34" r="4" fill="#A7F3D0" opacity=".6"/>
+              <path d="M30 52 Q40 56 50 52" stroke="#34D399" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stage-num">Stage 1</div>
+          <div class="token-title" style="font-size:.85rem;">Healthy &amp; Clear</div>
+          <div class="stage-tag">Normal · No concern</div>
+          <div class="stage-desc">Smooth texture, even tone, minimal issues</div>
+        </div>
+
+        
+        <div class="stage-card" data-val="stage2" onclick="selectStage(this)">
+          <div class="token-check">✓</div>
+          <div class="stage-illus">
+            <svg class="stage-svg" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="38" fill="#FFFBEB" stroke="#FDE68A" stroke-width="2"/>
+              <ellipse cx="40" cy="38" rx="22" ry="26" fill="#FEF3C7"/>
+              <ellipse cx="40" cy="35" rx="14" ry="10" fill="#FDE68A" opacity=".5"/>
+              <circle cx="30" cy="30" r="3.5" fill="#F59E0B" opacity=".7"/>
+              <circle cx="46" cy="28" r="2.5" fill="#EF4444" opacity=".6"/>
+              <circle cx="38" cy="45" r="3" fill="#F97316" opacity=".6"/>
+              <path d="M28 52 Q40 57 52 52" stroke="#FCD34D" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stage-num">Stage 2</div>
+          <div class="token-title" style="font-size:.85rem;">Mild Issues</div>
+          <div class="stage-tag">Occasional breakouts</div>
+          <div class="stage-desc">Visible blemishes, slight unevenness</div>
+        </div>
+
+        
+        <div class="stage-card" data-val="stage3" onclick="selectStage(this)">
+          <div class="token-check">✓</div>
+          <div class="stage-illus">
+            <svg class="stage-svg" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="38" fill="#FFF7ED" stroke="#FED7AA" stroke-width="2"/>
+              <ellipse cx="40" cy="38" rx="22" ry="26" fill="#FFEDD5"/>
+              <circle cx="28" cy="28" r="4" fill="#EF4444" opacity=".7"/>
+              <circle cx="50" cy="30" r="3" fill="#F59E0B" opacity=".7"/>
+              <circle cx="35" cy="44" r="3.5" fill="#EF4444" opacity=".6"/>
+              <circle cx="46" cy="42" r="2.5" fill="#F97316" opacity=".7"/>
+              <circle cx="32" cy="50" r="3" fill="#DC2626" opacity=".5"/>
+              <ellipse cx="26" cy="38" rx="5" ry="3" fill="#FCA5A5" opacity=".5"/>
+            </svg>
+          </div>
+          <div class="stage-num">Stage 3</div>
+          <div class="token-title" style="font-size:.85rem;">Moderate</div>
+          <div class="stage-tag">Scalp slightly visible</div>
+          <div class="stage-desc">Multiple concerns, recurring problems</div>
+        </div>
+
+        
+        <div class="stage-card" data-val="stage4" onclick="selectStage(this)">
+          <div class="token-check">✓</div>
+          <div class="stage-illus">
+            <svg class="stage-svg" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="38" fill="#FFF1F2" stroke="#FECDD3" stroke-width="2"/>
+              <ellipse cx="40" cy="38" rx="22" ry="26" fill="#FFE4E6"/>
+              <circle cx="26" cy="26" r="5" fill="#EF4444" opacity=".75"/>
+              <circle cx="52" cy="28" r="4" fill="#DC2626" opacity=".7"/>
+              <circle cx="33" cy="40" r="4.5" fill="#EF4444" opacity=".7"/>
+              <circle cx="49" cy="38" r="3.5" fill="#DC2626" opacity=".8"/>
+              <circle cx="30" cy="52" r="3.5" fill="#EF4444" opacity=".6"/>
+              <circle cx="46" cy="50" r="3" fill="#B91C1C" opacity=".6"/>
+              <ellipse cx="40" cy="33" rx="8" ry="5" fill="#FECACA" opacity=".4"/>
+            </svg>
+          </div>
+          <div class="stage-num">Stage 4</div>
+          <div class="token-title" style="font-size:.85rem;">Severe</div>
+          <div class="stage-tag">Deep · Persistent</div>
+          <div class="stage-desc">Significant, persistent, widespread issues</div>
+        </div>
+
+      </div>
+    </div>
+
+    
+    <div class="wiz-step" id="step-3">
+      <div class="wiz-step-header">
+        <div class="wiz-step-eyebrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="6"/></svg>
+          Root Cause Analysis · Question 3
+        </div>
+        <h1 class="wiz-step-q">Select any symptoms you face regularly</h1>
+        <p class="wiz-step-hint">Skin health is deeply connected to gut health, sleep, and stress. This helps us identify root causes beyond your skin's surface.</p>
+      </div>
+
+      <div class="chip-grid" id="lifestyle-chips">
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="acidity">
+          <span class="chip-label"><span class="chip-emoji">🤢</span> Acidity</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="stress">
+          <span class="chip-label"><span class="chip-emoji">🧠</span> Stress</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="poor_sleep">
+          <span class="chip-label"><span class="chip-emoji">😴</span> Poor Sleep</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="constipation">
+          <span class="chip-label"><span class="chip-emoji">💩</span> Constipation</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="fatigue">
+          <span class="chip-label"><span class="chip-emoji">⚡</span> Fatigue</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="family_history">
+          <span class="chip-label"><span class="chip-emoji">🧬</span> Family History</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="hormonal">
+          <span class="chip-label"><span class="chip-emoji">🔄</span> Hormonal Issues</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="poor_diet">
+          <span class="chip-label"><span class="chip-emoji">🍟</span> Poor Diet</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="dehydration">
+          <span class="chip-label"><span class="chip-emoji">💧</span> Low Water Intake</span>
+        </label>
+        <label class="chip-token">
+          <input type="checkbox" name="lifestyle" value="sun_exposure">
+          <span class="chip-label"><span class="chip-emoji">☀️</span> High Sun Exposure</span>
+        </label>
+      </div>
+
+      <p style="text-align:center;font-size:.75rem;color:var(--slate-muted);margin-top:1.25rem;">
+        Select all that apply — or skip if none apply
+      </p>
+    </div>
+
+    
+    <div class="wiz-step" id="step-4">
+      <div class="wiz-step-header">
+        <div class="wiz-step-eyebrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="6"/></svg>
+          Almost Done · Your Details
+        </div>
+        <h1 class="wiz-step-q">A few details to personalise your diagnosis</h1>
+        <p class="wiz-step-hint">We use this to tailor formulations and recommendations specifically for your age, skin type, and lifestyle.</p>
+      </div>
+
+      
+      <div class="trust-inline">
+        <i class="bi bi-shield-lock-fill"></i>
+        Your information is 100% private and never shared. Formulated by certified dermatologists.
+      </div>
+
+      
+      <div class="lifestyle-chips" id="selectionRecap" style="margin-bottom:1.35rem;"></div>
+
+      <form method="post" id="wizForm">
+        {% csrf_token %}
+
+        
+        <input type="hidden" name="extra_concerns" id="hdnConcerns">
+        <input type="hidden" name="skin_stage" id="hdnStage">
+        <input type="hidden" name="lifestyle_factors" id="hdnLifestyle">
+        <input type="hidden" name="age" id="hdnAge" value="25">
+        <input type="hidden" name="gender" id="hdnGender" value="other">
+        <input type="hidden" name="water_intake" id="hdnWater" value="moderate">
+        <input type="hidden" name="sleep_hours" id="hdnSleep" value="6-8">
+        <input type="hidden" name="stress_level" id="hdnStress" value="moderate">
+        <input type="hidden" name="diet" id="hdnDiet" value="balanced">
+        <input type="hidden" name="outdoor_hours" id="hdnOutdoor" value="moderate">
+
+        
+        <div class="fl-group">
+          <input type="text" id="inpName" name="user_name" class="fl-input" placeholder=" " autocomplete="given-name">
+          <label class="fl-label" for="inpName">Your First Name</label>
+        </div>
+
+        
+        <div style="margin-bottom:.4rem;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slate-muted);margin-bottom:.5rem;">Your Age</div>
+          <div class="age-counter">
+            <button type="button" class="age-counter-btn" onclick="changeAge(-1)">−</button>
+            <div>
+              <div class="age-counter-val" id="ageDisplay">25</div>
+              <div class="age-counter-unit">years old</div>
+            </div>
+            <button type="button" class="age-counter-btn" onclick="changeAge(+1)">+</button>
+          </div>
+        </div>
+
+        
+        <div style="margin-bottom:.4rem;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slate-muted);margin-bottom:.5rem;">Gender</div>
+          <div class="gender-row">
+            <label class="gender-opt">
+              <input type="radio" name="gender_sel" value="female" checked onchange="DATA.gender=this.value">
+              <span class="gender-lbl">
+                <span class="g-icon">♀</span> Female
+              </span>
+            </label>
+            <label class="gender-opt">
+              <input type="radio" name="gender_sel" value="male" onchange="DATA.gender=this.value">
+              <span class="gender-lbl">
+                <span class="g-icon">♂</span> Male
+              </span>
+            </label>
+            <label class="gender-opt">
+              <input type="radio" name="gender_sel" value="other" onchange="DATA.gender=this.value">
+              <span class="gender-lbl">
+                <span class="g-icon">⚧</span> Other
+              </span>
+            </label>
+          </div>
+        </div>
+
+        
+        <div style="margin-bottom:1.35rem;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slate-muted);margin-bottom:.5rem;">Water Intake</div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <label style="cursor:pointer;">
+              <input type="radio" name="water_intake_sel" value="low" style="display:none;" onchange="document.getElementById('hdnWater').value=this.value">
+              <span class="ls-chip" id="wl" style="cursor:pointer;transition:all .18s;">💧 Low</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="water_intake_sel" value="moderate" checked style="display:none;" onchange="document.getElementById('hdnWater').value=this.value">
+              <span class="ls-chip" id="wm" style="cursor:pointer;background:var(--accent);color:#fff;">🥤 Moderate</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="water_intake_sel" value="high" style="display:none;" onchange="document.getElementById('hdnWater').value=this.value">
+              <span class="ls-chip" id="wh" style="cursor:pointer;">🫙 High</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.35rem;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slate-muted);margin-bottom:.5rem;">Average Sleep</div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <label style="cursor:pointer;">
+              <input type="radio" name="sleep_sel" value="&lt;6" style="display:none;" onchange="document.getElementById('hdnSleep').value=this.value">
+              <span class="ls-chip" style="cursor:pointer;">😴 &lt;6 hrs</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="sleep_sel" value="6-8" checked style="display:none;" onchange="document.getElementById('hdnSleep').value=this.value">
+              <span class="ls-chip" style="cursor:pointer;background:var(--accent);color:#fff;">🌙 6–8 hrs</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="sleep_sel" value="&gt;8" style="display:none;" onchange="document.getElementById('hdnSleep').value=this.value">
+              <span class="ls-chip" style="cursor:pointer;">⭐ &gt;8 hrs</span>
+            </label>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    
+    <form method="post" id="wizFormSubmit" style="display:none;">
+      {% csrf_token %}
+      <input type="hidden" name="age"           id="submitAge"     value="25">
+      <input type="hidden" name="gender"         id="submitGender"  value="female">
+      <input type="hidden" name="water_intake"   id="submitWater"   value="moderate">
+      <input type="hidden" name="sleep_hours"    id="submitSleep"   value="6-8">
+      <input type="hidden" name="stress_level"   id="submitStress"  value="moderate">
+      <input type="hidden" name="diet"           id="submitDiet"    value="balanced">
+      <input type="hidden" name="outdoor_hours"  id="submitOutdoor" value="moderate">
+      
+    </form>
+
+    
+    <div class="wiz-step" id="step-5">
+      <div style="text-align:center;padding:3rem 1rem 2rem;">
+        <div id="analysisLoader" style="display:block;">
+          <div style="width:80px;height:80px;margin:0 auto 1.5rem;position:relative;">
+            <svg width="80" height="80" viewBox="0 0 80 80" style="animation:wizSpin 1.5s linear infinite;">
+              <circle cx="40" cy="40" r="35" fill="none" stroke="#E2E0DC" stroke-width="5"/>
+              <path d="M40 5 A35 35 0 0 1 75 40" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;">🔬</div>
+          </div>
+          <h2 style="font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:.5rem;">Analysing your skin profile…</h2>
+          <p style="color:var(--slate-light);font-size:.9rem;line-height:1.6;max-width:360px;margin:0 auto 1.5rem;">
+            Our AI is cross-referencing your answers with 500+ skin conditions and 10,000+ product formulations.
+          </p>
+          <div style="max-width:320px;margin:0 auto;">
+            <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:.5rem;">
+              <div id="analysisFill" style="height:100%;background:linear-gradient(90deg,var(--accent),#1a7a52);border-radius:4px;width:0;transition:width .4s ease;"></div>
+            </div>
+            <div id="analysisMsg" style="font-size:.75rem;color:var(--slate-muted);font-weight:600;text-align:center;">Detecting skin concerns…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  
+  <div class="wiz-action-bar">
+    <div class="wiz-action-inner">
+      <button class="wiz-cta-btn" id="wizNextBtn" onclick="wizAdvance()">
+        <span id="wizBtnLabel">Continue</span>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M4 9h10M9 4l5 5-5 5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="wiz-trust-copy" id="wizTrustCopy">
+        Select at least one concern to continue
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+@keyframes wizSpin { to { transform: rotate(360deg); } }
+</style>
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════
+   LUMINA DIAGNOSIS WIZARD — Controller
+   ══════════════════════════════════════════════════════ */
+
+const STEPS     = 5;
+let   current   = 1;
+
+// Collected data
+const DATA = {
+  concerns:   [],   // step 1 multi-select
+  stage:      null, // step 2 single
+  lifestyle:  [],   // step 3 chips
+  name:       '',
+  age:        25,
+  gender:     'female',
+};
+
+/* ── STEP PROGRESS CONFIG ── */
+const STEP_CFG = [
+  { pct: 15,  label: '15% Completed',  meta: 'Step 1 of 5', btn: 'Continue',                trust: 'Select at least one concern to continue' },
+  { pct: 35,  label: '35% Completed',  meta: 'Step 2 of 5', btn: 'Continue',                trust: 'Choose your skin stage to continue' },
+  { pct: 55,  label: '55% Completed',  meta: 'Step 3 of 5', btn: 'Continue',                trust: 'Select any that apply — or tap Continue to skip' },
+  { pct: 78,  label: '78% Completed',  meta: 'Step 4 of 5', btn: 'Get My Free Diagnosis →', trust: '🔒 100% Private · Formulated by Certified Dermatologists' },
+  { pct: 100, label: '100% Completed', meta: 'Step 5 of 5', btn: '',                        trust: '' },
+];
+
+/* ── DOM REFS ── */
+const $fill   = document.getElementById('wizProgressFill');
+const $pct    = document.getElementById('wizPct');
+const $meta   = document.getElementById('wizStepMeta');
+const $back   = document.getElementById('wizBack');
+const $nextBtn= document.getElementById('wizNextBtn');
+const $btnLbl = document.getElementById('wizBtnLabel');
+const $trust  = document.getElementById('wizTrustCopy');
+
+/* ── UPDATE HEADER ── */
+function updateHeader(n) {
+  const cfg = STEP_CFG[n - 1];
+  $fill.style.width = cfg.pct + '%';
+  $pct.textContent  = cfg.label;
+  $meta.textContent = cfg.meta;
+  $back.disabled    = n === 1;
+  if (cfg.btn) {
+    $btnLbl.textContent = cfg.btn;
+    document.getElementById('wizNextBtn').style.display = '';
+  } else {
+    document.getElementById('wizNextBtn').style.display = 'none';
+  }
+  $trust.textContent = cfg.trust;
+}
+
+/* ── SHOW STEP ── */
+function showStep(n) {
+  document.querySelectorAll('.wiz-step').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('step-' + n);
+  if (el) el.classList.add('active');
+  current = n;
+  updateHeader(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (n === 4) buildRecap();
+  if (n === 5) startAnalysis();
+}
+
+/* ── BACK ── */
+document.getElementById('wizBack').addEventListener('click', () => {
+  if (current > 1) showStep(current - 1);
+});
+
+/* ── ADVANCE ── */
+function wizAdvance() {
+  if (current === 4) {
+    submitForm();
+    return;
+  }
+  if (current < STEPS) showStep(current + 1);
+}
+
+/* ═══════════════════════════
+   STEP 1 — TOKEN MULTI SELECT
+   ═══════════════════════════ */
+function toggleToken(card, group) {
+  card.classList.toggle('selected');
+  const val = card.dataset.val;
+  if (card.classList.contains('selected')) {
+    DATA.concerns.push(val);
+  } else {
+    DATA.concerns = DATA.concerns.filter(v => v !== val);
+  }
+  updateTrustCopy();
+}
+
+function updateTrustCopy() {
+  if (current === 1) {
+    $trust.textContent = DATA.concerns.length > 0
+      ? `${DATA.concerns.length} concern${DATA.concerns.length > 1 ? 's' : ''} selected — tap Continue`
+      : 'Select at least one concern to continue';
+  }
+}
+
+/* ═══════════════════════════
+   STEP 2 — STAGE SINGLE SELECT
+   ═══════════════════════════ */
+function selectStage(card) {
+  document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  DATA.stage = card.dataset.val;
+  // Auto-advance after short delay
+  setTimeout(() => wizAdvance(), 380);
+}
+
+/* ═══════════════════════════
+   STEP 3 — LIFESTYLE CHIPS
+   ═══════════════════════════ */
+document.querySelectorAll('.chip-token input').forEach(inp => {
+  inp.addEventListener('change', () => {
+    DATA.lifestyle = Array.from(
+      document.querySelectorAll('.chip-token input:checked')
+    ).map(i => i.value);
+  });
+});
+
+/* ═══════════════════════════
+   STEP 4 — AGE COUNTER
+   ═══════════════════════════ */
+let ageVal = 25;
+function changeAge(delta) {
+  ageVal = Math.min(100, Math.max(10, ageVal + delta));
+  document.getElementById('ageDisplay').textContent = ageVal;
+  document.getElementById('hdnAge').value = ageVal;
+  DATA.age = ageVal;
+}
+
+/* ── Chip toggle visual for lifestyle summary selectors ── */
+document.querySelectorAll('input[name="water_intake_sel"]').forEach(r => {
+  r.addEventListener('change', function() {
+    document.querySelectorAll('input[name="water_intake_sel"]').forEach(x => {
+      const chip = x.parentElement.querySelector('.ls-chip');
+      if (chip) { chip.style.background = ''; chip.style.color = ''; }
+    });
+    const selChip = this.parentElement.querySelector('.ls-chip');
+    if (selChip) { selChip.style.background = 'var(--accent)'; selChip.style.color = '#fff'; }
+  });
+});
+document.querySelectorAll('input[name="sleep_sel"]').forEach(r => {
+  r.addEventListener('change', function() {
+    document.querySelectorAll('input[name="sleep_sel"]').forEach(x => {
+      const chip = x.parentElement.querySelector('.ls-chip');
+      if (chip) { chip.style.background = ''; chip.style.color = ''; }
+    });
+    const selChip = this.parentElement.querySelector('.ls-chip');
+    if (selChip) { selChip.style.background = 'var(--accent)'; selChip.style.color = '#fff'; }
+  });
+});
+
+/* ── BUILD RECAP chips on step 4 ── */
+function buildRecap() {
+  const wrap = document.getElementById('selectionRecap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const labels = {
+    acne:'Acne', pigmentation:'Pigmentation', dryness:'Dryness',
+    aging:'Fine Lines', oiliness:'Oily Skin', dark_circles:'Dark Circles',
+    sensitivity:'Sensitivity', dullness:'Dullness',
+    stage1:'Stage 1 – Healthy', stage2:'Stage 2 – Mild',
+    stage3:'Stage 3 – Moderate', stage4:'Stage 4 – Severe',
+  };
+  const all = [...DATA.concerns, DATA.stage].filter(Boolean);
+  all.forEach(v => {
+    const chip = document.createElement('span');
+    chip.className = 'ls-chip';
+    chip.style.cssText = 'background:var(--accent);color:#fff;border-color:transparent;';
+    chip.textContent = labels[v] || v;
+    wrap.appendChild(chip);
+  });
+}
+
+/* ── SUBMIT FORM ── */
+function submitForm() {
+  // Populate the always-visible hidden form fields
+  document.getElementById('submitAge').value     = DATA.age;
+  document.getElementById('submitGender').value  = DATA.gender;
+  document.getElementById('submitStress').value  = DATA.lifestyle.includes('stress')       ? 'high'    : (document.getElementById('hdnStress').value || 'moderate');
+  document.getElementById('submitSleep').value   = DATA.lifestyle.includes('poor_sleep')   ? '<6'      : (document.getElementById('hdnSleep').value || '6-8');
+  document.getElementById('submitDiet').value    = DATA.lifestyle.includes('poor_diet')    ? 'oily'    : (document.getElementById('hdnDiet').value || 'balanced');
+  document.getElementById('submitOutdoor').value = DATA.lifestyle.includes('sun_exposure') ? 'high'    : (document.getElementById('hdnOutdoor').value || 'moderate');
+  document.getElementById('submitWater').value   = DATA.lifestyle.includes('dehydration')  ? 'low'     : (document.getElementById('hdnWater').value || 'moderate');
+
+  // Inject one hidden input per concern into the always-visible form
+  const form = document.getElementById('wizFormSubmit');
+  // Remove any previously injected concern inputs
+  form.querySelectorAll('input[name="extra_concerns"]').forEach(el => el.remove());
+  DATA.concerns.forEach(slug => {
+    const inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = 'extra_concerns';
+    inp.value = slug;
+    form.appendChild(inp);
+  });
+
+  // Disable button & show loading
+  $nextBtn.disabled = true;
+  $btnLbl.textContent = 'Building your diagnosis…';
+
+  // Show step 5 loading animation, then submit
+  showStep(5);
+}
+
+/* ── ANALYSIS LOADING ANIMATION ── */
+function startAnalysis() {
+  const msgs = [
+    'Detecting skin concerns…',
+    'Cross-referencing 500+ conditions…',
+    'Mapping lifestyle root causes…',
+    'Matching formulation database…',
+    'Generating your personalised plan…',
+    'Almost ready…',
+  ];
+  const fill = document.getElementById('analysisFill');
+  const msg  = document.getElementById('analysisMsg');
+  let pct = 0, mi = 0;
+
+  const iv = setInterval(() => {
+    pct = Math.min(pct + 2, 95);
+    if (fill) fill.style.width = pct + '%';
+    const idx = Math.min(Math.floor(pct / 17), msgs.length - 1);
+    if (idx !== mi) { mi = idx; if (msg) msg.textContent = msgs[mi]; }
+  }, 80);
+
+  // Actually submit form after 2.5s
+  setTimeout(() => {
+    clearInterval(iv);
+    if (fill) fill.style.width = '100%';
+    if (msg)  msg.textContent  = 'Done — loading your results!';
+    setTimeout(() => {
+      document.getElementById('wizFormSubmit').submit();
+    }, 500);
+  }, 2800);
+}
+
+/* ── INIT ── */
+updateHeader(1);
+</script>
+{% endblock %}

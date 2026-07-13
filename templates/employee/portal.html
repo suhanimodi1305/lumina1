@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block title %}Employee Portal — Lumina{% endblock %}
 {% block page_title %}Employee Portal{% endblock %}
 
@@ -78,7 +78,6 @@
   </a>
 </div>
 
-<!-- Stats -->
 <div class="emp-stat-grid">
   <div class="emp-stat-card">
     <div class="sv">{{ total_products }}</div>
@@ -114,7 +113,6 @@
   </div>
 </div>
 
-<!-- Recent Requirements -->
 {% if recent_reqs %}
 <div class="emp-section-title">📋 Recent Requirements</div>
 {% for req in recent_reqs %}
@@ -133,7 +131,6 @@
 <a href="{% url 'employee:requirement_list' %}" style="display:block;text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">View all requirements <i class="bi bi-arrow-right"></i></a>
 {% endif %}
 
-<!-- Recent Orders -->
 {% if recent_orders %}
 <div class="emp-section-title">🛍️ Recent Orders</div>
 {% for order in recent_orders %}
@@ -150,7 +147,6 @@
 <a href="{% url 'employee:order_list' %}" style="display:block;text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">View all orders <i class="bi bi-arrow-right"></i></a>
 {% endif %}
 
-<!-- Recent Products -->
 <div class="emp-section-title">📦 Recent Products</div>
 {% for p in recent_products %}
 <div class="emp-product-row">

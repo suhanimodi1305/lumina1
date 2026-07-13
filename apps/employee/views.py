@@ -166,7 +166,7 @@ def product_delete(request, pk):
         name = product.name
         product.delete()
         messages.success(request, f'"{name}" deleted.')
-        return redirect('products:list')
+        return redirect('employee:product_list')
     return render(request, 'employee/product_confirm_delete.html', {'product': product})
 
 
@@ -188,7 +188,7 @@ def clear_products(request):
         else:
             deleted, _ = Product.objects.all().delete()
             messages.success(request, f'Deleted all {deleted} product(s).')
-    return redirect('products:list')
+    return redirect('employee:product_list')
 
 
 # ── Export CSV ────────────────────────────────────────────────────────────────
@@ -343,7 +343,7 @@ def employee_list(request):
     if not _is_staff(request.user):
         return redirect('core:home')
     employees = User.objects.filter(
-        Q(is_staff=True) | Q(is_superuser=True) | Q(username='suhani')
+        Q(is_staff=True) | Q(is_superuser=True)
     ).order_by('username')
     return render(request, 'employee/employee_list.html', {'employees': employees})
 
@@ -421,10 +421,10 @@ def order_detail_emp(request, order_id):
                 try:
                     from django.conf import settings as dj_settings
                     from django.db.models import F
-                    profile = order.user.profile
+                    from apps.memberships.models import UserProfile
+                    profile, _ = UserProfile.objects.get_or_create(user=order.user)
                     points = int(order.total // 100) * dj_settings.PURCHASE_POINTS_RATE
                     if points > 0:
-                        from apps.memberships.models import UserProfile
                         UserProfile.objects.filter(pk=profile.pk).update(
                             loyalty_points=F('loyalty_points') + points
                         )
@@ -495,5 +495,3 @@ def requirement_detail_emp(request, req_id):
         'priority_choices': UserRequirement.PRIORITY_CHOICES,
         'staff_users':      staff_users,
     })
-
-from apps.memberships.views import memberships_admin  # noqa — re-exported for employee URL

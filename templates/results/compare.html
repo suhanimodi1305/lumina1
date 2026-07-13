@@ -1,0 +1,542 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}Before vs After — Lumina{% endblock %}
+{% block page_title %}Scan Comparison{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   LUMINA — Before / After Scan Comparison  v1.0
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --cp-purple: #7c3aed; --cp-teal: #0d9488;
+  --cp-green:  #22c55e; --cp-red: #ef4444;
+  --cp-amber:  #f59e0b; --cp-blue: #3b82f6;
+  --cp-orange: #f97316; --cp-violet: #8b5cf6;
+  --cp-surf:   var(--surface);
+  --cp-surf2:  var(--surface-alt, #f8f9fc);
+  --cp-border: var(--border);
+  --cp-text:   var(--text);
+  --cp-muted:  var(--text-muted, #64748b);
+  --cp-radius: 16px; --cp-pill: 100px;
+  --cp-shadow: 0 2px 12px rgba(0,0,0,.07);
+  --cp-shadow2:0 6px 28px rgba(0,0,0,.11);
+}
+[data-theme="dark"] { --cp-surf2: #1d2035; }
+.cp-shell { padding-bottom: 3rem; }
+
+/* ── TOP BAR ── */
+.cp-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: .6rem;
+}
+.cp-back {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 600; color: var(--cp-muted);
+  background: var(--cp-surf); border: 1.5px solid var(--cp-border);
+  border-radius: var(--cp-pill); padding: .38rem 1rem;
+  text-decoration: none; transition: all .15s;
+}
+.cp-back:hover { color: var(--cp-purple); border-color: var(--cp-purple); }
+
+/* ── HERO SPLIT ── */
+.cp-hero {
+  display: grid; grid-template-columns: 1fr 60px 1fr;
+  gap: 0; align-items: center; margin-bottom: 1.5rem;
+}
+.cp-side {
+  background: var(--cp-surf); border-radius: var(--cp-radius);
+  border: 1px solid var(--cp-border); box-shadow: var(--cp-shadow);
+  overflow: hidden;
+}
+.cp-side-before { border-right: none; border-radius: var(--cp-radius) 0 0 var(--cp-radius); }
+.cp-side-after  { border-left: none;  border-radius: 0 var(--cp-radius) var(--cp-radius) 0; }
+.cp-side-img {
+  height: 240px; background: linear-gradient(135deg,#e8eaf6,#f3f0ff);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+[data-theme="dark"] .cp-side-img { background: linear-gradient(135deg,#1d1535,#2a1f4a); }
+.cp-side-img img { width: 100%; height: 240px; object-fit: cover; object-position: center top; display: block; }
+.cp-side-ph { font-size: 4rem; color: rgba(124,58,237,.3); }
+.cp-side-label {
+  position: absolute; bottom: 10px; left: 10px;
+  font-size: .65rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; padding: .22rem .7rem;
+  border-radius: var(--cp-pill); backdrop-filter: blur(8px);
+}
+.cp-label-before { background: rgba(245,158,11,.85); color: #fff; }
+.cp-label-after  { background: rgba(13,148,136,.85);  color: #fff; }
+.cp-side-meta { padding: .85rem 1rem; }
+.cp-side-date { font-size: .7rem; color: var(--cp-muted); margin-bottom: .3rem; }
+.cp-side-skin { font-size: .82rem; font-weight: 700; color: var(--cp-text); margin-bottom: .35rem; }
+.cp-side-tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+.cp-side-tag  {
+  font-size: .62rem; font-weight: 600; padding: .15rem .5rem;
+  border-radius: var(--cp-pill); background: var(--cp-surf2);
+  color: var(--cp-muted); border: 1px solid var(--cp-border);
+}
+/* centre divider */
+.cp-divider {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .4rem; z-index: 2;
+}
+.cp-vs {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--cp-purple), var(--cp-teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; color: #fff;
+  box-shadow: 0 4px 12px rgba(124,58,237,.35);
+}
+</style>
+
+<style>
+/* ── VERDICT BANNER ── */
+.cp-verdict {
+  border-radius: var(--cp-radius); margin-bottom: 1.5rem;
+  padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 1rem;
+  flex-wrap: wrap;
+}
+.cp-verdict-improved { background: rgba(34,197,94,.07);  border: 1.5px solid rgba(34,197,94,.2); }
+.cp-verdict-declined { background: rgba(239,68,68,.07);  border: 1.5px solid rgba(239,68,68,.2); }
+.cp-verdict-unchanged{ background: rgba(245,158,11,.07); border: 1.5px solid rgba(245,158,11,.2); }
+.cp-verdict-icon { font-size: 2.2rem; flex-shrink: 0; }
+.cp-verdict-body h2  { font-size: 1.1rem; font-weight: 800; color: var(--cp-text); margin-bottom: .2rem; }
+.cp-verdict-body p   { font-size: .82rem; color: var(--cp-muted); line-height: 1.6; margin: 0; }
+.cp-verdict-days {
+  margin-left: auto; text-align: center; flex-shrink: 0;
+  background: var(--cp-surf); border-radius: 12px;
+  padding: .6rem 1rem; border: 1px solid var(--cp-border);
+}
+.cp-verdict-days .d-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
+  font-weight: 700; color: var(--cp-purple); line-height: 1;
+}
+.cp-verdict-days .d-lbl {
+  font-size: .58rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--cp-muted);
+}
+
+/* ── METRICS TABLE ── */
+.cp-metrics { padding: .25rem 0; }
+.cp-metric-row {
+  display: grid; grid-template-columns: 40px 1fr 70px 70px 80px;
+  align-items: center; gap: .75rem; padding: .85rem 1.25rem;
+  border-bottom: 1px solid var(--cp-border); transition: background .12s;
+}
+.cp-metric-row:last-child { border-bottom: none; }
+.cp-metric-row:hover { background: var(--cp-surf2); }
+.cp-metric-icon { font-size: 1.1rem; text-align: center; }
+.cp-metric-info { min-width: 0; }
+.cp-metric-name { font-size: .82rem; font-weight: 700; color: var(--cp-text); margin-bottom: .15rem; }
+.cp-metric-bar  { height: 5px; background: var(--cp-border); border-radius: 3px; overflow: hidden; }
+.cp-metric-bar-fill { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(.4,0,.2,1); width: 0; }
+.cp-metric-val  { font-size: .88rem; font-weight: 700; color: var(--cp-text); text-align: center; }
+.cp-metric-val small { display: block; font-size: .58rem; color: var(--cp-muted); font-weight: 400; }
+.cp-metric-delta {
+  font-size: .82rem; font-weight: 800; padding: .25rem .65rem;
+  border-radius: var(--cp-pill); text-align: center;
+}
+.delta-good { background: rgba(34,197,94,.1);  color: #15803d; }
+.delta-bad  { background: rgba(239,68,68,.1);  color: #dc2626; }
+.delta-same { background: rgba(100,116,139,.1);color: var(--cp-muted); }
+.cp-metric-status { font-size: .68rem; font-weight: 700; text-align: center; }
+.ms-improved { color: #16a34a; }
+.ms-declined { color: #dc2626; }
+.ms-stable   { color: var(--cp-muted); }
+
+/* ── CONCERN CHANGES ── */
+.cp-concern-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .85rem; padding: 1rem 1.25rem; }
+.cp-concern-col h3 { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .7rem; }
+.cp-concern-chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .72rem; font-weight: 600; padding: .28rem .7rem;
+  border-radius: var(--cp-pill); margin: .2rem .15rem; cursor: default;
+}
+.cc-resolved  { background: rgba(34,197,94,.1);  color: #15803d; border: 1px solid rgba(34,197,94,.2); }
+.cc-new       { background: rgba(239,68,68,.1);  color: #dc2626; border: 1px solid rgba(239,68,68,.2); }
+.cc-persisting{ background: rgba(245,158,11,.1); color: #d97706; border: 1px solid rgba(245,158,11,.2); }
+.cp-concern-empty { font-size: .75rem; color: var(--cp-muted); font-style: italic; }
+
+/* ── AI REC ── */
+.cp-ai-wrap { padding: 1rem 1.25rem 1.25rem; }
+.cp-ai-bubble {
+  display: flex; gap: .9rem; align-items: flex-start;
+  padding: 1rem 1.1rem; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124,58,237,.06), rgba(13,148,136,.04));
+  border: 1.5px solid rgba(124,58,237,.15);
+}
+.cp-ai-avatar {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--cp-purple), var(--cp-teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: #fff;
+}
+.cp-ai-text { flex: 1; font-size: .83rem; color: var(--cp-text); line-height: 1.65; }
+
+/* ── CARD BASE ── */
+.cp-card {
+  background: var(--cp-surf); border-radius: var(--cp-radius);
+  border: 1px solid var(--cp-border); box-shadow: var(--cp-shadow);
+  overflow: hidden; margin-bottom: 1.25rem;
+}
+.cp-card-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem .65rem; border-bottom: 1px solid var(--cp-border);
+}
+.cp-card-title { font-size: .95rem; font-weight: 800; color: var(--cp-text); }
+.cp-card-sub   { font-size: .7rem;  color: var(--cp-muted); margin-top: .06rem; }
+.cp-badge {
+  font-size: .63rem; font-weight: 700; padding: .2rem .65rem;
+  border-radius: var(--cp-pill);
+}
+.cp-badge-green  { background: rgba(34,197,94,.1);   color: #16a34a; }
+.cp-badge-red    { background: rgba(239,68,68,.1);   color: #dc2626; }
+.cp-badge-amber  { background: rgba(245,158,11,.1);  color: #d97706; }
+.cp-badge-purple { background: rgba(124,58,237,.1);  color: var(--cp-purple); }
+
+/* ── RADAR CHART ── */
+.cp-radar-wrap { padding: .85rem 1.25rem 1.25rem; display: flex; justify-content: center; }
+.cp-radar-canvas { max-width: 300px; max-height: 300px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 767px) {
+  .cp-hero { grid-template-columns: 1fr; gap: .75rem; }
+  .cp-side-before, .cp-side-after { border-radius: var(--cp-radius); border: 1px solid var(--cp-border); }
+  .cp-divider { flex-direction: row; padding: .5rem 0; }
+  .cp-metric-row { grid-template-columns: 32px 1fr 55px 55px 60px; gap: .5rem; }
+  .cp-concern-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cp-shell">
+
+  
+  <div class="cp-topbar">
+    <a href="{% url 'results:progress' %}" class="cp-back">
+      <i class="bi bi-arrow-left"></i> Progress Tracker
+    </a>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+      <a href="{% url 'results:detail' scan_id=baseline.id %}" class="cp-back">
+        <i class="bi bi-eye"></i> Baseline Result
+      </a>
+      <a href="{% url 'results:detail' scan_id=latest.id %}" class="cp-back" style="color:var(--cp-teal);border-color:rgba(13,148,136,.3);">
+        <i class="bi bi-eye"></i> Latest Result
+      </a>
+    </div>
+  </div>
+
+  
+  <div class="cp-hero">
+    
+    <div class="cp-side cp-side-before">
+      <div class="cp-side-img">
+        {% if baseline.scan_image %}
+          <img src="{{ baseline.scan_image.url }}" alt="Baseline scan">
+        {% else %}
+          <div class="cp-side-ph">👤</div>
+        {% endif %}
+        <span class="cp-side-label cp-label-before">Before</span>
+      </div>
+      <div class="cp-side-meta">
+        <div class="cp-side-date">{{ baseline.created_at|date:"D, d M Y" }}</div>
+        <div class="cp-side-skin">{{ baseline.skin_type|title }} · {{ baseline.undertone|title }} undertone</div>
+        <div class="cp-side-tags">
+          <span class="cp-side-tag">Harmony {{ baseline.harmony_score }}</span>
+          <span class="cp-side-tag">{{ baseline.skin_tone|title }}</span>
+          <span class="cp-side-tag">Acne: {{ baseline.hf_acne_severity|title }}</span>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="cp-divider">
+      <div class="cp-vs">VS</div>
+      <div style="font-size:.62rem;color:var(--cp-muted);font-weight:600;white-space:nowrap;">{{ comp.days_between }}d</div>
+    </div>
+
+    
+    <div class="cp-side cp-side-after">
+      <div class="cp-side-img">
+        {% if latest.scan_image %}
+          <img src="{{ latest.scan_image.url }}" alt="Latest scan">
+        {% else %}
+          <div class="cp-side-ph">👤</div>
+        {% endif %}
+        <span class="cp-side-label cp-label-after">After</span>
+      </div>
+      <div class="cp-side-meta">
+        <div class="cp-side-date">{{ latest.created_at|date:"D, d M Y" }}</div>
+        <div class="cp-side-skin">{{ latest.skin_type|title }} · {{ latest.undertone|title }} undertone</div>
+        <div class="cp-side-tags">
+          <span class="cp-side-tag">Harmony {{ latest.harmony_score }}</span>
+          <span class="cp-side-tag">{{ latest.skin_tone|title }}</span>
+          <span class="cp-side-tag">Acne: {{ latest.hf_acne_severity|title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="cp-verdict cp-verdict-{{ comp.ai_verdict }}">
+    <div class="cp-verdict-icon">
+      {% if comp.ai_verdict == 'improved' %}✨{% elif comp.ai_verdict == 'declined' %}⚠️{% else %}⟳{% endif %}
+    </div>
+    <div class="cp-verdict-body">
+      <h2>
+        {% if comp.ai_verdict == 'improved' %}Skin Improved
+        {% elif comp.ai_verdict == 'declined' %}Skin Needs Attention
+        {% else %}Skin Stable{% endif %}
+      </h2>
+      <p>{{ comp.ai_recommendation }}</p>
+    </div>
+    <div class="cp-verdict-days">
+      <div class="d-num">{{ comp.days_between }}</div>
+      <div class="d-lbl">Days Tracked</div>
+    </div>
+  </div>
+
+  
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:1.25rem;align-items:start;">
+  <div>
+
+  
+  <div class="cp-card">
+    <div class="cp-card-hdr">
+      <div>
+        <div class="cp-card-title">📊 Metric-by-Metric Breakdown</div>
+        <div class="cp-card-sub">Before → After for each skin score</div>
+      </div>
+      <span class="cp-badge cp-badge-{{ comp.ai_verdict == 'improved'|yesno:'green,red,amber' }}">
+        {{ comp.ai_verdict|title }}
+      </span>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:40px 1fr 70px 70px 80px;gap:.75rem;
+                padding:.55rem 1.25rem;border-bottom:1.5px solid var(--cp-border);">
+      <div></div>
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--cp-muted);">Metric</div>
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--cp-muted);text-align:center;">Before</div>
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--cp-muted);text-align:center;">After</div>
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--cp-muted);text-align:center;">Change</div>
+    </div>
+    <div class="cp-metrics">
+      {% for m in metrics %}
+      <div class="cp-metric-row">
+        <div class="cp-metric-icon">{{ m.icon }}</div>
+        <div class="cp-metric-info">
+          <div class="cp-metric-name">{{ m.name }}</div>
+          <div class="cp-metric-bar">
+            <div class="cp-metric-bar-fill"
+                 data-w="{{ m.latest }}"
+                 style="background:{{ m.color }};"></div>
+          </div>
+        </div>
+        <div class="cp-metric-val">
+          {{ m.baseline }}<small>Before</small>
+        </div>
+        <div class="cp-metric-val" style="color:{{ m.color }};">
+          {{ m.latest }}<small>After</small>
+        </div>
+        <div class="cp-metric-delta
+          {% if m.improved %}delta-good{% elif m.declined %}delta-bad{% else %}delta-same{% endif %}">
+          {% if m.delta > 0 %}+{% endif %}{{ m.delta }}
+          <div class="cp-metric-status {% if m.improved %}ms-improved{% elif m.declined %}ms-declined{% else %}ms-stable{% endif %}">
+            {% if m.improved %}▲ Better{% elif m.declined %}▼ Worse{% else %}→ Stable{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  
+  <div class="cp-card">
+    <div class="cp-card-hdr">
+      <div>
+        <div class="cp-card-title">🔍 Skin Concern Changes</div>
+        <div class="cp-card-sub">What resolved, what's new, what persists</div>
+      </div>
+    </div>
+    <div class="cp-concern-grid">
+      <div>
+        <h3 style="color:#16a34a;">✅ Resolved ({{ resolved_concerns|length }})</h3>
+        {% for slug in resolved_concerns %}
+        <span class="cp-concern-chip cc-resolved">✓ {{ slug|title|cut:"_" }}</span>
+        {% empty %}
+        <div class="cp-concern-empty">None resolved yet</div>
+        {% endfor %}
+      </div>
+      <div>
+        <h3 style="color:#d97706;">⚠️ Persisting ({{ persisting_concerns|length }})</h3>
+        {% for slug in persisting_concerns %}
+        <span class="cp-concern-chip cc-persisting">{{ slug|title|cut:"_" }}</span>
+        {% empty %}
+        <div class="cp-concern-empty">None persisting</div>
+        {% endfor %}
+      </div>
+      <div>
+        <h3 style="color:#dc2626;">🆕 New ({{ new_concerns|length }})</h3>
+        {% for slug in new_concerns %}
+        <span class="cp-concern-chip cc-new">+ {{ slug|title|cut:"_" }}</span>
+        {% empty %}
+        <div class="cp-concern-empty">No new concerns</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  
+  <div>
+
+    
+    <div class="cp-card" style="margin-bottom:1.25rem;">
+      <div class="cp-card-hdr">
+        <div>
+          <div class="cp-card-title">🕸 Radar View</div>
+          <div class="cp-card-sub">Before vs after overlay</div>
+        </div>
+      </div>
+      <div class="cp-radar-wrap">
+        <canvas id="radarChart" class="cp-radar-canvas"></canvas>
+      </div>
+      <div style="display:flex;gap:.9rem;justify-content:center;padding:.5rem 1.25rem 1rem;font-size:.72rem;font-weight:600;">
+        <span style="display:flex;align-items:center;gap:.3rem;color:var(--cp-muted);">
+          <span style="width:12px;height:3px;background:rgba(245,158,11,.7);border-radius:2px;display:inline-block;"></span> Before
+        </span>
+        <span style="display:flex;align-items:center;gap:.3rem;color:var(--cp-teal);">
+          <span style="width:12px;height:3px;background:var(--cp-teal);border-radius:2px;display:inline-block;"></span> After
+        </span>
+      </div>
+    </div>
+
+    
+    <div class="cp-card" style="margin-bottom:1.25rem;">
+      <div class="cp-card-hdr">
+        <div>
+          <div class="cp-card-title">🤖 AI Analysis</div>
+          <div class="cp-card-sub">What these changes mean</div>
+        </div>
+      </div>
+      <div class="cp-ai-wrap">
+        <div class="cp-ai-bubble">
+          <div class="cp-ai-avatar">🩺</div>
+          <div class="cp-ai-text">{{ comp.ai_recommendation }}</div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="cp-card">
+      <div class="cp-card-hdr">
+        <div><div class="cp-card-title">🚀 Next Steps</div></div>
+      </div>
+      <div style="padding:.75rem 1.25rem 1rem;display:flex;flex-direction:column;gap:.55rem;">
+        <a href="{% url 'results:detail' scan_id=latest.id %}"
+           style="display:flex;align-items:center;justify-content:center;gap:.45rem;
+                  padding:.65rem 1rem;background:var(--cp-teal);color:#fff;
+                  border-radius:var(--cp-pill);font-size:.82rem;font-weight:700;text-decoration:none;transition:background .15s;">
+          <i class="bi bi-eye"></i> View Latest Full Result
+        </a>
+        <a href="{% url 'chat:create' %}?mode=doctor&scan_id={{ latest.id }}"
+           style="display:flex;align-items:center;justify-content:center;gap:.45rem;
+                  padding:.65rem 1rem;background:var(--cp-purple);color:#fff;
+                  border-radius:var(--cp-pill);font-size:.82rem;font-weight:700;text-decoration:none;transition:background .15s;">
+          🩺 Ask Dr. Lumina AI
+        </a>
+        <a href="{% url 'scanner:upload' %}"
+           style="display:flex;align-items:center;justify-content:center;gap:.45rem;
+                  padding:.65rem 1rem;background:var(--cp-surf2);color:var(--cp-text);
+                  border:1.5px solid var(--cp-border);
+                  border-radius:var(--cp-pill);font-size:.82rem;font-weight:700;text-decoration:none;transition:all .15s;">
+          <i class="bi bi-camera"></i> New Scan
+        </a>
+      </div>
+    </div>
+
+  </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+/* ── RADAR CHART ── */
+(function() {
+  const ctx = document.getElementById('radarChart');
+  if (!ctx) return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridCol = isDark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.07)';
+  const txtCol  = isDark ? 'rgba(255,255,255,.45)' : '#64748b';
+
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Harmony', 'Hydration', 'Elasticity', 'Pigment ↓', 'Acne ↓', 'Aging ↓'],
+      datasets: [
+        {
+          label: 'Before',
+          data: [
+            {{ baseline.harmony_score }},
+            {{ baseline.hydration_score }},
+            {{ baseline.elasticity_score }},
+            {{ baseline.pigmentation_score }},
+            {{ baseline.acne_score }},
+            {{ baseline.aging_score }},
+          ],
+          borderColor: 'rgba(245,158,11,.7)',
+          backgroundColor: 'rgba(245,158,11,.08)',
+          pointBackgroundColor: 'rgba(245,158,11,.7)',
+          borderWidth: 2,
+          pointRadius: 3,
+        },
+        {
+          label: 'After',
+          data: [
+            {{ latest.harmony_score }},
+            {{ latest.hydration_score }},
+            {{ latest.elasticity_score }},
+            {{ latest.pigmentation_score }},
+            {{ latest.acne_score }},
+            {{ latest.aging_score }},
+          ],
+          borderColor: '#0d9488',
+          backgroundColor: 'rgba(13,148,136,.1)',
+          pointBackgroundColor: '#0d9488',
+          borderWidth: 2,
+          pointRadius: 3,
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      animation: { duration: 1000 },
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          grid: { color: gridCol },
+          angleLines: { color: gridCol },
+          pointLabels: { color: txtCol, font: { size: 10, family: 'Inter' } },
+          ticks: { display: false, stepSize: 25 },
+        },
+      },
+    },
+  });
+})();
+
+/* ── ANIMATE METRIC BARS ── */
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.cp-metric-bar-fill[data-w]').forEach(el => {
+    setTimeout(() => { el.style.width = Math.min(parseInt(el.dataset.w) || 0, 100) + '%'; }, 350);
+  });
+});
+</script>
+{% endblock %}

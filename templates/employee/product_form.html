@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block title %}{{ action }} Product — Admin{% endblock %}
 {% block page_title %}{{ action }} Product{% endblock %}
 
@@ -60,7 +60,7 @@
 <form method="post" class="pf-card">
   {% csrf_token %}
 
-  <!-- BASIC INFO -->
+  
   <div class="pf-section-title">📦 Basic Information</div>
   <div class="pf-grid">
     <div class="pf-field">
@@ -132,7 +132,7 @@
     </div>
   </div>
 
-  <!-- IMAGE -->
+  
   <div class="pf-section-title">🖼️ Product Image</div>
   <div class="pf-field">
     <label>Image URL (paste direct image link or brand website URL)</label>
@@ -149,7 +149,7 @@
     </div>
   </div>
 
-  <!-- DESCRIPTIONS -->
+  
   <div class="pf-section-title">📝 Descriptions</div>
   <div class="pf-grid">
     <div class="pf-field pf-full">
@@ -168,7 +168,7 @@
     </div>
   </div>
 
-  <!-- MAKEUP SPECIFICS -->
+  
   <div class="pf-section-title">💄 Makeup / Shade Details (optional)</div>
   <div class="pf-grid">
     <div class="pf-field">
@@ -204,7 +204,7 @@
     </div>
   </div>
 
-  <!-- SETTINGS -->
+  
   <div class="pf-section-title">⚙️ Settings</div>
   <div class="pf-check-row">
     <input type="checkbox" name="is_featured" id="isFeatured"
@@ -212,7 +212,7 @@
     <label for="isFeatured">Mark as Featured Product</label>
   </div>
 
-  <!-- ACTIONS -->
+  
   <div class="pf-actions">
     <button type="submit" class="pf-btn-save">
       <i class="bi bi-check-lg"></i> {{ action }} Product
