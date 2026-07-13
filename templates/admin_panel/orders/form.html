@@ -1,0 +1,332 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}{{ action }} Order{% endblock %}
+{% block page_title %}{{ action }} Order{% endblock %}
+{% block breadcrumb %}Admin / Orders / {{ action }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-11">
+    <form method="post" id="order-form">
+      {% csrf_token %}
+
+      <!-- ── Customer Info ───────────────────────────────────────────────── -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">👤 Customer Information</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">Linked Account (registered user)</label>
+            <select name="user_id" class="adm-input" id="linked-user-select">
+              <option value="">— Guest / No linked account —</option>
+              {% for u in customers %}
+                <option value="{{ u.pk }}"
+                  data-name="{{ u.get_full_name|default:u.username }}"
+                  data-email="{{ u.email }}"
+                  {% if order.user_id == u.pk %}selected{% endif %}>
+                  {{ u.username }} {% if u.get_full_name %}({{ u.get_full_name }}){% endif %} — {{ u.email }}
+                </option>
+              {% endfor %}
+            </select>
+            <div style="font-size:.7rem;color:var(--adm-muted);margin-top:.3rem;">Selecting a user auto-fills name &amp; email below.</div>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Full Name *</label>
+            <input type="text" name="full_name" class="adm-input" id="field-full-name" required
+              value="{{ order.full_name|default:'' }}">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Phone *</label>
+            <input type="text" name="phone" class="adm-input" required
+              value="{{ order.phone|default:'' }}" placeholder="+91 XXXXX XXXXX">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Email</label>
+            <input type="email" name="email" class="adm-input" id="field-email"
+              value="{{ order.email|default:'' }}">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Delivery Address ───────────────────────────────────────────── -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">📍 Delivery Address</div>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="adm-label">Address Line 1 *</label>
+            <input type="text" name="address_line1" class="adm-input" required
+              value="{{ order.address_line1|default:'' }}" placeholder="House/Flat No., Street…">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Address Line 2</label>
+            <input type="text" name="address_line2" class="adm-input"
+              value="{{ order.address_line2|default:'' }}" placeholder="Area, Landmark">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">City *</label>
+            <input type="text" name="city" class="adm-input" required
+              value="{{ order.city|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">State *</label>
+            <input type="text" name="state" class="adm-input" required
+              value="{{ order.state|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Pincode *</label>
+            <input type="text" name="pincode" class="adm-input" required
+              value="{{ order.pincode|default:'' }}" maxlength="10">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Order Items ─────────────────────────────────────────────────── -->
+      <div class="adm-card mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="adm-card-title" style="margin-bottom:0;">🛍 Order Items</div>
+          <button type="button" class="adm-btn btn-teal btn-sm" onclick="addOrderItem()">
+            <i class="bi bi-plus-lg"></i> Add Item
+          </button>
+        </div>
+        <div id="order-items">
+          {% if order and order.items.all %}
+            {% for item in order.items.all %}
+            <div class="order-item-row row g-2 align-items-end mb-2" style="background:var(--adm-bg);padding:.75rem;border-radius:9px;">
+              <div class="col-md-4">
+                <label class="adm-label">Product (optional)</label>
+                <select name="item_product[]" class="adm-input product-picker" onchange="fillItemFromProduct(this)">
+                  <option value="">— Manual entry —</option>
+                  {% for p in products_qs %}
+                    <option value="{{ p.pk }}" data-name="{{ p.name }}" data-brand="{{ p.brand }}" data-price="{{ p.price|default:'' }}" data-sku="{{ p.sku }}"
+                      {% if item.product_id == p.pk %}selected{% endif %}>
+                      {{ p.brand }} — {{ p.name }} ({{ p.sku }})
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="adm-label">Item Name *</label>
+                <input type="text" name="item_name[]" class="adm-input item-name" required value="{{ item.name }}">
+              </div>
+              <div class="col-md-2">
+                <label class="adm-label">Price (₹) *</label>
+                <input type="number" name="item_price[]" class="adm-input item-price" required step="0.01" min="0" value="{{ item.price }}" onchange="recalcTotals()">
+              </div>
+              <div class="col-md-1">
+                <label class="adm-label">Qty *</label>
+                <input type="number" name="item_qty[]" class="adm-input item-qty" required min="1" value="{{ item.quantity }}" onchange="recalcTotals()">
+              </div>
+              <div class="col-md-2 d-flex align-items-end gap-2">
+                <span class="item-line-total adm-badge badge-success" style="font-size:.75rem;padding:.3rem .6rem;">
+                  ₹{{ item.line_total }}
+                </span>
+                <button type="button" class="adm-btn btn-danger btn-sm" onclick="removeItem(this)"><i class="bi bi-x"></i></button>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <!-- Empty state — one blank row for new orders -->
+            <div class="order-item-row row g-2 align-items-end mb-2" style="background:var(--adm-bg);padding:.75rem;border-radius:9px;">
+              <div class="col-md-4">
+                <label class="adm-label">Product (optional)</label>
+                <select name="item_product[]" class="adm-input product-picker" onchange="fillItemFromProduct(this)">
+                  <option value="">— Manual entry —</option>
+                  {% for p in products_qs %}
+                    <option value="{{ p.pk }}" data-name="{{ p.name }}" data-brand="{{ p.brand }}" data-price="{{ p.price|default:'' }}" data-sku="{{ p.sku }}">
+                      {{ p.brand }} — {{ p.name }} ({{ p.sku }})
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="adm-label">Item Name *</label>
+                <input type="text" name="item_name[]" class="adm-input item-name" required placeholder="Product name">
+              </div>
+              <div class="col-md-2">
+                <label class="adm-label">Price (₹) *</label>
+                <input type="number" name="item_price[]" class="adm-input item-price" required step="0.01" min="0" placeholder="0.00" onchange="recalcTotals()">
+              </div>
+              <div class="col-md-1">
+                <label class="adm-label">Qty</label>
+                <input type="number" name="item_qty[]" class="adm-input item-qty" value="1" min="1" onchange="recalcTotals()">
+              </div>
+              <div class="col-md-2 d-flex align-items-end gap-2">
+                <span class="item-line-total adm-badge badge-success" style="font-size:.75rem;padding:.3rem .6rem;">₹0</span>
+                <button type="button" class="adm-btn btn-danger btn-sm" onclick="removeItem(this)"><i class="bi bi-x"></i></button>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        <p style="font-size:.72rem;color:var(--adm-muted);margin-top:.5rem;">
+          <i class="bi bi-info-circle"></i>
+          Select a product from the dropdown to auto-fill the name and price, or enter manually.
+        </p>
+      </div>
+
+      <!-- ── Financials ─────────────────────────────────────────────────── -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">💰 Financials</div>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="adm-label">Subtotal (₹)</label>
+            <input type="number" name="subtotal" class="adm-input" id="field-subtotal"
+              step="0.01" min="0" value="{{ order.subtotal|default:'0' }}" readonly style="background:var(--adm-bg);">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Delivery Charge (₹)</label>
+            <input type="number" name="delivery_charge" class="adm-input" id="field-delivery"
+              step="0.01" min="0" value="{{ order.delivery_charge|default:'0' }}" onchange="recalcTotals()">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Discount (₹)</label>
+            <input type="number" name="discount" class="adm-input" id="field-discount"
+              step="0.01" min="0" value="{{ order.discount|default:'0' }}" onchange="recalcTotals()">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Grand Total (₹)</label>
+            <input type="number" name="total" class="adm-input" id="field-total"
+              step="0.01" min="0" value="{{ order.total|default:'0' }}" style="font-weight:700;color:#10b981;">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Payment & Status ───────────────────────────────────────────── -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">💳 Payment & Status</div>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="adm-label">Payment Method</label>
+            <select name="payment_method" class="adm-input">
+              {% for val,lbl in payment_choices %}
+                <option value="{{ val }}" {% if order.payment_method == val %}selected{% endif %}>{{ lbl }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Payment Status</label>
+            <select name="payment_status" class="adm-input">
+              <option value="pending" {% if order.payment_status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="paid" {% if order.payment_status == 'paid' %}selected{% endif %}>Paid</option>
+              <option value="failed" {% if order.payment_status == 'failed' %}selected{% endif %}>Failed</option>
+              <option value="refunded" {% if order.payment_status == 'refunded' %}selected{% endif %}>Refunded</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Order Status</label>
+            <select name="status" class="adm-input">
+              {% for val,lbl in status_choices %}
+                <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ lbl }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Order Notes</label>
+            <input type="text" name="order_notes" class="adm-input"
+              value="{{ order.order_notes|default:'' }}" placeholder="Internal notes…">
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'admin_panel:order_list' %}" class="adm-btn btn-outline">Cancel</a>
+        <button type="submit" class="adm-btn btn-primary">
+          <i class="bi bi-check-lg"></i> {{ action }} Order
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ── Product option template for cloned rows
+const productsJson = [
+  {% for p in products_qs %}
+  {id: {{ p.pk }}, name: "{{ p.name|escapejs }}", brand: "{{ p.brand|escapejs }}", price: "{{ p.price|default:'' }}", sku: "{{ p.sku|escapejs }}"},
+  {% endfor %}
+];
+
+function buildProductOptions(selectedId) {
+  let html = '<option value="">— Manual entry —</option>';
+  for (const p of productsJson) {
+    const sel = p.id == selectedId ? 'selected' : '';
+    html += `<option value="${p.id}" data-name="${p.name}" data-brand="${p.brand}" data-price="${p.price}" data-sku="${p.sku}" ${sel}>${p.brand} — ${p.name} (${p.sku})</option>`;
+  }
+  return html;
+}
+
+function addOrderItem() {
+  const container = document.getElementById('order-items');
+  const div = document.createElement('div');
+  div.className = 'order-item-row row g-2 align-items-end mb-2';
+  div.style = 'background:var(--adm-bg);padding:.75rem;border-radius:9px;';
+  div.innerHTML = `
+    <div class="col-md-4">
+      <label class="adm-label">Product (optional)</label>
+      <select name="item_product[]" class="adm-input product-picker" onchange="fillItemFromProduct(this)">
+        ${buildProductOptions(null)}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="adm-label">Item Name *</label>
+      <input type="text" name="item_name[]" class="adm-input item-name" required placeholder="Product name">
+    </div>
+    <div class="col-md-2">
+      <label class="adm-label">Price (₹) *</label>
+      <input type="number" name="item_price[]" class="adm-input item-price" required step="0.01" min="0" placeholder="0.00" onchange="recalcTotals()">
+    </div>
+    <div class="col-md-1">
+      <label class="adm-label">Qty</label>
+      <input type="number" name="item_qty[]" class="adm-input item-qty" value="1" min="1" onchange="recalcTotals()">
+    </div>
+    <div class="col-md-2 d-flex align-items-end gap-2">
+      <span class="item-line-total adm-badge badge-success" style="font-size:.75rem;padding:.3rem .6rem;">₹0</span>
+      <button type="button" class="adm-btn btn-danger btn-sm" onclick="removeItem(this)"><i class="bi bi-x"></i></button>
+    </div>`;
+  container.appendChild(div);
+}
+
+function fillItemFromProduct(sel) {
+  const opt = sel.selectedOptions[0];
+  const row = sel.closest('.order-item-row');
+  if (opt && opt.value) {
+    const nameInput = row.querySelector('.item-name');
+    const priceInput = row.querySelector('.item-price');
+    if (opt.dataset.name) nameInput.value = opt.dataset.brand + ' — ' + opt.dataset.name;
+    if (opt.dataset.price) { priceInput.value = opt.dataset.price; recalcTotals(); }
+  }
+}
+
+function removeItem(btn) {
+  const row = btn.closest('.order-item-row');
+  row.remove();
+  recalcTotals();
+}
+
+function recalcTotals() {
+  let subtotal = 0;
+  document.querySelectorAll('.order-item-row').forEach(row => {
+    const price = parseFloat(row.querySelector('.item-price')?.value) || 0;
+    const qty   = parseInt(row.querySelector('.item-qty')?.value) || 1;
+    const line  = price * qty;
+    subtotal += line;
+    const badge = row.querySelector('.item-line-total');
+    if (badge) badge.textContent = '₹' + line.toFixed(2);
+  });
+  const delivery = parseFloat(document.getElementById('field-delivery')?.value) || 0;
+  const discount = parseFloat(document.getElementById('field-discount')?.value) || 0;
+  document.getElementById('field-subtotal').value = subtotal.toFixed(2);
+  document.getElementById('field-total').value = Math.max(0, subtotal + delivery - discount).toFixed(2);
+}
+
+// Auto-fill customer name/email when linked user is selected
+document.getElementById('linked-user-select')?.addEventListener('change', function() {
+  const opt = this.selectedOptions[0];
+  if (opt && opt.value) {
+    const nameField = document.getElementById('field-full-name');
+    const emailField = document.getElementById('field-email');
+    if (opt.dataset.name && nameField && !nameField.value) nameField.value = opt.dataset.name;
+    if (opt.dataset.email && emailField && !emailField.value) emailField.value = opt.dataset.email;
+  }
+});
+
+// Init totals on page load
+recalcTotals();
+</script>
+{% endblock %}

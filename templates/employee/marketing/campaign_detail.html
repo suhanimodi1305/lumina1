@@ -1,0 +1,72 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}{{ camp.name }}{% endblock %}
+{% block page_title %}Campaign — {{ camp.name }}{% endblock %}
+{% block nav_campaigns %}active{% endblock %}
+{% block nav_mkt_open %}open{% endblock %}
+
+{% block content %}
+<a href="{% url 'employee:campaign_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← All Campaigns</a>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">Campaign Info</div>
+      <div style="font-size:.82rem;line-height:2.2;">
+        <div><strong>ID:</strong> {{ camp.camp_id }}</div>
+        <div><strong>Type:</strong> {{ camp.get_type_display }}</div>
+        <div><strong>Status:</strong> <span class="badge-stage" style="font-size:.65rem;">{{ camp.get_status_display }}</span></div>
+        <div><strong>Budget:</strong> ₹{{ camp.budget }}</div>
+        <div><strong>Spent:</strong> ₹{{ camp.spent }}</div>
+        <div><strong>ROI:</strong> {{ camp.roi }}%</div>
+        {% if camp.target_audience %}<div><strong>Audience:</strong> {{ camp.target_audience }}</div>{% endif %}
+        {% if camp.scheduled_at %}<div><strong>Scheduled:</strong> {{ camp.scheduled_at|date:"d M Y H:i" }}</div>{% endif %}
+        <div><strong>Created by:</strong> {{ camp.created_by.username|default:"—" }}</div>
+      </div>
+      {% if camp.description %}
+      <div style="margin-top:.75rem;background:var(--crm-row-bg);border-radius:8px;padding:.65rem;font-size:.8rem;color:#334155;">
+        {{ camp.description }}
+      </div>
+      {% endif %}
+    </div>
+    <div class="crm-card">
+      <div class="crm-card-title">Update Analytics</div>
+      <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom:.6rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Status</label>
+          <select name="status" class="form-select form-select-sm">
+            {% for val,label in status_choices %}<option value="{{ val }}" {% if camp.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="row g-2">
+          <div class="col-6"><label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Leads Generated</label>
+            <input name="leads_generated" type="number" value="{{ camp.leads_generated }}" class="form-control form-control-sm"></div>
+          <div class="col-6"><label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Conversions</label>
+            <input name="conversions" type="number" value="{{ camp.conversions }}" class="form-control form-control-sm"></div>
+          <div class="col-6"><label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Revenue (₹)</label>
+            <input name="revenue" type="number" value="{{ camp.revenue }}" class="form-control form-control-sm"></div>
+          <div class="col-6"><label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Spent (₹)</label>
+            <input name="spent" type="number" value="{{ camp.spent }}" class="form-control form-control-sm"></div>
+        </div>
+        <button type="submit" class="btn-crm-primary" style="width:100%;margin-top:.75rem;">Save</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="crm-stat-grid">
+      <div class="crm-stat"><div class="crm-stat-val">{{ camp.leads_generated }}</div><div class="crm-stat-label">Leads</div></div>
+      <div class="crm-stat"><div class="crm-stat-val">{{ camp.conversions }}</div><div class="crm-stat-label">Converted</div></div>
+      <div class="crm-stat"><div class="crm-stat-val" style="color:#c9a96e;">{{ camp.roi }}%</div><div class="crm-stat-label">ROI</div></div>
+      <div class="crm-stat"><div class="crm-stat-val">₹{{ camp.revenue|floatformat:0 }}</div><div class="crm-stat-label">Revenue</div></div>
+    </div>
+    {% if camp.leads_generated > 0 %}
+    <div class="crm-card">
+      <div class="crm-card-title">Conversion Rate</div>
+      <div style="font-size:.9rem;margin-bottom:.4rem;">{{ camp.conversions }} / {{ camp.leads_generated }} leads converted
+        ({% widthratio camp.conversions camp.leads_generated 100 %}%)
+      </div>
+      <div class="crm-progress"><div class="crm-progress-bar" style="width:{% widthratio camp.conversions camp.leads_generated 100 %}%;background:#c9a96e;"></div></div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

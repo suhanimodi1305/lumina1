@@ -1,0 +1,95 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Opportunities{% endblock %}
+{% block page_title %}Opportunities{% endblock %}
+{% block breadcrumb %}CRM · Opportunities{% endblock %}
+{% block nav_opps %}active{% endblock %}
+
+{% block content %}
+<!-- Header bar -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+  <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <select name="stage" class="emp-input" style="width:auto;padding:.45rem .85rem;">
+      <option value="">All Stages</option>
+      {% for val,label in stage_choices %}<option value="{{ val }}" {% if stage == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="emp-btn emp-btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+  </form>
+  <div style="display:flex;align-items:center;gap:.75rem;">
+    <div class="emp-kpi" style="padding:.6rem 1rem;border-radius:10px;min-width:0;">
+      <div class="emp-kpi-icon kpi-teal" style="width:36px;height:36px;border-radius:9px;font-size:1rem;"><i class="bi bi-trophy"></i></div>
+      <div><div class="emp-kpi-label">Total Pipeline</div><div style="font-size:1.1rem;font-weight:800;color:var(--emp-accent);">₹{{ total_value|floatformat:0 }}</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Kanban Pipeline -->
+<div class="pipeline-wrap mb-3">
+  {% for val,label in stage_choices %}
+  <div class="pipeline-col">
+    <div class="pipeline-col-title">
+      {{ label }}
+      <span style="background:rgba(13,148,136,.12);color:var(--emp-accent);font-size:.62rem;font-weight:700;padding:.1rem .45rem;border-radius:20px;">
+        {{ opps|length }}
+      </span>
+    </div>
+    {% for opp in opps %}{% if opp.stage == val %}
+    <div class="pipeline-card">
+      <div style="font-weight:600;font-size:.8rem;margin-bottom:.25rem;line-height:1.3;">{{ opp.title|truncatechars:38 }}</div>
+      <div style="font-size:.68rem;color:var(--emp-muted);">
+        {% if opp.lead %}{{ opp.lead.name }}{% elif opp.customer %}{{ opp.customer.username }}{% endif %}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.4rem;">
+        <span style="font-size:.85rem;font-weight:700;color:var(--emp-accent);">₹{{ opp.value|floatformat:0 }}</span>
+        <span style="font-size:.65rem;color:var(--emp-muted);">{{ opp.probability }}% win</span>
+      </div>
+      {% if opp.close_date %}<div style="font-size:.65rem;color:var(--emp-gold);margin-top:.2rem;"><i class="bi bi-calendar3"></i> {{ opp.close_date|date:"d M" }}</div>{% endif %}
+      {% if opp.assigned_to %}<div style="font-size:.65rem;color:var(--emp-muted);margin-top:.15rem;"><i class="bi bi-person"></i> {{ opp.assigned_to.get_full_name|default:opp.assigned_to.username }}</div>{% endif %}
+    </div>
+    {% endif %}{% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Table -->
+<div class="emp-table-wrap">
+  <div class="emp-table-head">
+    <h6><i class="bi bi-list-ul me-2" style="color:var(--emp-accent);"></i>All Opportunities</h6>
+    <span style="font-size:.8rem;color:var(--emp-muted);">{{ opps|length }} record{{ opps|length|pluralize }}</span>
+  </div>
+  <table class="emp-table">
+    <thead>
+      <tr><th>ID</th><th>Title</th><th>Lead / Customer</th><th>Stage</th><th>Value</th><th>Win %</th><th>Close Date</th><th>Assigned</th></tr>
+    </thead>
+    <tbody>
+      {% for opp in opps %}
+      <tr>
+        <td style="font-family:monospace;font-size:.72rem;color:var(--emp-muted);">{{ opp.opp_id }}</td>
+        <td style="font-weight:600;font-size:.85rem;">{{ opp.title|truncatechars:45 }}</td>
+        <td style="font-size:.8rem;">{% if opp.lead %}{{ opp.lead.name }}{% elif opp.customer %}{{ opp.customer.username }}{% else %}—{% endif %}</td>
+        <td>
+          <span class="emp-badge {% if opp.stage == 'won' %}badge-success{% elif opp.stage == 'lost' %}badge-danger{% elif opp.stage == 'proposal' %}badge-purple{% else %}badge-teal{% endif %}" style="font-size:.63rem;">
+            {{ opp.get_stage_display }}
+          </span>
+        </td>
+        <td style="font-weight:700;font-size:.85rem;color:var(--emp-accent);">₹{{ opp.value|floatformat:0 }}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:.4rem;">
+            <div class="emp-progress" style="width:55px;"><div class="emp-progress-bar" style="width:{{ opp.probability }}%;"></div></div>
+            <span style="font-size:.75rem;">{{ opp.probability }}%</span>
+          </div>
+        </td>
+        <td style="font-size:.78rem;color:var(--emp-muted);">{{ opp.close_date|date:"d M Y"|default:"—" }}</td>
+        <td style="font-size:.78rem;">{{ opp.assigned_to.get_full_name|default:opp.assigned_to.username|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8" style="text-align:center;padding:3rem;color:var(--emp-muted);">
+          <i class="bi bi-trophy" style="font-size:2rem;opacity:.3;display:block;margin-bottom:.5rem;"></i>
+          No opportunities yet
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,468 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Lumina Admin{% endblock %} — Lumina ERP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  {% block extra_css %}{% endblock %}
+<style>
+:root {
+  --adm-sidebar: #0d0d14;
+  --adm-sidebar-w: 260px;
+  --adm-sidebar-collapsed: 64px;
+  --adm-topbar-h: 56px;
+  --adm-accent: #7c3aed;
+  --adm-accent2: #0d9488;
+  --adm-gold: #f59e0b;
+  --adm-danger: #ef4444;
+  --adm-success: #10b981;
+  --adm-warning: #f59e0b;
+  --adm-info: #3b82f6;
+  --adm-bg: #f1f5f9;
+  --adm-surface: #ffffff;
+  --adm-border: #e2e8f0;
+  --adm-text: #0f172a;
+  --adm-muted: #64748b;
+  --adm-sb-text: rgba(255,255,255,.5);
+  --adm-sb-active: rgba(124,58,237,.2);
+}
+[data-theme="dark"]{
+  --adm-bg:#0d0d14; --adm-surface:#12121a;
+  --adm-border:rgba(255,255,255,.08);
+  --adm-text:rgba(255,255,255,.9); --adm-muted:rgba(255,255,255,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px; zoom:0.9;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--adm-bg);color:var(--adm-text);line-height:1.6;-webkit-font-smoothing:antialiased;}
+.adm-shell{display:flex;min-height:100vh;}
+/* ── SIDEBAR ── */
+.adm-sidebar{
+  width:var(--adm-sidebar-w);flex-shrink:0;background:var(--adm-sidebar);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;
+  z-index:200;transition:width .25s;overflow:hidden;
+}
+.adm-sidebar.collapsed{width:var(--adm-sidebar-collapsed);}
+.adm-brand{
+  padding:1rem .9rem .85rem;display:flex;align-items:center;gap:.65rem;
+  border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
+}
+.adm-brand-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--adm-accent),#5b21b6);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;
+}
+.adm-brand-text{font-size:.95rem;font-weight:800;color:#fff;white-space:nowrap;transition:opacity .2s;}
+.adm-brand-sub{font-size:.6rem;color:rgba(255,255,255,.3);white-space:nowrap;transition:opacity .2s;}
+.adm-sidebar.collapsed .adm-brand-text,.adm-sidebar.collapsed .adm-brand-sub{opacity:0;width:0;}
+</style>
+</head>
+<body>
+<div class="adm-shell">
+
+<style>
+/* ── NAV ── */
+.adm-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:.4rem 0;scrollbar-width:none;}
+.adm-nav::-webkit-scrollbar{display:none;}
+.adm-section-label{
+  font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  color:rgba(255,255,255,.22);padding:.65rem .9rem .25rem;white-space:nowrap;
+  transition:opacity .2s;
+}
+.adm-sidebar.collapsed .adm-section-label{opacity:0;}
+.adm-nav-item{
+  display:flex;align-items:center;gap:.7rem;padding:.52rem .9rem;margin:.08rem .4rem;
+  border-radius:9px;color:var(--adm-sb-text);font-size:.8rem;font-weight:500;
+  text-decoration:none;border:none;background:transparent;width:calc(100% - .8rem);
+  cursor:pointer;transition:background .12s,color .12s;white-space:nowrap;overflow:hidden;
+}
+.adm-nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);}
+.adm-nav-item.active{background:var(--adm-sb-active);color:#a78bfa;font-weight:600;}
+.adm-nav-item .nav-icon{font-size:1rem;flex-shrink:0;width:18px;text-align:center;color:rgba(255,255,255,.3);}
+.adm-nav-item:hover .nav-icon,.adm-nav-item.active .nav-icon{color:#a78bfa;}
+.adm-nav-item .nav-label{overflow:hidden;transition:opacity .2s,width .2s;}
+.adm-sidebar.collapsed .nav-label{opacity:0;width:0;}
+.adm-nav-badge{
+  margin-left:auto;padding:.1rem .4rem;background:var(--adm-accent);color:#fff;
+  border-radius:20px;font-size:.58rem;font-weight:700;flex-shrink:0;transition:opacity .2s;
+}
+.adm-sidebar.collapsed .adm-nav-badge{opacity:0;width:0;padding:0;}
+/* ── ADMIN FOOTER ── */
+.adm-sb-footer{padding:.75rem .5rem;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.adm-user-card{
+  display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;
+  border-radius:10px;background:rgba(255,255,255,.05);
+}
+.adm-user-avatar{
+  width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--adm-accent),#5b21b6);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.82rem;flex-shrink:0;
+}
+.adm-user-name{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;}
+.adm-user-role{font-size:.6rem;color:rgba(255,255,255,.3);}
+.adm-sidebar.collapsed .adm-user-name,.adm-sidebar.collapsed .adm-user-role{display:none;}
+/* ── MAIN ── */
+.adm-main{flex:1;margin-left:var(--adm-sidebar-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s;min-width:0;}
+.adm-main.sb-collapsed{margin-left:var(--adm-sidebar-collapsed);}
+/* ── TOPBAR ── */
+.adm-topbar{
+  height:var(--adm-topbar-h);background:var(--adm-surface);
+  border-bottom:1px solid var(--adm-border);display:flex;align-items:center;
+  gap:.75rem;padding:0 1.5rem;position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 8px rgba(0,0,0,.06);
+}
+.adm-topbar-toggle{background:none;border:none;color:var(--adm-muted);font-size:1.1rem;cursor:pointer;padding:.3rem;border-radius:7px;transition:background .12s;}
+.adm-topbar-toggle:hover{background:var(--adm-bg);}
+.adm-topbar-title{font-size:.95rem;font-weight:700;color:var(--adm-text);flex:1;}
+.adm-topbar-breadcrumb{font-size:.75rem;color:var(--adm-muted);}
+.adm-tb-btn{
+  width:34px;height:34px;border-radius:9px;background:none;border:1px solid var(--adm-border);
+  color:var(--adm-muted);font-size:.9rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:all .12s;text-decoration:none;
+}
+.adm-tb-btn:hover{background:var(--adm-bg);color:var(--adm-text);}
+/* ── CONTENT ── */
+.adm-content{flex:1;padding:1.5rem clamp(.75rem,2.5vw,2rem);max-width:1600px;margin-inline:auto;width:100%;}
+/* ── KPI CARDS ── */
+.adm-kpi{
+  background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:14px;
+  padding:1.1rem 1.2rem;display:flex;align-items:flex-start;gap:.85rem;
+  transition:box-shadow .15s,transform .15s;
+}
+.adm-kpi:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);transform:translateY(-2px);}
+.adm-kpi-icon{
+  width:44px;height:44px;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:1.2rem;flex-shrink:0;
+}
+.adm-kpi-label{font-size:.7rem;font-weight:600;color:var(--adm-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem;}
+.adm-kpi-value{font-size:1.5rem;font-weight:800;color:var(--adm-text);line-height:1.1;}
+.adm-kpi-sub{font-size:.7rem;color:var(--adm-muted);margin-top:.2rem;}
+.kpi-purple{background:rgba(124,58,237,.12);color:var(--adm-accent);}
+.kpi-teal{background:rgba(13,148,136,.12);color:var(--adm-accent2);}
+.kpi-gold{background:rgba(245,158,11,.12);color:var(--adm-gold);}
+.kpi-red{background:rgba(239,68,68,.12);color:var(--adm-danger);}
+.kpi-green{background:rgba(16,185,129,.12);color:var(--adm-success);}
+.kpi-blue{background:rgba(59,130,246,.12);color:var(--adm-info);}
+/* ── TABLE ── */
+.adm-table-wrap{background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:14px;overflow:hidden;}
+.adm-table-head{padding:.9rem 1.2rem;border-bottom:1px solid var(--adm-border);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
+.adm-table-head h6{font-size:.9rem;font-weight:700;margin:0;}
+table.adm-table{width:100%;border-collapse:collapse;}
+table.adm-table th{
+  font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--adm-muted);padding:.65rem 1rem;border-bottom:1px solid var(--adm-border);
+  background:var(--adm-bg);text-align:left;white-space:nowrap;
+}
+table.adm-table td{
+  padding:.65rem 1rem;border-bottom:1px solid var(--adm-border);font-size:.82rem;
+  vertical-align:middle;
+}
+table.adm-table tr:last-child td{border-bottom:none;}
+table.adm-table tr:hover td{background:rgba(124,58,237,.03);}
+/* ── BADGES ── */
+.adm-badge{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;}
+.badge-success{background:#dcfce7;color:#166534;}
+.badge-danger{background:#fee2e2;color:#991b1b;}
+.badge-warning{background:#fef3c7;color:#92400e;}
+.badge-info{background:#dbeafe;color:#1e40af;}
+.badge-purple{background:#ede9fe;color:#5b21b6;}
+.badge-gray{background:#f1f5f9;color:#475569;}
+/* ── FORMS ── */
+.adm-input{
+  width:100%;padding:.55rem .85rem;background:var(--adm-surface);
+  border:1px solid var(--adm-border);border-radius:9px;font-size:.85rem;
+  color:var(--adm-text);transition:border .15s;outline:none;
+}
+.adm-input:focus{border-color:var(--adm-accent);}
+.adm-label{font-size:.75rem;font-weight:600;color:var(--adm-muted);margin-bottom:.3rem;display:block;}
+.adm-btn{
+  display:inline-flex;align-items:center;gap:.4rem;padding:.52rem 1.1rem;
+  border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;
+  border:none;transition:all .15s;text-decoration:none;
+}
+.btn-primary{background:var(--adm-accent);color:#fff;}
+.btn-primary:hover{background:#6d28d9;color:#fff;}
+.btn-teal{background:var(--adm-accent2);color:#fff;}
+.btn-teal:hover{background:#0f766e;color:#fff;}
+.btn-outline{background:transparent;border:1px solid var(--adm-border);color:var(--adm-text);}
+.btn-outline:hover{background:var(--adm-bg);}
+.btn-danger{background:var(--adm-danger);color:#fff;}
+.btn-success{background:var(--adm-success);color:#fff;}
+.btn-sm{padding:.3rem .7rem;font-size:.75rem;border-radius:7px;}
+/* ── CARD ── */
+.adm-card{background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:14px;padding:1.25rem 1.35rem;}
+.adm-card-title{font-size:.9rem;font-weight:700;margin-bottom:1rem;}
+/* ── ALERTS ── */
+.adm-alert{padding:.65rem 1rem;border-radius:9px;font-size:.82rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.adm-alert-success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+.adm-alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+.adm-alert-warning{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.adm-alert-info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;}
+/* ── RESPONSIVE ── */
+@media(max-width:991px){
+  .adm-sidebar{transform:translateX(-100%);transition:transform .28s;width:var(--adm-sidebar-w)!important;}
+  .adm-sidebar.mob-open{transform:translateX(0);}
+  .adm-main{margin-left:0!important;}
+  .adm-mob-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.55);}
+  .adm-mob-overlay.open{display:block;}
+}
+</style>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="adm-sidebar" id="adm-sidebar">
+  <div class="adm-brand">
+    <div class="adm-brand-icon">L</div>
+    <div>
+      <div class="adm-brand-text">Lumina Admin</div>
+      <div class="adm-brand-sub">ERP · CRM · HRMS</div>
+    </div>
+  </div>
+
+  <nav class="adm-nav">
+    <!-- OVERVIEW -->
+    <div class="adm-section-label">📊 Overview</div>
+    <a href="{% url 'admin_panel:dashboard' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'kpis' %}active{% endif %}">
+      <i class="bi bi-grid-1x2-fill nav-icon"></i><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="{% url 'admin_panel:analytics' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+      <i class="bi bi-bar-chart-fill nav-icon"></i><span class="nav-label">Analytics</span>
+    </a>
+    <a href="{% url 'admin_panel:audit_log' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'audit_log' %}active{% endif %}">
+      <i class="bi bi-shield-check nav-icon"></i><span class="nav-label">Audit Log</span>
+    </a>
+
+    <!-- HRMS -->
+    <div class="adm-section-label">👨‍💼 HRMS</div>
+    <a href="{% url 'admin_panel:emp_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'emp_list,emp_add,emp_detail,emp_edit,emp_delete' %}active{% endif %}">
+      <i class="bi bi-people-fill nav-icon"></i><span class="nav-label">Employees</span>
+    </a>
+    <a href="{% url 'admin_panel:dept_list' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'dept_list' %}active{% endif %}">
+      <i class="bi bi-building nav-icon"></i><span class="nav-label">Departments</span>
+    </a>
+    <a href="{% url 'admin_panel:attendance' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'attendance' %}active{% endif %}">
+      <i class="bi bi-calendar-check nav-icon"></i><span class="nav-label">Attendance</span>
+    </a>
+    <a href="{% url 'admin_panel:salary_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'salary_list,salary_add' %}active{% endif %}">
+      <i class="bi bi-cash-stack nav-icon"></i><span class="nav-label">Salary</span>
+    </a>
+    <a href="{% url 'admin_panel:leave_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'leave_list,leave_action' %}active{% endif %}">
+      <i class="bi bi-calendar-x nav-icon"></i><span class="nav-label">Leave Management</span>
+    </a>
+
+    <!-- USER MANAGEMENT -->
+    <div class="adm-section-label">👥 Users</div>
+    <a href="{% url 'admin_panel:user_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'user_list,user_detail,user_edit' %}active{% endif %}">
+      <i class="bi bi-person-fill nav-icon"></i><span class="nav-label">All Users</span>
+    </a>
+
+    <!-- SALES & ORDERS -->
+    <div class="adm-section-label">📦 Sales & Orders</div>
+    <a href="{% url 'admin_panel:order_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'order_list,order_add,order_detail,order_edit,order_delete' %}active{% endif %}">
+      <i class="bi bi-bag-check-fill nav-icon"></i><span class="nav-label">Orders</span>
+    </a>
+    <a href="{% url 'admin_panel:product_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'product_list,product_add,product_edit,product_delete' %}active{% endif %}">
+      <i class="bi bi-box-seam nav-icon"></i><span class="nav-label">Products</span>
+    </a>
+
+    <!-- CRM -->
+    <div class="adm-section-label">🎯 CRM</div>
+    <a href="{% url 'admin_panel:crm' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'crm' %}active{% endif %}">
+      <i class="bi bi-funnel-fill nav-icon"></i><span class="nav-label">CRM Overview</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_leads' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'crm_leads,crm_lead_edit' %}active{% endif %}">
+      <i class="bi bi-person-lines-fill nav-icon"></i><span class="nav-label">Leads</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_opportunities' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'crm_opportunities' %}active{% endif %}">
+      <i class="bi bi-trophy nav-icon"></i><span class="nav-label">Opportunities</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_calling' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'crm_calling' %}active{% endif %}">
+      <i class="bi bi-telephone-fill nav-icon"></i><span class="nav-label">Call Center</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_support' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'crm_support,crm_ticket_detail' %}active{% endif %}">
+      <i class="bi bi-headset nav-icon"></i><span class="nav-label">Support Tickets</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_campaigns' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'crm_campaigns' %}active{% endif %}">
+      <i class="bi bi-megaphone nav-icon"></i><span class="nav-label">Campaigns</span>
+    </a>
+
+    <!-- TASKS & COLLAB -->
+    <div class="adm-section-label">🤝 Collaboration</div>
+    <a href="{% url 'admin_panel:task_list' %}" class="adm-nav-item {% if request.resolver_match.url_name in 'task_list,task_update' %}active{% endif %}">
+      <i class="bi bi-check2-square nav-icon"></i><span class="nav-label">Tasks</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_notes' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'crm_notes' %}active{% endif %}">
+      <i class="bi bi-chat-square-text nav-icon"></i><span class="nav-label">Internal Notes</span>
+    </a>
+
+    <!-- REPORTS -->
+    <div class="adm-section-label">📈 Reports</div>
+    <a href="{% url 'admin_panel:export_report' %}?section=orders&period=month" class="adm-nav-item">
+      <i class="bi bi-file-earmark-arrow-down nav-icon"></i><span class="nav-label">Export Orders</span>
+    </a>
+    <a href="{% url 'admin_panel:export_report' %}?section=users&period=month" class="adm-nav-item">
+      <i class="bi bi-file-earmark-person nav-icon"></i><span class="nav-label">Export Users</span>
+    </a>
+    <a href="{% url 'admin_panel:crm_reports' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'crm_reports' %}active{% endif %}">
+      <i class="bi bi-bar-chart-steps nav-icon"></i><span class="nav-label">Sales Reports</span>
+    </a>
+
+    <!-- SETTINGS -->
+    <div class="adm-section-label">⚙ System</div>
+    <a href="{% url 'admin_panel:settings' %}" class="adm-nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+      <i class="bi bi-gear-fill nav-icon"></i><span class="nav-label">Settings</span>
+    </a>
+    <a href="{% url 'admin:index' %}" class="adm-nav-item">
+      <i class="bi bi-shield-lock nav-icon"></i><span class="nav-label">Django Admin</span>
+    </a>
+    <a href="{% url 'core:home' %}" class="adm-nav-item">
+      <i class="bi bi-house nav-icon"></i><span class="nav-label">Back to Site</span>
+    </a>
+  </nav>
+
+  <div class="adm-sb-footer">
+    <div class="adm-user-card">
+      <div class="adm-user-avatar">{{ user.username|first|upper }}</div>
+      <div style="min-width:0;">
+        <div class="adm-user-name">{{ user.get_full_name|default:user.username }}</div>
+        <div class="adm-user-role">
+          {% if user.is_superuser %}Super Admin{% else %}Admin{% endif %}
+          &nbsp;·&nbsp; suhanimodi7090@gmail.com
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'logout' %}" class="adm-nav-item" style="margin-top:.5rem;color:#ef4444;">
+      <i class="bi bi-box-arrow-left nav-icon" style="color:#ef4444;"></i>
+      <span class="nav-label">Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="adm-mob-overlay" id="adm-overlay"></div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="adm-main" id="adm-main">
+  <!-- TOPBAR -->
+  <div class="adm-topbar">
+    <button class="adm-topbar-toggle" id="adm-toggle"><i class="bi bi-layout-sidebar"></i></button>
+    <div>
+      <div class="adm-topbar-title">{% block page_title %}Admin Panel{% endblock %}</div>
+      <div class="adm-topbar-breadcrumb">{% block breadcrumb %}Lumina Admin{% endblock %}</div>
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button class="adm-tb-btn" id="adm-theme-btn" title="Toggle theme"><i class="bi bi-moon-stars" id="adm-theme-icon"></i></button>
+      <a href="{% url 'notifications:list' %}" class="adm-tb-btn" title="Notifications" style="position:relative;">
+        <i class="bi bi-bell"></i>
+        {% if unread_notif_count > 0 %}<span style="position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;font-size:.55rem;padding:.1rem .3rem;border-radius:20px;font-weight:700;">{{ unread_notif_count }}</span>{% endif %}
+      </a>
+      <div style="width:1px;height:24px;background:var(--adm-border);"></div>
+      <a href="{% url 'admin_panel:settings' %}" style="text-decoration:none;">
+        <div class="adm-user-avatar" style="width:32px;height:32px;">{{ user.username|first|upper }}</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+  <div style="padding:.75rem 1.5rem 0;">
+    {% for message in messages %}
+    <div class="adm-alert adm-alert-{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">
+      <i class="bi bi-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% else %}info-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- CONTENT -->
+  <main class="adm-content">
+    {% block content %}{% endblock %}
+  </main>
+</div><!-- end adm-main -->
+</div><!-- end adm-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Sidebar toggle
+const admSidebar = document.getElementById('adm-sidebar');
+const admMain    = document.getElementById('adm-main');
+const admOverlay = document.getElementById('adm-overlay');
+const admToggle  = document.getElementById('adm-toggle');
+const admNav     = admSidebar ? admSidebar.querySelector('.adm-nav') : null;
+const isMob = () => window.innerWidth < 992;
+
+admToggle?.addEventListener('click', () => {
+  if (isMob()) {
+    admSidebar.classList.toggle('mob-open');
+    admOverlay.classList.toggle('open');
+  } else {
+    const collapsed = admSidebar.classList.toggle('collapsed');
+    admMain.classList.toggle('sb-collapsed', collapsed);
+    try { localStorage.setItem('adm_sb_collapsed', collapsed ? '1' : '0'); } catch(e) {}
+  }
+});
+admOverlay?.addEventListener('click', () => {
+  admSidebar.classList.remove('mob-open');
+  admOverlay.classList.remove('open');
+});
+
+// ── Restore collapse state
+if (!isMob()) {
+  try {
+    if (localStorage.getItem('adm_sb_collapsed') === '1') {
+      admSidebar.classList.add('collapsed');
+      admMain.classList.add('sb-collapsed');
+    }
+  } catch(e) {}
+}
+
+// ── Scroll active nav item into view & persist scroll position
+(function() {
+  const SCROLL_KEY = 'adm_nav_scroll';
+  if (!admNav) return;
+
+  // Restore saved scroll position first
+  try {
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (saved !== null) admNav.scrollTop = parseInt(saved, 10);
+  } catch(e) {}
+
+  // Then ensure the active item is visible (only scroll if it's out of view)
+  const activeItem = admNav.querySelector('.adm-nav-item.active');
+  if (activeItem) {
+    const navRect    = admNav.getBoundingClientRect();
+    const itemRect   = activeItem.getBoundingClientRect();
+    const isAbove    = itemRect.top < navRect.top;
+    const isBelow    = itemRect.bottom > navRect.bottom;
+    if (isAbove || isBelow) {
+      activeItem.scrollIntoView({ block: 'center' });
+    }
+  }
+
+  // Save scroll position before navigating away
+  admNav.addEventListener('scroll', () => {
+    try { sessionStorage.setItem(SCROLL_KEY, admNav.scrollTop); } catch(e) {}
+  }, { passive: true });
+})();
+
+// ── Theme
+const admThemeBtn  = document.getElementById('adm-theme-btn');
+const admThemeIcon = document.getElementById('adm-theme-icon');
+function getTheme() { try { return localStorage.getItem('lux_theme') || 'light'; } catch(e) { return 'light'; } }
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  if (admThemeIcon) admThemeIcon.className = t === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+}
+applyTheme(getTheme());
+admThemeBtn?.addEventListener('click', () => {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('lux_theme', next); } catch(e) {}
+  applyTheme(next);
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

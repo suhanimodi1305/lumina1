@@ -1,0 +1,42 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Requirements{% endblock %}
+{% block page_title %}Customer Requirements{% endblock %}
+{% block nav_reqs %}active{% endblock %}
+{% block nav_orders_open %}open{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+  <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <input name="q" value="{{ q }}" placeholder="Search ID, customer, phone..."
+           style="padding:.45rem .85rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;min-width:220px;outline:none;">
+    <select name="status" style="padding:.45rem .75rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;">
+      <option value="all">All Statuses</option>
+      {% for val,label in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn-crm-primary">🔍 Filter</button>
+  </form>
+</div>
+<div class="crm-card" style="padding:0;overflow:hidden;">
+  <table class="crm-table">
+    <thead>
+      <tr><th>Req ID</th><th>Customer</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Date</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for r in reqs %}
+      <tr>
+        <td style="font-size:.75rem;color:var(--crm-muted);font-weight:600;">{{ r.req_id }}</td>
+        <td><div style="font-size:.82rem;font-weight:500;">{{ r.full_name }}</div><div style="font-size:.7rem;color:var(--crm-muted);">{{ r.phone }}</div></td>
+        <td style="font-size:.8rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.title }}</td>
+        <td><span class="pp pp-{{ r.priority }}" style="font-size:.65rem;">{{ r.get_priority_display }}</span></td>
+        <td><span class="sp sp-{{ r.status }}" style="font-size:.65rem;">{{ r.get_status_display }}</span></td>
+        <td style="font-size:.78rem;">{{ r.assigned_to.username|default:"—" }}</td>
+        <td style="font-size:.75rem;color:var(--crm-muted);">{{ r.created_at|date:"d M" }}</td>
+        <td><a href="{% url 'employee:requirement_detail' r.req_id %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--crm-subtle);">No requirements found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

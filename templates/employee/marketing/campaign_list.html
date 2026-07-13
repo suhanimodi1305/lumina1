@@ -1,0 +1,95 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Campaigns{% endblock %}
+{% block page_title %}Marketing Campaigns{% endblock %}
+{% block breadcrumb %}Marketing · Campaigns{% endblock %}
+{% block nav_campaigns %}active{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+  <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <select name="status" class="emp-input" style="width:auto;padding:.45rem .85rem;">
+      <option value="">All Statuses</option>
+      {% for val,label in status_choices %}<option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="emp-btn emp-btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+    {% if status %}<a href="{% url 'employee:campaign_list' %}" class="emp-btn emp-btn-outline">Clear</a>{% endif %}
+  </form>
+  <a href="{% url 'employee:campaign_create' %}" class="emp-btn emp-btn-primary">
+    <i class="bi bi-plus-lg"></i> New Campaign
+  </a>
+</div>
+
+<!-- Campaign Cards -->
+<div class="row g-3">
+  {% for c in camps %}
+  <div class="col-xl-4 col-md-6">
+    <div class="emp-card" style="cursor:pointer;transition:box-shadow .15s,transform .15s;height:100%;"
+         onclick="window.location='{% url 'employee:campaign_detail' c.camp_id %}'"
+         onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.1)';this.style.transform='translateY(-2px)'"
+         onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.85rem;">
+        <div style="min-width:0;">
+          <div style="font-weight:700;font-size:.9rem;margin-bottom:.2rem;">{{ c.name }}</div>
+          <div style="font-size:.72rem;color:var(--emp-muted);">
+            <span style="font-family:monospace;">{{ c.camp_id }}</span> &nbsp;·&nbsp; {{ c.get_type_display }}
+          </div>
+        </div>
+        <span class="emp-badge {% if c.status == 'active' %}badge-success{% elif c.status == 'completed' %}badge-teal{% elif c.status == 'draft' %}badge-gray{% elif c.status == 'scheduled' %}badge-info{% else %}badge-warning{% endif %}" style="flex-shrink:0;margin-left:.5rem;">
+          {{ c.get_status_display }}
+        </span>
+      </div>
+
+      {% if c.description %}
+      <div style="font-size:.78rem;color:var(--emp-muted);margin-bottom:.85rem;line-height:1.5;">{{ c.description|truncatechars:90 }}</div>
+      {% endif %}
+
+      <!-- Metrics -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.85rem;">
+        <div style="text-align:center;background:var(--emp-bg);border-radius:9px;padding:.5rem .25rem;">
+          <div style="font-size:1.15rem;font-weight:800;color:var(--emp-accent);">{{ c.leads_generated }}</div>
+          <div style="font-size:.58rem;color:var(--emp-muted);text-transform:uppercase;letter-spacing:.06em;">Leads</div>
+        </div>
+        <div style="text-align:center;background:var(--emp-bg);border-radius:9px;padding:.5rem .25rem;">
+          <div style="font-size:1.15rem;font-weight:800;color:var(--emp-success);">{{ c.conversions }}</div>
+          <div style="font-size:.58rem;color:var(--emp-muted);text-transform:uppercase;letter-spacing:.06em;">Converted</div>
+        </div>
+        <div style="text-align:center;background:var(--emp-bg);border-radius:9px;padding:.5rem .25rem;">
+          <div style="font-size:1.15rem;font-weight:800;color:var(--emp-gold);">{{ c.roi }}%</div>
+          <div style="font-size:.58rem;color:var(--emp-muted);text-transform:uppercase;letter-spacing:.06em;">ROI</div>
+        </div>
+      </div>
+
+      <!-- Budget bar -->
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--emp-muted);margin-bottom:.35rem;">
+        <span>Budget: ₹{{ c.budget|floatformat:0 }}</span>
+        <span>Spent: ₹{{ c.spent|floatformat:0 }}</span>
+      </div>
+      {% if c.budget and c.budget > 0 %}
+      <div class="emp-progress">
+        <div class="emp-progress-bar" style="width:{% widthratio c.spent c.budget 100 %}%;background:{% if c.spent > c.budget %}var(--emp-danger){% else %}var(--emp-accent){% endif %};"></div>
+      </div>
+      {% endif %}
+
+      {% if c.target_audience %}
+      <div style="font-size:.7rem;color:var(--emp-muted);margin-top:.65rem;">
+        <i class="bi bi-people"></i> {{ c.target_audience|truncatechars:50 }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="emp-card" style="text-align:center;padding:4rem;">
+      <i class="bi bi-megaphone" style="font-size:3rem;opacity:.25;display:block;margin-bottom:.75rem;"></i>
+      <div style="font-size:1rem;font-weight:700;margin-bottom:.35rem;">No campaigns yet</div>
+      <div style="font-size:.82rem;color:var(--emp-muted);margin-bottom:1.25rem;">Start your first campaign to track leads, conversions, and ROI</div>
+      <a href="{% url 'employee:campaign_create' %}" class="emp-btn emp-btn-primary">
+        <i class="bi bi-plus-lg"></i> Create Campaign
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}{{ action }} Product — Admin{% endblock %}
+{% block page_title %}{{ action }} Product{% endblock %}
+{% block nav_products_open %}open{% endblock %}
+{% block nav_prod_add %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.pf-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+.pf-section-title { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin:1.25rem 0 .6rem; padding-bottom:.4rem; border-bottom:1px solid var(--border); }
+.pf-grid { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+.pf-field { display:flex; flex-direction:column; gap:.3rem; }
+.pf-field label { font-size:.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+.pf-input, .pf-select, .pf-textarea {
+  padding:.6rem .85rem; border:1.5px solid var(--border); border-radius:9px;
+  font-family:inherit; font-size:.875rem; background:var(--surface); color:var(--text);
+  transition:border-color .12s;
+}
+.pf-input:focus, .pf-select:focus, .pf-textarea:focus { outline:none; border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,148,136,.1); }
+.pf-textarea { min-height:90px; resize:vertical; }
+.pf-full { grid-column:1/-1; }
+.pf-check-row { display:flex; align-items:center; gap:.5rem; }
+.pf-check-row input { accent-color:#0d9488; width:16px; height:16px; cursor:pointer; }
+.pf-check-row label { font-size:.875rem; cursor:pointer; }
+
+/* Image preview */
+.img-preview-box {
+  width:100%; height:160px; border:2px dashed var(--border); border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-alt); margin-top:.4rem; overflow:hidden;
+}
+.img-preview-box img { width:100%; height:100%; object-fit:contain; }
+.img-preview-box .ph { font-size:2.5rem; color:var(--text-light); }
+
+/* Actions */
+.pf-actions { display:flex; gap:.75rem; margin-top:1.5rem; flex-wrap:wrap; }
+.pf-btn-save {
+  padding:.65rem 1.6rem; background:#0d9488; color:#fff; border:none; border-radius:100px;
+  font-size:.875rem; font-weight:600; cursor:pointer; transition:all .12s;
+  display:flex; align-items:center; gap:.4rem;
+}
+.pf-btn-save:hover { background:#0f766e; transform:translateY(-1px); }
+.pf-btn-cancel {
+  padding:.65rem 1.4rem; background:var(--surface-alt); color:var(--text-muted);
+  border:1px solid var(--border); border-radius:100px;
+  font-size:.875rem; font-weight:600; cursor:pointer; text-decoration:none;
+  display:flex; align-items:center; gap:.4rem;
+}
+
+@media (max-width:580px) { .pf-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:.75rem;display:flex;align-items:center;gap:.75rem;">
+  <a href="{% url 'employee:product_list' %}" class="pf-btn-cancel">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+  <span style="font-size:.8rem;color:var(--muted);">{{ action }} Product</span>
+</div>
+
+<form method="post" class="pf-card">
+  {% csrf_token %}
+
+  <div class="pf-section-title">📦 Basic Information</div>
+  <div class="pf-grid">
+    <div class="pf-field">
+      <label>Product Name *</label>
+      <input type="text" name="name" class="pf-input" placeholder="e.g. Pore Serum 1989" required
+             value="{{ product.name|default:'' }}">
+    </div>
+    <div class="pf-field">
+      <label>Brand *</label>
+      <input type="text" name="brand" class="pf-input" placeholder="e.g. SAS Global" required
+             value="{{ product.brand|default:'' }}">
+    </div>
+    <div class="pf-field">
+      <label>SKU *</label>
+      <input type="text" name="sku" class="pf-input" placeholder="e.g. DPS890009" required
+             value="{{ product.sku|default:'' }}">
+    </div>
+    <div class="pf-field">
+      <label>Price (₹)</label>
+      <input type="number" name="price" class="pf-input" placeholder="e.g. 1299" step="0.01" min="0"
+             value="{{ product.price|default:'' }}">
+    </div>
+    <div class="pf-field">
+      <label>Range *</label>
+      <select name="product_range" class="pf-select" id="pf-range-sel" required>
+        <option value="korean"    {% if product.product_range == 'korean'    %}selected{% endif %}>K-Beauty</option>
+        <option value="makeup"    {% if product.product_range == 'makeup'    %}selected{% endif %}>Makeup</option>
+        <option value="ayurvedic" {% if product.product_range == 'ayurvedic' %}selected{% endif %}>Ayurvedic</option>
+        <option value="pharmacy"  {% if product.product_range == 'pharmacy'  %}selected{% endif %}>Pharmacy</option>
+      </select>
+    </div>
+    <div class="pf-field">
+      <label>Category *</label>
+      <select name="category" class="pf-select" id="pf-cat-sel" required>
+        <!-- Populated by JS based on range -->
+      </select>
+    </div>
+  </div>
+
+  <div class="pf-section-title">🖼️ Product Image</div>
+  <div class="pf-field">
+    <label>Image URL (paste direct image link or brand website URL)</label>
+    <input type="url" name="image_url" class="pf-input" id="imgUrlInput"
+           placeholder="https://example.com/product-image.jpg"
+           value="{{ product.image_url|default:'' }}"
+           oninput="previewImg(this.value)">
+    <div class="img-preview-box" id="imgPreviewBox">
+      {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="Preview" id="imgPreview">
+      {% else %}
+        <div class="ph" id="imgPreviewPh">🖼️</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="pf-section-title">📝 Descriptions</div>
+  <div class="pf-grid">
+    <div class="pf-field pf-full">
+      <label>Short Description</label>
+      <textarea name="description" class="pf-textarea" placeholder="What does this product do? Who is it for?">{{ product.description|default:'' }}</textarea>
+    </div>
+    <div class="pf-field">
+      <label>Key Ingredients (comma-separated)</label>
+      <textarea name="key_ingredients" class="pf-textarea" style="min-height:70px;"
+                placeholder="Niacinamide, Hyaluronic Acid, Centella Asiatica">{{ product.key_ingredients|default:'' }}</textarea>
+    </div>
+    <div class="pf-field">
+      <label>Full Ingredient List</label>
+      <textarea name="full_ingredients" class="pf-textarea" style="min-height:70px;"
+                placeholder="Aqua, Niacinamide, ...">{{ product.full_ingredients|default:'' }}</textarea>
+    </div>
+  </div>
+
+  <div class="pf-section-title">💄 Makeup / Shade Details (optional)</div>
+  <div class="pf-grid">
+    <div class="pf-field">
+      <label>Coverage</label>
+      <input type="text" name="coverage" class="pf-input" placeholder="Light / Medium / Full"
+             value="{{ product.coverage|default:'' }}">
+    </div>
+    <div class="pf-field">
+      <label>Finish</label>
+      <input type="text" name="finish" class="pf-input" placeholder="Matte / Dewy / Satin"
+             value="{{ product.finish|default:'' }}">
+    </div>
+    <div class="pf-field">
+      <label>Undertone Match</label>
+      <select name="undertone_match" class="pf-select">
+        <option value="">— Any —</option>
+        <option value="warm"    {% if product.undertone_match == 'warm'    %}selected{% endif %}>Warm</option>
+        <option value="cool"    {% if product.undertone_match == 'cool'    %}selected{% endif %}>Cool</option>
+        <option value="neutral" {% if product.undertone_match == 'neutral' %}selected{% endif %}>Neutral</option>
+        <option value="olive"   {% if product.undertone_match == 'olive'   %}selected{% endif %}>Olive</option>
+      </select>
+    </div>
+    <div class="pf-field">
+      <label>Skin Tone Match</label>
+      <select name="skin_tone_match" class="pf-select">
+        <option value="">— Any —</option>
+        <option value="fair"   {% if product.skin_tone_match == 'fair'   %}selected{% endif %}>Fair</option>
+        <option value="light"  {% if product.skin_tone_match == 'light'  %}selected{% endif %}>Light</option>
+        <option value="medium" {% if product.skin_tone_match == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="tan"    {% if product.skin_tone_match == 'tan'    %}selected{% endif %}>Tan</option>
+        <option value="deep"   {% if product.skin_tone_match == 'deep'   %}selected{% endif %}>Deep</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="pf-section-title">⚙️ Settings</div>
+  <div class="pf-check-row">
+    <input type="checkbox" name="is_featured" id="isFeatured"
+           {% if product.is_featured %}checked{% endif %}>
+    <label for="isFeatured">Mark as Featured Product</label>
+  </div>
+
+  <div class="pf-actions">
+    <button type="submit" class="pf-btn-save">
+      <i class="bi bi-check-lg"></i> {{ action }} Product
+    </button>
+    <a href="{% url 'employee:product_list' %}" class="pf-btn-cancel">
+      <i class="bi bi-x"></i> Cancel
+    </a>
+  </div>
+
+</form>
+
+<script>
+// ── Cascading category based on range ─────────────────────────────────────
+const PF_RANGE_CAT = {
+  korean:    ['cleanser','toner','essence','serum','ampoule','moisturizer','cream','emulsion','sunscreen','mask','eye_cream','exfoliator','oil','mist'],
+  makeup:    ['primer','foundation','concealer','setting_powder','powder','blush','bronzer','highlighter','eyeshadow','eyeshadow_palette','eyeliner','mascara','lipstick','lip_gloss','lip_liner'],
+  ayurvedic: ['cleanser','toner','serum','moisturizer','cream','mask','oil'],
+  pharmacy:  ['cleanser','serum','moisturizer','sunscreen','eye_cream'],
+};
+const PF_CAT_LABELS = {
+  'cleanser':'Cleanser','toner':'Toner','essence':'Essence','serum':'Serum',
+  'ampoule':'Ampoule','moisturizer':'Moisturizer','cream':'Cream','emulsion':'Emulsion',
+  'sunscreen':'Sunscreen','mask':'Mask','eye_cream':'Eye Cream','exfoliator':'Exfoliator',
+  'oil':'Oil','mist':'Mist','primer':'Primer','foundation':'Foundation',
+  'concealer':'Concealer','setting_powder':'Setting Powder','powder':'Powder',
+  'blush':'Blush','bronzer':'Bronzer','highlighter':'Highlighter',
+  'eyeshadow':'Eyeshadow','eyeshadow_palette':'Eyeshadow Palette','eyeliner':'Eyeliner',
+  'mascara':'Mascara','lipstick':'Lipstick','lip_gloss':'Lip Gloss','lip_liner':'Lip Liner',
+};
+const pfRangeSel = document.getElementById('pf-range-sel');
+const pfCatSel   = document.getElementById('pf-cat-sel');
+const pfCurrentCat = "{{ product.category|default:'' }}";
+
+function pfUpdateCategories() {
+  const rng  = pfRangeSel.value;
+  const list = PF_RANGE_CAT[rng] || PF_RANGE_CAT['korean'];
+  const prev = pfCatSel.value;
+  pfCatSel.innerHTML = '';
+  for (const val of list) {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = PF_CAT_LABELS[val] || val;
+    if (val === prev || (prev === '' && val === pfCurrentCat)) opt.selected = true;
+    pfCatSel.appendChild(opt);
+  }
+}
+pfRangeSel.addEventListener('change', pfUpdateCategories);
+pfUpdateCategories();
+
+// ── Image preview ──────────────────────────────────────────────────────────
+function previewImg(url) {
+  const box = document.getElementById('imgPreviewBox');
+  const ph  = document.getElementById('imgPreviewPh');
+  if (url && url.startsWith('http')) {
+    let img = document.getElementById('imgPreview');
+    if (!img) {
+      img = document.createElement('img');
+      img.id = 'imgPreview';
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+      if (ph) ph.remove();
+      box.appendChild(img);
+    }
+    img.src = url;
+    img.onerror = () => { img.remove(); if (!document.getElementById('imgPreviewPh')) { const p=document.createElement('div'); p.id='imgPreviewPh'; p.className='ph'; p.textContent='🖼️'; box.appendChild(p); } };
+  } else {
+    const img = document.getElementById('imgPreview');
+    if (img) { img.remove(); if (!document.getElementById('imgPreviewPh')) { const p=document.createElement('div'); p.id='imgPreviewPh'; p.className='ph'; p.textContent='🖼️'; box.appendChild(p); } }
+  }
+}
+</script>
+{% endblock %}

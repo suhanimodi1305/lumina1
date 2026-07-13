@@ -1,0 +1,55 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Leave Management{% endblock %}
+{% block page_title %}Leave Management{% endblock %}
+{% block breadcrumb %}Admin / HRMS / Leaves{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-blue"><i class="bi bi-calendar-x"></i></div><div><div class="adm-kpi-label">Total Requests</div><div class="adm-kpi-value">{{ total }}</div></div></div></div>
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-gold"><i class="bi bi-hourglass-split"></i></div><div><div class="adm-kpi-label">Pending</div><div class="adm-kpi-value">{{ pending }}</div></div></div></div>
+  <div class="col-md-4">
+    <form method="get" class="adm-kpi" style="background:var(--adm-surface);">
+      <div class="adm-kpi-icon kpi-purple"><i class="bi bi-funnel"></i></div>
+      <div class="w-100">
+        <label class="adm-label">Filter by Status</label>
+        <select name="status" class="adm-input" onchange="this.form.submit()">
+          <option value="">All</option>
+          {% for val,lbl in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="adm-table-wrap">
+  <div class="adm-table-head"><h6>🏖 Leave Requests</h6></div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for l in leaves %}
+        <tr>
+          <td style="font-weight:600;">{{ l.employee.get_full_name|default:l.employee.username }}</td>
+          <td>{{ l.get_leave_type_display }}</td>
+          <td>{{ l.from_date|date:"d M Y" }}</td>
+          <td>{{ l.to_date|date:"d M Y" }}</td>
+          <td style="font-weight:700;">{{ l.days }}</td>
+          <td style="color:var(--adm-muted);max-width:200px;">{{ l.reason|truncatechars:60 }}</td>
+          <td><span class="adm-badge {% if l.status == 'approved' %}badge-success{% elif l.status == 'rejected' %}badge-danger{% elif l.status == 'pending' %}badge-warning{% else %}badge-gray{% endif %}">{{ l.get_status_display }}</span></td>
+          <td>
+            {% if l.status == 'pending' %}
+            <form method="post" action="{% url 'admin_panel:leave_action' pk=l.pk %}" style="display:flex;gap:.3rem;">
+              {% csrf_token %}
+              <button name="action" value="approved" class="adm-btn btn-success btn-sm" onclick="return confirm('Approve leave?')">✓</button>
+              <button name="action" value="rejected" class="adm-btn btn-danger btn-sm" onclick="return confirm('Reject leave?')">✗</button>
+            </form>
+            {% else %}<span style="color:var(--adm-muted);font-size:.75rem;">Done</span>{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--adm-muted);">No leave requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

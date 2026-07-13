@@ -1,0 +1,49 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}New Campaign{% endblock %}
+{% block page_title %}New Campaign{% endblock %}
+{% block nav_camp_new %}active{% endblock %}
+{% block nav_mkt_open %}open{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+  <a href="{% url 'employee:campaign_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← All Campaigns</a>
+  <div class="crm-card">
+    <div class="crm-card-title">Create Campaign</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Campaign Name *</label>
+          <input name="name" required class="form-control form-control-sm" placeholder="e.g. Diwali Glow Sale">
+        </div>
+        <div class="col-md-4">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Type</label>
+          <select name="type" class="form-select form-select-sm">
+            {% for val,label in type_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Budget (₹)</label>
+          <input name="budget" type="number" min="0" step="100" class="form-control form-control-sm" placeholder="0">
+        </div>
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Scheduled Date/Time</label>
+          <input name="scheduled_at" type="datetime-local" class="form-control form-control-sm">
+        </div>
+        <div class="col-12">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Target Audience</label>
+          <input name="target_audience" class="form-control form-control-sm" placeholder="e.g. VIP customers, Women 25-40">
+        </div>
+        <div class="col-12">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Description</label>
+          <textarea name="description" rows="3" class="form-control form-control-sm" placeholder="Campaign details..."></textarea>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn-crm-primary">Create Campaign</button>
+          <a href="{% url 'employee:campaign_list' %}" style="margin-left:.75rem;font-size:.8rem;color:var(--crm-muted);text-decoration:none;">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

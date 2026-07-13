@@ -1,0 +1,74 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Support Tickets{% endblock %}
+{% block page_title %}Support Tickets{% endblock %}
+{% block breadcrumb %}Admin / CRM / Support{% endblock %}
+{% block content %}
+
+<!-- KPI Row -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-2"><div class="adm-kpi" style="padding:.75rem;"><div class="adm-kpi-label">Total</div><div class="adm-kpi-value">{{ stats.total }}</div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi" style="padding:.75rem;"><div class="adm-kpi-label">Open</div><div class="adm-kpi-value" style="color:#f59e0b;">{{ stats.open }}</div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi" style="padding:.75rem;"><div class="adm-kpi-label">In Progress</div><div class="adm-kpi-value" style="color:#3b82f6;">{{ stats.in_progress }}</div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi" style="padding:.75rem;"><div class="adm-kpi-label">Resolved</div><div class="adm-kpi-value" style="color:#10b981;">{{ stats.resolved }}</div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi" style="padding:.75rem;"><div class="adm-kpi-label">Critical</div><div class="adm-kpi-value" style="color:#ef4444;">{{ stats.critical }}</div></div></div>
+</div>
+
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <h6>🎫 All Tickets</h6>
+    <form method="get" class="d-flex gap-2 flex-wrap">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Search subject, name, ID…" value="{{ q }}">
+      <select class="adm-input" style="width:140px;" name="status">
+        <option value="">All Status</option>
+        {% for val,lbl in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <select class="adm-input" style="width:140px;" name="priority">
+        <option value="">All Priority</option>
+        {% for val,lbl in priority_choices %}<option value="{{ val }}" {% if priority_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <select class="adm-input" style="width:160px;" name="emp">
+        <option value="">All Assignees</option>
+        {% for e in employees %}<option value="{{ e.pk }}" {% if emp_filter == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.username }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:crm_support' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr><th>Ticket ID</th><th>Subject</th><th>Customer</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td style="font-family:monospace;font-size:.72rem;color:var(--adm-muted);">{{ t.ticket_id }}</td>
+          <td style="font-weight:600;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ t.subject }}</td>
+          <td>
+            <div style="font-size:.82rem;">{{ t.customer_name }}</div>
+            <div style="font-size:.7rem;color:var(--adm-muted);">{{ t.customer_email|default:'' }}</div>
+          </td>
+          <td>
+            <span class="adm-badge {% if t.priority == 'critical' %}badge-danger{% elif t.priority == 'high' %}badge-warning{% elif t.priority == 'medium' %}badge-info{% else %}badge-gray{% endif %}" style="font-size:.62rem;">
+              {{ t.get_priority_display }}
+            </span>
+          </td>
+          <td>
+            <span class="adm-badge {% if t.status == 'resolved' or t.status == 'closed' %}badge-success{% elif t.status == 'open' %}badge-warning{% else %}badge-info{% endif %}" style="font-size:.62rem;">
+              {{ t.get_status_display }}
+            </span>
+          </td>
+          <td style="font-size:.78rem;">{{ t.assigned_to.username|default:'—' }}</td>
+          <td style="font-size:.72rem;color:var(--adm-muted);">{{ t.created_at|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'admin_panel:crm_ticket_detail' ticket_id=t.ticket_id %}" class="adm-btn btn-outline btn-sm">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--adm-muted);">No tickets found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -147,7 +147,7 @@ MARS (Indian brand, budget-friendly):
 - Concealer: MARS-CON-001 ₹199 — shades: Fair(C01), Light(C02), Medium(C03), Tan(C04), Deep(C05)
 - Setting Powder: MARS-PWD-001 ₹449 — Translucent, Banana, Deep
 - Liquid Blusher: MARS-BLS-001 ₹279 — Coral Kiss(warm), Rose Flush(cool), Peachy Keen(warm), Berry Bliss(cool), Nude Pink(neutral), Bronzed Glow(olive)
-- Eyeshadow Palette: MARS-EYE-001 ₹299 — 12 shades matte+shimmer
+- Eyeshadow Palette Dance Of Joy: MARS-EYE-001 ₹299 — 12 shades: Champagne Gold (shimmer), Rose Gold (shimmer), Copper (shimmer), Bronze (shimmer), Chocolate Brown (matte), Terracotta (matte), Peach (matte), Coral (matte), Burgundy (matte), Plum (matte), Matte Black (matte), Cream Highlight (shimmer)
 - Matte Mousse Lipstick: MARS-LIP-001 ₹299 — Ruby Red, Nude Beige, Rose Pink, Coral Orange, Berry, Mauve, Dark Brown, Hot Pink
 
 MAYBELLINE NEW YORK:

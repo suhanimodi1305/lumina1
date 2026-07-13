@@ -1,0 +1,80 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Leads{% endblock %}
+{% block page_title %}CRM — Leads{% endblock %}
+{% block nav_leads %}active{% endblock %}
+{% block nav_crm_open %}open{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <input name="q" value="{{ q }}" placeholder="Search name, phone, email..."
+             style="padding:.45rem .85rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;min-width:220px;outline:none;background:var(--crm-card);color:var(--crm-text);">
+      <select name="stage" style="padding:.45rem .75rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;color:var(--crm-text);background:var(--crm-card);">
+        <option value="">All Stages</option>
+        {% for val,label in stage_choices %}<option value="{{ val }}" {% if stage == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <select name="source" style="padding:.45rem .75rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;color:var(--crm-text);background:var(--crm-card);">
+        <option value="">All Sources</option>
+        {% for val,label in source_choices %}<option value="{{ val }}" {% if source == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn-crm-primary">🔍 Filter</button>
+    </form>
+  </div>
+  <div style="display:flex;gap:.5rem;">
+    <a href="{% url 'employee:export_excel' %}?section=leads&period=month" class="btn-crm-outline">📥 Export</a>
+    <a href="{% url 'employee:lead_create' %}" class="btn-crm-primary">+ New Lead</a>
+  </div>
+</div>
+
+<!-- Pipeline Summary -->
+<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+  {% for val,label in stage_choices %}
+  <a href="?stage={{ val }}" style="padding:.35rem .8rem;border-radius:20px;font-size:.7rem;font-weight:600;text-decoration:none;
+    {% if stage == val %}background:#0d9488;color:#fff;{% else %}background:var(--crm-chip-bg);color:var(--crm-chip-text);{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="crm-card" style="padding:0;overflow:hidden;">
+  <table class="crm-table">
+    <thead>
+      <tr><th>Lead</th><th>Contact</th><th>Source</th><th>Stage</th><th>Assigned To</th><th>Follow-up</th><th>Created</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>
+          <div style="font-weight:600;font-size:.82rem;">{{ lead.name }}</div>
+          <div style="font-size:.7rem;color:var(--crm-muted);">{{ lead.lead_id }}</div>
+        </td>
+        <td>
+          <div style="font-size:.8rem;">{{ lead.phone }}</div>
+          <div style="font-size:.7rem;color:var(--crm-muted);">{{ lead.email|default:"—" }}</div>
+        </td>
+        <td><span style="font-size:.72rem;background:var(--crm-chip-bg);color:var(--crm-chip-text);padding:.2rem .5rem;border-radius:20px;">{{ lead.get_source_display }}</span></td>
+        <td>
+          <span class="badge-stage badge-{% if lead.stage in 'order_confirmed,delivered,repeat_customer' %}interested{% elif lead.stage == 'new' %}new{% elif lead.stage == 'lost' %}lost{% else %}open{% endif %}" style="font-size:.65rem;">
+            {{ lead.get_stage_display }}
+          </span>
+        </td>
+        <td style="font-size:.8rem;">{{ lead.assigned_to.get_full_name|default:lead.assigned_to.username|default:"—" }}</td>
+        <td>
+          {% if lead.follow_up_date %}
+            <span style="font-size:.75rem;{% if lead.follow_up_date <= today %}color:#ef4444;font-weight:600;{% else %}color:var(--crm-muted);{% endif %}">
+              {{ lead.follow_up_date|date:"d M" }}
+            </span>
+          {% else %}<span style="color:var(--crm-subtle);font-size:.75rem;">—</span>{% endif %}
+        </td>
+        <td style="font-size:.75rem;color:var(--crm-muted);">{{ lead.created_at|date:"d M Y" }}</td>
+        <td><a href="{% url 'employee:lead_detail' lead.lead_id %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--crm-subtle);">No leads found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div style="font-size:.75rem;color:var(--crm-subtle);text-align:right;margin-top:.5rem;">{{ total }} leads</div>
+{% endblock %}

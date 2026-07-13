@@ -162,14 +162,25 @@
       {% if product.shades_available %}
       <div>
         <div class="pd-shade-label">Select Shade: <span id="pdSelectedShade" style="color:var(--teal);font-weight:700;">{{ product.shades_available.0.name }}</span></div>
-        <div class="pd-shade-grid">
+        <div class="pd-shade-grid" id="pdShadeGrid">
           {% for shade in product.shades_available %}
           <span class="pd-shade-swatch {% if forloop.first %}active{% endif %}"
                 style="background:{{ shade.hex }};"
                 title="{{ shade.name }}"
                 data-name="{{ shade.name }}"
+                data-hex="{{ shade.hex }}"
                 onclick="selectShade(this)"></span>
           {% endfor %}
+        </div>
+        <!-- Shade Preview Card (Flipkart/Amazon style) -->
+        <div id="pdShadePreview" style="display:flex;align-items:center;gap:.75rem;margin-top:.65rem;background:var(--surface-alt,#f5f3f0);border:1.5px solid var(--border,#e2e8f0);border-radius:12px;padding:.6rem .85rem;transition:all .2s;">
+          <div id="pdShadeColorBlock" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;border:2px solid rgba(0,0,0,.1);box-shadow:0 2px 8px rgba(0,0,0,.18);background:{{ product.shades_available.0.hex }};"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted,#64748b);margin-bottom:.15rem;">Selected Shade</div>
+            <div id="pdShadePreviewName" style="font-size:.88rem;font-weight:700;color:var(--text,#0f172a);line-height:1.2;">{{ product.shades_available.0.name }}</div>
+            <div id="pdShadePreviewHex" style="font-size:.65rem;color:var(--muted,#64748b);font-family:monospace;margin-top:.1rem;">{{ product.shades_available.0.hex }}</div>
+          </div>
+          <div id="pdShadeColorCircle" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.22);background:{{ product.shades_available.0.hex }};"></div>
         </div>
       </div>
       {% endif %}
@@ -412,7 +423,34 @@ function selectShade(el) {
   document.querySelectorAll('.pd-shade-swatch').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   const name = el.dataset.name;
+  const hex  = el.dataset.hex;
+
+  // Update shade label
   document.getElementById('pdSelectedShade').textContent = name;
+
+  // Update shade preview card
+  const colorBlock  = document.getElementById('pdShadeColorBlock');
+  const colorCircle = document.getElementById('pdShadeColorCircle');
+  const previewName = document.getElementById('pdShadePreviewName');
+  const previewHex  = document.getElementById('pdShadePreviewHex');
+  const preview     = document.getElementById('pdShadePreview');
+
+  if (colorBlock)  colorBlock.style.background  = hex;
+  if (colorCircle) colorCircle.style.background = hex;
+  if (previewName) previewName.textContent = name;
+  if (previewHex)  previewHex.textContent  = hex;
+
+  // Pulse animation on preview card
+  if (preview) {
+    preview.style.borderColor = hex;
+    preview.style.boxShadow   = '0 0 0 3px ' + hex + '33';
+    clearTimeout(preview._resetTimer);
+    preview._resetTimer = setTimeout(() => {
+      preview.style.borderColor = '';
+      preview.style.boxShadow   = '';
+    }, 900);
+  }
+
   // Update cart + buy now shade inputs
   const cartInput = document.getElementById('cartShadeInput');
   if (cartInput) cartInput.value = name;

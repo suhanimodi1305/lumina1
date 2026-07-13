@@ -1,0 +1,79 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Call History{% endblock %}
+{% block page_title %}Call History{% endblock %}
+{% block breadcrumb %}Calling · History{% endblock %}
+{% block nav_call_hist %}active{% endblock %}
+
+{% block content %}
+<!-- Filters -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+  <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <input name="q" value="{{ q }}" placeholder="Search phone, name, ID..."
+           class="emp-input" style="width:220px;">
+    <select name="direction" class="emp-input" style="width:auto;padding:.45rem .85rem;">
+      <option value="">All Directions</option>
+      {% for val,label in direction_choices %}<option value="{{ val }}" {% if direction == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="status" class="emp-input" style="width:auto;padding:.45rem .85rem;">
+      <option value="">All Statuses</option>
+      {% for val,label in status_choices %}<option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="emp-btn emp-btn-primary"><i class="bi bi-search"></i> Filter</button>
+    {% if q or direction or status %}<a href="{% url 'employee:call_history' %}" class="emp-btn emp-btn-outline">Clear</a>{% endif %}
+  </form>
+  <a href="{% url 'employee:export_excel' %}?section=calls&period=month" class="emp-btn emp-btn-outline">
+    <i class="bi bi-file-earmark-arrow-down"></i> Export CSV
+  </a>
+</div>
+
+<div class="emp-table-wrap">
+  <div class="emp-table-head">
+    <h6><i class="bi bi-clock-history me-2" style="color:var(--emp-accent);"></i>Call Log</h6>
+    <span style="font-size:.8rem;color:var(--emp-muted);">{{ calls|length }} record{{ calls|length|pluralize }}</span>
+  </div>
+  <table class="emp-table">
+    <thead>
+      <tr><th>Call ID</th><th>Customer</th><th>Phone</th><th>Direction</th><th>Status</th><th>Duration</th><th>Employee</th><th>Date</th><th>Follow-up</th></tr>
+    </thead>
+    <tbody>
+      {% for c in calls %}
+      <tr>
+        <td style="font-family:monospace;font-size:.72rem;color:var(--emp-muted);">{{ c.call_id }}</td>
+        <td style="font-weight:500;">{{ c.customer_name|default:"—" }}</td>
+        <td><a href="tel:{{ c.phone }}" style="color:var(--emp-accent);">{{ c.phone }}</a></td>
+        <td>
+          <span class="emp-badge {% if c.direction == 'inbound' %}badge-info{% elif c.direction == 'outbound' %}badge-teal{% else %}badge-warning{% endif %}" style="font-size:.62rem;">
+            <i class="bi bi-{% if c.direction == 'inbound' %}telephone-inbound{% elif c.direction == 'outbound' %}telephone-outbound{% else %}arrow-repeat{% endif %} me-1"></i>
+            {{ c.get_direction_display }}
+          </span>
+        </td>
+        <td>
+          <span class="emp-badge {% if c.status == 'connected' or c.status == 'converted' %}badge-success{% elif c.status == 'no_answer' or c.status == 'wrong_number' %}badge-danger{% elif c.status == 'interested' %}badge-teal{% elif c.status == 'escalated' or c.status == 'callback_requested' %}badge-warning{% else %}badge-gray{% endif %}" style="font-size:.62rem;">
+            {{ c.get_status_display }}
+          </span>
+        </td>
+        <td style="color:var(--emp-muted);">{{ c.duration_display }}</td>
+        <td style="font-size:.78rem;">{{ c.employee.get_full_name|default:c.employee.username }}</td>
+        <td style="font-size:.75rem;color:var(--emp-muted);">{{ c.called_at|date:"d M Y H:i" }}</td>
+        <td>
+          {% if c.follow_up_date %}
+            <span style="font-size:.73rem;color:var(--emp-gold);font-weight:600;">
+              <i class="bi bi-calendar-event"></i> {{ c.follow_up_date|date:"d M" }}
+            </span>
+          {% else %}
+            <span style="color:var(--emp-muted);font-size:.73rem;">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="9" style="text-align:center;padding:3rem;color:var(--emp-muted);">
+          <i class="bi bi-telephone-x" style="font-size:2rem;opacity:.3;display:block;margin-bottom:.5rem;"></i>
+          No calls found{% if q %} for "{{ q }}"{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

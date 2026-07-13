@@ -1,0 +1,58 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Campaigns{% endblock %}
+{% block page_title %}Marketing Campaigns{% endblock %}
+{% block breadcrumb %}Admin / CRM / Campaigns{% endblock %}
+{% block content %}
+
+<!-- Summary Row -->
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-purple"><i class="bi bi-megaphone-fill"></i></div><div><div class="adm-kpi-label">Total Campaigns</div><div class="adm-kpi-value">{{ camps|length }}</div></div></div></div>
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-red"><i class="bi bi-cash-stack"></i></div><div><div class="adm-kpi-label">Total Budget</div><div class="adm-kpi-value">₹{{ total_budget|floatformat:0 }}</div></div></div></div>
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-green"><i class="bi bi-graph-up-arrow"></i></div><div><div class="adm-kpi-label">Total Revenue</div><div class="adm-kpi-value">₹{{ total_revenue|floatformat:0 }}</div></div></div></div>
+</div>
+
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <h6>🚀 All Campaigns</h6>
+    <form method="get" class="d-flex gap-2">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Search name, ID…" value="{{ q }}">
+      <select class="adm-input" style="width:150px;" name="status">
+        <option value="">All Status</option>
+        {% for val,lbl in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:crm_campaigns' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr><th>Camp ID</th><th>Name</th><th>Type</th><th>Status</th><th>Budget</th><th>Revenue</th><th>Leads</th><th>ROI</th><th>Created</th></tr></thead>
+      <tbody>
+        {% for c in camps %}
+        <tr>
+          <td style="font-family:monospace;font-size:.7rem;color:var(--adm-muted);">{{ c.camp_id }}</td>
+          <td style="font-weight:600;">{{ c.name|truncatechars:40 }}</td>
+          <td><span class="adm-badge badge-info" style="font-size:.62rem;">{{ c.get_type_display }}</span></td>
+          <td>
+            <span class="adm-badge {% if c.status == 'active' %}badge-success{% elif c.status == 'completed' %}badge-purple{% elif c.status == 'paused' %}badge-warning{% elif c.status == 'draft' %}badge-gray{% else %}badge-info{% endif %}" style="font-size:.62rem;">
+              {{ c.get_status_display }}
+            </span>
+          </td>
+          <td style="font-size:.82rem;">₹{{ c.budget|floatformat:0 }}</td>
+          <td style="font-size:.82rem;font-weight:700;color:#10b981;">₹{{ c.revenue|floatformat:0 }}</td>
+          <td style="font-size:.82rem;">{{ c.leads_generated }}</td>
+          <td>
+            <span style="font-size:.78rem;font-weight:700;{% if c.roi > 0 %}color:#10b981;{% else %}color:#ef4444;{% endif %}">
+              {{ c.roi }}%
+            </span>
+          </td>
+          <td style="font-size:.72rem;color:var(--adm-muted);">{{ c.created_at|date:"d M Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--adm-muted);">No campaigns found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

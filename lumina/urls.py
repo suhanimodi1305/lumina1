@@ -24,12 +24,12 @@ urlpatterns = [
     path('membership/', include('apps.memberships.urls', namespace='memberships')),
     path('diagnostic/', include('apps.diagnostic.urls', namespace='diagnostic')),
     path('skin/', include('apps.skin.urls', namespace='skin')),
-    path('hair/', include('apps.hair.urls', namespace='hair')),
     path('progress/', include('apps.progress.urls', namespace='progress')),
     path('notifications/', include('apps.notifications.urls', namespace='notifications')),
     path('reviews/', include('apps.reviews.urls', namespace='reviews')),
     path('coupons/', include('apps.coupons.urls', namespace='coupons')),
     path('blog/', include('apps.blog.urls', namespace='blog')),
+    path('admin-panel/', include('apps.admin_panel.urls', namespace='admin_panel')),
 
     # ── Navigation convenience shortcuts ─────────────────────────────────────
     # These short URLs match the flow diagram so every page can use clean links.

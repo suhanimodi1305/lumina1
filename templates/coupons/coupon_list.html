@@ -1,0 +1,114 @@
+{% extends "employee/crm_base.html" %}
+{% load static %}
+
+{% block title %}Coupons{% endblock %}
+{% block page_title %}🎟️ Coupons{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="crm-stat-grid" style="margin-bottom:1.25rem;">
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ total }}</div>
+    <div class="crm-stat-label">Total Coupons</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val" style="color:#16a34a;">{{ active_count }}</div>
+    <div class="crm-stat-label">Active</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val" style="color:#dc2626;">{{ total|add:"-"|add:active_count }}</div>
+    <div class="crm-stat-label">Inactive</div>
+  </div>
+</div>
+
+<div class="crm-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+    <div class="crm-card-title" style="margin:0;">All Coupons</div>
+    <a href="/admin/coupons/coupon/add/" class="btn-crm-primary" style="font-size:.78rem;">
+      <i class="bi bi-plus-lg"></i> Create Coupon
+    </a>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Discount</th>
+          <th>Scope</th>
+          <th>Min Order</th>
+          <th>Valid Until</th>
+          <th>Uses</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for coupon in coupons %}
+        <tr>
+          <td>
+            <span style="font-family:monospace;font-weight:700;font-size:.85rem;
+                         background:#f1f5f9;padding:.2rem .5rem;border-radius:6px;
+                         letter-spacing:.05em;">{{ coupon.code }}</span>
+          </td>
+          <td style="font-size:.78rem;">
+            {% if coupon.coupon_type == 'percent' %}
+              <span class="badge-stage badge-interested">% Off</span>
+            {% elif coupon.coupon_type == 'fixed' %}
+              <span class="badge-stage badge-new">₹ Off</span>
+            {% else %}
+              <span class="badge-stage badge-medium">Free Ship</span>
+            {% endif %}
+          </td>
+          <td style="font-size:.82rem;font-weight:600;">
+            {% if coupon.coupon_type == 'percent' %}
+              {{ coupon.discount_value }}%
+              {% if coupon.max_discount_inr %}<small style="color:#64748b;"> (max ₹{{ coupon.max_discount_inr }})</small>{% endif %}
+            {% elif coupon.coupon_type == 'fixed' %}
+              ₹{{ coupon.discount_value }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td style="font-size:.78rem;color:#475569;">{{ coupon.get_scope_display }}</td>
+          <td style="font-size:.78rem;">
+            {% if coupon.min_order_value %}₹{{ coupon.min_order_value }}{% else %}—{% endif %}
+          </td>
+          <td style="font-size:.78rem;">
+            {% if coupon.valid_until %}
+              {{ coupon.valid_until|date:"d M Y" }}
+            {% else %}
+              <span style="color:#64748b;">No expiry</span>
+            {% endif %}
+          </td>
+          <td style="font-size:.78rem;">
+            {{ coupon.times_used }}{% if coupon.max_uses %} / {{ coupon.max_uses }}{% endif %}
+          </td>
+          <td>
+            {% if coupon.is_active %}
+              <span class="badge-stage badge-converted">Active</span>
+            {% else %}
+              <span class="badge-stage badge-lost">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/admin/coupons/coupon/{{ coupon.pk }}/change/"
+               class="btn-crm-outline" style="padding:.22rem .6rem;font-size:.7rem;">
+              <i class="bi bi-pencil"></i> Edit
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" style="text-align:center;color:#64748b;padding:2rem;font-size:.85rem;">
+            No coupons created yet.
+            <a href="/admin/coupons/coupon/add/" style="color:#0d9488;">Create one</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

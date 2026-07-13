@@ -1,0 +1,107 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Product Management{% endblock %}
+{% block breadcrumb %}Admin / Products{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <span class="adm-badge badge-info" style="font-size:.78rem;padding:.3rem .8rem;">{{ total }} Products</span>
+  <a href="{% url 'admin_panel:product_add' %}" class="adm-btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Product</a>
+</div>
+
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <h6>🛍 All Products</h6>
+    <form method="get" class="d-flex gap-2 flex-wrap" id="product-filter-form">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Name / Brand / SKU…" value="{{ q }}">
+
+      <!-- Range (product line) -->
+      <select class="adm-input" style="width:150px;" name="range" id="range-select">
+        <option value="">All Ranges</option>
+        {% for val,lbl in range_choices %}
+          <option value="{{ val }}" {% if prng == val %}selected{% endif %}>{{ lbl }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Category — dynamically filtered by range via JS -->
+      <select class="adm-input" style="width:170px;" name="cat" id="cat-select">
+        <option value="">All Categories</option>
+        {% for val,lbl in cat_choices %}
+          <option value="{{ val }}" {% if cat == val %}selected{% endif %}>{{ lbl }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:product_list' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr>
+        <th>Product</th><th>Brand</th><th>SKU</th><th>Category</th><th>Range</th><th>Price (MRP)</th><th>Featured</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:.82rem;">{{ p.name }}</div>
+          </td>
+          <td style="color:var(--adm-muted);font-size:.8rem;">{{ p.brand|default:'—' }}</td>
+          <td style="font-family:monospace;font-size:.72rem;color:var(--adm-muted);">{{ p.sku|default:'—' }}</td>
+          <td style="font-size:.78rem;">{{ p.get_category_display|default:'—' }}</td>
+          <td>
+            <span class="adm-badge
+              {% if p.product_range == 'korean' %}badge-info
+              {% elif p.product_range == 'makeup' %}badge-purple
+              {% elif p.product_range == 'ayurvedic' %}badge-success
+              {% elif p.product_range == 'pharmacy' %}badge-warning
+              {% else %}badge-gray{% endif %}"
+              style="font-size:.62rem;">{{ p.get_product_range_display|default:'—' }}</span>
+          </td>
+          <td style="font-weight:700;">{% if p.price %}₹{{ p.price }}{% else %}—{% endif %}</td>
+          <td style="text-align:center;">
+            {% if p.is_featured %}<span class="adm-badge badge-warning" style="font-size:.6rem;">⭐ Yes</span>
+            {% else %}<span style="color:var(--adm-muted);font-size:.75rem;">—</span>{% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'admin_panel:product_edit' pk=p.pk %}" class="adm-btn btn-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'admin_panel:product_delete' pk=p.pk %}" class="adm-btn btn-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--adm-muted);">No products found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Cascading category filter based on selected range
+const rangeCatMap = {{ range_cat_map_json|safe }};
+const allCatChoices = {{ all_cat_choices_json|safe }};
+const rangeSelect = document.getElementById('range-select');
+const catSelect   = document.getElementById('cat-select');
+const currentCat  = "{{ cat }}";
+
+function updateCategories() {
+  const rng = rangeSelect.value;
+  const allowed = rangeCatMap[rng] || null;
+  const prev = catSelect.value;
+  catSelect.innerHTML = '<option value="">All Categories</option>';
+  for (const [val, lbl] of Object.entries(allCatChoices)) {
+    if (!allowed || allowed.includes(val)) {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = lbl;
+      if (val === prev || val === currentCat) opt.selected = true;
+      catSelect.appendChild(opt);
+    }
+  }
+}
+rangeSelect.addEventListener('change', updateCategories);
+// Init on page load
+updateCategories();
+</script>
+{% endblock %}

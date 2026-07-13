@@ -1,0 +1,537 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu — Lumina Employee</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+<script>
+(function(){
+  var t='light';
+  try{var s=localStorage.getItem('lux_theme');if(s==='dark'){t='dark';}else{localStorage.setItem('lux_theme','light');}}catch(e){}
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+</head>
+<body>
+<style>
+:root {
+  --adm-sidebar:#0d0d14; --adm-sidebar-w:260px; --adm-sidebar-collapsed:64px;
+  --adm-topbar-h:56px; --adm-accent:#7c3aed; --adm-accent2:#0d9488;
+  --adm-gold:#f59e0b; --adm-danger:#ef4444; --adm-success:#10b981;
+  --adm-warning:#f59e0b; --adm-info:#3b82f6;
+  --adm-bg:#f1f5f9; --adm-surface:#ffffff;
+  --adm-border:#e2e8f0; --adm-text:#0f172a; --adm-muted:#64748b;
+  --adm-sb-text:rgba(255,255,255,.5); --adm-sb-active:rgba(124,58,237,.2);
+}
+[data-theme="dark"]{
+  --adm-bg:#0d0d14; --adm-surface:#12121a;
+  --adm-border:rgba(255,255,255,.08);
+  --adm-text:rgba(255,255,255,.9); --adm-muted:rgba(255,255,255,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;zoom:0.9;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--adm-bg);color:var(--adm-text);line-height:1.6;-webkit-font-smoothing:antialiased;}
+.adm-shell{display:flex;min-height:100vh;}
+</style>
+<style>
+/* ── SIDEBAR ── */
+.adm-sidebar{width:var(--adm-sidebar-w);flex-shrink:0;background:var(--adm-sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:width .25s;overflow:hidden;}
+.adm-sidebar.collapsed{width:var(--adm-sidebar-collapsed);}
+.adm-brand{padding:1rem .9rem .85rem;display:flex;align-items:center;gap:.65rem;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.adm-brand-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--adm-accent2),#0891b2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;}
+.adm-brand-text{font-size:.95rem;font-weight:800;color:#fff;white-space:nowrap;transition:opacity .2s;}
+.adm-brand-sub{font-size:.6rem;color:rgba(255,255,255,.3);white-space:nowrap;transition:opacity .2s;}
+.adm-sidebar.collapsed .adm-brand-text,.adm-sidebar.collapsed .adm-brand-sub{opacity:0;width:0;}
+/* ── NAV ── */
+.adm-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:.4rem 0;scrollbar-width:none;}
+.adm-nav::-webkit-scrollbar{display:none;}
+.adm-section-label{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.22);padding:.65rem .9rem .25rem;white-space:nowrap;transition:opacity .2s;}
+.adm-sidebar.collapsed .adm-section-label{opacity:0;}
+.adm-nav-item{display:flex;align-items:center;gap:.7rem;padding:.52rem .9rem;margin:.08rem .4rem;border-radius:9px;color:var(--adm-sb-text);font-size:.8rem;font-weight:500;text-decoration:none;border:none;background:transparent;width:calc(100% - .8rem);cursor:pointer;transition:background .12s,color .12s;white-space:nowrap;overflow:hidden;}
+.adm-nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);}
+.adm-nav-item.active{background:var(--adm-sb-active);color:#a78bfa;font-weight:600;}
+.adm-nav-item .nav-icon{font-size:1rem;flex-shrink:0;width:18px;text-align:center;color:rgba(255,255,255,.3);}
+.adm-nav-item:hover .nav-icon,.adm-nav-item.active .nav-icon{color:#a78bfa;}
+.adm-nav-item .nav-label{overflow:hidden;transition:opacity .2s,width .2s;}
+.adm-sidebar.collapsed .nav-label{opacity:0;width:0;}
+.adm-nav-badge{margin-left:auto;padding:.1rem .4rem;background:var(--adm-accent2);color:#fff;border-radius:20px;font-size:.58rem;font-weight:700;flex-shrink:0;transition:opacity .2s;}
+.adm-sidebar.collapsed .adm-nav-badge{opacity:0;width:0;padding:0;}
+/* ── SIDEBAR FOOTER ── */
+.adm-sb-footer{padding:.75rem .5rem;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.adm-user-card{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:10px;background:rgba(255,255,255,.05);}
+.adm-user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--adm-accent2),#0891b2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.82rem;flex-shrink:0;}
+.adm-user-name{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;}
+.adm-user-role{font-size:.6rem;color:rgba(255,255,255,.3);}
+.adm-sidebar.collapsed .adm-user-name,.adm-sidebar.collapsed .adm-user-role{display:none;}
+</style>
+<style>
+/* ── MAIN ── */
+.adm-main{flex:1;margin-left:var(--adm-sidebar-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s;min-width:0;}
+.adm-main.sb-collapsed{margin-left:var(--adm-sidebar-collapsed);}
+/* ── TOPBAR ── */
+.adm-topbar{height:var(--adm-topbar-h);background:var(--adm-surface);border-bottom:1px solid var(--adm-border);display:flex;align-items:center;gap:.75rem;padding:0 1.5rem;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.06);}
+.adm-topbar-toggle{background:none;border:none;color:var(--adm-muted);font-size:1.1rem;cursor:pointer;padding:.3rem;border-radius:7px;transition:background .12s;}
+.adm-topbar-toggle:hover{background:var(--adm-bg);}
+.adm-topbar-title{font-size:.95rem;font-weight:700;color:var(--adm-text);flex:1;}
+.adm-topbar-breadcrumb{font-size:.75rem;color:var(--adm-muted);}
+.adm-tb-btn{width:34px;height:34px;border-radius:9px;background:none;border:1px solid var(--adm-border);color:var(--adm-muted);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;text-decoration:none;}
+.adm-tb-btn:hover{background:var(--adm-bg);color:var(--adm-text);}
+/* ── CONTENT ── */
+.adm-content{flex:1;padding:1.5rem clamp(.75rem,2.5vw,2rem);max-width:1600px;margin-inline:auto;width:100%;}
+/* ── MENU CARDS ── */
+.menu-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--adm-muted);margin:1.5rem 0 .65rem;display:flex;align-items:center;gap:.5rem;}
+.menu-section-title::after{content:'';flex:1;height:1px;background:var(--adm-border);}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.9rem;margin-bottom:.5rem;}
+.menu-card{background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:14px;padding:1.2rem 1.1rem;text-decoration:none;color:var(--adm-text);display:flex;align-items:flex-start;gap:.85rem;transition:box-shadow .15s,transform .15s,border-color .15s;position:relative;overflow:hidden;}
+.menu-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.09);transform:translateY(-2px);border-color:var(--adm-accent2);color:var(--adm-text);}
+.menu-card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
+.menu-card-title{font-size:.85rem;font-weight:700;line-height:1.25;margin-bottom:.2rem;}
+.menu-card-desc{font-size:.7rem;color:var(--adm-muted);line-height:1.45;}
+.menu-card-badge{position:absolute;top:.75rem;right:.75rem;background:var(--adm-accent2);color:#fff;font-size:.58rem;font-weight:700;padding:.12rem .45rem;border-radius:20px;}
+.menu-card-badge.danger{background:var(--adm-danger);}
+.menu-card-badge.warning{background:var(--adm-warning);color:#0f172a;}
+/* icon colour helpers */
+.ic-teal{background:rgba(13,148,136,.12);color:#0d9488;}
+.ic-purple{background:rgba(124,58,237,.12);color:#7c3aed;}
+.ic-gold{background:rgba(245,158,11,.12);color:#d97706;}
+.ic-red{background:rgba(239,68,68,.12);color:#ef4444;}
+.ic-blue{background:rgba(59,130,246,.12);color:#3b82f6;}
+.ic-green{background:rgba(16,185,129,.12);color:#10b981;}
+.ic-pink{background:rgba(236,72,153,.12);color:#ec4899;}
+.ic-slate{background:rgba(100,116,139,.12);color:#475569;}
+/* ── RESPONSIVE ── */
+@media(max-width:991px){
+  .adm-sidebar{transform:translateX(-100%);transition:transform .28s;width:var(--adm-sidebar-w)!important;}
+  .adm-sidebar.mob-open{transform:translateX(0);}
+  .adm-main{margin-left:0!important;}
+  .adm-mob-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.55);}
+  .adm-mob-overlay.open{display:block;}
+}
+</style>
+
+<div class="adm-shell">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="adm-sidebar" id="adm-sidebar">
+  <div class="adm-brand">
+    <div class="adm-brand-icon"><i class="bi bi-briefcase" style="font-size:.95rem;"></i></div>
+    <div>
+      <div class="adm-brand-text">Lumina Employee</div>
+      <div class="adm-brand-sub">CRM · Workspace</div>
+    </div>
+  </div>
+
+  <nav class="adm-nav">
+    <!-- OVERVIEW -->
+    <div class="adm-section-label">📊 Overview</div>
+    <a href="{% url 'employee:portal' %}" class="adm-nav-item">
+      <i class="bi bi-grid-1x2-fill nav-icon"></i><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="{% url 'employee:menu' %}" class="adm-nav-item active">
+      <i class="bi bi-compass nav-icon"></i><span class="nav-label">Menu</span>
+    </a>
+    <a href="{% url 'employee:reports' %}" class="adm-nav-item">
+      <i class="bi bi-bar-chart-fill nav-icon"></i><span class="nav-label">Reports</span>
+    </a>
+
+    <!-- CRM -->
+    <div class="adm-section-label">🎯 CRM</div>
+    <a href="{% url 'employee:lead_list' %}" class="adm-nav-item">
+      <i class="bi bi-person-lines-fill nav-icon"></i><span class="nav-label">Leads</span>
+    </a>
+    <a href="{% url 'employee:opportunity_list' %}" class="adm-nav-item">
+      <i class="bi bi-trophy nav-icon"></i><span class="nav-label">Opportunities</span>
+    </a>
+    <a href="{% url 'employee:customer_list' %}" class="adm-nav-item">
+      <i class="bi bi-people-fill nav-icon"></i><span class="nav-label">Customers</span>
+    </a>
+
+    <!-- ORDERS -->
+    <div class="adm-section-label">📦 Orders</div>
+    <a href="{% url 'employee:order_list' %}" class="adm-nav-item">
+      <i class="bi bi-bag-check-fill nav-icon"></i><span class="nav-label">Orders</span>
+      {% if pending_orders %}<span class="adm-nav-badge">{{ pending_orders }}</span>{% endif %}
+    </a>
+    <a href="{% url 'employee:requirement_list' %}" class="adm-nav-item">
+      <i class="bi bi-clipboard-check-fill nav-icon"></i><span class="nav-label">Requirements</span>
+    </a>
+
+    <!-- SUPPORT -->
+    <div class="adm-section-label">💬 Support</div>
+    <a href="{% url 'employee:ticket_list' %}" class="adm-nav-item">
+      <i class="bi bi-headset nav-icon"></i><span class="nav-label">Tickets</span>
+      {% if open_tickets %}<span class="adm-nav-badge">{{ open_tickets }}</span>{% endif %}
+    </a>
+    <a href="{% url 'employee:call_center' %}" class="adm-nav-item">
+      <i class="bi bi-telephone-fill nav-icon"></i><span class="nav-label">Call Center</span>
+      {% if pending_callbacks %}<span class="adm-nav-badge danger" style="background:#ef4444;">{{ pending_callbacks }}</span>{% endif %}
+    </a>
+
+    <!-- MARKETING -->
+    <div class="adm-section-label">📢 Marketing</div>
+    <a href="{% url 'employee:campaign_list' %}" class="adm-nav-item">
+      <i class="bi bi-megaphone nav-icon"></i><span class="nav-label">Campaigns</span>
+    </a>
+    <a href="{% url 'coupons:list' %}" class="adm-nav-item">
+      <i class="bi bi-ticket-perforated nav-icon"></i><span class="nav-label">Coupons</span>
+    </a>
+
+    <!-- PRODUCTS -->
+    <div class="adm-section-label">🛍 Products</div>
+    <a href="{% url 'employee:product_list' %}" class="adm-nav-item">
+      <i class="bi bi-box-seam nav-icon"></i><span class="nav-label">All Products</span>
+    </a>
+    <a href="{% url 'employee:bulk_import' %}" class="adm-nav-item">
+      <i class="bi bi-cloud-upload nav-icon"></i><span class="nav-label">Bulk Import</span>
+    </a>
+
+    <!-- TEAM -->
+    <div class="adm-section-label">👥 Team</div>
+    <a href="{% url 'employee:employee_list' %}" class="adm-nav-item">
+      <i class="bi bi-person-badge-fill nav-icon"></i><span class="nav-label">Team Members</span>
+    </a>
+    <a href="{% url 'employee:attendance_today' %}" class="adm-nav-item">
+      <i class="bi bi-calendar-check-fill nav-icon"></i><span class="nav-label">Attendance</span>
+    </a>
+    <a href="{% url 'employee:internal_notes' %}" class="adm-nav-item">
+      <i class="bi bi-chat-square-text-fill nav-icon"></i><span class="nav-label">Internal Notes</span>
+    </a>
+
+    <!-- SYSTEM -->
+    <div class="adm-section-label">⚙ System</div>
+    <a href="{% url 'employee:my_profile' %}" class="adm-nav-item">
+      <i class="bi bi-person-circle nav-icon"></i><span class="nav-label">My Profile</span>
+    </a>
+    <a href="{% url 'core:home' %}" class="adm-nav-item">
+      <i class="bi bi-house nav-icon"></i><span class="nav-label">Back to Site</span>
+    </a>
+  </nav>
+
+  <div class="adm-sb-footer">
+    <div class="adm-user-card">
+      <div class="adm-user-avatar">{{ request.user.username|first|upper }}</div>
+      <div style="min-width:0;">
+        <div class="adm-user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="adm-user-role">{% if request.user.is_superuser %}Super Admin{% else %}Employee{% endif %}</div>
+      </div>
+    </div>
+    <a href="{% url 'logout' %}" class="adm-nav-item" style="margin-top:.5rem;color:#ef4444;">
+      <i class="bi bi-box-arrow-left nav-icon" style="color:#ef4444;"></i>
+      <span class="nav-label">Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="adm-mob-overlay" id="adm-overlay"></div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="adm-main" id="adm-main">
+  <!-- TOPBAR -->
+  <div class="adm-topbar">
+    <button class="adm-topbar-toggle" id="adm-toggle"><i class="bi bi-layout-sidebar"></i></button>
+    <div>
+      <div class="adm-topbar-title">Employee Menu</div>
+      <div class="adm-topbar-breadcrumb">Lumina Employee · All Sections</div>
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button class="adm-tb-btn" id="adm-theme-btn" title="Toggle theme"><i class="bi bi-moon-stars" id="adm-theme-icon"></i></button>
+      <a href="{% url 'employee:portal' %}" class="adm-tb-btn" title="Dashboard"><i class="bi bi-grid-1x2"></i></a>
+      <div style="width:1px;height:24px;background:var(--adm-border);"></div>
+      <div class="adm-user-avatar" style="width:32px;height:32px;">{{ request.user.username|first|upper }}</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <main class="adm-content">
+
+    <!-- Page header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:1.35rem;font-weight:800;color:var(--adm-text);margin-bottom:.2rem;">Employee Workspace</h1>
+        <p style="font-size:.8rem;color:var(--adm-muted);margin:0;">All sections at a glance · {{ today|date:"l, d F Y" }}</p>
+      </div>
+      <a href="{% url 'employee:portal' %}" class="adm-tb-btn" style="width:auto;padding:.45rem 1rem;gap:.4rem;font-size:.8rem;font-weight:600;">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+    </div>
+
+    <!-- ── CRM ── -->
+    <div class="menu-section-title">🎯 CRM</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:lead_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-teal"><i class="bi bi-person-lines-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Leads</div>
+          <div class="menu-card-desc">View & manage all sales leads and follow-ups</div>
+        </div>
+        {% if my_leads %}<span class="menu-card-badge">{{ my_leads }} mine</span>{% endif %}
+      </a>
+      <a href="{% url 'employee:lead_create' %}" class="menu-card">
+        <div class="menu-card-icon ic-teal"><i class="bi bi-person-plus-fill"></i></div>
+        <div>
+          <div class="menu-card-title">New Lead</div>
+          <div class="menu-card-desc">Create a new lead and assign to the pipeline</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:opportunity_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-gold"><i class="bi bi-trophy-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Opportunities</div>
+          <div class="menu-card-desc">Track open opportunities and deal stages</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:customer_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-blue"><i class="bi bi-people-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Customers</div>
+          <div class="menu-card-desc">Full customer profiles, orders and history</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── ORDERS ── -->
+    <div class="menu-section-title">📦 Orders</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:order_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-purple"><i class="bi bi-bag-check-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Order Search</div>
+          <div class="menu-card-desc">Search, filter and manage customer orders</div>
+        </div>
+        {% if pending_orders %}<span class="menu-card-badge warning">{{ pending_orders }} pending</span>{% endif %}
+      </a>
+      <a href="{% url 'employee:requirement_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-purple"><i class="bi bi-clipboard-check-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Requirements</div>
+          <div class="menu-card-desc">Purchased product requirements & skin plans</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── SUPPORT ── -->
+    <div class="menu-section-title">💬 Support</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:ticket_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-red"><i class="bi bi-headset"></i></div>
+        <div>
+          <div class="menu-card-title">Support Tickets</div>
+          <div class="menu-card-desc">Resolve customer issues across all channels</div>
+        </div>
+        {% if open_tickets %}<span class="menu-card-badge danger">{{ open_tickets }} open</span>{% endif %}
+      </a>
+      <a href="{% url 'employee:ticket_create' %}" class="menu-card">
+        <div class="menu-card-icon ic-red"><i class="bi bi-ticket-perforated-fill"></i></div>
+        <div>
+          <div class="menu-card-title">New Ticket</div>
+          <div class="menu-card-desc">Open a new support ticket for a customer</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:call_center' %}" class="menu-card">
+        <div class="menu-card-icon ic-red"><i class="bi bi-telephone-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Call Center</div>
+          <div class="menu-card-desc">Incoming calls, callbacks and queue management</div>
+        </div>
+        {% if pending_callbacks %}<span class="menu-card-badge danger">{{ pending_callbacks }}</span>{% endif %}
+      </a>
+      <a href="{% url 'employee:call_history' %}" class="menu-card">
+        <div class="menu-card-icon ic-slate"><i class="bi bi-clock-history"></i></div>
+        <div>
+          <div class="menu-card-title">Call History</div>
+          <div class="menu-card-desc">Full log of inbound and outbound calls</div>
+        </div>
+        {% if today_calls %}<span class="menu-card-badge">{{ today_calls }} today</span>{% endif %}
+      </a>
+      <a href="{% url 'employee:log_call' %}" class="menu-card">
+        <div class="menu-card-icon ic-teal"><i class="bi bi-telephone-plus-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Log a Call</div>
+          <div class="menu-card-desc">Record details of a completed call</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── MARKETING ── -->
+    <div class="menu-section-title">📢 Marketing</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:campaign_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-pink"><i class="bi bi-megaphone-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Campaigns</div>
+          <div class="menu-card-desc">Active and past marketing campaigns</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:campaign_create' %}" class="menu-card">
+        <div class="menu-card-icon ic-pink"><i class="bi bi-send-fill"></i></div>
+        <div>
+          <div class="menu-card-title">New Campaign</div>
+          <div class="menu-card-desc">Launch a new SMS, email or WhatsApp campaign</div>
+        </div>
+      </a>
+      <a href="{% url 'coupons:list' %}" class="menu-card">
+        <div class="menu-card-icon ic-gold"><i class="bi bi-ticket-perforated"></i></div>
+        <div>
+          <div class="menu-card-title">Coupons</div>
+          <div class="menu-card-desc">Manage discount codes and promo offers</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── PRODUCTS ── -->
+    <div class="menu-section-title">🛍 Products</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:product_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-teal"><i class="bi bi-box-seam-fill"></i></div>
+        <div>
+          <div class="menu-card-title">All Products</div>
+          <div class="menu-card-desc">Browse, edit, and delete product listings</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:product_add' %}" class="menu-card">
+        <div class="menu-card-icon ic-teal"><i class="bi bi-plus-circle-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Add Product</div>
+          <div class="menu-card-desc">Create a new product with images and details</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:bulk_import' %}" class="menu-card">
+        <div class="menu-card-icon ic-blue"><i class="bi bi-cloud-upload-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Bulk Import</div>
+          <div class="menu-card-desc">Upload products via CSV or spreadsheet</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:export_products' %}" class="menu-card">
+        <div class="menu-card-icon ic-blue"><i class="bi bi-file-earmark-arrow-down-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Export CSV</div>
+          <div class="menu-card-desc">Download the full product catalogue as CSV</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── TEAM ── -->
+    <div class="menu-section-title">👥 Team</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:employee_list' %}" class="menu-card">
+        <div class="menu-card-icon ic-purple"><i class="bi bi-person-badge-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Team Members</div>
+          <div class="menu-card-desc">View all employees and their profiles</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:attendance_today' %}" class="menu-card">
+        <div class="menu-card-icon ic-green"><i class="bi bi-calendar-check-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Attendance</div>
+          <div class="menu-card-desc">Mark and review today's attendance records</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:internal_notes' %}" class="menu-card">
+        <div class="menu-card-icon ic-slate"><i class="bi bi-chat-square-text-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Internal Notes</div>
+          <div class="menu-card-desc">Team updates, pinned messages and collaboration</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="menu-section-title">📊 Analytics</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:reports' %}" class="menu-card">
+        <div class="menu-card-icon ic-blue"><i class="bi bi-bar-chart-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Reports</div>
+          <div class="menu-card-desc">Sales, calls, leads and ticket performance</div>
+        </div>
+      </a>
+      <a href="{% url 'employee:export_excel' %}?section=orders&period=month" class="menu-card">
+        <div class="menu-card-icon ic-green"><i class="bi bi-file-earmark-spreadsheet-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Export Excel</div>
+          <div class="menu-card-desc">Download orders, leads, or call logs as Excel</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── PROFILE & SYSTEM ── -->
+    <div class="menu-section-title">⚙ Profile & System</div>
+    <div class="menu-grid">
+      <a href="{% url 'employee:my_profile' %}" class="menu-card">
+        <div class="menu-card-icon ic-teal"><i class="bi bi-person-circle"></i></div>
+        <div>
+          <div class="menu-card-title">My Profile</div>
+          <div class="menu-card-desc">Personal info, attendance log and login history</div>
+        </div>
+      </a>
+      <a href="{% url 'core:home' %}" class="menu-card">
+        <div class="menu-card-icon ic-slate"><i class="bi bi-house-fill"></i></div>
+        <div>
+          <div class="menu-card-title">Back to Site</div>
+          <div class="menu-card-desc">Return to the Lumina customer-facing homepage</div>
+        </div>
+      </a>
+    </div>
+
+  </main>
+</div><!-- end adm-main -->
+</div><!-- end adm-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Sidebar toggle
+const admSidebar = document.getElementById('adm-sidebar');
+const admMain    = document.getElementById('adm-main');
+const admOverlay = document.getElementById('adm-overlay');
+const admToggle  = document.getElementById('adm-toggle');
+const isMob = () => window.innerWidth < 992;
+
+admToggle?.addEventListener('click', () => {
+  if (isMob()) {
+    admSidebar.classList.toggle('mob-open');
+    admOverlay.classList.toggle('open');
+  } else {
+    const collapsed = admSidebar.classList.toggle('collapsed');
+    admMain.classList.toggle('sb-collapsed', collapsed);
+    try { localStorage.setItem('emp_sb_collapsed', collapsed ? '1' : '0'); } catch(e) {}
+  }
+});
+admOverlay?.addEventListener('click', () => {
+  admSidebar.classList.remove('mob-open');
+  admOverlay.classList.remove('open');
+});
+
+// Restore collapse state
+if (!isMob()) {
+  try {
+    if (localStorage.getItem('emp_sb_collapsed') === '1') {
+      admSidebar.classList.add('collapsed');
+      admMain.classList.add('sb-collapsed');
+    }
+  } catch(e) {}
+}
+
+// ── Theme
+const admThemeBtn  = document.getElementById('adm-theme-btn');
+const admThemeIcon = document.getElementById('adm-theme-icon');
+function getTheme() { try { return localStorage.getItem('lux_theme') || 'light'; } catch(e) { return 'light'; } }
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  if (admThemeIcon) admThemeIcon.className = t === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+}
+applyTheme(getTheme());
+admThemeBtn?.addEventListener('click', () => {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('lux_theme', next); } catch(e) {}
+  applyTheme(next);
+});
+</script>
+</body>
+</html>

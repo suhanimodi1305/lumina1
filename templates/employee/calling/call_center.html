@@ -1,0 +1,136 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Call Center{% endblock %}
+{% block page_title %}Call Center{% endblock %}
+{% block breadcrumb %}Calling · Incoming / Callbacks{% endblock %}
+{% block nav_call_center %}active{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <!-- Pending Callbacks -->
+  <div class="col-lg-6">
+    <div class="emp-card h-100">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.6rem;">
+          <i class="bi bi-bell-fill" style="color:var(--emp-danger);"></i>
+          Customer Callback Requests
+          {% if pending_cbs %}
+          <span style="background:var(--emp-danger);color:#fff;font-size:.6rem;font-weight:700;
+                        padding:.12rem .45rem;border-radius:20px;">{{ pending_cbs|length }}</span>
+          {% endif %}
+        </div>
+        <a href="{% url 'employee:log_call' %}" class="emp-btn emp-btn-primary emp-btn-sm">
+          <i class="bi bi-telephone-plus"></i> Log Call
+        </a>
+      </div>
+
+      {% for cb in pending_cbs %}
+      <div style="background:var(--emp-bg);border:1px solid #fde68a;border-radius:11px;padding:.9rem;margin-bottom:.65rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;">
+          <div style="min-width:0;">
+            <div style="font-weight:700;font-size:.9rem;">{{ cb.name }}</div>
+            <div style="font-size:.78rem;color:var(--emp-muted);margin:.15rem 0;">
+              <a href="tel:{{ cb.phone }}" style="color:var(--emp-accent);font-weight:600;">
+                <i class="bi bi-telephone"></i> {{ cb.phone }}
+              </a>
+              {% if cb.email %} · <i class="bi bi-envelope"></i> {{ cb.email }}{% endif %}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:.65rem;color:var(--emp-muted);">{{ cb.created_at|timesince }} ago</div>
+            <span class="emp-badge badge-warning" style="margin-top:.2rem;display:inline-flex;">PENDING</span>
+          </div>
+        </div>
+        <div style="background:var(--emp-surface);border-radius:7px;padding:.5rem .75rem;margin:.6rem 0;
+                    font-size:.8rem;border:1px solid var(--emp-border);">
+          <strong>Issue:</strong> {{ cb.issue_summary }}
+        </div>
+        {% if cb.preferred_time %}
+        <div style="font-size:.72rem;color:var(--emp-muted);margin-bottom:.55rem;">
+          <i class="bi bi-clock"></i> Preferred: {{ cb.preferred_time }}
+        </div>
+        {% endif %}
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <a href="tel:{{ cb.phone }}" class="emp-btn emp-btn-primary emp-btn-sm">
+            <i class="bi bi-telephone"></i> Call Now
+          </a>
+          <a href="{% url 'employee:log_call' %}?phone={{ cb.phone }}&name={{ cb.name }}&cb={{ cb.pk }}"
+             class="emp-btn emp-btn-outline emp-btn-sm">
+            <i class="bi bi-pencil"></i> Log Call
+          </a>
+          <form method="post" action="{% url 'employee:callback_resolve' cb.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="emp-btn emp-btn-success emp-btn-sm">
+              <i class="bi bi-check-circle"></i> Resolved
+            </button>
+          </form>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:3rem;color:var(--emp-muted);">
+        <i class="bi bi-check-circle-fill" style="font-size:2.5rem;color:var(--emp-success);display:block;margin-bottom:.75rem;"></i>
+        <div style="font-size:.9rem;font-weight:600;color:var(--emp-text);">All caught up!</div>
+        <div style="font-size:.78rem;margin-top:.25rem;">No pending callback requests</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Today's Calls -->
+  <div class="col-lg-6">
+    <div class="emp-card h-100">
+      <div class="emp-card-title" style="display:flex;align-items:center;gap:.6rem;">
+        <i class="bi bi-clipboard-check" style="color:var(--emp-accent);"></i> Today's Call Log
+      </div>
+      {% for c in today_calls %}
+      <div style="display:flex;gap:.75rem;align-items:flex-start;padding:.65rem;
+                  background:var(--emp-bg);border:1px solid var(--emp-border);
+                  border-radius:9px;margin-bottom:.4rem;">
+        <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;
+          background:{% if c.direction == 'inbound' %}rgba(59,130,246,.12){% elif c.direction == 'outbound' %}rgba(13,148,136,.12){% else %}rgba(245,158,11,.12){% endif %};">
+          <i class="bi bi-{% if c.direction == 'inbound' %}telephone-inbound{% elif c.direction == 'outbound' %}telephone-outbound{% else %}arrow-repeat{% endif %}"
+             style="color:{% if c.direction == 'inbound' %}var(--emp-info){% elif c.direction == 'outbound' %}var(--emp-accent){% else %}var(--emp-gold){% endif %};"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.25rem;">
+            <span style="font-weight:600;font-size:.82rem;">{{ c.customer_name|default:c.phone }}</span>
+            <span style="font-size:.65rem;color:var(--emp-muted);">{{ c.called_at|time:"H:i" }}</span>
+          </div>
+          <div style="font-size:.72rem;color:var(--emp-muted);">{{ c.phone }}</div>
+          <div style="display:flex;gap:.4rem;margin-top:.3rem;flex-wrap:wrap;align-items:center;">
+            <span class="emp-badge {% if c.status == 'connected' %}badge-success{% elif c.status == 'no_answer' %}badge-danger{% elif c.status == 'interested' %}badge-teal{% else %}badge-gray{% endif %}" style="font-size:.6rem;">
+              {{ c.get_status_display }}
+            </span>
+            <span style="font-size:.7rem;color:var(--emp-muted);">{{ c.duration_display }}</span>
+          </div>
+          {% if c.notes %}<div style="font-size:.75rem;color:var(--emp-muted);margin-top:.25rem;font-style:italic;">{{ c.notes|truncatechars:75 }}</div>{% endif %}
+          {% if c.follow_up_date %}<div style="font-size:.7rem;color:var(--emp-gold);margin-top:.2rem;"><i class="bi bi-calendar-event"></i> Follow-up: {{ c.follow_up_date }}</div>{% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:3rem;color:var(--emp-muted);">
+        <i class="bi bi-telephone-x" style="font-size:2rem;opacity:.3;display:block;margin-bottom:.5rem;"></i>
+        <div style="font-size:.82rem;">No calls logged today yet</div>
+        <a href="{% url 'employee:log_call' %}" class="emp-btn emp-btn-outline emp-btn-sm" style="margin-top:.75rem;">
+          <i class="bi bi-telephone-plus"></i> Log First Call
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Status Guide -->
+<div class="emp-card" style="margin-top:1rem;">
+  <div class="emp-card-title" style="display:flex;align-items:center;gap:.5rem;">
+    <i class="bi bi-info-circle" style="color:var(--emp-info);"></i> Call Status Reference
+  </div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    {% for val,label in status_choices %}
+    <div style="background:var(--emp-bg);border:1px solid var(--emp-border);border-radius:8px;padding:.45rem .85rem;font-size:.75rem;display:flex;align-items:center;gap:.5rem;">
+      <span class="emp-badge {% if val == 'connected' %}badge-success{% elif val == 'no_answer' %}badge-danger{% elif val == 'interested' %}badge-teal{% elif val == 'converted' %}badge-success{% elif val == 'escalated' %}badge-warning{% else %}badge-gray{% endif %}" style="font-size:.58rem;">{{ val|upper }}</span>
+      <span style="color:var(--emp-muted);">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

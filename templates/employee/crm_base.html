@@ -1,0 +1,766 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Employee{% endblock %} — Lumina Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  var t='light';
+  try{var s=localStorage.getItem('lux_theme');if(s==='dark'){t='dark';}else{localStorage.setItem('lux_theme','light');}}catch(e){}
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+<style>
+:root {
+  --emp-sidebar:   #0d0d14;
+  --emp-sidebar-w: 258px;
+  --emp-sidebar-collapsed: 64px;
+  --emp-topbar-h:  56px;
+  --emp-accent:    #0d9488;
+  --emp-accent2:   #0891b2;
+  --emp-gold:      #f59e0b;
+  --emp-danger:    #ef4444;
+  --emp-success:   #10b981;
+  --emp-warning:   #f59e0b;
+  --emp-info:      #3b82f6;
+  --emp-bg:        #f1f5f9;
+  --emp-surface:   #ffffff;
+  --emp-border:    #e2e8f0;
+  --emp-text:      #0f172a;
+  --emp-muted:     #64748b;
+  --emp-sb-text:   rgba(255,255,255,.5);
+  --emp-sb-active: rgba(13,148,136,.18);
+}
+[data-theme="dark"]{
+  --emp-bg:#0d0d14; --emp-surface:#12121a;
+  --emp-border:rgba(255,255,255,.08);
+  --emp-text:rgba(255,255,255,.9); --emp-muted:rgba(255,255,255,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;zoom:0.9;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--emp-bg);color:var(--emp-text);line-height:1.6;-webkit-font-smoothing:antialiased;}
+.emp-shell{display:flex;min-height:100vh;}
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="emp-shell">
+
+<style>
+/* ── SIDEBAR ── */
+.emp-sidebar{
+  width:var(--emp-sidebar-w);flex-shrink:0;background:var(--emp-sidebar);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;
+  z-index:200;transition:width .25s;overflow:hidden;
+}
+.emp-sidebar.collapsed{width:var(--emp-sidebar-collapsed);}
+.emp-brand{
+  padding:1rem .9rem .85rem;display:flex;align-items:center;gap:.65rem;
+  border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
+}
+.emp-brand-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--emp-accent),var(--emp-accent2));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;
+}
+.emp-brand-text{font-size:.95rem;font-weight:800;color:#fff;white-space:nowrap;transition:opacity .2s;}
+.emp-brand-sub{font-size:.6rem;color:rgba(255,255,255,.3);white-space:nowrap;transition:opacity .2s;}
+.emp-sidebar.collapsed .emp-brand-text,.emp-sidebar.collapsed .emp-brand-sub{opacity:0;width:0;}
+/* ── NAV ── */
+.emp-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:.4rem 0;scrollbar-width:none;}
+.emp-nav::-webkit-scrollbar{display:none;}
+.emp-section-label{
+  font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  color:rgba(255,255,255,.22);padding:.65rem .9rem .25rem;white-space:nowrap;
+  transition:opacity .2s;
+}
+.emp-sidebar.collapsed .emp-section-label{opacity:0;}
+.emp-nav-item{
+  display:flex;align-items:center;gap:.7rem;padding:.52rem .9rem;margin:.08rem .4rem;
+  border-radius:9px;color:var(--emp-sb-text);font-size:.8rem;font-weight:500;
+  text-decoration:none;border:none;background:transparent;width:calc(100% - .8rem);
+  cursor:pointer;transition:background .12s,color .12s;white-space:nowrap;overflow:hidden;
+}
+.emp-nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);}
+.emp-nav-item.active{background:var(--emp-sb-active);color:#5eead4;font-weight:600;}
+.emp-nav-item .nav-icon{font-size:1rem;flex-shrink:0;width:18px;text-align:center;color:rgba(255,255,255,.3);}
+.emp-nav-item:hover .nav-icon,.emp-nav-item.active .nav-icon{color:var(--emp-accent);}
+.emp-nav-item .nav-label{overflow:hidden;transition:opacity .2s,width .2s;}
+.emp-sidebar.collapsed .nav-label{opacity:0;width:0;}
+.emp-nav-badge{
+  margin-left:auto;padding:.1rem .4rem;background:var(--emp-danger);color:#fff;
+  border-radius:20px;font-size:.58rem;font-weight:700;flex-shrink:0;transition:opacity .2s;
+}
+.emp-sidebar.collapsed .emp-nav-badge{opacity:0;width:0;padding:0;}
+</style>
+
+<style>
+/* ── SIDEBAR FOOTER ── */
+.emp-sb-footer{padding:.75rem .5rem;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.emp-user-card{
+  display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;
+  border-radius:10px;background:rgba(255,255,255,.05);
+}
+.emp-user-avatar{
+  width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--emp-accent),var(--emp-accent2));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.82rem;flex-shrink:0;
+}
+.emp-user-name{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;}
+.emp-user-role{font-size:.6rem;color:rgba(255,255,255,.3);}
+.emp-sidebar.collapsed .emp-user-name,.emp-sidebar.collapsed .emp-user-role{display:none;}
+/* ── MAIN ── */
+.emp-main{flex:1;margin-left:var(--emp-sidebar-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s;min-width:0;}
+.emp-main.sb-collapsed{margin-left:var(--emp-sidebar-collapsed);}
+/* ── TOPBAR ── */
+.emp-topbar{
+  height:var(--emp-topbar-h);background:var(--emp-surface);
+  border-bottom:1px solid var(--emp-border);display:flex;align-items:center;
+  gap:.75rem;padding:0 1.5rem;position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 8px rgba(0,0,0,.06);
+}
+.emp-topbar-toggle{background:none;border:none;color:var(--emp-muted);font-size:1.1rem;cursor:pointer;padding:.3rem;border-radius:7px;transition:background .12s;}
+.emp-topbar-toggle:hover{background:var(--emp-bg);}
+.emp-topbar-title{font-size:.95rem;font-weight:700;color:var(--emp-text);flex:1;}
+.emp-topbar-breadcrumb{font-size:.75rem;color:var(--emp-muted);}
+.emp-tb-btn{
+  width:34px;height:34px;border-radius:9px;background:none;border:1px solid var(--emp-border);
+  color:var(--emp-muted);font-size:.9rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:all .12s;text-decoration:none;
+}
+.emp-tb-btn:hover{background:var(--emp-bg);color:var(--emp-text);}
+/* ── CONTENT ── */
+.emp-content{flex:1;padding:1.5rem clamp(.75rem,2.5vw,2rem);max-width:1600px;margin-inline:auto;width:100%;}
+/* ── KPI CARDS ── */
+.emp-kpi{
+  background:var(--emp-surface);border:1px solid var(--emp-border);border-radius:14px;
+  padding:1.1rem 1.2rem;display:flex;align-items:flex-start;gap:.85rem;
+  transition:box-shadow .15s,transform .15s;
+}
+.emp-kpi:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);transform:translateY(-2px);}
+.emp-kpi-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.emp-kpi-label{font-size:.7rem;font-weight:600;color:var(--emp-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem;}
+.emp-kpi-value{font-size:1.5rem;font-weight:800;color:var(--emp-text);line-height:1.1;}
+.emp-kpi-sub{font-size:.7rem;color:var(--emp-muted);margin-top:.2rem;}
+.kpi-teal{background:rgba(13,148,136,.12);color:var(--emp-accent);}
+.kpi-blue{background:rgba(8,145,178,.12);color:var(--emp-accent2);}
+.kpi-gold{background:rgba(245,158,11,.12);color:var(--emp-gold);}
+.kpi-red{background:rgba(239,68,68,.12);color:var(--emp-danger);}
+.kpi-green{background:rgba(16,185,129,.12);color:var(--emp-success);}
+.kpi-purple{background:rgba(139,92,246,.12);color:#8b5cf6;}
+</style>
+
+<style>
+/* ── TABLE ── */
+.emp-table-wrap{background:var(--emp-surface);border:1px solid var(--emp-border);border-radius:14px;overflow:hidden;}
+.emp-table-head{padding:.9rem 1.2rem;border-bottom:1px solid var(--emp-border);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
+.emp-table-head h6{font-size:.9rem;font-weight:700;margin:0;}
+table.emp-table{width:100%;border-collapse:collapse;}
+table.emp-table th{
+  font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--emp-muted);padding:.65rem 1rem;border-bottom:1px solid var(--emp-border);
+  background:var(--emp-bg);text-align:left;white-space:nowrap;
+}
+table.emp-table td{padding:.65rem 1rem;border-bottom:1px solid var(--emp-border);font-size:.82rem;vertical-align:middle;}
+table.emp-table tr:last-child td{border-bottom:none;}
+table.emp-table tr:hover td{background:rgba(13,148,136,.03);}
+/* ── BADGES ── */
+.emp-badge{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;}
+.badge-success{background:#dcfce7;color:#166534;} .badge-danger{background:#fee2e2;color:#991b1b;}
+.badge-warning{background:#fef3c7;color:#92400e;} .badge-info{background:#dbeafe;color:#1e40af;}
+.badge-teal{background:rgba(13,148,136,.12);color:#0d9488;} .badge-gray{background:#f1f5f9;color:#475569;}
+.badge-purple{background:#ede9fe;color:#5b21b6;}
+[data-theme="dark"] .badge-success{background:rgba(16,185,129,.12);color:#6ee7b7;}
+[data-theme="dark"] .badge-danger{background:rgba(239,68,68,.12);color:#fca5a5;}
+[data-theme="dark"] .badge-warning{background:rgba(245,158,11,.12);color:#fde68a;}
+[data-theme="dark"] .badge-info{background:rgba(59,130,246,.12);color:#93c5fd;}
+[data-theme="dark"] .badge-teal{background:rgba(13,148,136,.15);color:#5eead4;}
+[data-theme="dark"] .badge-gray{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);}
+/* ── FORMS ── */
+.emp-input{width:100%;padding:.55rem .85rem;background:var(--emp-surface);border:1px solid var(--emp-border);border-radius:9px;font-size:.85rem;color:var(--emp-text);transition:border .15s;outline:none;}
+.emp-input:focus{border-color:var(--emp-accent);}
+.emp-label{font-size:.75rem;font-weight:600;color:var(--emp-muted);margin-bottom:.3rem;display:block;}
+/* ── BUTTONS ── */
+.emp-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.52rem 1.1rem;border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.emp-btn-primary{background:var(--emp-accent);color:#fff;} .emp-btn-primary:hover{background:#0f766e;color:#fff;}
+.emp-btn-outline{background:transparent;border:1px solid var(--emp-border);color:var(--emp-text);} .emp-btn-outline:hover{background:var(--emp-bg);}
+.emp-btn-danger{background:var(--emp-danger);color:#fff;} .emp-btn-success{background:var(--emp-success);color:#fff;}
+.emp-btn-sm{padding:.3rem .7rem;font-size:.75rem;border-radius:7px;}
+/* ── CARD ── */
+.emp-card{background:var(--emp-surface);border:1px solid var(--emp-border);border-radius:14px;padding:1.25rem 1.35rem;}
+.emp-card-title{font-size:.9rem;font-weight:700;margin-bottom:1rem;}
+/* ── ALERTS ── */
+.emp-alert{padding:.65rem 1rem;border-radius:9px;font-size:.82rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.emp-alert-success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+.emp-alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+.emp-alert-warning{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.emp-alert-info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;}
+/* ── PIPELINE ── */
+.pipeline-wrap{display:flex;gap:.75rem;overflow-x:auto;padding-bottom:.5rem;}
+.pipeline-col{min-width:185px;background:var(--emp-bg);border:1px solid var(--emp-border);border-radius:12px;padding:.75rem;}
+.pipeline-col-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--emp-muted);margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center;}
+.pipeline-card{background:var(--emp-surface);border:1px solid var(--emp-border);border-radius:9px;padding:.6rem .75rem;margin-bottom:.5rem;font-size:.78rem;cursor:pointer;transition:box-shadow .12s,transform .12s;color:var(--emp-text);}
+.pipeline-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.09);transform:translateY(-1px);}
+/* ── PROGRESS ── */
+.emp-progress{background:var(--emp-border);border-radius:20px;height:7px;overflow:hidden;}
+.emp-progress-bar{height:100%;border-radius:20px;background:var(--emp-accent);transition:width .4s;}
+/* ── RESPONSIVE ── */
+@media(max-width:991px){
+  .emp-sidebar{transform:translateX(-100%);transition:transform .28s;width:var(--emp-sidebar-w)!important;}
+  .emp-sidebar.mob-open{transform:translateX(0);}
+  .emp-main{margin-left:0!important;}
+  .emp-mob-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.55);}
+  .emp-mob-overlay.open{display:block;}
+}
+</style>
+
+<style>
+/* ══════════════════════════════════════════════════════
+   CRM COMPATIBILITY LAYER
+   Maps --crm-* variables & legacy class names to the
+   --emp-* design system so all child templates render
+   correctly regardless of which naming scheme they use.
+   ══════════════════════════════════════════════════════ */
+
+/* ── Variable aliases ── */
+:root {
+  --crm-bg:          var(--emp-bg);
+  --crm-surface:     var(--emp-surface);
+  --crm-card:        var(--emp-surface);
+  --crm-border:      var(--emp-border);
+  --crm-text:        var(--emp-text);
+  --crm-body-text:   var(--emp-text);
+  --crm-muted:       var(--emp-muted);
+  --crm-subtle:      #94a3b8;
+  --crm-teal:        var(--emp-accent);
+  --crm-accent:      var(--emp-accent);
+  --crm-accent2:     var(--emp-accent2);
+  --crm-row-bg:      var(--emp-bg);
+  --crm-chip-bg:     rgba(13,148,136,.1);
+  --crm-chip-text:   #0d9488;
+  --crm-input-bg:    var(--emp-surface);
+  --crm-sidebar:     var(--emp-sidebar);
+
+  /* ── Generic aliases so child templates can use --surface/--border/--text/--muted ── */
+  --surface:         var(--emp-surface);
+  --border:          var(--emp-border);
+  --text:            var(--emp-text);
+  --muted:           var(--emp-muted);
+  --bg:              var(--emp-bg);
+  --accent:          var(--emp-accent);
+  --teal:            var(--emp-accent);
+}
+[data-theme="dark"] {
+  --crm-subtle:      rgba(255,255,255,.3);
+  --crm-chip-bg:     rgba(13,148,136,.18);
+  --crm-chip-text:   #5eead4;
+  --crm-row-bg:      rgba(255,255,255,.03);
+
+  /* ── Generic aliases — dark overrides ── */
+  --surface:         var(--emp-surface);
+  --border:          var(--emp-border);
+  --text:            var(--emp-text);
+  --muted:           var(--emp-muted);
+  --bg:              var(--emp-bg);
+  --teal:            var(--emp-accent);
+}
+
+/* ── Dark mode: alert overrides ── */
+[data-theme="dark"] .emp-alert-success{background:rgba(16,185,129,.12);color:#6ee7b7;border-color:rgba(16,185,129,.25);}
+[data-theme="dark"] .emp-alert-error{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.25);}
+[data-theme="dark"] .emp-alert-warning{background:rgba(245,158,11,.12);color:#fde68a;border-color:rgba(245,158,11,.25);}
+[data-theme="dark"] .emp-alert-info{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.25);}
+
+/* ── .crm-card (alias for .emp-card) ── */
+.crm-card {
+  background: var(--emp-surface);
+  border: 1px solid var(--emp-border);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1rem;
+}
+.crm-card-title {
+  font-size: .9rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--emp-text);
+}
+
+/* ── .crm-table (alias for .emp-table) ── */
+table.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table.crm-table th {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--emp-muted);
+  padding: .65rem 1rem;
+  border-bottom: 1px solid var(--emp-border);
+  background: var(--emp-bg);
+  text-align: left;
+  white-space: nowrap;
+}
+table.crm-table td {
+  padding: .65rem 1rem;
+  border-bottom: 1px solid var(--emp-border);
+  font-size: .82rem;
+  vertical-align: middle;
+  color: var(--emp-text);
+}
+table.crm-table tr:last-child td { border-bottom: none; }
+table.crm-table tr:hover td { background: rgba(13,148,136,.03); }
+
+/* ── Buttons ── */
+.btn-crm-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .52rem 1.1rem;
+  border-radius: 9px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all .15s;
+  background: var(--emp-accent);
+  color: #fff;
+}
+.btn-crm-primary:hover { background: #0f766e; color: #fff; }
+
+.btn-crm-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .52rem 1.1rem;
+  border-radius: 9px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+  background: transparent;
+  border: 1px solid var(--emp-border);
+  color: var(--emp-text);
+}
+.btn-crm-outline:hover { background: var(--emp-bg); }
+
+/* ── Stats grid ── */
+.crm-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+.crm-stat {
+  background: var(--emp-surface);
+  border: 1px solid var(--emp-border);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+}
+.crm-stat-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--emp-text);
+  line-height: 1.1;
+}
+.crm-stat-label {
+  font-size: .68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--emp-muted);
+  margin-top: .2rem;
+}
+
+/* ── Progress bar ── */
+.crm-progress {
+  background: var(--emp-border);
+  border-radius: 20px;
+  height: 7px;
+  overflow: hidden;
+}
+.crm-progress-bar {
+  height: 100%;
+  border-radius: 20px;
+  background: var(--emp-accent);
+  transition: width .4s;
+}
+
+/* ── Badge: stage / status / priority ── */
+.badge-stage {
+  display: inline-flex;
+  align-items: center;
+  padding: .2rem .6rem;
+  border-radius: 20px;
+  font-size: .65rem;
+  font-weight: 700;
+}
+
+/* Stage / status colours */
+.badge-new         { background: rgba(59,130,246,.12);  color: #3b82f6; }
+.badge-open        { background: rgba(14,165,233,.12);  color: #0ea5e9; }
+.badge-in_progress { background: rgba(245,158,11,.12);  color: #f59e0b; }
+.badge-interested  { background: rgba(13,148,136,.12);  color: #0d9488; }
+.badge-closed      { background: rgba(100,116,139,.12); color: #64748b; }
+.badge-lost        { background: rgba(239,68,68,.12);   color: #ef4444; }
+.badge-pending     { background: rgba(245,158,11,.12);  color: #f59e0b; }
+.badge-resolved    { background: rgba(16,185,129,.12);  color: #10b981; }
+.badge-medium      { background: rgba(245,158,11,.12);  color: #f59e0b; }
+.badge-high        { background: rgba(239,68,68,.12);   color: #ef4444; }
+.badge-critical    { background: rgba(185,28,28,.18);   color: #dc2626; }
+.badge-low         { background: rgba(100,116,139,.12); color: #64748b; }
+.badge-active      { background: rgba(13,148,136,.12);  color: #0d9488; }
+
+/* Dynamic stage badge (used via badge-{{ lead.stage }}) */
+.badge-order_confirmed { background: rgba(13,148,136,.15); color: #0d9488; }
+.badge-delivered       { background: rgba(16,185,129,.15); color: #10b981; }
+.badge-repeat_customer { background: rgba(139,92,246,.15); color: #8b5cf6; }
+
+[data-theme="dark"] .badge-new         { background: rgba(59,130,246,.18);  color: #93c5fd; }
+[data-theme="dark"] .badge-open        { background: rgba(14,165,233,.18);  color: #7dd3fc; }
+[data-theme="dark"] .badge-in_progress { background: rgba(245,158,11,.18);  color: #fde68a; }
+[data-theme="dark"] .badge-interested  { background: rgba(13,148,136,.18);  color: #5eead4; }
+[data-theme="dark"] .badge-closed      { background: rgba(255,255,255,.07); color: rgba(255,255,255,.45); }
+[data-theme="dark"] .badge-lost        { background: rgba(239,68,68,.18);   color: #fca5a5; }
+[data-theme="dark"] .badge-pending     { background: rgba(245,158,11,.18);  color: #fde68a; }
+[data-theme="dark"] .badge-resolved    { background: rgba(16,185,129,.18);  color: #6ee7b7; }
+[data-theme="dark"] .badge-high        { background: rgba(239,68,68,.18);   color: #fca5a5; }
+[data-theme="dark"] .badge-critical    { background: rgba(220,38,38,.22);   color: #fca5a5; }
+[data-theme="dark"] .badge-low         { background: rgba(255,255,255,.07); color: rgba(255,255,255,.4); }
+
+/* ── Order status pills (.sp) ── */
+.sp {
+  display: inline-flex;
+  align-items: center;
+  padding: .2rem .55rem;
+  border-radius: 20px;
+  font-size: .65rem;
+  font-weight: 700;
+}
+.sp-pending    { background: rgba(245,158,11,.12);  color: #f59e0b; }
+.sp-confirmed  { background: rgba(59,130,246,.12);  color: #3b82f6; }
+.sp-processing { background: rgba(139,92,246,.12);  color: #8b5cf6; }
+.sp-shipped    { background: rgba(14,165,233,.12);  color: #0ea5e9; }
+.sp-delivered  { background: rgba(16,185,129,.12);  color: #10b981; }
+.sp-cancelled  { background: rgba(239,68,68,.12);   color: #ef4444; }
+.sp-refunded   { background: rgba(100,116,139,.12); color: #64748b; }
+.sp-open       { background: rgba(14,165,233,.12);  color: #0ea5e9; }
+.sp-resolved   { background: rgba(16,185,129,.12);  color: #10b981; }
+.sp-closed     { background: rgba(100,116,139,.12); color: #64748b; }
+.sp-new        { background: rgba(59,130,246,.12);  color: #3b82f6; }
+.sp-in_progress{ background: rgba(245,158,11,.12);  color: #f59e0b; }
+
+/* ── Priority pills (.pp) ── */
+.pp {
+  display: inline-flex;
+  align-items: center;
+  padding: .2rem .55rem;
+  border-radius: 20px;
+  font-size: .65rem;
+  font-weight: 700;
+}
+.pp-low      { background: rgba(100,116,139,.12); color: #64748b; }
+.pp-medium   { background: rgba(245,158,11,.12);  color: #f59e0b; }
+.pp-high     { background: rgba(239,68,68,.12);   color: #ef4444; }
+.pp-critical { background: rgba(185,28,28,.18);   color: #dc2626; }
+
+/* ── Misc inputs / form elements in crm pages ── */
+.crm-input {
+  width: 100%;
+  padding: .55rem .85rem;
+  background: var(--emp-surface);
+  border: 1px solid var(--emp-border);
+  border-radius: 9px;
+  font-size: .85rem;
+  color: var(--emp-text);
+  outline: none;
+  transition: border .15s;
+}
+.crm-input:focus { border-color: var(--emp-accent); }
+
+/* ── Dark mode form overrides for Bootstrap selects/inputs inside crm pages ── */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--emp-surface);
+  border-color: var(--emp-border);
+  color: var(--emp-text);
+}
+[data-theme="dark"] .form-control::placeholder { color: rgba(255,255,255,.3); }
+
+/* ── Generic link colour inside tables ── */
+.crm-card a[style*="color:#0d9488"],
+table.crm-table a { color: var(--emp-accent); }
+</style>
+
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="emp-sidebar" id="emp-sidebar">
+  <div class="emp-brand">
+    <div class="emp-brand-icon">L</div>
+    <div>
+      <div class="emp-brand-text">Lumina CRM</div>
+      <div class="emp-brand-sub">Employee Workspace</div>
+    </div>
+  </div>
+
+  <nav class="emp-nav">
+    <!-- OVERVIEW -->
+    <div class="emp-section-label">Overview</div>
+    <a href="{% url 'employee:portal' %}" class="emp-nav-item {% block nav_dashboard %}{% endblock %}">
+      <i class="bi bi-grid-1x2-fill nav-icon"></i><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="{% url 'employee:reports' %}" class="emp-nav-item {% block nav_reports %}{% endblock %}">
+      <i class="bi bi-bar-chart-fill nav-icon"></i><span class="nav-label">Reports</span>
+    </a>
+
+    <!-- CRM -->
+    <div class="emp-section-label">CRM</div>
+    <a href="{% url 'employee:lead_list' %}" class="emp-nav-item {% block nav_leads %}{% endblock %}">
+      <i class="bi bi-person-lines-fill nav-icon"></i><span class="nav-label">Leads</span>
+    </a>
+    <a href="{% url 'employee:opportunity_list' %}" class="emp-nav-item {% block nav_opps %}{% endblock %}">
+      <i class="bi bi-trophy nav-icon"></i><span class="nav-label">Opportunities</span>
+    </a>
+    <a href="{% url 'employee:customer_list' %}" class="emp-nav-item {% block nav_customers %}{% endblock %}">
+      <i class="bi bi-people-fill nav-icon"></i><span class="nav-label">Customers</span>
+    </a>
+
+    <!-- ORDERS -->
+    <div class="emp-section-label">Orders</div>
+    <a href="{% url 'employee:order_list' %}" class="emp-nav-item {% block nav_orders %}{% endblock %}">
+      <i class="bi bi-bag-check-fill nav-icon"></i><span class="nav-label">Orders</span>
+    </a>
+    <a href="{% url 'employee:requirement_list' %}" class="emp-nav-item {% block nav_reqs %}{% endblock %}">
+      <i class="bi bi-clipboard-check nav-icon"></i><span class="nav-label">Requirements</span>
+    </a>
+
+    <!-- SUPPORT -->
+    <div class="emp-section-label">Support</div>
+    <a href="{% url 'employee:ticket_list' %}" class="emp-nav-item {% block nav_tickets %}{% endblock %}">
+      <i class="bi bi-headset nav-icon"></i><span class="nav-label">Tickets</span>
+    </a>
+    <a href="{% url 'employee:ticket_create' %}" class="emp-nav-item {% block nav_ticket_new %}{% endblock %}">
+      <i class="bi bi-plus-circle nav-icon"></i><span class="nav-label">New Ticket</span>
+    </a>
+
+    <!-- CALLING -->
+    <div class="emp-section-label">Calling</div>
+    <a href="{% url 'employee:call_center' %}" class="emp-nav-item {% block nav_call_center %}{% endblock %}">
+      <i class="bi bi-telephone-fill nav-icon"></i><span class="nav-label">Call Center</span>
+    </a>
+    <a href="{% url 'employee:call_history' %}" class="emp-nav-item {% block nav_call_hist %}{% endblock %}">
+      <i class="bi bi-clock-history nav-icon"></i><span class="nav-label">Call History</span>
+    </a>
+    <a href="{% url 'employee:log_call' %}" class="emp-nav-item {% block nav_log_call %}{% endblock %}">
+      <i class="bi bi-telephone-plus nav-icon"></i><span class="nav-label">Log a Call</span>
+    </a>
+
+    <!-- MARKETING -->
+    <div class="emp-section-label">Marketing</div>
+    <a href="{% url 'employee:campaign_list' %}" class="emp-nav-item {% block nav_campaigns %}{% endblock %}">
+      <i class="bi bi-megaphone-fill nav-icon"></i><span class="nav-label">Campaigns</span>
+    </a>
+    <a href="{% url 'employee:campaign_create' %}" class="emp-nav-item {% block nav_camp_new %}{% endblock %}">
+      <i class="bi bi-plus-circle nav-icon"></i><span class="nav-label">New Campaign</span>
+    </a>
+    <a href="{% url 'coupons:list' %}" class="emp-nav-item">
+      <i class="bi bi-ticket-perforated nav-icon"></i><span class="nav-label">Coupons</span>
+    </a>
+
+    <!-- PRODUCTS -->
+    <div class="emp-section-label">Products</div>
+    <a href="{% url 'employee:product_list' %}" class="emp-nav-item {% block nav_prod_list %}{% endblock %}">
+      <i class="bi bi-box-seam nav-icon"></i><span class="nav-label">All Products</span>
+    </a>
+    <a href="{% url 'employee:product_add' %}" class="emp-nav-item {% block nav_prod_add %}{% endblock %}">
+      <i class="bi bi-plus-circle nav-icon"></i><span class="nav-label">Add Product</span>
+    </a>
+    <a href="{% url 'employee:bulk_import' %}" class="emp-nav-item {% block nav_bulk %}{% endblock %}">
+      <i class="bi bi-cloud-upload nav-icon"></i><span class="nav-label">Bulk Import</span>
+    </a>
+
+    <!-- TEAM -->
+    <div class="emp-section-label">Team</div>
+    <a href="{% url 'employee:internal_notes' %}" class="emp-nav-item {% block nav_notes %}{% endblock %}">
+      <i class="bi bi-chat-square-text nav-icon"></i><span class="nav-label">Internal Notes</span>
+    </a>
+    <a href="{% url 'employee:employee_list' %}" class="emp-nav-item {% block nav_team %}{% endblock %}">
+      <i class="bi bi-person-badge nav-icon"></i><span class="nav-label">Team</span>
+    </a>
+    <a href="{% url 'employee:attendance_today' %}" class="emp-nav-item {% block nav_attend %}{% endblock %}">
+      <i class="bi bi-calendar-check nav-icon"></i><span class="nav-label">Attendance</span>
+    </a>
+
+    <!-- ANALYTICS -->
+    <div class="emp-section-label">Analytics</div>
+    <a href="{% url 'employee:export_excel' %}?section=orders&period=month" class="emp-nav-item">
+      <i class="bi bi-file-earmark-arrow-down nav-icon"></i><span class="nav-label">Export Excel</span>
+    </a>
+
+    <!-- PROFILE -->
+    <div class="emp-section-label">Profile</div>
+    <a href="{% url 'employee:my_profile' %}" class="emp-nav-item {% block nav_my_profile %}{% endblock %}">
+      <i class="bi bi-person-circle nav-icon"></i><span class="nav-label">My Profile</span>
+    </a>
+  </nav>
+
+  <!-- Sidebar footer: logged-in employee card -->
+  <div class="emp-sb-footer">
+    <div class="emp-user-card">
+      <div class="emp-user-avatar">{{ request.user.first_name|first|upper|default:request.user.username|first|upper }}</div>
+      <div style="min-width:0;">
+        <div class="emp-user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="emp-user-role">
+          {% if request.user.is_superuser %}Super Admin{% else %}Employee{% endif %}
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'logout' %}" class="emp-nav-item" style="margin-top:.5rem;color:#ef4444;">
+      <i class="bi bi-box-arrow-left nav-icon" style="color:#ef4444;"></i>
+      <span class="nav-label">Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="emp-mob-overlay" id="emp-overlay"></div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="emp-main" id="emp-main">
+  <!-- TOPBAR -->
+  <div class="emp-topbar">
+    <button class="emp-topbar-toggle" id="emp-toggle"><i class="bi bi-layout-sidebar"></i></button>
+    <div>
+      <div class="emp-topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+      <div class="emp-topbar-breadcrumb">{% block breadcrumb %}Employee Workspace{% endblock %}</div>
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <!-- Quick Add -->
+      <div class="dropdown">
+        <button class="emp-tb-btn dropdown-toggle" data-bs-toggle="dropdown" style="width:auto;padding:0 .75rem;font-size:.8rem;font-weight:600;gap:.4rem;">
+          <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Quick Add</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size:.82rem;min-width:200px;">
+          <li><a class="dropdown-item" href="{% url 'employee:lead_create' %}"><i class="bi bi-person-plus me-2 text-primary"></i>New Lead</a></li>
+          <li><a class="dropdown-item" href="{% url 'employee:ticket_create' %}"><i class="bi bi-headset me-2 text-warning"></i>New Ticket</a></li>
+          <li><a class="dropdown-item" href="{% url 'employee:log_call' %}"><i class="bi bi-telephone-plus me-2 text-success"></i>Log Call</a></li>
+          <li><a class="dropdown-item" href="{% url 'employee:campaign_create' %}"><i class="bi bi-megaphone me-2 text-danger"></i>New Campaign</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="{% url 'employee:product_add' %}"><i class="bi bi-bag-plus me-2 text-info"></i>Add Product</a></li>
+        </ul>
+      </div>
+      <button class="emp-tb-btn" id="emp-theme-btn" title="Toggle theme"><i class="bi bi-moon-stars" id="emp-theme-icon"></i></button>
+      <div style="width:1px;height:24px;background:var(--emp-border);"></div>
+      <a href="{% url 'employee:my_profile' %}" style="text-decoration:none;">
+        <div class="emp-user-avatar" style="width:32px;height:32px;">{{ request.user.first_name|first|upper|default:request.user.username|first|upper }}</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+  <div style="padding:.75rem 1.5rem 0;">
+    {% for message in messages %}
+    <div class="emp-alert emp-alert-{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">
+      <i class="bi bi-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% else %}info-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- CONTENT -->
+  <main class="emp-content">
+    {% block content %}{% endblock %}
+  </main>
+</div><!-- end emp-main -->
+</div><!-- end emp-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ── Sidebar toggle
+const empSidebar = document.getElementById('emp-sidebar');
+const empMain    = document.getElementById('emp-main');
+const empOverlay = document.getElementById('emp-overlay');
+const empToggle  = document.getElementById('emp-toggle');
+const empNav     = empSidebar ? empSidebar.querySelector('.emp-nav') : null;
+const isMob = () => window.innerWidth < 992;
+
+empToggle?.addEventListener('click', () => {
+  if (isMob()) {
+    empSidebar.classList.toggle('mob-open');
+    empOverlay.classList.toggle('open');
+  } else {
+    const collapsed = empSidebar.classList.toggle('collapsed');
+    empMain.classList.toggle('sb-collapsed', collapsed);
+    try { localStorage.setItem('emp_sb_collapsed', collapsed ? '1' : '0'); } catch(e) {}
+  }
+});
+empOverlay?.addEventListener('click', () => {
+  empSidebar.classList.remove('mob-open');
+  empOverlay.classList.remove('open');
+});
+
+// ── Restore collapse state
+if (!isMob()) {
+  try {
+    if (localStorage.getItem('emp_sb_collapsed') === '1') {
+      empSidebar.classList.add('collapsed');
+      empMain.classList.add('sb-collapsed');
+    }
+  } catch(e) {}
+}
+
+// ── Scroll active nav item into view & persist scroll
+(function() {
+  const SCROLL_KEY = 'emp_nav_scroll';
+  if (!empNav) return;
+  try {
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (saved !== null) empNav.scrollTop = parseInt(saved, 10);
+  } catch(e) {}
+  const activeItem = empNav.querySelector('.emp-nav-item.active');
+  if (activeItem) {
+    const navRect  = empNav.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+    if (itemRect.top < navRect.top || itemRect.bottom > navRect.bottom) {
+      activeItem.scrollIntoView({ block: 'center' });
+    }
+  }
+  empNav.addEventListener('scroll', () => {
+    try { sessionStorage.setItem(SCROLL_KEY, empNav.scrollTop); } catch(e) {}
+  }, { passive: true });
+})();
+
+// ── Theme
+const empThemeBtn  = document.getElementById('emp-theme-btn');
+const empThemeIcon = document.getElementById('emp-theme-icon');
+function getTheme() { try { return localStorage.getItem('lux_theme') || 'light'; } catch(e) { return 'light'; } }
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  if (empThemeIcon) empThemeIcon.className = t === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+}
+applyTheme(getTheme());
+empThemeBtn?.addEventListener('click', () => {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('lux_theme', next); } catch(e) {}
+  applyTheme(next);
+});
+// Sync across tabs
+window.addEventListener('storage', (e) => {
+  if (e.key === 'lux_theme') applyTheme(e.newValue === 'dark' ? 'dark' : 'light');
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

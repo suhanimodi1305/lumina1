@@ -1,0 +1,69 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Users{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block breadcrumb %}Admin / Users{% endblock %}
+{% block content %}
+<!-- Stats row -->
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-blue"><i class="bi bi-people-fill"></i></div><div><div class="adm-kpi-label">Total Users</div><div class="adm-kpi-value">{{ total }}</div></div></div></div>
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-gold"><i class="bi bi-star-fill"></i></div><div><div class="adm-kpi-label">Premium/VIP</div><div class="adm-kpi-value">{{ premium }}</div></div></div></div>
+  <div class="col-md-4"><div class="adm-kpi"><div class="adm-kpi-icon kpi-red"><i class="bi bi-slash-circle"></i></div><div><div class="adm-kpi-label">Blocked</div><div class="adm-kpi-value">{{ blocked }}</div></div></div></div>
+</div>
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <h6>👥 All Users</h6>
+    <form method="get" class="d-flex gap-2 flex-wrap">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Search users…" value="{{ q }}">
+      <select class="adm-input" style="width:140px;" name="tier">
+        <option value="">All Tiers</option>
+        {% for val,lbl in tier_choices %}<option value="{{ val }}" {% if tier == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <select class="adm-input" style="width:130px;" name="status">
+        <option value="">All Status</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Blocked</option>
+      </select>
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:user_list' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr>
+        <th>User</th><th>Email</th><th>Tier</th><th>Joined</th><th>Status</th><th>Action</th>
+      </tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <a href="{% url 'admin_panel:user_detail' pk=u.pk %}" style="text-decoration:none;display:flex;align-items:center;gap:.5rem;">
+              <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#0d9488);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.75rem;flex-shrink:0;">{{ u.username|first|upper }}</div>
+              <span style="font-weight:600;color:var(--adm-accent);">{{ u.get_full_name|default:u.username }}</span>
+            </a>
+          </td>
+          <td style="color:var(--adm-muted);">{{ u.email }}</td>
+          <td>
+            {% with tier=u.profile.tier|default:'normal' %}
+            <span class="adm-badge {% if tier == 'vip' %}badge-purple{% elif tier == 'medium' %}badge-info{% else %}badge-gray{% endif %}">{{ tier|upper }}</span>
+            {% endwith %}
+          </td>
+          <td style="color:var(--adm-muted);">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            <span class="adm-badge {% if u.is_active %}badge-success{% else %}badge-danger{% endif %}">
+              {% if u.is_active %}Active{% else %}Blocked{% endif %}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'admin_panel:user_detail' pk=u.pk %}" class="adm-btn btn-outline btn-sm">
+              <i class="bi bi-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--adm-muted);">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

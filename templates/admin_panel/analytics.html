@@ -1,0 +1,115 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block breadcrumb %}Admin / Analytics{% endblock %}
+{% block content %}
+<!-- Period selector -->
+<div class="d-flex gap-2 mb-3 flex-wrap align-items-center justify-content-between">
+  <div class="d-flex gap-2 flex-wrap">
+    {% for val,lbl in periods_list %}<a href="?period={{ val }}" class="adm-btn {% if period == val %}btn-primary{% else %}btn-outline{% endif %} btn-sm">{{ lbl }}</a>{% endfor %}
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'admin_panel:export_report' %}?section=orders&period={{ period }}" class="adm-btn btn-outline btn-sm"><i class="bi bi-download"></i> Orders CSV</a>
+    <a href="{% url 'admin_panel:export_report' %}?section=users&period={{ period }}" class="adm-btn btn-outline btn-sm"><i class="bi bi-download"></i> Users CSV</a>
+    <a href="{% url 'admin_panel:export_report' %}?section=leads&period={{ period }}" class="adm-btn btn-outline btn-sm"><i class="bi bi-download"></i> Leads CSV</a>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-2"><div class="adm-kpi"><div class="adm-kpi-icon kpi-green"><i class="bi bi-currency-rupee"></i></div><div><div class="adm-kpi-label">Revenue</div><div class="adm-kpi-value">₹{{ revenue|floatformat:0 }}</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi"><div class="adm-kpi-icon kpi-blue"><i class="bi bi-bag-check"></i></div><div><div class="adm-kpi-label">Orders</div><div class="adm-kpi-value">{{ order_count }}</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi"><div class="adm-kpi-icon kpi-teal"><i class="bi bi-currency-dollar"></i></div><div><div class="adm-kpi-label">Avg Order</div><div class="adm-kpi-value">₹{{ avg_order|floatformat:0 }}</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi"><div class="adm-kpi-icon kpi-purple"><i class="bi bi-funnel"></i></div><div><div class="adm-kpi-label">Leads</div><div class="adm-kpi-value">{{ lead_count }}</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi"><div class="adm-kpi-icon kpi-gold"><i class="bi bi-stars"></i></div><div><div class="adm-kpi-label">AI Scans</div><div class="adm-kpi-value">{{ scan_count }}</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="adm-kpi"><div class="adm-kpi-icon kpi-red"><i class="bi bi-headset"></i></div><div><div class="adm-kpi-label">Tickets</div><div class="adm-kpi-value">{{ ticket_count }}</div><div class="adm-kpi-sub">{{ res_rate }}% resolved</div></div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- Revenue Chart -->
+  <div class="col-lg-8">
+    <div class="adm-card">
+      <div class="adm-card-title">📈 Monthly Revenue Trend (12 Months)</div>
+      <div style="height:260px;"><canvas id="revenueChart"></canvas></div>
+    </div>
+  </div>
+  <!-- Resolution Rate -->
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">🎫 Support Resolution</div>
+      <div style="text-align:center;padding:1.5rem 0;">
+        <div style="font-size:3rem;font-weight:800;color:var(--adm-accent);">{{ res_rate }}%</div>
+        <div style="font-size:.82rem;color:var(--adm-muted);">Resolution Rate</div>
+        <div style="height:10px;background:var(--adm-border);border-radius:5px;margin-top:1rem;overflow:hidden;">
+          <div style="height:100%;background:linear-gradient(90deg,#7c3aed,#10b981);border-radius:5px;width:{{ res_rate }}%;transition:width .8s;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Top Categories -->
+  <div class="col-lg-6">
+    <div class="adm-card">
+      <div class="adm-card-title">🛍 Top Products Sold</div>
+      {% for p in top_cats %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--adm-border);font-size:.82rem;">
+        <div>
+          <div style="font-weight:600;">{{ p.name|truncatechars:40 }}</div>
+          <div style="font-size:.68rem;color:var(--adm-muted);">₹{{ p.rev|floatformat:0 }} revenue</div>
+        </div>
+        <span class="adm-badge badge-purple">{{ p.cnt }} sold</span>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No data.</div>{% endfor %}
+    </div>
+  </div>
+  <!-- User Growth -->
+  <div class="col-lg-6">
+    <div class="adm-card">
+      <div class="adm-card-title">👥 User Growth (6 Months)</div>
+      <div style="height:200px;"><canvas id="userChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const revenueCtx = document.getElementById('revenueChart');
+if (revenueCtx) {
+  const data = {{ monthly_data|safe }};
+  new Chart(revenueCtx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.month),
+      datasets: [{
+        label: 'Revenue (₹)', data: data.map(d => d.revenue),
+        backgroundColor: 'rgba(124,58,237,.7)',
+        borderRadius: 6, borderSkipped: false,
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { grid: { color: 'rgba(0,0,0,.05)' } }, x: { grid: { display: false } } }
+    }
+  });
+}
+const userCtx = document.getElementById('userChart');
+if (userCtx) {
+  const ud = {{ user_growth|safe }};
+  new Chart(userCtx, {
+    type: 'line',
+    data: {
+      labels: ud.map(d => d.month),
+      datasets: [{ label: 'New Users', data: ud.map(d => d.users),
+        borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,.1)',
+        tension: 0.4, fill: true, pointRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { grid: { color: 'rgba(0,0,0,.05)' } }, x: { grid: { display: false } } }
+    }
+  });
+}
+</script>
+{% endblock %}

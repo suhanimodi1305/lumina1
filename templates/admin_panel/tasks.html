@@ -1,0 +1,86 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block page_title %}Admin Tasks{% endblock %}
+{% block breadcrumb %}Admin / Tasks{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <!-- Task List -->
+  <div class="col-lg-8">
+    <div class="d-flex gap-2 mb-2 flex-wrap">
+      {% for val,lbl in status_choices %}<a href="?status={{ val }}" class="adm-btn {% if status_filter == val %}btn-primary{% else %}btn-outline{% endif %} btn-sm">{{ lbl }}</a>{% endfor %}
+      <a href="{% url 'admin_panel:task_list' %}" class="adm-btn {% if not status_filter %}btn-primary{% else %}btn-outline{% endif %} btn-sm">All</a>
+    </div>
+    <div class="adm-table-wrap">
+      <div class="adm-table-head"><h6>✅ Tasks</h6></div>
+      <table class="adm-table">
+        <thead><tr><th>Task</th><th>Assigned</th><th>Priority</th><th>Due</th><th>Status</th><th>Update</th></tr></thead>
+        <tbody>
+          {% for t in tasks %}
+          <tr style="{% if t.status == 'done' %}opacity:.6;{% endif %}">
+            <td>
+              <div style="font-weight:600;font-size:.82rem;">{{ t.title|truncatechars:60 }}</div>
+              {% if t.description %}<div style="font-size:.68rem;color:var(--adm-muted);">{{ t.description|truncatechars:80 }}</div>{% endif %}
+            </td>
+            <td style="font-size:.78rem;">{{ t.assigned_to.get_full_name|default:t.assigned_to.username|default:'—' }}</td>
+            <td>
+              <span class="adm-badge {% if t.priority == 'urgent' %}badge-danger{% elif t.priority == 'high' %}badge-warning{% elif t.priority == 'medium' %}badge-info{% else %}badge-gray{% endif %}">{{ t.get_priority_display }}</span>
+            </td>
+            <td style="color:{% if t.due_date and t.due_date < today %}#ef4444{% else %}var(--adm-muted){% endif %};font-size:.78rem;">{{ t.due_date|date:"d M"|default:'—' }}</td>
+            <td><span class="adm-badge {% if t.status == 'done' %}badge-success{% elif t.status == 'in_progress' %}badge-info{% elif t.status == 'cancelled' %}badge-danger{% else %}badge-warning{% endif %}">{{ t.get_status_display }}</span></td>
+            <td>
+              <form method="post" action="{% url 'admin_panel:task_update' pk=t.pk %}" class="d-flex gap-1">
+                {% csrf_token %}
+                <select name="status" class="adm-input" style="width:120px;font-size:.72rem;padding:.25rem .5rem;">
+                  {% for val,lbl in status_choices %}<option value="{{ val }}" {% if t.status == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                </select>
+                <button type="submit" class="adm-btn btn-primary btn-sm">✓</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--adm-muted);">No tasks found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Task -->
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">➕ New Task</div>
+      <form method="post" action="{% url 'admin_panel:task_list' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="adm-label">Title *</label>
+          <input type="text" name="title" class="adm-input" required placeholder="Task description…">
+        </div>
+        <div class="mb-3">
+          <label class="adm-label">Details</label>
+          <textarea name="description" class="adm-input" rows="3" placeholder="Additional context…"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="adm-label">Assign To</label>
+          <select name="assigned_to" class="adm-input">
+            <option value="">— Unassigned —</option>
+            {% for s in staff %}<option value="{{ s.pk }}">{{ s.get_full_name|default:s.username }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="adm-label">Priority</label>
+            <select name="priority" class="adm-input">
+              {% for val,lbl in priority_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="adm-label">Due Date</label>
+            <input type="date" name="due_date" class="adm-input">
+          </div>
+        </div>
+        <button type="submit" class="adm-btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Create Task</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

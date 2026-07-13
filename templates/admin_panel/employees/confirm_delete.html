@@ -1,0 +1,72 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Delete Employee{% endblock %}
+{% block page_title %}Delete Employee{% endblock %}
+{% block breadcrumb %}Admin / HRMS / Delete Employee{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+
+    <!-- Admin-only warning banner -->
+    <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;
+                padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;
+                font-size:.78rem;color:#ef4444;">
+      <i class="bi bi-shield-lock-fill" style="font-size:1rem;flex-shrink:0;"></i>
+      <span><strong>Admin action:</strong> This permanently deletes the employee's account and all associated data.
+      Employees cannot perform this action — it is only available from the Admin Panel.</span>
+    </div>
+
+    <div class="adm-card text-center">
+      <!-- Employee avatar -->
+      <div style="width:60px;height:60px;border-radius:50%;margin:0 auto 1rem;
+                  background:linear-gradient(135deg,#7c3aed,#5b21b6);
+                  display:flex;align-items:center;justify-content:center;
+                  color:#fff;font-weight:700;font-size:1.4rem;">
+        {{ emp.username|first|upper }}
+      </div>
+
+      <h5 style="font-weight:700;margin-bottom:.25rem;color:var(--adm-text);">
+        {{ emp.get_full_name|default:emp.username }}
+      </h5>
+      <div style="font-size:.78rem;color:var(--adm-muted);margin-bottom:1.25rem;">
+        <span style="font-family:monospace;">{{ emp.username }}</span>
+        &nbsp;·&nbsp; {{ emp.email }}
+        {% if emp.emp_profile.employee_id %}
+        &nbsp;·&nbsp; <span style="font-family:monospace;font-size:.75em;">{{ emp.emp_profile.employee_id }}</span>
+        {% endif %}
+      </div>
+
+      <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:10px;
+                  padding:1rem;margin-bottom:1.5rem;text-align:left;">
+        <div style="font-size:.8rem;font-weight:700;color:#ef4444;margin-bottom:.5rem;">
+          ⚠️ This will permanently delete:
+        </div>
+        <ul style="font-size:.78rem;color:var(--adm-muted);padding-left:1.25rem;margin:0;line-height:1.9;">
+          <li>The employee's Django user account</li>
+          <li>All CRM leads, calls, tickets assigned to them</li>
+          <li>Attendance records, salary records, leave requests</li>
+          <li>Login history and session data</li>
+        </ul>
+      </div>
+
+      <p style="color:var(--adm-muted);font-size:.82rem;margin-bottom:1.5rem;">
+        Are you sure you want to permanently delete
+        <strong>{{ emp.get_full_name|default:emp.username }}</strong>?<br>
+        <span style="color:#ef4444;font-size:.8rem;font-weight:600;">This action cannot be undone.</span>
+      </p>
+
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="{% url 'admin_panel:emp_list' %}" class="adm-btn btn-outline">
+          <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <form method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="adm-btn btn-danger">
+            <i class="bi bi-trash"></i> Yes, Delete Permanently
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

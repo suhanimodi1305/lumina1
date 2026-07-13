@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'apps.orders',
     'apps.memberships',
     'apps.diagnostic',
-    'apps.hair',
     'apps.skin',
     # New system-design apps
     'apps.notifications',
@@ -54,6 +53,8 @@ INSTALLED_APPS = [
     'apps.reviews',
     'apps.coupons',
     'apps.blog',
+    # Admin ERP panel
+    'apps.admin_panel',
 ]
 
 MIDDLEWARE = [

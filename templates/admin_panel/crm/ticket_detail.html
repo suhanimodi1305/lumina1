@@ -1,0 +1,98 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Ticket — {{ ticket.ticket_id }}{% endblock %}
+{% block page_title %}Ticket Detail{% endblock %}
+{% block breadcrumb %}Admin / CRM / Support / {{ ticket.ticket_id }}{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <!-- Left: Ticket info + replies -->
+  <div class="col-lg-8">
+    <div class="adm-card mb-3">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+        <div>
+          <div style="font-family:monospace;font-size:.75rem;color:var(--adm-muted);">{{ ticket.ticket_id }}</div>
+          <div style="font-size:1rem;font-weight:700;margin-top:.2rem;">{{ ticket.subject }}</div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <span class="adm-badge {% if ticket.priority == 'critical' %}badge-danger{% elif ticket.priority == 'high' %}badge-warning{% else %}badge-info{% endif %}">{{ ticket.get_priority_display }}</span>
+          <span class="adm-badge {% if ticket.status == 'resolved' or ticket.status == 'closed' %}badge-success{% elif ticket.status == 'open' %}badge-warning{% else %}badge-info{% endif %}">{{ ticket.get_status_display }}</span>
+        </div>
+      </div>
+      <div style="background:var(--adm-bg);border-radius:8px;padding:1rem;font-size:.85rem;line-height:1.6;margin-bottom:1rem;">
+        {{ ticket.description }}
+      </div>
+      <!-- Replies -->
+      {% for reply in replies %}
+      <div style="border-left:3px solid {% if reply.is_internal %}#f59e0b{% else %}var(--adm-accent){% endif %};padding:.75rem 1rem;margin-bottom:.75rem;background:var(--adm-bg);border-radius:0 8px 8px 0;">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--adm-muted);margin-bottom:.35rem;">
+          <span style="font-weight:600;">{{ reply.author.get_full_name|default:reply.author.username|default:'System' }}
+            {% if reply.is_internal %}<span class="adm-badge badge-warning ms-1" style="font-size:.55rem;">Internal</span>{% endif %}
+          </span>
+          <span>{{ reply.created_at|date:"d M Y H:i" }}</span>
+        </div>
+        <div style="font-size:.83rem;">{{ reply.message }}</div>
+      </div>
+      {% empty %}
+      <div style="color:var(--adm-muted);font-size:.82rem;margin-bottom:.75rem;">No replies yet.</div>
+      {% endfor %}
+
+      <!-- Reply Form -->
+      <form method="post" style="margin-top:1rem;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reply">
+        <label class="adm-label">Add Reply</label>
+        <textarea name="message" class="adm-input" rows="3" placeholder="Type your reply…"></textarea>
+        <div style="display:flex;align-items:center;gap:1rem;margin-top:.6rem;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;cursor:pointer;">
+            <input type="checkbox" name="is_internal"> Internal note (not shown to customer)
+          </label>
+          <button type="submit" class="adm-btn btn-primary btn-sm"><i class="bi bi-send"></i> Send Reply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right: Actions -->
+  <div class="col-lg-4">
+    <div class="adm-card mb-3">
+      <div class="adm-card-title">⚙ Update Ticket</div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_status">
+        <div class="mb-3">
+          <label class="adm-label">Status</label>
+          <select name="status" class="adm-input">
+            {% for val,lbl in status_choices %}<option value="{{ val }}" {% if ticket.status == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="adm-label">Priority</label>
+          <select name="priority" class="adm-input">
+            {% for val,lbl in priority_choices %}<option value="{{ val }}" {% if ticket.priority == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="adm-label">Assign To</label>
+          <select name="assigned_to" class="adm-input">
+            <option value="">— Unassigned —</option>
+            {% for e in employees %}<option value="{{ e.pk }}" {% if ticket.assigned_to_id == e.pk %}selected{% endif %}>{{ e.get_full_name|default:e.username }}</option>{% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="adm-btn btn-primary w-100">Save Changes</button>
+      </form>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-title">👤 Customer</div>
+      <div style="font-size:.82rem;">
+        <div style="padding:.35rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Name:</span> {{ ticket.customer_name }}</div>
+        <div style="padding:.35rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Email:</span> {{ ticket.customer_email|default:'—' }}</div>
+        <div style="padding:.35rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Phone:</span> {{ ticket.customer_phone|default:'—' }}</div>
+        <div style="padding:.35rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Channel:</span> {{ ticket.get_channel_display }}</div>
+        <div style="padding:.35rem 0;"><span style="color:var(--adm-muted);">Created:</span> {{ ticket.created_at|date:"d M Y H:i" }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="mt-2">
+  <a href="{% url 'admin_panel:crm_support' %}" class="adm-btn btn-outline btn-sm"><i class="bi bi-arrow-left"></i> Back to Tickets</a>
+</div>
+{% endblock %}

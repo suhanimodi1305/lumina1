@@ -1,0 +1,62 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Management{% endblock %}
+{% block breadcrumb %}Admin / HRMS / Attendance{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <form method="get" class="d-flex align-items-center gap-2">
+    <label class="adm-label mb-0">Date:</label>
+    <input type="date" name="date" class="adm-input" style="width:180px;" value="{{ target_date }}">
+    <button type="submit" class="adm-btn btn-outline btn-sm">Go</button>
+  </form>
+  <div>
+    <span class="adm-badge badge-success" style="font-size:.8rem;padding:.4rem .9rem;">{{ present }} / {{ total_staff }} Present</span>
+  </div>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="adm-table-wrap">
+    <div class="adm-table-head"><h6>📅 Attendance — {{ target_date }}</h6>
+      <button type="submit" class="adm-btn btn-primary btn-sm"><i class="bi bi-save"></i> Save Attendance</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="adm-table">
+        <thead><tr><th>Employee</th><th>Status</th><th>Check In</th><th>Check Out</th></tr></thead>
+        <tbody>
+          {% for emp in staff %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;">{{ emp.username|first|upper }}</div>
+                <span style="font-weight:600;font-size:.82rem;">{{ emp.get_full_name|default:emp.username }}</span>
+              </div>
+            </td>
+            <td>
+              <select name="status_{{ emp.pk }}" class="adm-input" style="width:150px;">
+                {% for val,lbl in status_choices %}
+                <option value="{{ val }}"
+                  {% for rec_id,rec in records.items %}{% if rec_id == emp.pk and rec.status == val %}selected{% endif %}{% endfor %}>
+                  {{ lbl }}
+                </option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <input type="time" name="checkin_{{ emp.pk }}" class="adm-input" style="width:120px;"
+                {% for rec_id,rec in records.items %}{% if rec_id == emp.pk and rec.check_in %}value="{{ rec.check_in|time:'H:i' }}"{% endif %}{% endfor %}>
+            </td>
+            <td>
+              <input type="time" name="checkout_{{ emp.pk }}" class="adm-input" style="width:120px;"
+                {% for rec_id,rec in records.items %}{% if rec_id == emp.pk and rec.check_out %}value="{{ rec.check_out|time:'H:i' }}"{% endif %}{% endfor %}>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--adm-muted);">No staff found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div style="background:linear-gradient(135deg,#0f172a,#0d9488);border-radius:14px;
+            padding:1.5rem 1.75rem;margin-bottom:1.25rem;color:#fff;display:flex;
+            align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+  <div>
+    <div style="font-size:.75rem;opacity:.7;text-transform:uppercase;letter-spacing:.1em;">
+      Welcome back
+    </div>
+    <div style="font-size:1.5rem;font-weight:700;margin:.2rem 0;">
+      {{ request.user.get_full_name|default:request.user.username }} 👋
+    </div>
+    <div style="font-size:.8rem;opacity:.7;">{{ today|date:"l, d F Y" }}</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:.7rem;opacity:.6;margin-bottom:.3rem;">Today's Sales Target</div>
+    <div style="font-size:1.4rem;font-weight:700;">₹{{ achieved_val|floatformat:0 }} <span style="opacity:.5;font-size:.9rem;">/ ₹{{ target_val|floatformat:0 }}</span></div>
+    <div style="background:rgba(255,255,255,.15);border-radius:20px;height:6px;width:180px;margin-top:.5rem;overflow:hidden;">
+      <div style="background:#c9a96e;height:100%;border-radius:20px;width:{{ target_pct }}%;"></div>
+    </div>
+    <div style="font-size:.65rem;opacity:.6;margin-top:.25rem;">{{ target_pct }}% achieved</div>
+  </div>
+</div>
+
+<!-- KPI Stats -->
+<div class="crm-stat-grid">
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ new_leads }}</div>
+    <div class="crm-stat-label">New Leads</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ followups }}</div>
+    <div class="crm-stat-label">Follow-ups Today</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ today_orders }}</div>
+    <div class="crm-stat-label">Orders Today</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ pending_orders }}</div>
+    <div class="crm-stat-label">Pending Orders</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val" style="color:#f59e0b;">{{ open_tickets }}</div>
+    <div class="crm-stat-label">Open Tickets</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val" style="color:#ef4444;">{{ pending_callbacks }}</div>
+    <div class="crm-stat-label">Callback Requests</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ today_calls }}</div>
+    <div class="crm-stat-label">Calls Today</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ my_leads }}</div>
+    <div class="crm-stat-label">My Leads</div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Pending Callbacks (Calling Help Requests) -->
+  <div class="col-xl-4 col-lg-6">
+    <div class="crm-card h-100">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <div class="crm-card-title" style="margin:0;">📞 Callback Requests</div>
+        <a href="{% url 'employee:call_center' %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">View All</a>
+      </div>
+      {% for cb in pending_cbs %}
+      <div style="background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;padding:.7rem;margin-bottom:.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-weight:600;font-size:.82rem;">{{ cb.name }}</div>
+            <div style="font-size:.72rem;color:var(--crm-muted);">{{ cb.phone }}</div>
+            <div style="font-size:.72rem;color:var(--crm-muted);margin-top:.2rem;">{{ cb.issue_summary|truncatechars:60 }}</div>
+          </div>
+          <div>
+            <span class="badge-stage badge-pending" style="font-size:.6rem;font-weight:700;">PENDING</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+          <form method="post" action="{% url 'employee:callback_resolve' cb.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-crm-primary" style="padding:.25rem .65rem;font-size:.7rem;">
+              ✅ Resolved
+            </button>
+          </form>
+          <a href="{% url 'employee:log_call' %}?phone={{ cb.phone }}&name={{ cb.name }}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">
+            📞 Call
+          </a>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:1.5rem;color:var(--crm-subtle);font-size:.8rem;">
+        <div style="font-size:1.5rem;margin-bottom:.5rem;">✅</div>
+        No pending callbacks
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Leads -->
+  <div class="col-xl-4 col-lg-6">
+    <div class="crm-card h-100">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <div class="crm-card-title" style="margin:0;">🎯 My Leads</div>
+        <a href="{% url 'employee:lead_create' %}" class="btn-crm-primary" style="padding:.25rem .65rem;font-size:.7rem;">+ New</a>
+      </div>
+      {% for lead in recent_leads %}
+      <a href="{% url 'employee:lead_detail' lead.lead_id %}" style="text-decoration:none;color:inherit;">
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:.4rem;transition:box-shadow .12s;"
+             onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'"
+             onmouseout="this.style.boxShadow='none'">
+          <div style="width:34px;height:34px;background:#0d9488;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
+            {{ lead.name|first|upper }}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ lead.name }}</div>
+            <div style="font-size:.7rem;color:var(--crm-muted);">{{ lead.phone }}</div>
+          </div>
+          <div>
+            <span class="badge-stage badge-new" style="font-size:.6rem;font-weight:700;">
+              {{ lead.get_stage_display }}
+            </span>
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <div style="text-align:center;padding:1.5rem;color:var(--crm-subtle);font-size:.8rem;">No leads assigned yet</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Open Tickets -->
+  <div class="col-xl-4 col-12">
+    <div class="crm-card h-100">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <div class="crm-card-title" style="margin:0;">🎫 Open Tickets</div>
+        <a href="{% url 'employee:ticket_list' %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">View All</a>
+      </div>
+      {% for tk in recent_tickets %}
+      <a href="{% url 'employee:ticket_detail' tk.ticket_id %}" style="text-decoration:none;color:inherit;">
+        <div style="padding:.6rem .75rem;background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:.4rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.72rem;color:var(--crm-muted);">{{ tk.ticket_id }}</div>
+            <span class="badge-stage badge-{{ tk.priority }}" style="font-size:.6rem;font-weight:700;">{{ tk.get_priority_display|upper }}</span>
+          </div>
+          <div style="font-weight:600;font-size:.8rem;margin:.2rem 0;">{{ tk.subject|truncatechars:55 }}</div>
+          <div style="font-size:.7rem;color:var(--crm-muted);">{{ tk.customer_name }} · {{ tk.get_channel_display }}</div>
+        </div>
+      </a>
+      {% empty %}
+      <div style="text-align:center;padding:1.5rem;color:var(--crm-subtle);font-size:.8rem;">
+        <div style="font-size:1.5rem;margin-bottom:.5rem;">🎉</div>
+        No open tickets
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="col-xl-6 col-12">
+    <div class="crm-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <div class="crm-card-title" style="margin:0;">📦 Recent Orders</div>
+        <a href="{% url 'employee:order_list' %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">View All</a>
+      </div>
+      <table class="crm-table">
+        <thead>
+          <tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for o in recent_orders %}
+          <tr>
+            <td><a href="{% url 'employee:order_detail' o.order_id %}" style="color:#0d9488;font-weight:600;font-size:.75rem;">{{ o.order_id }}</a></td>
+            <td><div style="font-size:.8rem;">{{ o.full_name }}</div><div style="font-size:.7rem;color:var(--crm-muted);">{{ o.phone }}</div></td>
+            <td style="font-weight:600;font-size:.82rem;">₹{{ o.total }}</td>
+            <td><span class="badge-stage badge-{{ o.status }}" style="font-size:.65rem;">{{ o.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;color:var(--crm-subtle);padding:1.5rem;">No recent orders</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Internal Notes -->
+  <div class="col-xl-6 col-12">
+    <div class="crm-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <div class="crm-card-title" style="margin:0;">📝 Team Notes</div>
+        <a href="{% url 'employee:internal_notes' %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">All Notes</a>
+      </div>
+      <!-- Quick note post -->
+      <form method="post" action="{% url 'employee:internal_notes' %}" style="margin-bottom:.75rem;">
+        {% csrf_token %}
+        <div style="display:flex;gap:.5rem;">
+          <input name="content" placeholder="Post a quick update for the team..." required
+                 class="form-control form-control-sm" style="flex:1;">
+          <select name="tag" class="form-select form-select-sm" style="flex:0 0 auto;width:auto;">
+            <option value="general">General</option>
+            <option value="lead">Lead</option>
+            <option value="order">Order</option>
+            <option value="callback">Callback</option>
+            <option value="payment">Payment</option>
+            <option value="refund">Refund</option>
+          </select>
+          <button type="submit" class="btn-crm-primary" style="padding:.5rem .9rem;white-space:nowrap;">Post</button>
+        </div>
+      </form>
+      {% for note in recent_notes %}
+      <div style="padding:.55rem .75rem;border-left:3px solid {% if note.tag == 'order' %}#0d9488{% elif note.tag == 'payment' %}#c9a96e{% elif note.tag == 'refund' %}#ef4444{% else %}var(--crm-subtle){% endif %};background:var(--crm-row-bg);border-radius:0 8px 8px 0;margin-bottom:.4rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:.72rem;font-weight:600;">{{ note.author.get_full_name|default:note.author.username }}</div>
+          <div style="font-size:.65rem;color:var(--crm-subtle);">{{ note.created_at|timesince }} ago</div>
+        </div>
+        <div style="font-size:.8rem;color:var(--crm-body-text);margin-top:.15rem;">{{ note.content }}</div>
+        <span style="font-size:.6rem;color:var(--crm-subtle);text-transform:uppercase;letter-spacing:.07em;">{{ note.get_tag_display }}</span>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:1rem;color:var(--crm-subtle);font-size:.8rem;">No team notes yet</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Recent Calls -->
+<div class="crm-card" style="margin-top:0;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+    <div class="crm-card-title" style="margin:0;">📞 Today's Calls</div>
+    <a href="{% url 'employee:log_call' %}" class="btn-crm-primary" style="padding:.25rem .65rem;font-size:.7rem;">+ Log Call</a>
+  </div>
+  <table class="crm-table">
+    <thead>
+      <tr><th>Time</th><th>Customer</th><th>Phone</th><th>Direction</th><th>Status</th><th>Duration</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      {% for c in recent_calls %}
+      <tr>
+        <td style="font-size:.75rem;color:var(--crm-muted);">{{ c.called_at|time:"H:i" }}</td>
+        <td style="font-size:.8rem;">{{ c.customer_name|default:"—" }}</td>
+        <td style="font-size:.8rem;">{{ c.phone }}</td>
+        <td><span style="font-size:.7rem;background:var(--crm-blue-chip-bg);color:var(--crm-blue-chip-text);padding:.2rem .5rem;border-radius:20px;">{{ c.get_direction_display }}</span></td>
+        <td><span class="badge-stage badge-{{ c.status }}" style="font-size:.65rem;">{{ c.get_status_display }}</span></td>
+        <td style="font-size:.75rem;color:var(--crm-muted);">{{ c.duration_display }}</td>
+        <td style="font-size:.75rem;color:var(--crm-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.notes|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:var(--crm-subtle);padding:1.5rem;">No calls logged today</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Internal Notes{% endblock %}
+{% block page_title %}Internal Notes{% endblock %}
+{% block breadcrumb %}Admin / CRM / Notes{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <!-- Notes Feed -->
+  <div class="col-lg-8">
+    <div class="adm-table-wrap" style="padding:0;">
+      <div class="adm-table-head">
+        <h6>🤝 Team Notes</h6>
+        <form method="get" class="d-flex gap-2">
+          <select name="tag" class="adm-input" style="width:160px;">
+            <option value="">All Tags</option>
+            {% for val,lbl in tag_choices %}<option value="{{ val }}" {% if tag_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+          </select>
+          <select name="emp" class="adm-input" style="width:160px;">
+            <option value="">All Employees</option>
+            {% for e in employees %}<option value="{{ e.pk }}" {% if emp_filter == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.username }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+          <a href="{% url 'admin_panel:crm_notes' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+        </form>
+      </div>
+      <div style="padding:1rem;">
+        {% for note in notes %}
+        <div style="border-left:3px solid var(--adm-accent);padding:.75rem 1rem;margin-bottom:.75rem;background:var(--adm-bg);border-radius:0 8px 8px 0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem;margin-bottom:.35rem;">
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#0d9488);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;font-weight:700;">{{ note.author.username|first|upper }}</div>
+              <span style="font-weight:600;font-size:.82rem;">{{ note.author.get_full_name|default:note.author.username }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <span class="adm-badge badge-purple" style="font-size:.6rem;">{{ note.get_tag_display }}</span>
+              <span style="font-size:.7rem;color:var(--adm-muted);">{{ note.created_at|date:"d M Y H:i" }}</span>
+            </div>
+          </div>
+          <div style="font-size:.83rem;line-height:1.5;">{{ note.content }}</div>
+          {% if note.lead %}<div style="margin-top:.35rem;font-size:.72rem;color:var(--adm-muted);">🎯 Lead: {{ note.lead.name }}</div>{% endif %}
+          {% if note.order_ref %}<div style="margin-top:.2rem;font-size:.72rem;color:var(--adm-muted);">📦 Order: {{ note.order_ref }}</div>{% endif %}
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:2rem;color:var(--adm-muted);">No notes found.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Note -->
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">➕ Add Note</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="adm-label">Tag</label>
+          <select name="tag" class="adm-input">
+            {% for val,lbl in tag_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="adm-label">Note *</label>
+          <textarea name="content" class="adm-input" rows="5" required placeholder="Write your note…"></textarea>
+        </div>
+        <button type="submit" class="adm-btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Add Note</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

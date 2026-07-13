@@ -386,6 +386,29 @@ S9_MAKEUP = {
             ],
         },
         {
+            'name': 'skin_tone', 'required': False,
+            'label': 'What is your skin tone?', 'type': 'single',
+            'hint': 'This helps us match you to the right foundation shade.',
+            'options': [
+                {'value': 'fair',   'label': 'Fair',   'icon': '🌸', 'desc': 'Very light, porcelain skin'},
+                {'value': 'light',  'label': 'Light',  'icon': '🌼', 'desc': 'Light but not the lightest'},
+                {'value': 'medium', 'label': 'Medium', 'icon': '🌻', 'desc': 'Wheatish, medium brown'},
+                {'value': 'tan',    'label': 'Tan',    'icon': '🌴', 'desc': 'Tan / dusky'},
+                {'value': 'deep',   'label': 'Deep',   'icon': '🍫', 'desc': 'Deep brown / very dark'},
+            ],
+        },
+        {
+            'name': 'undertone', 'required': False,
+            'label': 'What is your skin undertone?', 'type': 'single',
+            'hint': 'Check your inner wrist veins — blue/purple = cool, green = warm, both = neutral.',
+            'options': [
+                {'value': 'warm',    'label': 'Warm',    'icon': '🌅', 'desc': 'Yellow / golden / peachy undertone'},
+                {'value': 'cool',    'label': 'Cool',    'icon': '🌊', 'desc': 'Pink / red / bluish undertone'},
+                {'value': 'neutral', 'label': 'Neutral', 'icon': '☯️', 'desc': 'Mix of warm and cool'},
+                {'value': 'olive',   'label': 'Olive',   'icon': '🫒', 'desc': 'Greenish / yellow-green cast'},
+            ],
+        },
+        {
             'name': 'makeup_finish', 'required': False,
             'label': 'What finish do you prefer?', 'type': 'single',
             'show_if': {'field': 'wears_makeup', 'not_in': ['no']},
@@ -405,6 +428,39 @@ S9_MAKEUP = {
                 {'value': '500_1000', 'label': '₹500 – ₹1,000',  'icon': '💳'},
                 {'value': '1000_3000','label': '₹1,000 – ₹3,000','icon': '💎'},
                 {'value': 'gt3000',   'label': '₹3,000+',         'icon': '👑'},
+            ],
+        },
+        {
+            'name': 'preferred_makeup_brands', 'required': False,
+            'label': 'Which makeup brands do you prefer or use?', 'type': 'multi',
+            'show_if': {'field': 'wears_makeup', 'not_in': ['no']},
+            'hint': 'Select all brands you already use or are open to trying.',
+            'options': [
+                # ── Local / Budget-Friendly Indian Brands ──────────────────
+                {'value': 'mars',        'label': 'MARS Cosmetics',     'icon': '🔴', 'desc': 'Affordable, wide shade range'},
+                {'value': 'faces_canada','label': 'Faces Canada',       'icon': '🍁', 'desc': 'Budget-friendly, Indian market'},
+                {'value': 'miss_claire', 'label': 'Miss Claire',        'icon': '🌸', 'desc': 'Drugstore, easy to find'},
+                {'value': 'blue_heaven', 'label': 'Blue Heaven',        'icon': '💙', 'desc': 'Super affordable local brand'},
+                {'value': 'ADS',         'label': 'ADS Cosmetics',      'icon': '✨', 'desc': 'Local budget brand'},
+
+                # ── Mid-Range Indian & India-Popular Brands ────────────────
+                {'value': 'lakme',       'label': 'Lakmé',              'icon': '🌺', 'desc': 'Most trusted Indian brand'},
+                {'value': 'colorbar',    'label': 'Colorbar',           'icon': '🎨', 'desc': 'Premium feel, mid price'},
+                {'value': 'sugar',       'label': 'SUGAR Cosmetics',    'icon': '🍬', 'desc': 'Trendy, long-wear formulas'},
+                {'value': 'myglamm',     'label': 'MyGlamm',            'icon': '💋', 'desc': 'D2C brand, wide range'},
+                {'value': 'nykaa',       'label': 'Nykaa Cosmetics',    'icon': '🛍️', 'desc': 'In-house Nykaa brand'},
+                {'value': 'renee',       'label': 'RENÉE Cosmetics',    'icon': '🌹', 'desc': 'Growing D2C Indian brand'},
+                {'value': 'swiss_beauty','label': 'Swiss Beauty',       'icon': '🇨🇭', 'desc': 'Quality at mid price'},
+                {'value': 'insight',     'label': 'Insight Cosmetics',  'icon': '🔬', 'desc': 'Professional finish, mid-range'},
+
+                # ── Mass-Market International (widely sold in India) ────────
+                {'value': 'maybelline',  'label': 'Maybelline',         'icon': '🟡', 'desc': 'Global brand, widely available'},
+                {'value': 'loreal_paris','label': "L'Oréal Paris",      'icon': '💛', 'desc': 'Trusted, easily available'},
+                {'value': 'revlon',      'label': 'Revlon',             'icon': '💅', 'desc': 'Classic international brand'},
+                {'value': 'nyx',         'label': 'NYX Professional',   'icon': '⚡', 'desc': 'Professional-grade, mid price'},
+
+                # ── Other ──────────────────────────────────────────────────
+                {'value': 'other',       'label': 'Other / No preference', 'icon': '🤷'},
             ],
         },
     ],
@@ -639,23 +695,124 @@ PRODUCT_MAP = {
     ],
 }
 
+# Foundation shades per (skin_tone, undertone)
+# Format — fdn: local brand / mid-range brand / international brand
+# Local:       MARS Cosmetics, Blue Heaven
+# Mid-range:   Lakmé, SUGAR Cosmetics, Colorbar, Faces Canada
+# International: Maybelline, L'Oréal Paris
 MAKEUP_SHADE_MAP = {
-    ('fair','warm'):    {'fdn':'MARS Porcelain 01 / Maybelline 110','lip':'Coral, Nude Beige','blush':'Peachy Keen'},
-    ('fair','cool'):    {'fdn':'MARS Porcelain 01 / Maybelline 120','lip':'Rose Pink, Berry','blush':'Rose Flush'},
-    ('fair','neutral'): {'fdn':'MARS Ivory 02 / Maybelline 115',   'lip':'Nude Pink, Mauve','blush':'Nude Pink'},
-    ('light','warm'):   {'fdn':'MARS Ivory 02 / Maybelline 120',   'lip':'Coral Orange, Peach','blush':'Coral Kiss'},
-    ('light','cool'):   {'fdn':'MARS Natural Beige 03 / Maybelline 128','lip':'Dusty Rose, Mauve','blush':'Rose Flush'},
-    ('light','neutral'):{'fdn':'MARS Natural Beige 03 / Maybelline 125','lip':'Nude Beige, Rose','blush':'Nude Pink'},
-    ('medium','warm'):  {'fdn':'MARS Sand Beige 04 / Maybelline 220','lip':'Terracotta, Coral','blush':'Bronzed Glow'},
-    ('medium','cool'):  {'fdn':'MARS Natural Beige 03 / Maybelline 228','lip':'Berry, Burgundy','blush':'Berry Bliss'},
-    ('medium','neutral'):{'fdn':'MARS Natural Beige 03 / Maybelline 220','lip':'Nude Beige, Rose','blush':'Nude Pink'},
-    ('medium','olive'): {'fdn':'MARS Sand Beige 04 / Maybelline 230','lip':'Mocha, Terracotta','blush':'Bronzed Glow'},
-    ('tan','warm'):     {'fdn':'MARS Warm Honey 05 / Maybelline 310','lip':'Burnt Orange, Coral','blush':'Bronzed Glow'},
-    ('tan','cool'):     {'fdn':'MARS Warm Honey 05 / Maybelline 330','lip':'Wine, Deep Berry','blush':'Berry Bliss'},
-    ('tan','neutral'):  {'fdn':'MARS Warm Honey 05 / Maybelline 320','lip':'Nude Mocha, Rose','blush':'Peachy Keen'},
-    ('deep','warm'):    {'fdn':'MARS Caramel 06 / Maybelline 355',  'lip':'Terracotta, Bronze','blush':'Bronzed Glow'},
-    ('deep','cool'):    {'fdn':'MARS Caramel 06 / Maybelline 370',  'lip':'Dark Wine, Plum','blush':'Berry Bliss'},
-    ('deep','neutral'): {'fdn':'MARS Caramel 06 / Maybelline 360',  'lip':'Nude Brown, Rose','blush':'Berry Bliss'},
+    ('fair','warm'):     {
+        'fdn':   'MARS Porcelain 01 / Lakmé Ivory W10 / Maybelline 110',
+        'fdn_alt': 'SUGAR Matte As Hell #02 / Faces Canada Natural W10',
+        'lip':   'Coral, Nude Beige',
+        'lip_local': 'Lakmé 9to5 Coral Coast / SUGAR Matte Attack #04',
+        'blush': 'Peachy Keen',
+    },
+    ('fair','cool'):     {
+        'fdn':   'MARS Porcelain 01 / Lakmé Ivory C10 / Maybelline 120',
+        'fdn_alt': 'SUGAR Matte As Hell #01 / Colorbar Seamless Foundation C10',
+        'lip':   'Rose Pink, Berry',
+        'lip_local': 'Lakmé Absolute Moonlit Rose / SUGAR Smudge Me Not Berry',
+        'blush': 'Rose Flush',
+    },
+    ('fair','neutral'):  {
+        'fdn':   'MARS Ivory 02 / Lakmé Ivory N10 / Maybelline 115',
+        'fdn_alt': 'SUGAR Matte As Hell #03 / Faces Canada Natural N10',
+        'lip':   'Nude Pink, Mauve',
+        'lip_local': 'Lakmé 9to5 Nude Flush / SUGAR Smudge Me Not Mauve',
+        'blush': 'Nude Pink',
+    },
+    ('light','warm'):    {
+        'fdn':   'MARS Ivory 02 / Lakmé Beige W20 / Maybelline 120',
+        'fdn_alt': 'SUGAR Matte As Hell #05 / Colorbar Seamless W20',
+        'lip':   'Coral Orange, Peach',
+        'lip_local': 'Lakmé 9to5 Tangerine Trip / SUGAR Smudge Me Not Peach',
+        'blush': 'Coral Kiss',
+    },
+    ('light','cool'):    {
+        'fdn':   'MARS Natural Beige 03 / Lakmé Beige C20 / Maybelline 128',
+        'fdn_alt': 'SUGAR Matte As Hell #06 / Faces Canada Beige C20',
+        'lip':   'Dusty Rose, Mauve',
+        'lip_local': 'Lakmé 9to5 Dusty Rose / SUGAR Smudge Me Not Plum',
+        'blush': 'Rose Flush',
+    },
+    ('light','neutral'): {
+        'fdn':   'MARS Natural Beige 03 / Lakmé Beige N20 / Maybelline 125',
+        'fdn_alt': 'SUGAR Matte As Hell #04 / Colorbar Seamless N20',
+        'lip':   'Nude Beige, Rose',
+        'lip_local': 'Lakmé 9to5 Nude Touch / SUGAR Smudge Me Not Rose',
+        'blush': 'Nude Pink',
+    },
+    ('medium','warm'):   {
+        'fdn':   'MARS Sand Beige 04 / Lakmé Sand W30 / Maybelline 220',
+        'fdn_alt': 'SUGAR Matte As Hell #10 / Faces Canada Caramel W30',
+        'lip':   'Terracotta, Coral',
+        'lip_local': 'Lakmé 9to5 Brick Lane / SUGAR Smudge Me Not Terracotta',
+        'blush': 'Bronzed Glow',
+    },
+    ('medium','cool'):   {
+        'fdn':   'MARS Natural Beige 03 / Lakmé Sand C30 / Maybelline 228',
+        'fdn_alt': 'SUGAR Matte As Hell #09 / Colorbar Seamless C30',
+        'lip':   'Berry, Burgundy',
+        'lip_local': 'Lakmé 9to5 Berry Best / SUGAR Smudge Me Not Burgundy',
+        'blush': 'Berry Bliss',
+    },
+    ('medium','neutral'): {
+        'fdn':   'MARS Natural Beige 03 / Lakmé Sand N30 / Maybelline 220',
+        'fdn_alt': 'SUGAR Matte As Hell #08 / Faces Canada Caramel N30',
+        'lip':   'Nude Beige, Rose',
+        'lip_local': 'Lakmé 9to5 Nude Flush / SUGAR Smudge Me Not Nude',
+        'blush': 'Nude Pink',
+    },
+    ('medium','olive'):  {
+        'fdn':   'MARS Sand Beige 04 / Lakmé Honey OW30 / Maybelline 230',
+        'fdn_alt': 'SUGAR Matte As Hell #11 / Colorbar Seamless OW30',
+        'lip':   'Mocha, Terracotta',
+        'lip_local': 'Lakmé 9to5 Mocha Magic / SUGAR Smudge Me Not Mocha',
+        'blush': 'Bronzed Glow',
+    },
+    ('tan','warm'):      {
+        'fdn':   'MARS Warm Honey 05 / Lakmé Honey W40 / Maybelline 310',
+        'fdn_alt': 'SUGAR Matte As Hell #15 / Faces Canada Honey W40',
+        'lip':   'Burnt Orange, Coral',
+        'lip_local': 'Lakmé 9to5 Orange Peel / SUGAR Smudge Me Not Burnt Orange',
+        'blush': 'Bronzed Glow',
+    },
+    ('tan','cool'):      {
+        'fdn':   'MARS Warm Honey 05 / Lakmé Honey C40 / Maybelline 330',
+        'fdn_alt': 'SUGAR Matte As Hell #14 / Colorbar Seamless C40',
+        'lip':   'Wine, Deep Berry',
+        'lip_local': 'Lakmé 9to5 Wine & Dine / SUGAR Smudge Me Not Wine',
+        'blush': 'Berry Bliss',
+    },
+    ('tan','neutral'):   {
+        'fdn':   'MARS Warm Honey 05 / Lakmé Honey N40 / Maybelline 320',
+        'fdn_alt': 'SUGAR Matte As Hell #13 / Faces Canada Honey N40',
+        'lip':   'Nude Mocha, Rose',
+        'lip_local': 'Lakmé 9to5 Mocha Magic / SUGAR Smudge Me Not Nude Brown',
+        'blush': 'Peachy Keen',
+    },
+    ('deep','warm'):     {
+        'fdn':   'MARS Caramel 06 / Lakmé Caramel W50 / Maybelline 355',
+        'fdn_alt': 'SUGAR Matte As Hell #20 / Colorbar Seamless W50',
+        'lip':   'Terracotta, Bronze',
+        'lip_local': 'Lakmé 9to5 Burnt Terracotta / SUGAR Smudge Me Not Bronze',
+        'blush': 'Bronzed Glow',
+    },
+    ('deep','cool'):     {
+        'fdn':   'MARS Caramel 06 / Lakmé Caramel C50 / Maybelline 370',
+        'fdn_alt': 'SUGAR Matte As Hell #19 / Faces Canada Caramel C50',
+        'lip':   'Dark Wine, Plum',
+        'lip_local': 'Lakmé 9to5 Dark Wine / SUGAR Smudge Me Not Deep Plum',
+        'blush': 'Berry Bliss',
+    },
+    ('deep','neutral'):  {
+        'fdn':   'MARS Caramel 06 / Lakmé Caramel N50 / Maybelline 360',
+        'fdn_alt': 'SUGAR Matte As Hell #18 / Colorbar Seamless N50',
+        'lip':   'Nude Brown, Rose',
+        'lip_local': 'Lakmé 9to5 Nude Flush / SUGAR Smudge Me Not Nude Brown',
+        'blush': 'Berry Bliss',
+    },
 }
 
 
@@ -796,7 +953,46 @@ def compute_analysis(answers: dict) -> dict:
     if tone and undertone:
         shades = MAKEUP_SHADE_MAP.get((tone, undertone)) or MAKEUP_SHADE_MAP.get((tone, 'neutral'))
         if shades:
-            result['makeup_shades'] = {'tone': tone.title(), 'undertone': undertone.title(), **shades}
+            # Resolve preferred Indian brands from quiz answer
+            selected_brands = answers.get('preferred_makeup_brands', [])
+            if isinstance(selected_brands, str):
+                selected_brands = [selected_brands]
+
+            # Map of brand value → display label
+            BRAND_LABEL_MAP = {
+                'mars': 'MARS Cosmetics', 'faces_canada': 'Faces Canada',
+                'miss_claire': 'Miss Claire', 'blue_heaven': 'Blue Heaven',
+                'ADS': 'ADS Cosmetics', 'lakme': 'Lakmé',
+                'colorbar': 'Colorbar', 'sugar': 'SUGAR Cosmetics',
+                'myglamm': 'MyGlamm', 'nykaa': 'Nykaa Cosmetics',
+                'renee': 'RENÉE Cosmetics', 'swiss_beauty': 'Swiss Beauty',
+                'insight': 'Insight Cosmetics', 'maybelline': 'Maybelline',
+                'loreal_paris': "L'Oréal Paris", 'revlon': 'Revlon',
+                'nyx': 'NYX Professional', 'other': None,
+            }
+            preferred_brand_labels = [
+                BRAND_LABEL_MAP[b] for b in selected_brands
+                if b in BRAND_LABEL_MAP and BRAND_LABEL_MAP[b]
+            ]
+
+            # Tier-based foundation suggestion override if Indian brands selected
+            makeup_budget = answers.get('makeup_budget', '')
+            budget_is_local = makeup_budget in ('lt500', '500_1000')
+
+            # Build a user-friendly brand note
+            brand_note = ''
+            if preferred_brand_labels:
+                brand_note = 'Your picks: ' + ', '.join(preferred_brand_labels)
+            elif budget_is_local:
+                brand_note = 'Affordable Indian options: Lakmé, MARS, SUGAR Cosmetics, Faces Canada'
+
+            result['makeup_shades'] = {
+                'tone': tone.title(),
+                'undertone': undertone.title(),
+                **shades,
+                'preferred_brands': preferred_brand_labels,
+                'brand_note': brand_note,
+            }
 
     # ── Summary ───────────────────────────────────────────────────────────────
     concern_labels = [CONCERN_META[c]['label'] for c in concerns if c in CONCERN_META]

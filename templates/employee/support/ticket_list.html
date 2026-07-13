@@ -1,0 +1,66 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Support Tickets{% endblock %}
+{% block page_title %}Support Tickets{% endblock %}
+{% block nav_tickets %}active{% endblock %}
+{% block nav_support_open %}open{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+  <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <input name="q" value="{{ q }}" placeholder="Search ticket, customer, phone..."
+           style="padding:.45rem .85rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;min-width:200px;outline:none;background:var(--crm-card);color:var(--crm-text);">
+    <select name="status" style="padding:.45rem .75rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;color:var(--crm-text);background:var(--crm-card);">
+      <option value="">All Statuses</option>
+      {% for val,label in status_choices %}<option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="priority" style="padding:.45rem .75rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;color:var(--crm-text);background:var(--crm-card);">
+      <option value="">All Priorities</option>
+      {% for val,label in priority_choices %}<option value="{{ val }}" {% if priority == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn-crm-primary">🔍 Filter</button>
+  </form>
+  <div style="display:flex;gap:.5rem;">
+    <a href="{% url 'employee:export_excel' %}?section=tickets&period=month" class="btn-crm-outline">📥 Export</a>
+    <a href="{% url 'employee:ticket_create' %}" class="btn-crm-primary">+ New Ticket</a>
+  </div>
+</div>
+
+<div style="display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+  <div class="crm-stat" style="flex:1;min-width:120px;padding:.8rem;text-align:center;">
+    <div class="crm-stat-val" style="font-size:1.5rem;">{{ total }}</div>
+    <div class="crm-stat-label">Total</div>
+  </div>
+  <div class="crm-stat" style="flex:1;min-width:120px;padding:.8rem;text-align:center;">
+    <div class="crm-stat-val" style="font-size:1.5rem;color:#ef4444;">{{ open_count }}</div>
+    <div class="crm-stat-label">Open</div>
+  </div>
+</div>
+
+<div class="crm-card" style="padding:0;overflow:hidden;">
+  <table class="crm-table">
+    <thead>
+      <tr><th>Ticket</th><th>Customer</th><th>Subject</th><th>Channel</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Created</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for tk in tickets %}
+      <tr>
+        <td style="font-size:.75rem;color:var(--crm-muted);font-weight:600;">{{ tk.ticket_id }}</td>
+        <td>
+          <div style="font-size:.82rem;font-weight:500;">{{ tk.customer_name }}</div>
+          <div style="font-size:.7rem;color:var(--crm-muted);">{{ tk.customer_phone }}</div>
+        </td>
+        <td style="font-size:.8rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tk.subject }}</td>
+        <td><span style="font-size:.7rem;background:var(--crm-chip-bg);color:var(--crm-chip-text);padding:.2rem .5rem;border-radius:20px;">{{ tk.get_channel_display }}</span></td>
+        <td><span class="badge-stage badge-{{ tk.priority }}" style="font-size:.65rem;">{{ tk.get_priority_display }}</span></td>
+        <td><span class="badge-stage badge-{{ tk.status }}" style="font-size:.65rem;">{{ tk.get_status_display }}</span></td>
+        <td style="font-size:.78rem;">{{ tk.assigned_to.username|default:"—" }}</td>
+        <td style="font-size:.75rem;color:var(--crm-muted);">{{ tk.created_at|date:"d M Y" }}</td>
+        <td><a href="{% url 'employee:ticket_detail' tk.ticket_id %}" class="btn-crm-outline" style="padding:.25rem .65rem;font-size:.7rem;">Open</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--crm-subtle);">No tickets found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Delete Product{% endblock %}
+{% block page_title %}Delete Product{% endblock %}
+{% block breadcrumb %}Admin / Products / Delete{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="adm-card text-center">
+      <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
+      <h5 style="font-weight:700;margin-bottom:.5rem;">Delete Product</h5>
+      <p style="color:var(--adm-muted);margin-bottom:.5rem;">
+        Are you sure you want to permanently delete:
+      </p>
+      <p style="font-weight:700;font-size:1rem;margin-bottom:.25rem;">{{ product.brand }} — {{ product.name }}</p>
+      <p style="font-family:monospace;font-size:.8rem;color:var(--adm-muted);margin-bottom:1.5rem;">SKU: {{ product.sku }}</p>
+      <p style="color:#ef4444;font-size:.85rem;margin-bottom:1.5rem;">
+        This action cannot be undone. The product will be removed from all orders referencing it (order items will remain but product link will be cleared).
+      </p>
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="{% url 'admin_panel:product_list' %}" class="adm-btn btn-outline">
+          <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <form method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="adm-btn btn-danger">
+            <i class="bi bi-trash"></i> Yes, Delete Product
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

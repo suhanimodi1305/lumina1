@@ -1,0 +1,45 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block page_title %}Audit Log{% endblock %}
+{% block breadcrumb %}Admin / Audit Log{% endblock %}
+{% block content %}
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <h6>🛡 Admin Activity Log</h6>
+    <form method="get" class="d-flex gap-2 flex-wrap">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Search description / user…" value="{{ q }}">
+      <select class="adm-input" style="width:130px;" name="action">
+        <option value="">All Actions</option>
+        {% for val,lbl in action_choices %}<option value="{{ val }}" {% if action_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <input class="adm-input" style="width:140px;" name="module" placeholder="Module (orders…)" value="{{ module_filter }}">
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:audit_log' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr><th>Admin</th><th>Action</th><th>Module</th><th>Description</th><th>IP</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;font-weight:700;">{{ log.admin.username|first|upper|default:'?' }}</div>
+              <span style="font-size:.82rem;font-weight:600;">{{ log.admin.username|default:'system' }}</span>
+            </div>
+          </td>
+          <td><span class="adm-badge {% if log.action == 'create' %}badge-success{% elif log.action == 'delete' %}badge-danger{% elif log.action == 'export' %}badge-info{% elif log.action == 'login' %}badge-purple{% else %}badge-gray{% endif %}">{{ log.get_action_display }}</span></td>
+          <td><span style="font-family:monospace;font-size:.72rem;background:var(--adm-bg);padding:.15rem .5rem;border-radius:5px;">{{ log.module }}</span></td>
+          <td style="font-size:.78rem;max-width:350px;">{{ log.description|truncatechars:100 }}</td>
+          <td style="font-family:monospace;font-size:.72rem;color:var(--adm-muted);">{{ log.ip_address|default:'—' }}</td>
+          <td style="font-size:.72rem;color:var(--adm-muted);white-space:nowrap;">{{ log.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--adm-muted);">No audit logs found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

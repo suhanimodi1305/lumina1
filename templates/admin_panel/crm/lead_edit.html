@@ -1,0 +1,76 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Edit Lead — {{ lead.lead_id }}{% endblock %}
+{% block page_title %}Edit Lead{% endblock %}
+{% block breadcrumb %}Admin / CRM / Leads / {{ lead.lead_id }}{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="adm-card">
+      <div class="adm-card-title">✏️ Edit Lead — {{ lead.lead_id }}</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">Name *</label>
+            <input type="text" name="name" class="adm-input" value="{{ lead.name }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Phone *</label>
+            <input type="text" name="phone" class="adm-input" value="{{ lead.phone }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Email</label>
+            <input type="email" name="email" class="adm-input" value="{{ lead.email }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">City</label>
+            <input type="text" name="city" class="adm-input" value="{{ lead.city }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Source</label>
+            <select name="source" class="adm-input">
+              {% for val,lbl in source_choices %}<option value="{{ val }}" {% if lead.source == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Stage</label>
+            <select name="stage" class="adm-input">
+              {% for val,lbl in stage_choices %}<option value="{{ val }}" {% if lead.stage == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Assigned To</label>
+            <select name="assigned_to" class="adm-input">
+              <option value="">— Unassigned —</option>
+              {% for e in employees %}<option value="{{ e.pk }}" {% if lead.assigned_to_id == e.pk %}selected{% endif %}>{{ e.get_full_name|default:e.username }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Follow-up Date</label>
+            <input type="date" name="follow_up_date" class="adm-input" value="{{ lead.follow_up_date|date:'Y-m-d'|default:'' }}">
+          </div>
+          <div class="col-12">
+            <label class="adm-label">Notes</label>
+            <textarea name="notes" class="adm-input" rows="4">{{ lead.notes }}</textarea>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="adm-btn btn-primary"><i class="bi bi-check-lg"></i> Save Changes</button>
+            <a href="{% url 'admin_panel:crm_leads' %}" class="adm-btn btn-outline">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">ℹ️ Lead Info</div>
+      <div style="font-size:.82rem;">
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Lead ID</span><span style="font-family:monospace;">{{ lead.lead_id }}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Created</span><span>{{ lead.created_at|date:"d M Y H:i" }}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);"><span style="color:var(--adm-muted);">Updated</span><span>{{ lead.updated_at|date:"d M Y H:i" }}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;"><span style="color:var(--adm-muted);">Converted</span><span class="adm-badge {% if lead.is_converted %}badge-success{% else %}badge-gray{% endif %}">{% if lead.is_converted %}Yes{% else %}No{% endif %}</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}CRM Leads{% endblock %}
+{% block page_title %}CRM — Leads{% endblock %}
+{% block breadcrumb %}Admin / CRM / Leads{% endblock %}
+{% block content %}
+<!-- Filters -->
+<div class="adm-table-wrap" style="margin-bottom:1rem;">
+  <div class="adm-table-head">
+    <h6>🎯 All Leads <span class="adm-badge badge-info ms-2">{{ total }}</span></h6>
+    <form method="get" class="d-flex gap-2 flex-wrap">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Search name, phone…" value="{{ q }}">
+      <select class="adm-input" style="width:150px;" name="stage">
+        <option value="">All Stages</option>
+        {% for val,lbl in stage_choices %}<option value="{{ val }}" {% if stage == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <select class="adm-input" style="width:150px;" name="source">
+        <option value="">All Sources</option>
+        {% for val,lbl in source_choices %}<option value="{{ val }}" {% if source == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+      <select class="adm-input" style="width:160px;" name="emp">
+        <option value="">All Employees</option>
+        {% for e in employees %}<option value="{{ e.pk }}" {% if emp_filter == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.get_full_name|default:e.username }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:crm_leads' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr>
+        <th>Lead ID</th><th>Name</th><th>Contact</th><th>Source</th><th>Stage</th>
+        <th>Assigned To</th><th>Follow-up</th><th>Created</th><th></th>
+      </tr></thead>
+      <tbody>
+        {% for lead in leads %}
+        <tr>
+          <td style="font-family:monospace;font-size:.72rem;color:var(--adm-muted);">{{ lead.lead_id }}</td>
+          <td style="font-weight:600;">{{ lead.name }}</td>
+          <td>
+            <div>{{ lead.phone }}</div>
+            <div style="font-size:.7rem;color:var(--adm-muted);">{{ lead.email|default:'—' }}</div>
+          </td>
+          <td><span class="adm-badge badge-info" style="font-size:.63rem;">{{ lead.get_source_display }}</span></td>
+          <td>
+            <span class="adm-badge {% if lead.stage == 'new' %}badge-info{% elif lead.stage == 'lost' %}badge-danger{% elif lead.stage == 'order_confirmed' %}badge-success{% else %}badge-warning{% endif %}" style="font-size:.63rem;">
+              {{ lead.get_stage_display }}
+            </span>
+          </td>
+          <td style="font-size:.82rem;">{{ lead.assigned_to.get_full_name|default:lead.assigned_to.username|default:'—' }}</td>
+          <td>
+            {% if lead.follow_up_date %}
+              <span style="font-size:.75rem;{% if lead.follow_up_date <= today %}color:#ef4444;font-weight:600;{% else %}color:var(--adm-muted);{% endif %}">
+                {{ lead.follow_up_date|date:"d M Y" }}
+              </span>
+            {% else %}<span style="color:var(--adm-muted);font-size:.75rem;">—</span>{% endif %}
+          </td>
+          <td style="font-size:.75rem;color:var(--adm-muted);">{{ lead.created_at|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'admin_panel:crm_lead_edit' lead_id=lead.lead_id %}" class="adm-btn btn-outline btn-sm">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--adm-muted);">No leads found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

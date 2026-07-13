@@ -172,6 +172,10 @@ def signup(request):
 @login_required
 def user_home(request):
     """Home for logged-in regular users — routing hub with context."""
+    # Superusers (admins) go to the admin panel, not the employee portal
+    if request.user.is_superuser:
+        return redirect('admin_panel:dashboard')
+    # Staff (employees) go to the employee portal
     if _is_staff(request.user):
         return redirect('employee:portal')
 

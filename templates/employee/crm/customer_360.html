@@ -1,0 +1,118 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}{{ customer.username }} — 360°{% endblock %}
+{% block page_title %}Customer 360° — {{ customer.get_full_name|default:customer.username }}{% endblock %}
+{% block nav_customers %}active{% endblock %}
+{% block nav_crm_open %}open{% endblock %}
+
+{% block content %}
+<a href="{% url 'employee:customer_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← All Customers</a>
+<div class="row g-3">
+  <div class="col-lg-3">
+    <div class="crm-card" style="text-align:center;">
+      <div style="width:56px;height:56px;background:#0d9488;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;margin:0 auto .75rem;">
+        {{ customer.username|first|upper }}
+      </div>
+      <div style="font-size:1rem;font-weight:700;">{{ customer.get_full_name|default:customer.username }}</div>
+      <div style="font-size:.75rem;color:var(--crm-muted);margin:.2rem 0;">{{ customer.email }}</div>
+      {% if profile %}
+      <div style="margin-top:.5rem;">
+        <span class="badge-stage {% if profile.effective_tier == 'vip' %}badge-medium{% elif profile.effective_tier == 'medium' %}badge-new{% else %}badge-closed{% endif %}" style="font-size:.72rem;font-weight:700;">
+          {{ profile.effective_tier|upper }} TIER
+        </span>
+      </div>
+      <div style="margin-top:.65rem;font-size:.8rem;color:#0d9488;font-weight:700;">{{ profile.loyalty_points }} points</div>
+      {% endif %}
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--crm-subtle);">Joined {{ customer.date_joined|date:"d M Y" }}</div>
+    </div>
+    <div class="crm-card">
+      <div class="crm-stat-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="crm-stat"><div class="crm-stat-val" style="font-size:1.3rem;">{{ orders.count }}</div><div class="crm-stat-label">Orders</div></div>
+        <div class="crm-stat"><div class="crm-stat-val" style="font-size:1.3rem;color:#c9a96e;">₹{{ revenue|floatformat:0 }}</div><div class="crm-stat-label">Revenue</div></div>
+        <div class="crm-stat"><div class="crm-stat-val" style="font-size:1.3rem;">{{ tickets.count }}</div><div class="crm-stat-label">Tickets</div></div>
+        <div class="crm-stat"><div class="crm-stat-val" style="font-size:1.3rem;">{{ calls.count }}</div><div class="crm-stat-label">Calls</div></div>
+      </div>
+    </div>
+    <div class="crm-card">
+      <div class="crm-card-title">Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <a href="{% url 'employee:lead_create' %}?phone={{ customer.username }}&name={{ customer.get_full_name|default:customer.username }}" class="btn-crm-outline" style="justify-content:center;font-size:.78rem;">🎯 Create Lead</a>
+        <a href="{% url 'employee:ticket_create' %}?name={{ customer.get_full_name|default:customer.username }}&email={{ customer.email }}" class="btn-crm-outline" style="justify-content:center;font-size:.78rem;">🎫 Create Ticket</a>
+        <a href="{% url 'employee:log_call' %}?name={{ customer.get_full_name|default:customer.username }}" class="btn-crm-outline" style="justify-content:center;font-size:.78rem;">📞 Log Call</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <!-- Orders -->
+    <div class="crm-card">
+      <div class="crm-card-title">📦 Order History</div>
+      <table class="crm-table">
+        <thead><tr><th>Order ID</th><th>Total</th><th>Status</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td style="font-size:.82rem;font-weight:600;color:#0d9488;">{{ o.order_id }}</td>
+            <td style="font-size:.82rem;font-weight:700;">₹{{ o.total }}</td>
+            <td><span class="badge-stage badge-{{ o.status }}" style="font-size:.65rem;">{{ o.get_status_display }}</span></td>
+            <td style="font-size:.75rem;color:var(--crm-muted);">{{ o.created_at|date:"d M Y" }}</td>
+            <td><a href="{% url 'employee:order_detail' o.order_id %}" class="btn-crm-outline" style="padding:.2rem .55rem;font-size:.68rem;">View</a></td>
+          </tr>
+          {% empty %}<tr><td colspan="5" style="text-align:center;color:var(--crm-subtle);padding:1rem;">No orders</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tickets + Calls side by side -->
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="crm-card">
+          <div class="crm-card-title">🎫 Support Tickets</div>
+          {% for tk in tickets %}
+          <div style="padding:.5rem .65rem;background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:.35rem;">
+            <div style="font-size:.72rem;color:var(--crm-muted);">{{ tk.ticket_id }}</div>
+            <div style="font-size:.82rem;font-weight:500;">{{ tk.subject|truncatechars:50 }}</div>
+            <span class="badge-stage badge-{{ tk.status }}" style="font-size:.62rem;">{{ tk.get_status_display }}</span>
+          </div>
+          {% empty %}<div style="color:var(--crm-subtle);font-size:.8rem;">No tickets</div>{% endfor %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="crm-card">
+          <div class="crm-card-title">📞 Call History</div>
+          {% for c in calls %}
+          <div style="padding:.5rem .65rem;background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:.35rem;">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="font-size:.82rem;font-weight:500;">{{ c.phone }}</span>
+              <span class="badge-stage badge-{{ c.status }}" style="font-size:.62rem;">{{ c.get_status_display }}</span>
+            </div>
+            <div style="font-size:.7rem;color:var(--crm-muted);">{{ c.called_at|date:"d M Y H:i" }} · {{ c.get_direction_display }}</div>
+          </div>
+          {% empty %}<div style="color:var(--crm-subtle);font-size:.8rem;">No calls</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Notes for this customer -->
+    <div class="crm-card">
+      <div class="crm-card-title">📝 Internal Notes</div>
+      <form method="post" style="margin-bottom:.75rem;">
+        {% csrf_token %}
+        <div style="display:flex;gap:.5rem;">
+          <input name="content" placeholder="Add a note about this customer..." required
+                 class="form-control form-control-sm" style="flex:1;">
+          <select name="tag" class="form-select form-select-sm" style="flex:0 0 auto;width:auto;">
+            {% for val,label in tag_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="btn-crm-primary">Post</button>
+        </div>
+      </form>
+      {% for note in notes %}
+      <div style="padding:.5rem .65rem;border-left:3px solid #0d9488;background:var(--crm-row-bg);border-radius:0 8px 8px 0;margin-bottom:.35rem;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:.75rem;font-weight:600;">{{ note.author.username }}</span><span style="font-size:.65rem;color:var(--crm-subtle);">{{ note.created_at|timesince }} ago</span></div>
+        <div style="font-size:.82rem;color:var(--crm-body-text);margin-top:.15rem;">{{ note.content }}</div>
+      </div>
+      {% empty %}<div style="color:var(--crm-subtle);font-size:.8rem;">No notes yet</div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

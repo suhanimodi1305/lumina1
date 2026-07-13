@@ -1,0 +1,139 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}{{ action }} Employee{% endblock %}
+{% block page_title %}{{ action }} Employee{% endblock %}
+{% block breadcrumb %}Admin / HRMS / {{ action }} Employee{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <!-- Basic Info -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">👤 Account Information</div>
+        <div class="row g-3">
+          {% if action == 'Add' %}
+          <div class="col-md-4">
+            <label class="adm-label">Username *</label>
+            <input type="text" name="username" class="adm-input" required value="{{ request.POST.username }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Email *</label>
+            <input type="email" name="email" class="adm-input" required value="{{ request.POST.email }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Password *</label>
+            <input type="password" name="password" class="adm-input" required>
+          </div>
+          {% else %}
+          <div class="col-md-6">
+            <label class="adm-label">Email</label>
+            <input type="email" name="email" class="adm-input" value="{{ emp.email }}">
+          </div>
+          {% endif %}
+          <div class="col-md-3">
+            <label class="adm-label">First Name</label>
+            <input type="text" name="first_name" class="adm-input" value="{{ emp.first_name|default:'' }}">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Last Name</label>
+            <input type="text" name="last_name" class="adm-input" value="{{ emp.last_name|default:'' }}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Info -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">💼 Professional Details</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="adm-label">Designation</label>
+            <input type="text" name="designation" class="adm-input" value="{{ profile.designation|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Department</label>
+            <select name="department" class="adm-input">
+              <option value="">— Select —</option>
+              {% for d in departments %}<option value="{{ d.pk }}" {% if profile.department_id == d.pk %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Shift</label>
+            <select name="shift" class="adm-input">
+              {% for val,lbl in shift_choices %}<option value="{{ val }}" {% if profile.shift == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Phone</label>
+            <input type="text" name="phone" class="adm-input" value="{{ profile.phone|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Joining Date</label>
+            <input type="date" name="joining_date" class="adm-input" value="{{ profile.joining_date|date:'Y-m-d'|default:'' }}">
+          </div>
+          {% if action == 'Edit' %}
+          <div class="col-md-4">
+            <label class="adm-label">Status</label>
+            <select name="status" class="adm-input">
+              {% for val,lbl in status_choices %}<option value="{{ val }}" {% if profile.status == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">🧑 Personal Information</div>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="adm-label">Date of Birth</label>
+            <input type="date" name="dob" class="adm-input" value="{{ profile.dob|date:'Y-m-d'|default:'' }}">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Gender</label>
+            <select name="gender" class="adm-input">
+              <option value="">— Select —</option>
+              {% for val,lbl in gender_choices %}<option value="{{ val }}" {% if profile.gender == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Blood Group</label>
+            <select name="blood_group" class="adm-input">
+              <option value="">— Select —</option>
+              {% for val,lbl in blood_choices %}<option value="{{ val }}" {% if profile.blood_group == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-12">
+            <label class="adm-label">Address</label>
+            <textarea name="address" class="adm-input" rows="2">{{ profile.address|default:'' }}</textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">City</label>
+            <input type="text" name="city" class="adm-input" value="{{ profile.city|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">State</label>
+            <input type="text" name="state" class="adm-input" value="{{ profile.state|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Pincode</label>
+            <input type="text" name="pincode" class="adm-input" value="{{ profile.pincode|default:'' }}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">🛠 Skills & Notes</div>
+        <label class="adm-label">Skills (comma-separated)</label>
+        <input type="text" name="skills" class="adm-input" value="{{ profile.skills|default:'' }}" placeholder="e.g. Python, Django, Sales, Excel">
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'admin_panel:emp_list' %}" class="adm-btn btn-outline">Cancel</a>
+        <button type="submit" class="adm-btn btn-primary"><i class="bi bi-check-lg"></i> {{ action }} Employee</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

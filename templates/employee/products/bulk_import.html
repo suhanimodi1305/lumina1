@@ -1,0 +1,596 @@
+{% extends 'employee/crm_base.html' %}
+
+{% load static %}
+
+{% block nav_products_open %}open{% endblock %}
+
+{% block nav_bulk %}active{% endblock %}
+
+{% block title %}Bulk Import Products — Employee Portal{% endblock %}
+
+
+
+{% block extra_css %}
+<style>
+/* ── Bulk Import page — fully dark/light mode aware ──────────────────── */
+:root {
+  --bi-radius: 14px;
+}
+
+/* Header banner — always dark-gradient, no theming needed */
+.bi-header {
+  background: linear-gradient(135deg, #0a0a0f, #1a1a2e);
+  border-radius: var(--bi-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+.bi-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; color: #fff; margin: 0; }
+.bi-header p  { font-size: .82rem; color: rgba(255,255,255,.5); margin: .3rem 0 0; }
+
+/* Mode tabs */
+.mode-tabs {
+  display: flex; gap: 4px;
+  background: var(--emp-surface);
+  border: 1.5px solid var(--emp-border);
+  border-radius: 100px; padding: 4px;
+  margin-bottom: 1.5rem; width: fit-content;
+}
+.mode-tab {
+  padding: .45rem 1.2rem; border-radius: 100px; border: none;
+  background: transparent; color: var(--emp-muted);
+  font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.mode-tab.active { background: var(--emp-accent); color: #fff; }
+
+/* Cards */
+.bi-card {
+  background: var(--emp-surface);
+  border: 1px solid var(--emp-border);
+  border-radius: var(--bi-radius);
+  padding: 1.5rem; margin-bottom: 1rem;
+}
+.bi-card h3 {
+  font-size: 1rem; font-weight: 700;
+  color: var(--emp-text); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+
+/* Form layout */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: .3rem; }
+.form-group label {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--emp-muted);
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: .6rem .85rem;
+  border: 1.5px solid var(--emp-border);
+  border-radius: 9px; font-size: .85rem;
+  background: var(--emp-surface);
+  color: var(--emp-text);
+  font-family: inherit; transition: border-color .15s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--emp-accent);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.1);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+/* Submit button */
+.submit-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .65rem 1.4rem; background: var(--emp-accent); color: #fff;
+  border: none; border-radius: 10px; font-size: .875rem; font-weight: 700;
+  cursor: pointer; transition: background .15s;
+}
+.submit-btn:hover { background: #0f766e; }
+
+/* Result rows — light default, dark overrides below */
+.result-row { display: flex; align-items: center; gap: .6rem; padding: .45rem .75rem; border-radius: 8px; font-size: .78rem; margin-bottom: .3rem; }
+.result-created { background: #f0fdf4; color: #166534; }
+.result-updated  { background: #eff6ff; color: #1e40af; }
+.result-error    { background: #fff1f2; color: #9f1239; }
+[data-theme="dark"] .result-created { background: rgba(16,185,129,.12); color: #6ee7b7; }
+[data-theme="dark"] .result-updated  { background: rgba(59,130,246,.12);  color: #93c5fd; }
+[data-theme="dark"] .result-error    { background: rgba(239,68,68,.12);   color: #fca5a5; }
+
+/* CSV instructions panel */
+.csv-instructions {
+  background: rgba(13,148,136,.05);
+  border: 1px solid rgba(13,148,136,.2);
+  border-radius: 10px; padding: 1rem; margin-bottom: 1rem;
+}
+.csv-instructions code {
+  background: rgba(13,148,136,.1);
+  padding: .1rem .4rem; border-radius: 4px;
+  font-size: .75rem; color: #065f46;
+}
+[data-theme="dark"] .csv-instructions { background: rgba(13,148,136,.08); border-color: rgba(13,148,136,.25); }
+[data-theme="dark"] .csv-instructions code { background: rgba(13,148,136,.18); color: #5eead4; }
+
+/* File input dark fix */
+[data-theme="dark"] input[type="file"] { color: var(--emp-text); }
+
+/* Select arrow visible in dark */
+[data-theme="dark"] .form-group select { color-scheme: dark; }
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div style="max-width:900px;margin:0 auto;padding:0 1rem 3rem;">
+
+
+
+  <div class="bi-header">
+
+    <h1><i class="bi bi-upload"></i> Bulk Product Import</h1>
+
+    <p>Import multiple products via CSV upload, or add a single product manually.</p>
+
+  </div>
+
+
+
+  
+
+  {% for msg in messages %}
+  <div class="emp-alert emp-alert-{% if 'error' in msg.tags %}error{% elif 'success' in msg.tags %}success{% elif 'warning' in msg.tags %}warning{% else %}info{% endif %}" style="margin-bottom:.75rem;">
+    <i class="bi bi-{% if 'error' in msg.tags %}exclamation-circle{% elif 'success' in msg.tags %}check-circle{% elif 'warning' in msg.tags %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+    {{ msg }}
+  </div>
+  {% endfor %}
+
+
+
+  
+
+  <div class="mode-tabs">
+
+    <button class="mode-tab active" id="tabCsv" onclick="switchMode('csv')">
+
+      <i class="bi bi-file-earmark-spreadsheet"></i> CSV Upload
+
+    </button>
+
+    <button class="mode-tab" id="tabManual" onclick="switchMode('manual')">
+
+      <i class="bi bi-pencil-square"></i> Manual Entry
+
+    </button>
+
+  </div>
+
+
+
+  
+
+  <div id="modeCsv">
+
+    <div class="bi-card">
+
+      <h3><i class="bi bi-file-earmark-spreadsheet" style="color:var(--teal);"></i> CSV Bulk Upload</h3>
+
+
+
+      <div class="csv-instructions">
+
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);margin-bottom:.5rem;">Required CSV Columns</div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem;">
+
+          <code>name</code><code>brand</code><code>category</code><code>product_range</code>
+
+          <code>sku</code><code>price</code><code>description</code><code>key_ingredients</code>
+
+          <code>image_url</code><code>coverage</code><code>finish</code>
+
+          <code>undertone_match</code><code>skin_tone_match</code><code>is_featured</code>
+
+        </div>
+
+        <div style="font-size:.72rem;color:var(--muted,#64748b);display:flex;flex-direction:column;gap:.3rem;">
+
+          <div style="display:flex;align-items:flex-start;gap:.4rem;">
+
+            <i class="bi bi-info-circle" style="color:var(--teal);flex-shrink:0;margin-top:.05rem;"></i>
+
+            <span><strong>sku</strong> is required and must be unique — existing SKUs will be updated.</span>
+
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:.4rem;">
+
+            <i class="bi bi-info-circle" style="color:var(--teal);flex-shrink:0;margin-top:.05rem;"></i>
+
+            <span><strong>product_range</strong>: korean / makeup / treatment</span>
+
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:.4rem;">
+
+            <i class="bi bi-info-circle" style="color:var(--teal);flex-shrink:0;margin-top:.05rem;"></i>
+
+            <span><strong>is_featured</strong>: 1 / true / yes = featured</span>
+
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:.4rem;">
+
+            <i class="bi bi-info-circle" style="color:var(--teal);flex-shrink:0;margin-top:.05rem;"></i>
+
+            <span><strong>category</strong>: cleanser, toner, serum, moisturizer, foundation, lipstick, etc.</span>
+
+          </div>
+
+        </div>
+
+        <div style="margin-top:.65rem;">
+
+          <a href="{% url 'employee:export_products' %}" style="font-size:.75rem;color:var(--teal);font-weight:600;">
+
+            <i class="bi bi-download"></i> Download existing products as CSV template
+
+          </a>
+
+        </div>
+
+      </div>
+
+
+
+      <form method="post" enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <input type="hidden" name="mode" value="csv">
+
+        <div class="form-group" style="margin-bottom:1rem;">
+
+          <label>Select CSV File</label>
+
+          <input type="file" name="csv_file" accept=".csv" required>
+
+        </div>
+
+        <button type="submit" class="submit-btn">
+
+          <i class="bi bi-upload"></i> Upload & Import
+
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+
+  
+
+  <div id="modeManual" style="display:none;">
+
+    <div class="bi-card">
+
+      <h3><i class="bi bi-pencil-square" style="color:var(--gold);"></i> Manual Product Entry</h3>
+
+      <form method="post">
+
+        {% csrf_token %}
+
+        <input type="hidden" name="mode" value="manual">
+
+
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label>Product Name *</label>
+
+            <input type="text" name="name" placeholder="e.g. Matte Muse Mousse Lipstick" required>
+
+          </div>
+
+          <div class="form-group">
+
+            <label>Brand / Range *</label>
+
+            <input type="text" name="brand" placeholder="e.g. Mars Cosmetics">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label>SKU (unique) *</label>
+
+            <input type="text" name="sku" placeholder="e.g. MARS-LIP-001" required>
+
+          </div>
+
+          <div class="form-group">
+
+            <label>Price (?)</label>
+
+            <input type="number" name="price" step="0.01" placeholder="e.g. 299.00">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label>Category</label>
+
+            <select name="category">
+
+              {% for val, label in category_choices %}
+
+              <option value="{{ val }}">{{ label }}</option>
+
+              {% endfor %}
+
+            </select>
+
+          </div>
+
+          <div class="form-group">
+
+            <label>Product Range</label>
+
+            <select name="product_range">
+
+              {% for val, label in range_choices %}
+
+              <option value="{{ val }}">{{ label }}</option>
+
+              {% endfor %}
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label>Coverage</label>
+
+            <input type="text" name="coverage" placeholder="e.g. Full, Medium, Light">
+
+          </div>
+
+          <div class="form-group">
+
+            <label>Finish</label>
+
+            <input type="text" name="finish" placeholder="e.g. Matte, Dewy, Natural">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label>Undertone Match</label>
+
+            <select name="undertone_match">
+
+              <option value="">— None —</option>
+
+              <option value="warm">Warm</option>
+
+              <option value="cool">Cool</option>
+
+              <option value="neutral">Neutral</option>
+
+              <option value="olive">Olive</option>
+
+            </select>
+
+          </div>
+
+          <div class="form-group">
+
+            <label>Skin Tone Match</label>
+
+            <select name="skin_tone_match">
+
+              <option value="">— None —</option>
+
+              <option value="fair">Fair</option>
+
+              <option value="light">Light</option>
+
+              <option value="medium">Medium</option>
+
+              <option value="tan">Tan</option>
+
+              <option value="deep">Deep</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="form-group" style="margin-bottom:.75rem;">
+
+          <label>Image URL</label>
+
+          <input type="url" name="image_url" placeholder="https://example.com/product.jpg">
+
+        </div>
+
+
+
+        <div class="form-group" style="margin-bottom:.75rem;">
+
+          <label>Key Ingredients (comma-separated)</label>
+
+          <input type="text" name="key_ingredients" placeholder="e.g. Hyaluronic Acid, Niacinamide, Centella">
+
+        </div>
+
+
+
+        <div class="form-group" style="margin-bottom:.75rem;">
+
+          <label>Description</label>
+
+          <textarea name="description" placeholder="Describe the product…"></textarea>
+
+        </div>
+
+
+
+        <div class="form-group" style="margin-bottom:1rem;">
+
+          <label>Full Ingredients List</label>
+
+          <textarea name="full_ingredients" placeholder="Aqua, Glycerin, Niacinamide…"></textarea>
+
+        </div>
+
+
+
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem;">
+
+          <input type="checkbox" name="is_featured" id="isFeatured" style="width:18px;height:18px;accent-color:var(--teal);">
+
+          <label for="isFeatured" style="font-size:.85rem;font-weight:600;cursor:pointer;">Mark as Featured Product</label>
+
+        </div>
+
+
+
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+
+          <button type="submit" class="submit-btn">
+
+            <i class="bi bi-check-circle"></i> Add / Update Product
+
+          </button>
+
+          <a href="{% url 'employee:product_list' %}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;background:var(--surface,#fff);color:var(--muted,#64748b);border:1.5px solid var(--border,#e2e8f0);border-radius:10px;font-size:.875rem;font-weight:600;text-decoration:none;">
+
+            <i class="bi bi-x"></i> Cancel
+
+          </a>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+
+  
+
+  {% if results %}
+
+  <div class="bi-card" style="margin-top:1rem;">
+
+    <h3><i class="bi bi-list-check" style="color:var(--teal);"></i> Import Results ({{ results|length }})</h3>
+
+    {% for r in results %}
+
+    <div class="result-row result-{{ r.status }}">
+
+      {% if r.status == 'created' %}<i class="bi bi-plus-circle-fill"></i> Created: <strong>{{ r.name }}</strong> ({{ r.sku }})
+
+      {% elif r.status == 'updated' %}<i class="bi bi-arrow-clockwise"></i> Updated: <strong>{{ r.name }}</strong> ({{ r.sku }})
+
+      {% else %}<i class="bi bi-exclamation-triangle-fill"></i> Error: {{ r.msg }}{% if r.row %} — {{ r.row.name|default:"unknown" }}{% endif %}{% endif %}
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+  {% endif %}
+
+
+
+  
+
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
+
+    <a href="{% url 'employee:product_add' %}" style="font-size:.82rem;color:var(--teal);font-weight:600;text-decoration:none;">
+
+      <i class="bi bi-plus-circle"></i> Add Single Product (Full Form)
+
+    </a>
+
+    <span style="color:var(--muted,#64748b);">·</span>
+
+    <a href="{% url 'employee:product_list' %}" style="font-size:.82rem;color:var(--teal);font-weight:600;text-decoration:none;">
+
+      <i class="bi bi-table"></i> Manage All Products
+
+    </a>
+
+  </div>
+
+
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+function switchMode(mode) {
+
+  document.getElementById('modeCsv').style.display    = mode === 'csv'    ? 'block' : 'none';
+
+  document.getElementById('modeManual').style.display = mode === 'manual' ? 'block' : 'none';
+
+  document.getElementById('tabCsv').classList.toggle('active',    mode === 'csv');
+
+  document.getElementById('tabManual').classList.toggle('active', mode === 'manual');
+
+}
+
+</script>
+
+{% endblock %}
+

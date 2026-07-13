@@ -6,8 +6,24 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import user_passes_test
 
 from .models import Coupon, CouponUsage
+
+
+def _is_staff(user):
+    return user.is_authenticated and (user.is_staff or user.is_superuser)
+
+
+@user_passes_test(_is_staff, login_url='/accounts/login/')
+def coupon_list(request):
+    """Staff-facing coupon management list."""
+    coupons = Coupon.objects.select_related('created_by').order_by('-created_at')
+    return render(request, 'coupons/coupon_list.html', {
+        'coupons': coupons,
+        'total': coupons.count(),
+        'active_count': coupons.filter(is_active=True).count(),
+    })
 
 
 @require_POST

@@ -1,0 +1,103 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Team{% endblock %}
+{% block page_title %}Team Members{% endblock %}
+{% block nav_team %}active{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+  <div style="font-size:.78rem;color:var(--crm-muted);">
+    <i class="bi bi-people" style="margin-right:.3rem;"></i>
+    {{ employees|length }} employee{% if employees|length != 1 %}s{% endif %} on your team
+  </div>
+  <a href="{% url 'employee:attendance_today' %}" class="btn-crm-outline" style="font-size:.75rem;padding:.35rem .85rem;">
+    <i class="bi bi-calendar-check"></i> Mark Attendance
+  </a>
+</div>
+
+<div class="crm-card" style="padding:0;overflow:hidden;">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>Employee</th>
+        <th>Contact</th>
+        <th>Designation</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th>Last Login</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#0d9488,#0891b2);
+                        color:#fff;border-radius:50%;display:flex;align-items:center;
+                        justify-content:center;font-size:.82rem;font-weight:700;flex-shrink:0;">
+              {{ emp.username|first|upper }}
+            </div>
+            <div>
+              <div style="font-size:.84rem;font-weight:600;color:var(--crm-text);">
+                {{ emp.get_full_name|default:emp.username }}
+              </div>
+              <div style="font-size:.68rem;color:var(--crm-muted);">
+                @{{ emp.username }}
+                {% if emp.emp_profile.employee_id %}
+                  &nbsp;·&nbsp;<span style="font-family:monospace;">{{ emp.emp_profile.employee_id }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="font-size:.78rem;color:var(--crm-muted);">{{ emp.email }}</div>
+          {% if emp.emp_profile.phone %}
+            <div style="font-size:.73rem;color:var(--crm-subtle);">{{ emp.emp_profile.phone }}</div>
+          {% endif %}
+        </td>
+        <td style="font-size:.8rem;color:var(--crm-text);">
+          {{ emp.emp_profile.designation|default:'—' }}
+        </td>
+        <td style="font-size:.78rem;color:var(--crm-muted);">
+          {{ emp.emp_profile.department|default:'—' }}
+        </td>
+        <td>
+          {% with s=emp.emp_profile.status|default:'active' %}
+          <span class="badge-stage
+            {% if s == 'active' %}badge-interested
+            {% elif s == 'terminated' %}badge-lost
+            {% elif s == 'on_leave' %}badge-pending
+            {% else %}badge-closed{% endif %}" style="font-size:.65rem;font-weight:700;">
+            {{ s|title }}
+          </span>
+          {% endwith %}
+        </td>
+        <td style="font-size:.73rem;color:var(--crm-subtle);">
+          {{ emp.last_login|date:"d M Y H:i"|default:"Never" }}
+        </td>
+        <td>
+          {% if emp.pk != request.user.pk %}
+            <a href="{% url 'employee:employee_detail' emp.pk %}" class="btn-crm-outline"
+               style="padding:.25rem .65rem;font-size:.7rem;">
+              View
+            </a>
+          {% else %}
+            <a href="{% url 'employee:my_profile' %}" class="btn-crm-primary"
+               style="padding:.25rem .65rem;font-size:.7rem;">
+              My Profile
+            </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;color:var(--crm-subtle);padding:2rem;">
+          No team members found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

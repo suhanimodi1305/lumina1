@@ -1,0 +1,108 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Ticket {{ ticket.ticket_id }}{% endblock %}
+{% block page_title %}Ticket — {{ ticket.ticket_id }}{% endblock %}
+{% block nav_tickets %}active{% endblock %}
+{% block nav_support_open %}open{% endblock %}
+
+{% block content %}
+<a href="{% url 'employee:ticket_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← All Tickets</a>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">Ticket Info</div>
+      <div style="font-size:.82rem;line-height:2.2;">
+        <div><strong>ID:</strong> {{ ticket.ticket_id }}</div>
+        <div><strong>Customer:</strong> {{ ticket.customer_name }}</div>
+        {% if ticket.customer_phone %}<div>📞 <a href="tel:{{ ticket.customer_phone }}" style="color:#0d9488;">{{ ticket.customer_phone }}</a></div>{% endif %}
+        {% if ticket.customer_email %}<div>✉️ <a href="mailto:{{ ticket.customer_email }}" style="color:#0d9488;">{{ ticket.customer_email }}</a></div>{% endif %}
+        <div><strong>Channel:</strong> {{ ticket.get_channel_display }}</div>
+        <div><strong>Priority:</strong> <span class="badge-stage badge-{{ ticket.priority }}" style="font-size:.65rem;">{{ ticket.get_priority_display }}</span></div>
+        <div><strong>Status:</strong> <span class="badge-stage badge-{{ ticket.status }}" style="font-size:.65rem;">{{ ticket.get_status_display }}</span></div>
+        <div><strong>Assigned:</strong> {{ ticket.assigned_to.username|default:"Unassigned" }}</div>
+        <div><strong>Created:</strong> {{ ticket.created_at|date:"d M Y H:i" }}</div>
+        {% if ticket.resolved_at %}<div><strong>Resolved:</strong> {{ ticket.resolved_at|date:"d M Y H:i" }}</div>{% endif %}
+        {% if ticket.rating %}<div>⭐ Customer Rating: {{ ticket.rating }}/5</div>{% endif %}
+      </div>
+    </div>
+    <div class="crm-card">
+      <div class="crm-card-title">Update Ticket</div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update">
+        <div style="margin-bottom:.65rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Status</label>
+          <select name="status" class="form-select form-select-sm">
+            {% for val,label in status_choices %}<option value="{{ val }}" {% if ticket.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div style="margin-bottom:.65rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Priority</label>
+          <select name="priority" class="form-select form-select-sm">
+            {% for val,label in priority_choices %}<option value="{{ val }}" {% if ticket.priority == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div style="margin-bottom:.65rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Assign To</label>
+          <select name="assigned_to" class="form-select form-select-sm">
+            <option value="">Unassigned</option>
+            {% for s in staff %}<option value="{{ s.pk }}" {% if ticket.assigned_to_id == s.pk %}selected{% endif %}>{{ s.username }}</option>{% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn-crm-primary" style="width:100%;">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="crm-card">
+      <div class="crm-card-title">Issue Description</div>
+      <div style="background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;padding:.85rem;font-size:.85rem;line-height:1.7;color:var(--crm-body-text);">
+        {{ ticket.description|linebreaks }}
+      </div>
+    </div>
+
+    <div class="crm-card">
+      <div class="crm-card-title">Conversation Thread</div>
+      {% for reply in replies %}
+      <div style="display:flex;gap:.75rem;margin-bottom:.75rem;{% if reply.is_internal %}opacity:.85;{% endif %}">
+        <div style="width:34px;height:34px;
+             background:{% if reply.is_internal %}rgba(245,158,11,.15){% elif reply.author == request.user %}#0d9488{% else %}var(--crm-chip-bg){% endif %};
+             color:{% if reply.is_internal %}#f59e0b{% elif reply.author == request.user %}#fff{% else %}var(--crm-chip-text){% endif %};
+             border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
+          {{ reply.author.username|first|upper|default:"?" }}
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;flex-wrap:wrap;">
+            <span style="font-size:.78rem;font-weight:600;">{{ reply.author.username|default:"System" }}</span>
+            {% if reply.is_internal %}<span class="badge-stage badge-medium" style="font-size:.6rem;font-weight:700;">INTERNAL</span>{% endif %}
+            <span style="font-size:.65rem;color:var(--crm-subtle);">{{ reply.created_at|date:"d M H:i" }}</span>
+          </div>
+          <div style="background:{% if reply.is_internal %}rgba(245,158,11,.07){% elif reply.author == request.user %}rgba(13,148,136,.08){% else %}var(--crm-row-bg){% endif %};
+               border:1px solid {% if reply.is_internal %}rgba(245,158,11,.25){% elif reply.author == request.user %}rgba(13,148,136,.2){% else %}var(--crm-border){% endif %};
+               border-radius:8px;padding:.6rem .85rem;font-size:.82rem;color:var(--crm-body-text);line-height:1.6;">
+            {{ reply.message|linebreaks }}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="color:var(--crm-subtle);font-size:.8rem;margin-bottom:.75rem;">No replies yet. Be the first to respond.</div>
+      {% endfor %}
+
+      <!-- Reply form -->
+      <form method="post" style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--crm-border);">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reply">
+        <textarea name="message" rows="3" class="form-control form-control-sm" required
+                  placeholder="Type your reply or internal note..."></textarea>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:.6rem;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;cursor:pointer;">
+            <input type="checkbox" name="is_internal"> Internal note (team only)
+          </label>
+          <button type="submit" class="btn-crm-primary" style="margin-left:auto;">Send Reply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

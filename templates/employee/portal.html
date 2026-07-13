@@ -1,164 +1,235 @@
-﻿{% extends 'base.html' %}
-{% block title %}Employee Portal — Lumina{% endblock %}
-{% block page_title %}Employee Portal{% endblock %}
-
-{% block extra_css %}
-<style>
-.emp-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-.emp-stat-card {
-  background:var(--surface); border:1px solid var(--border); border-radius:14px;
-  padding:1.1rem; text-align:center; box-shadow:0 1px 6px rgba(0,0,0,.05);
-}
-.emp-stat-card .sv { font-size:2rem; font-weight:700; color:#0d9488; font-family:'Cormorant Garamond',serif; }
-.emp-stat-card .sl { font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:600; }
-.emp-section-title { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:.75rem; margin-top:1.25rem; }
-.emp-product-row {
-  display:flex; align-items:center; gap:.85rem; padding:.7rem .85rem;
-  background:var(--surface); border:1px solid var(--border); border-radius:12px;
-  margin-bottom:.5rem; transition:box-shadow .12s;
-}
-.emp-product-row:hover { box-shadow:0 3px 12px rgba(0,0,0,.08); }
-.emp-product-img {
-  width:44px; height:44px; border-radius:8px; object-fit:cover;
-  background:#f1f5f9; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.2rem;
-}
-.emp-product-name { font-weight:600; font-size:.875rem; color:var(--text); }
-.emp-product-sku  { font-size:.72rem; color:var(--muted); }
-.emp-product-price { margin-left:auto; font-weight:700; color:#0d9488; font-size:.9rem; white-space:nowrap; }
-.emp-quick-btn {
-  display:inline-flex; align-items:center; gap:.4rem;
-  padding:.55rem 1.1rem; border-radius:20px; font-size:.8rem; font-weight:600;
-  border:none; cursor:pointer; text-decoration:none; transition:background .12s;
-}
-.emp-btn-teal { background:#0d9488; color:#fff; }
-.emp-btn-teal:hover { background:#0f766e; color:#fff; }
-.emp-btn-gold { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
-.emp-btn-gold:hover { background:#fde68a; }
-.emp-btn-purple { background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
-.emp-btn-purple:hover { background:#c4b5fd; }
-.emp-action-row { display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:1.5rem; }
-/* Req/Order mini cards */
-.emp-req-row{display:flex;align-items:center;gap:.75rem;padding:.6rem .85rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:.4rem;text-decoration:none;color:var(--text);transition:box-shadow .12s;}
-.emp-req-row:hover{box-shadow:0 2px 10px rgba(0,0,0,.07);color:var(--text);}
-.sp{padding:.2rem .6rem;border-radius:20px;font-size:.65rem;font-weight:700;}
-.sp-pending{background:rgba(245,158,11,.15);color:#92400e;}
-.sp-accepted{background:#dbeafe;color:#1e40af;}
-.sp-processing{background:#ede9fe;color:#5b21b6;}
-.sp-dispatched{background:#fce7f3;color:#9d174d;}
-.sp-delivered{background:#dcfce7;color:#166534;}
-.sp-confirmed{background:#dbeafe;color:#1e40af;}
-.sp-packed{background:#fef9c3;color:#854d0e;}
-.sp-shipped,.sp-out_for_delivery{background:#fce7f3;color:#9d174d;}
-.sp-rejected,.sp-cancelled{background:#fee2e2;color:#991b1b;}
-.pp{padding:.15rem .5rem;border-radius:20px;font-size:.63rem;font-weight:700;}
-.pp-urgent{background:#fee2e2;color:#991b1b;}
-.pp-high{background:#ffedd5;color:#c2410c;}
-</style>
-{% endblock %}
+﻿{% extends 'employee/crm_base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Employee Workspace · Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
 
 {% block content %}
-<div class="emp-action-row">
-  <a href="{% url 'employee:product_list' %}" class="emp-quick-btn emp-btn-teal">
-    <i class="bi bi-box-seam"></i> Products
-  </a>
-  <a href="{% url 'employee:order_list' %}" class="emp-quick-btn emp-btn-teal">
-    <i class="bi bi-bag-check"></i> Orders
-  </a>
-  <a href="{% url 'employee:requirement_list' %}" class="emp-quick-btn emp-btn-purple">
-    <i class="bi bi-clipboard-heart"></i> Requirements
-  </a>
-  <a href="{% url 'employee:employee_list' %}" class="emp-quick-btn" style="background:#f1f5f9;color:var(--text);border:1px solid var(--border);">
-    <i class="bi bi-people"></i> Team
-  </a>
-  <a href="{% url 'employee:export_products' %}" class="emp-quick-btn emp-btn-gold">
-    <i class="bi bi-download"></i> Export CSV
-  </a>
-  <a href="{% url 'admin:index' %}" class="emp-quick-btn" style="background:#f1f5f9;color:var(--text);border:1px solid var(--border);">
-    <i class="bi bi-shield-lock"></i> Django Admin
-  </a>
-</div>
-
-<div class="emp-stat-grid">
-  <div class="emp-stat-card">
-    <div class="sv">{{ total_products }}</div>
-    <div class="sl">Total Products</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv">{{ total_orders }}</div>
-    <div class="sl">Total Orders</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv" style="color:#f59e0b;">{{ pending_orders }}</div>
-    <div class="sl">Active Orders</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv" style="color:#10b981;">{{ delivered_orders }}</div>
-    <div class="sl">Delivered</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv" style="color:#8b5cf6;">{{ total_reqs }}</div>
-    <div class="sl">Requirements</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv" style="color:#f59e0b;">{{ pending_reqs }}</div>
-    <div class="sl">Pending Reqs</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv">{{ total_korean }}</div>
-    <div class="sl">K-Beauty</div>
-  </div>
-  <div class="emp-stat-card">
-    <div class="sv">{{ total_makeup }}</div>
-    <div class="sl">Makeup</div>
-  </div>
-</div>
-
-{% if recent_reqs %}
-<div class="emp-section-title">📋 Recent Requirements</div>
-{% for req in recent_reqs %}
-<a href="{% url 'employee:requirement_detail' req_id=req.req_id %}" class="emp-req-row">
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:.85rem;font-weight:700;color:var(--text);">{{ req.title|truncatechars:50 }}</div>
-    <div style="font-size:.7rem;color:var(--muted);">{{ req.user.username }} · {{ req.created_at|date:"d M Y" }}</div>
-  </div>
-  <span class="pp {% if req.priority == 'urgent' %}pp-urgent{% elif req.priority == 'high' %}pp-high{% endif %}">
-    {% if req.priority in 'urgent,high' %}{{ req.get_priority_display }}{% endif %}
-  </span>
-  <span class="sp sp-{{ req.status }}">{{ req.get_status_display }}</span>
-  <i class="bi bi-chevron-right" style="color:var(--muted);font-size:.8rem;"></i>
-</a>
-{% endfor %}
-<a href="{% url 'employee:requirement_list' %}" style="display:block;text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">View all requirements <i class="bi bi-arrow-right"></i></a>
-{% endif %}
-
-{% if recent_orders %}
-<div class="emp-section-title">🛍️ Recent Orders</div>
-{% for order in recent_orders %}
-<a href="{% url 'employee:order_detail' order_id=order.order_id %}" class="emp-req-row">
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:.82rem;font-weight:700;color:var(--text);font-family:monospace;">{{ order.order_id }}</div>
-    <div style="font-size:.7rem;color:var(--muted);">{{ order.full_name }} · {{ order.items.count }} item{{ order.items.count|pluralize }}</div>
-  </div>
-  <div style="font-size:.88rem;font-weight:800;color:#0d9488;white-space:nowrap;">₹{{ order.total }}</div>
-  <span class="sp sp-{{ order.status }}">{{ order.get_status_display }}</span>
-  <i class="bi bi-chevron-right" style="color:var(--muted);font-size:.8rem;"></i>
-</a>
-{% endfor %}
-<a href="{% url 'employee:order_list' %}" style="display:block;text-align:center;font-size:.78rem;color:#0d9488;padding:.5rem;font-weight:600;">View all orders <i class="bi bi-arrow-right"></i></a>
-{% endif %}
-
-<div class="emp-section-title">📦 Recent Products</div>
-{% for p in recent_products %}
-<div class="emp-product-row">
-  <div class="emp-product-img">
-    {% if p.image_url %}<img src="{{ p.image_url }}" alt="{{ p.name }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;">{% else %}🌿{% endif %}
-  </div>
+<!-- Welcome Banner -->
+<div style="background:linear-gradient(135deg,#0d9488 0%,#0891b2 60%,#0f172a 100%);
+            border-radius:16px;padding:1.6rem 2rem;margin-bottom:1.5rem;
+            color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
   <div>
-    <div class="emp-product-name">{{ p.name }}</div>
-    <div class="emp-product-sku">{{ p.brand }} · {{ p.sku }} · {{ p.get_category_display }}</div>
+    <div style="font-size:.72rem;opacity:.65;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;">Welcome back</div>
+    <div style="font-size:1.5rem;font-weight:800;margin-bottom:.2rem;">
+      {{ request.user.get_full_name|default:request.user.username }} 👋
+    </div>
+    <div style="font-size:.8rem;opacity:.65;">{{ today|date:"l, d F Y" }} &nbsp;·&nbsp; Lumina CRM</div>
   </div>
-  <div class="emp-product-price">{% if p.price %}₹{{ p.price }}{% else %}—{% endif %}</div>
-  <a href="{% url 'employee:product_detail' pk=p.pk %}" class="emp-quick-btn emp-btn-teal" style="padding:.3rem .75rem;font-size:.72rem;">View</a>
+  <div style="text-align:right;">
+    <div style="font-size:.7rem;opacity:.6;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em;">Today's Sales Target</div>
+    <div style="font-size:1.5rem;font-weight:800;">₹{{ achieved_val|floatformat:0 }}
+      <span style="opacity:.45;font-size:.85rem;font-weight:500;">/ ₹{{ target_val|floatformat:0 }}</span>
+    </div>
+    <div style="background:rgba(255,255,255,.18);border-radius:20px;height:6px;width:180px;margin:.5rem 0 .25rem auto;overflow:hidden;">
+      <div style="background:#f59e0b;height:100%;border-radius:20px;width:{{ target_pct }}%;transition:width .4s;"></div>
+    </div>
+    <div style="font-size:.65rem;opacity:.6;">{{ target_pct }}% achieved</div>
+  </div>
 </div>
-{% endfor %}
+
+<!-- KPI Grid -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3 col-xl-3">
+    <div class="emp-kpi"><div class="emp-kpi-icon kpi-teal"><i class="bi bi-person-plus"></i></div>
+      <div><div class="emp-kpi-label">New Leads</div><div class="emp-kpi-value">{{ new_leads }}</div><div class="emp-kpi-sub">{{ followups }} follow-ups today</div></div></div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-3">
+    <div class="emp-kpi"><div class="emp-kpi-icon kpi-blue"><i class="bi bi-bag"></i></div>
+      <div><div class="emp-kpi-label">Today Orders</div><div class="emp-kpi-value">{{ today_orders }}</div><div class="emp-kpi-sub">{{ pending_orders }} pending</div></div></div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-3">
+    <div class="emp-kpi"><div class="emp-kpi-icon kpi-gold"><i class="bi bi-headset"></i></div>
+      <div><div class="emp-kpi-label">Open Tickets</div><div class="emp-kpi-value">{{ open_tickets }}</div><div class="emp-kpi-sub">Needs attention</div></div></div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-3">
+    <div class="emp-kpi"><div class="emp-kpi-icon kpi-red"><i class="bi bi-telephone-inbound"></i></div>
+      <div><div class="emp-kpi-label">Callbacks</div><div class="emp-kpi-value">{{ pending_callbacks }}</div><div class="emp-kpi-sub">{{ today_calls }} calls today</div></div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Pending Callbacks -->
+  <div class="col-xl-4 col-lg-6">
+    <div class="emp-card h-100">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.5rem;">
+          <i class="bi bi-telephone-inbound" style="color:var(--emp-danger);"></i> Callback Requests
+        </div>
+        <a href="{% url 'employee:call_center' %}" class="emp-btn emp-btn-outline emp-btn-sm">View All</a>
+      </div>
+      {% for cb in pending_cbs %}
+      <div style="background:var(--emp-bg);border:1px solid var(--emp-border);border-radius:10px;padding:.75rem;margin-bottom:.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;">
+          <div style="min-width:0;">
+            <div style="font-weight:600;font-size:.82rem;">{{ cb.name }}</div>
+            <div style="font-size:.72rem;color:var(--emp-muted);">{{ cb.phone }}</div>
+            <div style="font-size:.72rem;color:var(--emp-muted);margin-top:.15rem;">{{ cb.issue_summary|truncatechars:55 }}</div>
+          </div>
+          <span class="emp-badge badge-warning" style="flex-shrink:0;">PENDING</span>
+        </div>
+        <div style="display:flex;gap:.4rem;margin-top:.6rem;flex-wrap:wrap;">
+          <form method="post" action="{% url 'employee:callback_resolve' cb.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="emp-btn emp-btn-success emp-btn-sm">✓ Resolved</button>
+          </form>
+          <a href="{% url 'employee:log_call' %}?phone={{ cb.phone }}&name={{ cb.name }}" class="emp-btn emp-btn-outline emp-btn-sm">Log Call</a>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:2rem;color:var(--emp-muted);">
+        <i class="bi bi-check-circle" style="font-size:2rem;color:var(--emp-success);"></i>
+        <div style="margin-top:.5rem;font-size:.82rem;">No pending callbacks</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- My Leads -->
+  <div class="col-xl-4 col-lg-6">
+    <div class="emp-card h-100">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.5rem;">
+          <i class="bi bi-person-lines-fill" style="color:var(--emp-accent);"></i> My Leads
+        </div>
+        <a href="{% url 'employee:lead_create' %}" class="emp-btn emp-btn-primary emp-btn-sm"><i class="bi bi-plus"></i> New</a>
+      </div>
+      {% for lead in recent_leads %}
+      <a href="{% url 'employee:lead_detail' lead.lead_id %}" style="text-decoration:none;color:inherit;">
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:var(--emp-bg);
+                    border:1px solid var(--emp-border);border-radius:9px;margin-bottom:.4rem;transition:box-shadow .12s;"
+             onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.07)'"
+             onmouseout="this.style.boxShadow='none'">
+          <div style="width:34px;height:34px;background:linear-gradient(135deg,#0d9488,#0891b2);color:#fff;border-radius:50%;
+                      display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
+            {{ lead.name|first|upper }}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ lead.name }}</div>
+            <div style="font-size:.7rem;color:var(--emp-muted);">{{ lead.phone }}</div>
+          </div>
+          <span class="emp-badge badge-teal" style="font-size:.6rem;">{{ lead.get_stage_display }}</span>
+        </div>
+      </a>
+      {% empty %}
+      <div style="text-align:center;padding:2rem;color:var(--emp-muted);font-size:.82rem;">No leads assigned yet</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Open Tickets -->
+  <div class="col-xl-4 col-12">
+    <div class="emp-card h-100">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.5rem;">
+          <i class="bi bi-headset" style="color:var(--emp-gold);"></i> Open Tickets
+        </div>
+        <a href="{% url 'employee:ticket_list' %}" class="emp-btn emp-btn-outline emp-btn-sm">View All</a>
+      </div>
+      {% for tk in recent_tickets %}
+      <a href="{% url 'employee:ticket_detail' tk.ticket_id %}" style="text-decoration:none;color:inherit;">
+        <div style="padding:.65rem;background:var(--emp-bg);border:1px solid var(--emp-border);border-radius:9px;margin-bottom:.4rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;">
+            <span style="font-size:.68rem;color:var(--emp-muted);font-family:monospace;">{{ tk.ticket_id }}</span>
+            <span class="emp-badge {% if tk.priority == 'critical' %}badge-danger{% elif tk.priority == 'high' %}badge-warning{% else %}badge-info{% endif %}" style="font-size:.6rem;">{{ tk.get_priority_display }}</span>
+          </div>
+          <div style="font-weight:600;font-size:.8rem;margin-bottom:.15rem;">{{ tk.subject|truncatechars:50 }}</div>
+          <div style="font-size:.7rem;color:var(--emp-muted);">{{ tk.customer_name }} · {{ tk.get_channel_display }}</div>
+        </div>
+      </a>
+      {% empty %}
+      <div style="text-align:center;padding:2rem;color:var(--emp-muted);">
+        <i class="bi bi-emoji-smile" style="font-size:2rem;color:var(--emp-success);"></i>
+        <div style="margin-top:.5rem;font-size:.82rem;">No open tickets</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="col-xl-7 col-12">
+    <div class="emp-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.5rem;">
+          <i class="bi bi-bag-check-fill" style="color:var(--emp-accent2);"></i> Recent Orders
+        </div>
+        <a href="{% url 'employee:order_list' %}" class="emp-btn emp-btn-outline emp-btn-sm">View All</a>
+      </div>
+      <table class="emp-table">
+        <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for o in recent_orders %}
+          <tr>
+            <td><a href="{% url 'employee:order_detail' o.order_id %}" style="color:var(--emp-accent);font-weight:600;font-size:.78rem;font-family:monospace;">{{ o.order_id }}</a></td>
+            <td><div style="font-size:.8rem;font-weight:500;">{{ o.full_name }}</div><div style="font-size:.7rem;color:var(--emp-muted);">{{ o.phone }}</div></td>
+            <td style="font-weight:700;font-size:.82rem;">₹{{ o.total }}</td>
+            <td><span class="emp-badge {% if o.status == 'delivered' %}badge-success{% elif o.status == 'cancelled' %}badge-danger{% elif o.status == 'pending' %}badge-warning{% else %}badge-info{% endif %}" style="font-size:.62rem;">{{ o.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;color:var(--emp-muted);padding:1.5rem;">No recent orders</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Team Notes -->
+  <div class="col-xl-5 col-12">
+    <div class="emp-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.5rem;">
+          <i class="bi bi-chat-square-text" style="color:var(--emp-info);"></i> Team Notes
+        </div>
+        <a href="{% url 'employee:internal_notes' %}" class="emp-btn emp-btn-outline emp-btn-sm">All Notes</a>
+      </div>
+      <form method="post" action="{% url 'employee:internal_notes' %}" style="margin-bottom:.75rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input name="content" placeholder="Post a quick team update..." required
+               class="emp-input" style="flex:1;min-width:140px;">
+        <button type="submit" class="emp-btn emp-btn-primary emp-btn-sm">Post</button>
+      </form>
+      {% for note in recent_notes %}
+      <div style="padding:.55rem .75rem;border-left:3px solid {% if note.tag == 'order' %}var(--emp-accent){% elif note.tag == 'payment' %}var(--emp-gold){% elif note.tag == 'refund' %}var(--emp-danger){% else %}var(--emp-border){% endif %};background:var(--emp-bg);border-radius:0 9px 9px 0;margin-bottom:.4rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:.72rem;font-weight:600;">{{ note.author.get_full_name|default:note.author.username }}</div>
+          <div style="font-size:.65rem;color:var(--emp-muted);">{{ note.created_at|timesince }} ago</div>
+        </div>
+        <div style="font-size:.8rem;margin-top:.15rem;">{{ note.content }}</div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:1rem;color:var(--emp-muted);font-size:.82rem;">No notes yet</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Today's Calls -->
+  <div class="col-12">
+    <div class="emp-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+        <div class="emp-card-title" style="margin:0;display:flex;align-items:center;gap:.5rem;">
+          <i class="bi bi-telephone" style="color:var(--emp-accent);"></i> Today's Calls
+        </div>
+        <a href="{% url 'employee:log_call' %}" class="emp-btn emp-btn-primary emp-btn-sm"><i class="bi bi-plus"></i> Log Call</a>
+      </div>
+      <table class="emp-table">
+        <thead><tr><th>Time</th><th>Customer</th><th>Phone</th><th>Direction</th><th>Status</th><th>Duration</th><th>Notes</th></tr></thead>
+        <tbody>
+          {% for c in recent_calls %}
+          <tr>
+            <td style="font-size:.75rem;color:var(--emp-muted);">{{ c.called_at|time:"H:i" }}</td>
+            <td style="font-weight:500;">{{ c.customer_name|default:"—" }}</td>
+            <td>{{ c.phone }}</td>
+            <td><span class="emp-badge badge-info" style="font-size:.62rem;">{{ c.get_direction_display }}</span></td>
+            <td><span class="emp-badge {% if c.status == 'connected' %}badge-success{% elif c.status == 'no_answer' %}badge-danger{% elif c.status == 'interested' %}badge-teal{% else %}badge-gray{% endif %}" style="font-size:.62rem;">{{ c.get_status_display }}</span></td>
+            <td style="color:var(--emp-muted);">{{ c.duration_display }}</td>
+            <td style="color:var(--emp-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.notes|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" style="text-align:center;color:var(--emp-muted);padding:1.5rem;">No calls logged today</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock %}

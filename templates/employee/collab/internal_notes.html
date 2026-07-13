@@ -1,0 +1,79 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Team Notes{% endblock %}
+{% block page_title %}Internal Team Notes{% endblock %}
+{% block nav_notes %}active{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">📝 Post a Note</div>
+      <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom:.75rem;">
+          <textarea name="content" rows="4" class="form-control form-control-sm" required
+                    placeholder="Share an update with your team...&#10;e.g. 'Customer Priya interested in Premium Plan'&#10;'Refund approved for order OD260...'"></textarea>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-bottom:.75rem;">
+          <select name="tag" class="form-select form-select-sm" style="flex:1;">
+            {% for val,label in tag_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+          <input name="order_ref" class="form-control form-control-sm" style="flex:1;" placeholder="Order/Lead ID (opt.)">
+        </div>
+        <button type="submit" class="btn-crm-primary" style="width:100%;">Post Update</button>
+      </form>
+    </div>
+    <div class="crm-card">
+      <div class="crm-card-title">🔍 Filter Notes</div>
+      <form method="get">
+        <div style="margin-bottom:.5rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Tag</label>
+          <select name="tag" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Tags</option>
+            {% for val,label in tag_choices %}<option value="{{ val }}" {% if tag == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Team Member</label>
+          <select name="author" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Members</option>
+            {% for s in staff %}<option value="{{ s.username }}" {% if author == s.username %}selected{% endif %}>{{ s.get_full_name|default:s.username }}</option>{% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="crm-card">
+      <div class="crm-card-title">Team Feed</div>
+      {% for note in notes %}
+      <div style="display:flex;gap:.75rem;margin-bottom:.85rem;padding-bottom:.85rem;border-bottom:1px solid var(--crm-border);">
+        <div style="width:36px;height:36px;background:#0d9488;color:#fff;border-radius:50%;
+             display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;">
+          {{ note.author.username|first|upper }}
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+            <span style="font-size:.82rem;font-weight:600;">{{ note.author.get_full_name|default:note.author.username }}</span>
+            <span class="badge-stage {% if note.tag == 'order' %}badge-new{% elif note.tag == 'payment' %}badge-medium{% elif note.tag == 'refund' %}badge-lost{% elif note.tag == 'callback' %}badge-interested{% elif note.tag == 'lead' %}badge-in_progress{% else %}badge-closed{% endif %}" style="font-size:.6rem;font-weight:700;">
+              {{ note.get_tag_display|upper }}
+            </span>
+            <span style="font-size:.65rem;color:var(--crm-subtle);margin-left:auto;">{{ note.created_at|timesince }} ago</span>
+          </div>
+          <div style="font-size:.88rem;color:var(--crm-body-text);margin-top:.3rem;line-height:1.6;">{{ note.content }}</div>
+          {% if note.order_ref %}
+          <div style="font-size:.72rem;color:#0d9488;margin-top:.2rem;">🔗 {{ note.order_ref }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:2.5rem;color:var(--crm-subtle);">
+        <div style="font-size:2rem;margin-bottom:.5rem;">💬</div>
+        No team notes yet. Post the first update!
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

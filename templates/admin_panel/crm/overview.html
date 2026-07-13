@@ -1,0 +1,88 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}CRM Overview{% endblock %}
+{% block page_title %}CRM Overview{% endblock %}
+{% block breadcrumb %}Admin / CRM{% endblock %}
+{% block content %}
+<!-- Period filter -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="?period=today" class="adm-btn {% if period == 'today' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Today</a>
+  <a href="?period=week" class="adm-btn {% if period == 'week' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">This Week</a>
+  <a href="?period=month" class="adm-btn {% if period == 'month' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">This Month</a>
+  <a href="?period=year" class="adm-btn {% if period == 'year' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">This Year</a>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-blue"><i class="bi bi-funnel-fill"></i></div><div><div class="adm-kpi-label">Total Leads</div><div class="adm-kpi-value">{{ total_leads }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-green"><i class="bi bi-check-circle-fill"></i></div><div><div class="adm-kpi-label">Converted</div><div class="adm-kpi-value">{{ converted_leads }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-gold"><i class="bi bi-trophy-fill"></i></div><div><div class="adm-kpi-label">Won Deals</div><div class="adm-kpi-value">{{ won_opps }}</div><div class="adm-kpi-sub">₹{{ opp_value|floatformat:0 }} value</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-teal"><i class="bi bi-telephone-fill"></i></div><div><div class="adm-kpi-label">Total Calls</div><div class="adm-kpi-value">{{ total_calls }}</div><div class="adm-kpi-sub">{{ connected }} connected</div></div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <!-- Lead Pipeline -->
+  <div class="col-lg-6">
+    <div class="adm-card">
+      <div class="adm-card-title">🎯 Lead Pipeline</div>
+      {% for item in stage_data %}
+      <div style="margin-bottom:.8rem;">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem;">
+          <span style="font-weight:600;text-transform:capitalize;">{{ item.stage|default:'—' }}</span><span class="adm-badge badge-info">{{ item.c }}</span>
+        </div>
+        <div style="height:7px;background:var(--adm-border);border-radius:4px;overflow:hidden;">
+          <div style="height:100%;background:linear-gradient(90deg,#7c3aed,#0d9488);border-radius:4px;width:{% if stage_data.0.c %}{% widthratio item.c stage_data.0.c 100 %}{% else %}0{% endif %}%;transition:width .6s;"></div>
+        </div>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No leads data.</div>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Lead Sources -->
+  <div class="col-lg-6">
+    <div class="adm-card">
+      <div class="adm-card-title">📡 Lead Sources</div>
+      {% for item in source_data %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);font-size:.82rem;">
+        <span style="text-transform:capitalize;font-weight:600;">{{ item.source|default:'Unknown' }}</span>
+        <span class="adm-badge badge-purple">{{ item.c }}</span>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No source data.</div>{% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Top Employees -->
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="adm-card">
+      <div class="adm-card-title">🏆 Top Lead Creators</div>
+      {% for e in top_emp %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--adm-border);font-size:.82rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;font-weight:700;">{{ forloop.counter }}</div>
+          <span style="font-weight:600;">{{ e.assigned_to__username|default:'Unassigned' }}</span>
+        </div>
+        <span class="adm-badge badge-success">{{ e.c }} leads</span>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No data.</div>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Leads -->
+  <div class="col-lg-6">
+    <div class="adm-card">
+      <div class="adm-card-title">📋 Recent Leads</div>
+      {% for l in recent_leads %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);font-size:.82rem;">
+        <div>
+          <div style="font-weight:600;">{{ l.name|truncatechars:30 }}</div>
+          <div style="font-size:.68rem;color:var(--adm-muted);">{{ l.source }} · {{ l.phone }}</div>
+        </div>
+        <span class="adm-badge badge-purple" style="font-size:.6rem;">{{ l.stage }}</span>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No leads.</div>{% endfor %}
+      <a href="{% url 'employee:lead_list' %}" class="adm-btn btn-outline btn-sm mt-2 w-100">View All Leads</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

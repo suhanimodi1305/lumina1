@@ -40,6 +40,10 @@ api*.txt
 # Kiro
 .kiro/
 
+# Laravel
+lumina-laravel/vendor/
+lumina-laravel/node_modules/
+
 # Misc
 *.log
 *.bak

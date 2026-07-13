@@ -1,0 +1,220 @@
+{% extends 'employee/crm_base.html' %}
+
+{% block title %}Products — Employee Portal{% endblock %}
+{% block page_title %}Product Management{% endblock %}
+{% block nav_products_open %}open{% endblock %}
+{% block nav_prod_list %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.emp-toolbar {
+  display:flex; gap:.65rem; align-items:center; flex-wrap:wrap;
+  margin-bottom:1.25rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:.65rem .85rem;
+}
+.emp-search-input {
+  flex:1; min-width:180px; padding:.48rem .9rem;
+  border:1.5px solid var(--border); border-radius:8px;
+  font-family:inherit; font-size:.84rem; background:var(--surface); color:var(--text);
+}
+.emp-search-input:focus { outline:none; border-color:#0d9488; }
+.emp-filter-sel {
+  padding:.48rem .75rem; border:1.5px solid var(--border); border-radius:8px;
+  font-size:.8rem; background:var(--surface); color:var(--text);
+}
+.emp-submit-btn {
+  padding:.48rem 1rem; background:#0d9488; color:#fff;
+  border:none; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer;
+}
+.emp-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
+.emp-table {
+  width:100%; border-collapse:collapse; background:var(--surface); font-size:.82rem;
+}
+.emp-table thead tr { background:var(--page-bg); border-bottom:1px solid var(--border); }
+.emp-table th {
+  padding:.6rem .9rem; text-align:left; font-size:.62rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.08em; color:var(--muted); white-space:nowrap;
+}
+.emp-table tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+.emp-table tbody tr:last-child { border-bottom:none; }
+.emp-table tbody tr:hover { background:var(--page-bg); }
+.emp-table td { padding:.65rem .9rem; vertical-align:middle; }
+.emp-td-img {
+  width:36px; height:36px; border-radius:8px; object-fit:cover;
+  background:#f1f5f9; display:inline-flex; align-items:center;
+  justify-content:center; font-size:1.1rem;
+}
+.range-badge {
+  padding:.18rem .55rem; border-radius:20px; font-size:.65rem; font-weight:600;
+  display:inline-block;
+}
+.rb-korean   { background:#ccfbf1; color:#065f46; }
+.rb-makeup   { background:#fce7f3; color:#9d174d; }
+.rb-ayurvedic{ background:#dcfce7; color:#166534; }
+.rb-pharmacy { background:#dbeafe; color:#1e40af; }
+.rb-other    { background:#f1f5f9; color:#475569; }
+.price-val   { font-weight:700; color:#0d9488; }
+.emp-action-btn {
+  padding:.22rem .6rem; border:none; border-radius:6px; font-size:.68rem;
+  font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex;
+  align-items:center; gap:.3rem; transition:opacity .12s;
+}
+.emp-action-btn:hover { opacity:.85; }
+.btn-view   { background:#e0f2fe; color:#0369a1; }
+.btn-edit   { background:#0d9488; color:#fff; }
+.btn-del    { background:#fee2e2; color:#991b1b; }
+.result-count { font-size:.78rem; color:var(--muted); margin-bottom:.65rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<form method="get" class="emp-toolbar" id="emp-prod-form">
+  <a href="{% url 'employee:product_add' %}"
+     style="padding:.48rem 1rem;background:#0d9488;color:#fff;border-radius:8px;
+            font-size:.82rem;font-weight:600;text-decoration:none;
+            display:flex;align-items:center;gap:.4rem;white-space:nowrap;">
+    <i class="bi bi-plus-circle"></i> Add Product
+  </a>
+
+  <input type="text" name="q" value="{{ q }}" placeholder="Search name, brand, SKU…"
+         class="emp-search-input">
+
+  <!-- Range selector — drives category cascade -->
+  <select name="range" class="emp-filter-sel" id="emp-range-sel">
+    <option value="all" {% if range_ == 'all' %}selected{% endif %}>All Ranges</option>
+    <option value="korean"    {% if range_ == 'korean'    %}selected{% endif %}>K-Beauty</option>
+    <option value="makeup"    {% if range_ == 'makeup'    %}selected{% endif %}>Makeup</option>
+    <option value="ayurvedic" {% if range_ == 'ayurvedic' %}selected{% endif %}>Ayurvedic</option>
+    <option value="pharmacy"  {% if range_ == 'pharmacy'  %}selected{% endif %}>Pharmacy</option>
+  </select>
+
+  <!-- Category selector — filtered by range via JS -->
+  <select name="category" class="emp-filter-sel" id="emp-cat-sel">
+    <option value="all">All Categories</option>
+  </select>
+
+  <button type="submit" class="emp-submit-btn"><i class="bi bi-search"></i> Search</button>
+
+  <a href="{% url 'employee:export_products' %}{% if q or range_ != 'all' %}?q={{ q }}&range={{ range_ }}{% endif %}"
+     style="padding:.48rem 1rem;background:#fef3c7;color:#92400e;border:1px solid #fde68a;
+            border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;">
+    <i class="bi bi-download"></i> Export
+  </a>
+</form>
+
+<div class="result-count">Showing {{ total }} product{{ total|pluralize }}</div>
+
+<div class="emp-table-wrap">
+  <table class="emp-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Brand</th>
+        <th>SKU</th>
+        <th>Range</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Featured</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>
+          {% if p.image_url %}
+            <img src="{{ p.image_url }}" alt="{{ p.name }}" class="emp-td-img">
+          {% else %}
+            <div class="emp-td-img">🧴</div>
+          {% endif %}
+        </td>
+        <td style="font-weight:600;max-width:180px;">{{ p.name }}</td>
+        <td style="color:var(--muted);">{{ p.brand }}</td>
+        <td style="font-family:monospace;font-size:.75rem;color:var(--muted);">{{ p.sku }}</td>
+        <td>
+          <span class="range-badge
+            {% if p.product_range == 'korean' %}rb-korean
+            {% elif p.product_range == 'makeup' %}rb-makeup
+            {% elif p.product_range == 'ayurvedic' %}rb-ayurvedic
+            {% elif p.product_range == 'pharmacy' %}rb-pharmacy
+            {% else %}rb-other{% endif %}">
+            {{ p.get_product_range_display }}
+          </span>
+        </td>
+        <td style="font-size:.78rem;">{{ p.get_category_display }}</td>
+        <td class="price-val">{% if p.price %}₹{{ p.price }}{% else %}—{% endif %}</td>
+        <td style="text-align:center;">
+          {% if p.is_featured %}<span style="color:#f59e0b;">⭐</span>{% else %}—{% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+            <a href="{% url 'employee:product_detail' pk=p.pk %}" class="emp-action-btn btn-view">
+              <i class="bi bi-eye"></i> View
+            </a>
+            <a href="{% url 'employee:product_edit' pk=p.pk %}" class="emp-action-btn btn-edit">
+              <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a href="{% url 'employee:product_delete' pk=p.pk %}" class="emp-action-btn btn-del">
+              <i class="bi bi-trash"></i> Del
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--muted);">No products found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+const EMP_RANGE_CAT = {
+  all:       ['cleanser','toner','essence','serum','ampoule','moisturizer','cream','emulsion',
+              'sunscreen','mask','eye_cream','exfoliator','oil','mist',
+              'primer','foundation','concealer','setting_powder','powder','blush',
+              'bronzer','highlighter','eyeshadow','eyeshadow_palette','eyeliner',
+              'mascara','lipstick','lip_gloss','lip_liner'],
+  korean:    ['cleanser','toner','essence','serum','ampoule','moisturizer','cream','emulsion',
+              'sunscreen','mask','eye_cream','exfoliator','oil','mist'],
+  makeup:    ['primer','foundation','concealer','setting_powder','powder','blush','bronzer',
+              'highlighter','eyeshadow','eyeshadow_palette','eyeliner','mascara',
+              'lipstick','lip_gloss','lip_liner'],
+  ayurvedic: ['cleanser','toner','serum','moisturizer','cream','mask','oil'],
+  pharmacy:  ['cleanser','serum','moisturizer','sunscreen','eye_cream'],
+};
+const EMP_CAT_LABELS = {
+  'cleanser':'Cleanser','toner':'Toner','essence':'Essence','serum':'Serum',
+  'ampoule':'Ampoule','moisturizer':'Moisturizer','cream':'Cream','emulsion':'Emulsion',
+  'sunscreen':'Sunscreen','mask':'Mask','eye_cream':'Eye Cream','exfoliator':'Exfoliator',
+  'oil':'Oil','mist':'Mist','primer':'Primer','foundation':'Foundation',
+  'concealer':'Concealer','setting_powder':'Setting Powder','powder':'Powder',
+  'blush':'Blush','bronzer':'Bronzer','highlighter':'Highlighter',
+  'eyeshadow':'Eyeshadow','eyeshadow_palette':'Eyeshadow Palette','eyeliner':'Eyeliner',
+  'mascara':'Mascara','lipstick':'Lipstick','lip_gloss':'Lip Gloss','lip_liner':'Lip Liner',
+};
+const empRangeSel = document.getElementById('emp-range-sel');
+const empCatSel   = document.getElementById('emp-cat-sel');
+const currentCat  = "{{ cat|default:'all' }}";
+
+function empUpdateCategories() {
+  const rng  = empRangeSel.value;
+  const list = EMP_RANGE_CAT[rng] || EMP_RANGE_CAT['all'];
+  const prev = empCatSel.value;
+  empCatSel.innerHTML = '<option value="all">All Categories</option>';
+  for (const val of list) {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = EMP_CAT_LABELS[val] || val;
+    if (val === prev || val === currentCat) opt.selected = true;
+    empCatSel.appendChild(opt);
+  }
+  // restore 'all' if prev was all
+  if (prev === 'all' || !prev) empCatSel.value = 'all';
+}
+empRangeSel.addEventListener('change', empUpdateCategories);
+empUpdateCategories();
+</script>
+{% endblock %}

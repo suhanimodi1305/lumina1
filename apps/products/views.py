@@ -1,7 +1,8 @@
 """
 Product catalog views
 """
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils.text import slugify
 from .models import Product
 from collections import OrderedDict
 import logging
@@ -195,7 +196,7 @@ def product_list(request):
         pharmacy_qs  = pharmacy_qs.order_by('-created_at')
     else:
         korean_qs    = korean_qs.order_by('brand', 'name')
-        makeup_qs    = makeup_qs.order_by('brand', 'name')
+        makeup_qs    = makeup_qs.order_by('category', 'brand', 'name')
         ayurvedic_qs = ayurvedic_qs.order_by('brand', 'name')
         pharmacy_qs  = pharmacy_qs.order_by('brand', 'name')
 
@@ -207,13 +208,13 @@ def product_list(request):
             korean_ranges[range_name] = []
         korean_ranges[range_name].append(product)
 
-    # ── Group makeup products by brand ──
+    # ── Group makeup products by category (product type) ──
     makeup_brands = OrderedDict()
     for product in makeup_qs:
-        brand_name = product.brand or 'Other'
-        if brand_name not in makeup_brands:
-            makeup_brands[brand_name] = []
-        makeup_brands[brand_name].append(product)
+        cat_display = product.get_category_display() or 'Other'
+        if cat_display not in makeup_brands:
+            makeup_brands[cat_display] = []
+        makeup_brands[cat_display].append(product)
 
     # ── Group ayurvedic products by brand ──
     ayurvedic_brands = OrderedDict()
@@ -262,8 +263,6 @@ def product_list(request):
         .distinct()
         .order_by('category')
     )
-
-    # Count active filters for badge
     active_filter_count = sum([
         bool(q), bool(category), bool(price),
         bool(product_range), bool(brand), bool(skin_type), bool(featured),
@@ -276,6 +275,39 @@ def product_list(request):
         ('normal', 'Normal'),
         ('all', 'All Skin Types'),
     ]
+
+    # ── Build "Shop by Brand" list for sidebar (all products, with slug + count) ──
+    from django.db.models import Count
+    brand_counts = (
+        Product.objects.values('brand', 'product_range')
+        .annotate(cnt=Count('id'))
+        .order_by('brand')
+    )
+    brand_map = OrderedDict()
+    for row in brand_counts:
+        b = row['brand']
+        if b not in brand_map:
+            brand_map[b] = {'brand': b, 'slug': slugify(b), 'count': 0, 'range': row['product_range']}
+        brand_map[b]['count'] += row['cnt']
+    all_brands_list = list(brand_map.values())
+
+    # ── When searching, also produce a brand-grouped flat view for "search results" ──
+    search_by_brand = OrderedDict()
+    if q:
+        from django.db.models import Q as DQ
+        search_filter = (
+            DQ(name__icontains=q) |
+            DQ(brand__icontains=q) |
+            DQ(description__icontains=q) |
+            DQ(key_ingredients__icontains=q) |
+            DQ(sku__icontains=q)
+        )
+        all_matching = Product.objects.filter(search_filter).order_by('brand', 'name')
+        for p in all_matching:
+            bn = p.brand or 'Other'
+            if bn not in search_by_brand:
+                search_by_brand[bn] = []
+            search_by_brand[bn].append(p)
 
     context = {
         'korean_ranges':      korean_ranges,
@@ -295,6 +327,10 @@ def product_list(request):
         'korean_categories':  list(korean_categories),
         'active_filter_count': active_filter_count,
         'skin_type_options':  skin_type_options,
+        # brand browser
+        'all_brands_list':    all_brands_list,
+        # brand-grouped search results (only populated when q is set)
+        'search_by_brand':    search_by_brand,
         # current filter values echoed back
         'cur_q':              q,
         'cur_category':       category,
@@ -340,3 +376,116 @@ def product_detail(request, pk):
         'range_meta':       range_meta,
     }
     return render(request, 'products/detail.html', context)
+
+
+def brand_page(request, brand_slug):
+    """
+    Dedicated brand page — shows all products from a single brand,
+    grouped by category, with filters for price/category/sort.
+    URL: /products/brand/<slug>/
+    """
+    from django.db.models import Q, Count
+
+    # ── Resolve actual brand name from slug ──
+    # Find a product whose slugified brand matches the slug
+    candidates = Product.objects.values_list('brand', flat=True).distinct()
+    brand_name = None
+    for b in candidates:
+        if slugify(b) == brand_slug:
+            brand_name = b
+            break
+    if not brand_name:
+        # fallback: redirect to list
+        return redirect('products:list')
+
+    # ── Get filter params ──
+    q        = request.GET.get('q', '').strip()
+    category = request.GET.get('category', '').strip()
+    price    = request.GET.get('price', '').strip()
+    sort     = request.GET.get('sort', '').strip()
+
+    qs = Product.objects.filter(brand=brand_name)
+
+    if q:
+        qs = qs.filter(
+            Q(name__icontains=q) |
+            Q(description__icontains=q) |
+            Q(key_ingredients__icontains=q) |
+            Q(sku__icontains=q)
+        )
+    if category:
+        qs = qs.filter(category=category)
+    if price:
+        if price == '0-500':
+            qs = qs.filter(price__lte=500)
+        elif price == '500-1000':
+            qs = qs.filter(price__gte=500, price__lte=1000)
+        elif price == '1000-2500':
+            qs = qs.filter(price__gte=1000, price__lte=2500)
+        elif price == '2500-5000':
+            qs = qs.filter(price__gte=2500, price__lte=5000)
+        elif price == '5000-':
+            qs = qs.filter(price__gte=5000)
+
+    if sort == 'price_asc':
+        qs = qs.order_by('price', 'name')
+    elif sort == 'price_desc':
+        qs = qs.order_by('-price', 'name')
+    elif sort == 'name_asc':
+        qs = qs.order_by('name')
+    elif sort == 'newest':
+        qs = qs.order_by('-created_at')
+    else:
+        qs = qs.order_by('category', 'name')
+
+    # ── Group by category ──
+    by_category = OrderedDict()
+    for p in qs:
+        cat = p.get_category_display()
+        if cat not in by_category:
+            by_category[cat] = []
+        by_category[cat].append(p)
+
+    # ── Sidebar: categories available for this brand ──
+    brand_categories = (
+        Product.objects.filter(brand=brand_name)
+        .values_list('category', flat=True)
+        .distinct()
+        .order_by('category')
+    )
+
+    # ── Detect product range for badge colour ──
+    sample = Product.objects.filter(brand=brand_name).first()
+    product_range = sample.product_range if sample else 'makeup'
+
+    # ── Range meta if K-Beauty range ──
+    range_meta = KOREAN_RANGE_META.get(brand_name, {})
+
+    # ── All brands for sidebar "Other brands" ──
+    other_brands = (
+        Product.objects.exclude(brand=brand_name)
+        .values('brand')
+        .annotate(cnt=Count('id'))
+        .order_by('brand')
+    )
+    other_brands_list = [
+        {'brand': row['brand'], 'slug': slugify(row['brand']), 'count': row['cnt']}
+        for row in other_brands
+    ]
+
+    context = {
+        'brand_name':       brand_name,
+        'brand_slug':       brand_slug,
+        'by_category':      by_category,
+        'total':            qs.count(),
+        'product_range':    product_range,
+        'range_meta':       range_meta,
+        'brand_categories': list(brand_categories),
+        'other_brands':     other_brands_list,
+        # filters
+        'cur_q':        q,
+        'cur_category': category,
+        'cur_price':    price,
+        'cur_sort':     sort,
+    }
+    return render(request, 'products/brand.html', context)

@@ -1,0 +1,58 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Customers{% endblock %}
+{% block page_title %}Customer Database{% endblock %}
+{% block nav_customers %}active{% endblock %}
+{% block nav_crm_open %}open{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+  <form method="get" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <input name="q" value="{{ q }}" placeholder="Name, email, username..."
+           style="padding:.45rem .85rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;min-width:220px;outline:none;background:var(--crm-card);color:var(--crm-text);">
+    <select name="tier" style="padding:.45rem .75rem;border:1px solid var(--crm-border);border-radius:8px;font-size:.8rem;color:var(--crm-text);background:var(--crm-card);">
+      <option value="">All Tiers</option>
+      {% for val,label in tier_choices %}<option value="{{ val }}" {% if tier == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn-crm-primary">🔍 Filter</button>
+  </form>
+</div>
+
+<div class="crm-card" style="padding:0;overflow:hidden;">
+  <table class="crm-table">
+    <thead>
+      <tr><th>Customer</th><th>Email</th><th>Tier</th><th>Points</th><th>Joined</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for c in customers %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:.65rem;">
+            <div style="width:32px;height:32px;background:#0d9488;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;">
+              {{ c.username|first|upper }}
+            </div>
+            <div>
+              <div style="font-size:.85rem;font-weight:600;">{{ c.get_full_name|default:c.username }}</div>
+              <div style="font-size:.7rem;color:var(--crm-muted);">@{{ c.username }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="font-size:.8rem;color:var(--crm-muted);">{{ c.email|default:"—" }}</td>
+        <td>
+          {% with tier=c.profile.effective_tier %}
+          <span class="badge-stage {% if tier == 'vip' %}badge-medium{% elif tier == 'medium' %}badge-new{% else %}badge-closed{% endif %}" style="font-size:.7rem;font-weight:700;">
+            {{ tier|upper }}
+          </span>
+          {% endwith %}
+        </td>
+        <td style="font-size:.82rem;font-weight:600;color:#0d9488;">{{ c.profile.loyalty_points|default:0 }}</td>
+        <td style="font-size:.75rem;color:var(--crm-muted);">{{ c.date_joined|date:"d M Y" }}</td>
+        <td><a href="{% url 'employee:customer_360' c.pk %}" class="btn-crm-primary" style="padding:.25rem .65rem;font-size:.7rem;">360° View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--crm-subtle);">No customers found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div style="font-size:.75rem;color:var(--crm-subtle);text-align:right;margin-top:.5rem;">{{ total }} customers</div>
+{% endblock %}

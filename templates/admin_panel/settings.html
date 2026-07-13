@@ -1,0 +1,98 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Company Settings{% endblock %}
+{% block breadcrumb %}Admin / Settings{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">🏢 Company Information</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">Company Name</label>
+            <input type="text" name="company_name" class="adm-input" value="{{ company.company_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Phone</label>
+            <input type="text" name="phone" class="adm-input" value="{{ company.phone }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Website</label>
+            <input type="url" name="website" class="adm-input" value="{{ company.website }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">GSTIN</label>
+            <input type="text" name="gstin" class="adm-input" value="{{ company.gstin }}">
+          </div>
+          <div class="col-md-12">
+            <label class="adm-label">Address</label>
+            <textarea name="address" class="adm-input" rows="2">{{ company.address }}</textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">City</label>
+            <input type="text" name="city" class="adm-input" value="{{ company.city }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">State</label>
+            <input type="text" name="state" class="adm-input" value="{{ company.state }}">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Pincode</label>
+            <input type="text" name="pincode" class="adm-input" value="{{ company.pincode }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">📧 Email Configuration</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">Company Email</label>
+            <input type="email" name="company_email" class="adm-input" value="{{ company.company_email }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Support Email</label>
+            <input type="email" name="support_email" class="adm-input" value="{{ company.support_email }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">HR Email</label>
+            <input type="email" name="hr_email" class="adm-input" value="{{ company.hr_email }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Sales Email</label>
+            <input type="email" name="sales_email" class="adm-input" value="{{ company.sales_email }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Marketing Email</label>
+            <input type="email" name="marketing_email" class="adm-input" value="{{ company.marketing_email }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="adm-card mb-3">
+        <div class="adm-card-title">⚙ SMTP Settings</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">SMTP Host</label>
+            <input type="text" name="smtp_host" class="adm-input" value="{{ company.smtp_host }}">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">SMTP Port</label>
+            <input type="number" name="smtp_port" class="adm-input" value="{{ company.smtp_port }}">
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">SMTP User</label>
+            <input type="email" name="smtp_user" class="adm-input" value="{{ company.smtp_user }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="adm-btn btn-primary"><i class="bi bi-save"></i> Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

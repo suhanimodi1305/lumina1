@@ -1,0 +1,67 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}New Lead{% endblock %}
+{% block page_title %}New Lead{% endblock %}
+{% block nav_leads %}active{% endblock %}
+{% block nav_crm_open %}open{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+  <a href="{% url 'employee:lead_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← Back to Leads</a>
+  <div class="crm-card">
+    <div class="crm-card-title">Create New Lead</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Full Name *</label>
+          <input name="name" required class="form-control form-control-sm" placeholder="Customer name">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Phone *</label>
+          <input name="phone" required class="form-control form-control-sm" placeholder="Mobile number">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Email</label>
+          <input name="email" type="email" class="form-control form-control-sm" placeholder="Email address">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">City</label>
+          <input name="city" class="form-control form-control-sm" placeholder="City">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Source</label>
+          <select name="source" class="form-select form-select-sm">
+            {% for val,label in source_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Stage</label>
+          <select name="stage" class="form-select form-select-sm">
+            {% for val,label in stage_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Skin Concern</label>
+          <input name="skin_concern" class="form-control form-control-sm" placeholder="e.g. Acne, Dark spots">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Budget</label>
+          <input name="budget" class="form-control form-control-sm" placeholder="e.g. ₹500-₹2000">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Follow-up Date</label>
+          <input name="follow_up_date" type="date" class="form-control form-control-sm">
+        </div>
+        <div class="col-12">
+          <label class="form-label" style="font-size:.78rem;font-weight:600;">Notes</label>
+          <textarea name="notes" rows="3" class="form-control form-control-sm" placeholder="Any additional notes..."></textarea>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn-crm-primary">Create Lead</button>
+          <a href="{% url 'employee:lead_list' %}" style="margin-left:.75rem;font-size:.8rem;color:var(--crm-muted);text-decoration:none;">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

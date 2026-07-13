@@ -1,0 +1,89 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Call Center{% endblock %}
+{% block page_title %}Call Center{% endblock %}
+{% block breadcrumb %}Admin / CRM / Call Center{% endblock %}
+{% block content %}
+
+<!-- Stats KPIs -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-blue"><i class="bi bi-telephone-fill"></i></div><div><div class="adm-kpi-label">Calls Today</div><div class="adm-kpi-value">{{ stats.total_today }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-green"><i class="bi bi-telephone-inbound-fill"></i></div><div><div class="adm-kpi-label">Connected Today</div><div class="adm-kpi-value">{{ stats.connected_today }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-gold"><i class="bi bi-alarm-fill"></i></div><div><div class="adm-kpi-label">Pending Callbacks</div><div class="adm-kpi-value">{{ stats.pending_cbs }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-purple"><i class="bi bi-collection-fill"></i></div><div><div class="adm-kpi-label">Total Calls</div><div class="adm-kpi-value">{{ stats.total_all }}</div></div></div></div>
+</div>
+
+<div class="row g-3">
+  <!-- Pending Callbacks -->
+  <div class="col-lg-5">
+    <div class="adm-card">
+      <div class="adm-card-title">🔔 Pending Callbacks
+        {% if stats.pending_cbs > 0 %}<span class="adm-badge badge-danger ms-1">{{ stats.pending_cbs }}</span>{% endif %}
+      </div>
+      {% for cb in pending_cbs %}
+      <div style="background:rgba(245,158,11,.07);border:1px solid #fde68a;border-radius:10px;padding:.85rem;margin-bottom:.6rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-weight:700;font-size:.88rem;">{{ cb.name }}</div>
+            <div style="font-size:.78rem;color:var(--adm-muted);">📞 {{ cb.phone }}{% if cb.email %} · {{ cb.email }}{% endif %}</div>
+          </div>
+          <span class="adm-badge badge-warning">{{ cb.created_at|timesince }} ago</span>
+        </div>
+        <div style="background:var(--adm-surface);border-radius:6px;padding:.5rem .7rem;margin:.5rem 0;font-size:.8rem;border:1px solid #fde68a;">
+          {{ cb.issue_summary }}
+        </div>
+        {% if cb.preferred_time %}<div style="font-size:.72rem;color:var(--adm-muted);">⏰ {{ cb.preferred_time }}</div>{% endif %}
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:2rem;color:var(--adm-muted);font-size:.82rem;">✅ No pending callbacks</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Today's Calls -->
+  <div class="col-lg-7">
+    <div class="adm-table-wrap">
+      <div class="adm-table-head">
+        <h6>📋 Call Log</h6>
+        <form method="get" class="d-flex gap-2">
+          <select name="emp" class="adm-input" style="width:160px;">
+            <option value="">All Employees</option>
+            {% for e in employees %}<option value="{{ e.pk }}" {% if emp_filter == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.username }}</option>{% endfor %}
+          </select>
+          <select name="status" class="adm-input" style="width:160px;">
+            <option value="">All Statuses</option>
+            {% for val,lbl in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+        </form>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="adm-table">
+          <thead><tr><th>Call ID</th><th>Phone / Name</th><th>Employee</th><th>Direction</th><th>Status</th><th>Duration</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for c in calls %}
+            <tr>
+              <td style="font-family:monospace;font-size:.7rem;color:var(--adm-muted);">{{ c.call_id }}</td>
+              <td>
+                <div style="font-weight:600;font-size:.82rem;">{{ c.customer_name|default:c.phone }}</div>
+                <div style="font-size:.7rem;color:var(--adm-muted);">{{ c.phone }}</div>
+              </td>
+              <td style="font-size:.78rem;">{{ c.employee.username|default:'—' }}</td>
+              <td><span class="adm-badge badge-info" style="font-size:.62rem;">{{ c.get_direction_display }}</span></td>
+              <td>
+                <span class="adm-badge {% if c.status == 'connected' %}badge-success{% elif c.status == 'no_answer' %}badge-danger{% else %}badge-warning{% endif %}" style="font-size:.62rem;">
+                  {{ c.get_status_display }}
+                </span>
+              </td>
+              <td style="font-size:.75rem;color:var(--adm-muted);">{{ c.duration_display }}</td>
+              <td style="font-size:.72rem;color:var(--adm-muted);">{{ c.called_at|date:"d M H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--adm-muted);">No calls found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

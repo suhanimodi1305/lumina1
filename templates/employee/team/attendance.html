@@ -1,0 +1,49 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}📅 Today's Attendance — {{ today|date:"d F Y" }}{% endblock %}
+{% block nav_attend %}active{% endblock %}
+
+{% block content %}
+<div class="crm-card">
+  <form method="post">
+    {% csrf_token %}
+    <table class="crm-table">
+      <thead>
+        <tr><th>Employee</th><th>Status</th><th>Check In</th><th>Check Out</th></tr>
+      </thead>
+      <tbody>
+        {% for emp in staff %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.65rem;">
+              <div style="width:30px;height:30px;background:#0d9488;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
+                {{ emp.username|first|upper }}
+              </div>
+              <span style="font-size:.85rem;font-weight:600;">{{ emp.get_full_name|default:emp.username }}</span>
+            </div>
+          </td>
+          <td>
+            <select name="status_{{ emp.pk }}" class="form-select form-select-sm" style="min-width:130px;">
+              <option value="">— Mark —</option>
+              {% for val,label in status_choices %}
+              <option value="{{ val }}" {% if records|dictsort:"employee_id" %}{% for a in records.values %}{% if a.employee_id == emp.pk and a.status == val %}selected{% endif %}{% endfor %}{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input type="time" name="checkin_{{ emp.pk }}" class="form-control form-control-sm" style="width:110px;"
+               value="{% for a in records.values %}{% if a.employee_id == emp.pk %}{{ a.check_in|time:"H:i"|default:'' }}{% endif %}{% endfor %}"></td>
+          <td><input type="time" name="checkout_{{ emp.pk }}" class="form-control form-control-sm" style="width:110px;"
+               value="{% for a in records.values %}{% if a.employee_id == emp.pk %}{{ a.check_out|time:"H:i"|default:'' }}{% endif %}{% endfor %}"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div style="margin-top:1rem;text-align:right;">
+      <button type="submit" class="btn-crm-primary">💾 Save Attendance</button>
+    </div>
+  </form>
+</div>
+<div style="text-align:right;margin-top:.5rem;">
+  <a href="{% url 'employee:export_excel' %}?section=attendance&period=month" class="btn-crm-outline" style="font-size:.75rem;">📥 Export This Month</a>
+</div>
+{% endblock %}

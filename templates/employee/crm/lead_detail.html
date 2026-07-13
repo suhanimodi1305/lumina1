@@ -1,0 +1,131 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Lead {{ lead.name }}{% endblock %}
+{% block page_title %}Lead — {{ lead.name }}{% endblock %}
+{% block nav_leads %}active{% endblock %}
+{% block nav_crm_open %}open{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+  <a href="{% url 'employee:lead_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;">← All Leads</a>
+  <span style="color:var(--crm-subtle);">|</span>
+  <span style="font-size:.75rem;color:var(--crm-muted);">{{ lead.lead_id }}</span>
+  <span class="badge-stage badge-new" style="font-size:.65rem;">{{ lead.get_stage_display }}</span>
+</div>
+
+<div class="row g-3">
+  <!-- Lead Info + Update -->
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">Lead Info</div>
+      <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1rem;">
+        <div style="width:48px;height:48px;background:#0d9488;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">
+          {{ lead.name|first|upper }}
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:1rem;">{{ lead.name }}</div>
+          <div style="font-size:.75rem;color:var(--crm-muted);">{{ lead.get_source_display }}</div>
+        </div>
+      </div>
+      <div style="font-size:.82rem;line-height:2;">
+        <div>📞 <a href="tel:{{ lead.phone }}" style="color:#0d9488;">{{ lead.phone }}</a></div>
+        {% if lead.email %}<div>✉️ <a href="mailto:{{ lead.email }}" style="color:#0d9488;">{{ lead.email }}</a></div>{% endif %}
+        {% if lead.city %}<div>📍 {{ lead.city }}</div>{% endif %}
+        {% if lead.skin_concern %}<div>💆 {{ lead.skin_concern }}</div>{% endif %}
+        {% if lead.budget %}<div>💰 {{ lead.budget }}</div>{% endif %}
+      </div>
+    </div>
+
+    <!-- Update Stage -->
+    <div class="crm-card">
+      <div class="crm-card-title">Update Lead</div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_stage">
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.75rem;font-weight:600;color:var(--crm-label);display:block;margin-bottom:.3rem;">Stage</label>
+          <select name="stage" class="form-select form-select-sm">
+            {% for val,label in stage_choices %}
+            <option value="{{ val }}" {% if lead.stage == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.75rem;font-weight:600;color:var(--crm-label);display:block;margin-bottom:.3rem;">Follow-up Date</label>
+          <input type="date" name="follow_up_date" value="{{ lead.follow_up_date|date:'Y-m-d'|default:'' }}"
+                 class="form-control form-control-sm">
+        </div>
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.75rem;font-weight:600;color:var(--crm-label);display:block;margin-bottom:.3rem;">Notes</label>
+          <textarea name="notes" rows="3" class="form-control form-control-sm">{{ lead.notes }}</textarea>
+        </div>
+        <button type="submit" class="btn-crm-primary" style="width:100%;">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="crm-card">
+      <div class="crm-card-title">Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <a href="{% url 'employee:log_call' %}?phone={{ lead.phone }}&name={{ lead.name }}&lead_id={{ lead.lead_id }}"
+           class="btn-crm-primary" style="justify-content:center;">📞 Log a Call</a>
+        <a href="{% url 'employee:ticket_create' %}?phone={{ lead.phone }}&name={{ lead.name }}"
+           class="btn-crm-outline" style="justify-content:center;">🎫 Create Ticket</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Feed -->
+  <div class="col-lg-8">
+    <!-- Call History -->
+    <div class="crm-card">
+      <div class="crm-card-title">📞 Call History</div>
+      {% for c in calls %}
+      <div style="display:flex;gap:.75rem;padding:.6rem;background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:.4rem;">
+        <div style="width:36px;height:36px;background:#0d9488;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">
+          📞
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;">
+            <span class="badge-stage badge-{{ c.status }}" style="font-size:.65rem;">{{ c.get_status_display }}</span>
+            <span style="font-size:.7rem;color:var(--crm-subtle);">{{ c.called_at|date:"d M Y H:i" }}</span>
+          </div>
+          <div style="font-size:.8rem;margin:.2rem 0;color:var(--crm-body-text);">{{ c.notes|default:"No notes" }}</div>
+          <div style="font-size:.7rem;color:var(--crm-subtle);">{{ c.get_direction_display }} · {{ c.duration_display }} · {{ c.employee.username }}</div>
+          {% if c.follow_up_date %}
+          <div style="font-size:.7rem;color:#f59e0b;margin-top:.2rem;">⏰ Follow-up: {{ c.follow_up_date|date:"d M Y" }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}<div style="color:var(--crm-subtle);font-size:.8rem;padding:.5rem;">No calls logged yet.</div>{% endfor %}
+    </div>
+
+    <!-- Internal Notes -->
+    <div class="crm-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+        <div class="crm-card-title" style="margin:0;">📝 Team Notes</div>
+      </div>
+      <form method="post" style="margin-bottom:.75rem;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_note">
+        <div style="display:flex;gap:.5rem;">
+          <input name="content" placeholder="Add a note about this lead..." required
+                 class="form-control form-control-sm" style="flex:1;">
+          <select name="tag" class="form-select form-select-sm" style="flex:0 0 auto;width:auto;">
+            {% for val,label in tag_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="btn-crm-primary">Post</button>
+        </div>
+      </form>
+      {% for note in notes %}
+      <div style="padding:.6rem .75rem;border-left:3px solid #0d9488;background:var(--crm-row-bg);border-radius:0 8px 8px 0;margin-bottom:.4rem;">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:.72rem;font-weight:600;">{{ note.author.username }}</span>
+          <span style="font-size:.65rem;color:var(--crm-subtle);">{{ note.created_at|timesince }} ago</span>
+        </div>
+        <div style="font-size:.8rem;color:var(--crm-body-text);margin-top:.15rem;">{{ note.content }}</div>
+      </div>
+      {% empty %}<div style="color:var(--crm-subtle);font-size:.8rem;">No notes yet.</div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

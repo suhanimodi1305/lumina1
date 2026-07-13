@@ -1,0 +1,71 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Add Salary{% endblock %}
+{% block page_title %}Add Salary Record{% endblock %}
+{% block breadcrumb %}Admin / HRMS / Salary / Add{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="adm-card">
+      <div class="adm-card-title">💰 New Salary Record</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">Employee *</label>
+            <select name="employee" class="adm-input" required>
+              <option value="">— Select Employee —</option>
+              {% for e in employees %}<option value="{{ e.pk }}" {% if request.GET.employee == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.get_full_name|default:e.username }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Month *</label>
+            <select name="month" class="adm-input">
+              {% for m in months %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="adm-label">Year *</label>
+            <select name="year" class="adm-input">
+              {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Basic Salary (₹)</label>
+            <input type="number" name="basic_salary" class="adm-input" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">HRA (₹)</label>
+            <input type="number" name="hra" class="adm-input" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Allowances (₹)</label>
+            <input type="number" name="allowances" class="adm-input" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Incentives (₹)</label>
+            <input type="number" name="incentives" class="adm-input" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Deductions (₹)</label>
+            <input type="number" name="deductions" class="adm-input" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-4">
+            <label class="adm-label">Tax Deducted (₹)</label>
+            <input type="number" name="tax_deducted" class="adm-input" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Status</label>
+            <select name="status" class="adm-input">
+              {% for val,lbl in status_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2 justify-content-end mt-4">
+          <a href="{% url 'admin_panel:salary_list' %}" class="adm-btn btn-outline">Cancel</a>
+          <button type="submit" class="adm-btn btn-primary"><i class="bi bi-save"></i> Save Salary Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Order {{ order.order_id }}{% endblock %}
+{% block page_title %}Order — {{ order.order_id }}{% endblock %}
+{% block nav_orders %}active{% endblock %}
+{% block nav_orders_open %}open{% endblock %}
+
+{% block content %}
+<a href="{% url 'employee:order_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← All Orders</a>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">Order Details</div>
+      <div style="font-size:.82rem;line-height:2.2;">
+        <div><strong>Order ID:</strong> {{ order.order_id }}</div>
+        <div><strong>Tracking:</strong> {{ order.tracking_id }}</div>
+        <div><strong>Customer:</strong> {{ order.full_name }}</div>
+        <div>📞 <a href="tel:{{ order.phone }}" style="color:#0d9488;">{{ order.phone }}</a></div>
+        {% if order.email %}<div>✉️ {{ order.email }}</div>{% endif %}
+        <div><strong>Address:</strong> {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</div>
+        <div><strong>Payment:</strong> {{ order.get_payment_method_display }}</div>
+        <div><strong>Subtotal:</strong> ₹{{ order.subtotal }}</div>
+        <div><strong>Delivery:</strong> ₹{{ order.delivery_charge }}</div>
+        <div><strong>Discount:</strong> ₹{{ order.discount }}</div>
+        <div style="font-weight:700;color:#0d9488;"><strong>Total:</strong> ₹{{ order.total }}</div>
+        <div><strong>Placed:</strong> {{ order.created_at|date:"d M Y H:i" }}</div>
+      </div>
+    </div>
+    <div class="crm-card">
+      <div class="crm-card-title">Update Status</div>
+      <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom:.6rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">New Status</label>
+          <select name="status" class="form-select form-select-sm">
+            {% for val,label in status_choices %}<option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div style="margin-bottom:.6rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Note</label>
+          <input name="note" class="form-control form-control-sm" placeholder="Optional note...">
+        </div>
+        <div style="margin-bottom:.6rem;">
+          <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:.25rem;">Location</label>
+          <input name="location" class="form-control form-control-sm" placeholder="e.g. Mumbai Hub">
+        </div>
+        <button type="submit" class="btn-crm-primary" style="width:100%;">Update Order</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="crm-card">
+      <div class="crm-card-title">Order Items</div>
+      {% for item in order.items.all %}
+      <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--crm-row-bg);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:.4rem;">
+        {% if item.image_url %}
+        <img src="{{ item.image_url }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+        {% else %}
+        <div style="width:44px;height:44px;background:#e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🧴</div>
+        {% endif %}
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:.85rem;">{{ item.name }}</div>
+          <div style="font-size:.72rem;color:var(--crm-muted);">{{ item.brand }} {% if item.shade %}· {{ item.shade }}{% endif %} · SKU: {{ item.sku }}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700;font-size:.85rem;">₹{{ item.price }} × {{ item.quantity }}</div>
+          <div style="font-size:.75rem;color:#0d9488;font-weight:600;">₹{{ item.line_total }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="crm-card">
+      <div class="crm-card-title">Status Timeline</div>
+      {% for log in logs %}
+      <div style="display:flex;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--crm-border);">
+        <div style="width:10px;height:10px;background:#0d9488;border-radius:50%;margin-top:.35rem;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:.82rem;font-weight:600;">{{ log.status|title }}</div>
+          <div style="font-size:.75rem;color:var(--crm-muted);">{{ log.message }}</div>
+          {% if log.location %}<div style="font-size:.72rem;color:var(--crm-subtle);">📍 {{ log.location }}</div>{% endif %}
+          <div style="font-size:.68rem;color:var(--crm-subtle);">{{ log.timestamp|date:"d M Y H:i" }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="color:var(--crm-subtle);font-size:.8rem;">No status updates yet</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

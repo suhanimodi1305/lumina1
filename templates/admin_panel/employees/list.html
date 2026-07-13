@@ -1,0 +1,70 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Employees{% endblock %}
+{% block page_title %}Employee Management{% endblock %}
+{% block breadcrumb %}Admin / HRMS / Employees{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <div>
+    <span class="adm-badge badge-info" style="font-size:.78rem;padding:.3rem .8rem;">{{ total }} Employees</span>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'admin_panel:dept_list' %}" class="adm-btn btn-outline btn-sm"><i class="bi bi-building"></i> Departments</a>
+    <a href="{% url 'admin_panel:emp_add' %}" class="adm-btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Add Employee</a>
+  </div>
+</div>
+
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <h6>👨‍💼 All Employees</h6>
+    <form method="get" class="d-flex gap-2 flex-wrap">
+      <input class="adm-input" style="width:200px;" name="q" placeholder="Search…" value="{{ q }}">
+      <select class="adm-input" style="width:160px;" name="dept">
+        <option value="">All Departments</option>
+        {% for d in departments %}<option value="{{ d.pk }}" {% if dept_filter == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="adm-btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:emp_list' %}" class="adm-btn btn-outline btn-sm">Reset</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="adm-table">
+      <thead><tr>
+        <th>Employee</th><th>Email</th><th>Designation</th><th>Department</th><th>Shift</th><th>Status</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+        {% for emp in employees %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#5b21b6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.78rem;flex-shrink:0;">{{ emp.username|first|upper }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.82rem;">{{ emp.get_full_name|default:emp.username }}</div>
+                <div style="font-size:.68rem;color:var(--adm-muted);">{{ emp.emp_profile.employee_id|default:'N/A' }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--adm-muted);font-size:.8rem;">{{ emp.email }}</td>
+          <td style="font-size:.82rem;">{{ emp.emp_profile.designation|default:'—' }}</td>
+          <td style="font-size:.82rem;">{{ emp.emp_profile.department|default:'—' }}</td>
+          <td style="font-size:.78rem;">{{ emp.emp_profile.get_shift_display|default:'—' }}</td>
+          <td>
+            {% with s=emp.emp_profile.status|default:'active' %}
+            <span class="adm-badge {% if s == 'active' %}badge-success{% elif s == 'terminated' %}badge-danger{% elif s == 'on_leave' %}badge-warning{% else %}badge-gray{% endif %}">{{ s|title }}</span>
+            {% endwith %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'admin_panel:emp_detail' pk=emp.pk %}" class="adm-btn btn-outline btn-sm" title="View"><i class="bi bi-eye"></i></a>
+              <a href="{% url 'admin_panel:emp_edit' pk=emp.pk %}" class="adm-btn btn-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'admin_panel:emp_delete' pk=emp.pk %}" class="adm-btn btn-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--adm-muted);">No employees found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

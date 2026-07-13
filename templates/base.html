@@ -619,10 +619,6 @@ body{
       <i class="bi bi-clipboard-heart sb-icon"></i>
       <span class="sb-label">Purchased Products</span>
     </a>
-    <a href="{% url 'hair:start' %}" class="sb-item {% if 'hair' in request.path %}active{% endif %}">
-      <i class="bi bi-heart sb-icon"></i>
-      <span class="sb-label">Wishlist</span>
-    </a>
     <a href="{% url 'orders:checkout' %}" class="sb-item {% if 'orders/checkout' in request.path %}active{% endif %}">
       <i class="bi bi-cart sb-icon"></i>
       <span class="sb-label">Cart{% if request.session.cart %} <span style="background:#0d9488;color:#fff;font-size:.58rem;padding:.08rem .35rem;border-radius:20px;font-weight:700;margin-left:.2rem;">{{ request.session.cart|length }}</span>{% endif %}</span>
@@ -667,10 +663,50 @@ body{
       <span class="sb-label">Contact Support</span>
     </a>
 
-    {# 🔧 ADMIN (staff/superuser only) #}
-    {% if user.is_staff or user.is_superuser %}
+    {# 🔧 ADMIN (superuser only) #}
+    {% if user.is_superuser %}
     <div class="sb-section-label">Admin</div>
-    <a href="{% url 'employee:portal' %}" class="sb-item {% if 'employee' in request.path %}active{% endif %}">
+    <a href="{% url 'admin_panel:dashboard' %}" class="sb-item {% if 'admin-panel' in request.path %}active{% endif %}">
+      <i class="bi bi-speedometer2 sb-icon"></i>
+      <span class="sb-label">Admin Dashboard</span>
+    </a>
+    <a href="{% url 'admin_panel:user_list' %}" class="sb-item {% if 'admin-panel/users' in request.path %}active{% endif %}">
+      <i class="bi bi-people sb-icon"></i>
+      <span class="sb-label">Users</span>
+    </a>
+    <a href="{% url 'admin_panel:emp_list' %}" class="sb-item {% if 'admin-panel/employees' in request.path %}active{% endif %}">
+      <i class="bi bi-briefcase sb-icon"></i>
+      <span class="sb-label">Employees</span>
+    </a>
+    <a href="{% url 'admin_panel:order_list' %}" class="sb-item {% if 'admin-panel/orders' in request.path %}active{% endif %}">
+      <i class="bi bi-bag-check sb-icon"></i>
+      <span class="sb-label">Orders</span>
+    </a>
+    <a href="{% url 'admin_panel:analytics' %}" class="sb-item {% if 'admin-panel/analytics' in request.path %}active{% endif %}">
+      <i class="bi bi-bar-chart sb-icon"></i>
+      <span class="sb-label">Analytics</span>
+    </a>
+    <a href="{% url 'admin_panel:settings' %}" class="sb-item {% if 'admin-panel/settings' in request.path %}active{% endif %}">
+      <i class="bi bi-gear sb-icon"></i>
+      <span class="sb-label">Settings</span>
+    </a>
+    <a href="{% url 'admin:index' %}" class="sb-item {% if request.path == '/admin/' %}active{% endif %}">
+      <i class="bi bi-shield-lock sb-icon"></i>
+      <span class="sb-label">Django Admin</span>
+    </a>
+    <a href="{% url 'employee:portal' %}" class="sb-item {% if request.path == '/employee/' or request.path == '/employee' %}active{% endif %}">
+      <i class="bi bi-person-badge sb-icon"></i>
+      <span class="sb-label">Employee Portal</span>
+    </a>
+    <a href="{% url 'diagnostic:admin_panel' %}" class="sb-item {% if 'diagnostic/admin' in request.path %}active{% endif %}">
+      <i class="bi bi-clipboard-data sb-icon"></i>
+      <span class="sb-label">Diagnostic Panel</span>
+    </a>
+
+    {# 🔧 EMPLOYEE (staff but not superuser) #}
+    {% elif user.is_staff %}
+    <div class="sb-section-label">Employee</div>
+    <a href="{% url 'employee:portal' %}" class="sb-item {% if request.path == '/employee/' or request.path == '/employee' %}active{% endif %}">
       <i class="bi bi-briefcase sb-icon"></i>
       <span class="sb-label">Employee Portal</span>
     </a>
@@ -682,31 +718,23 @@ body{
       <i class="bi bi-clipboard-heart sb-icon"></i>
       <span class="sb-label">Requirements</span>
     </a>
-    <a href="{% url 'employee:employee_list' %}" class="sb-item {% if 'team' in request.path %}active{% endif %}">
+    <a href="{% url 'employee:employee_list' %}" class="sb-item {% if 'employee/team' in request.path %}active{% endif %}">
       <i class="bi bi-people sb-icon"></i>
       <span class="sb-label">Team</span>
     </a>
-    <a href="{% url 'employee:product_list' %}" class="sb-item">
+    <a href="{% url 'employee:product_list' %}" class="sb-item {% if 'employee/products' in request.path and 'bulk-import' not in request.path and 'add' not in request.path %}active{% endif %}">
       <i class="bi bi-box-seam sb-icon"></i>
       <span class="sb-label">Manage Products</span>
     </a>
-    <a href="{% url 'employee:bulk_import' %}" class="sb-item">
+    <a href="{% url 'employee:bulk_import' %}" class="sb-item {% if 'employee/products/bulk-import' in request.path %}active{% endif %}">
       <i class="bi bi-upload sb-icon"></i>
       <span class="sb-label">Bulk Import</span>
     </a>
-    <a href="{% url 'employee:export_products' %}" class="sb-item">
+    <a href="{% url 'employee:export_products' %}" class="sb-item {% if 'employee/products/export' in request.path %}active{% endif %}">
       <i class="bi bi-download sb-icon"></i>
       <span class="sb-label">Export CSV</span>
     </a>
-    <a href="{% url 'admin:index' %}" class="sb-item">
-      <i class="bi bi-shield-lock sb-icon"></i>
-      <span class="sb-label">Django Admin</span>
-    </a>
-    <a href="{% url 'diagnostic:admin_panel' %}" class="sb-item">
-      <i class="bi bi-clipboard-data sb-icon"></i>
-      <span class="sb-label">Diagnostic Panel</span>
-    </a>
-    <a href="{% url 'diagnostic:marketing' %}" class="sb-item">
+    <a href="{% url 'diagnostic:marketing' %}" class="sb-item {% if 'diagnostic/marketing' in request.path %}active{% endif %}">
       <i class="bi bi-bar-chart sb-icon"></i>
       <span class="sb-label">Marketing Portal</span>
     </a>

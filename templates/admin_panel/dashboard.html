@@ -1,0 +1,292 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Home / Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div style="background:linear-gradient(135deg,#7c3aed,#5b21b6);border-radius:16px;padding:1.5rem 1.75rem;margin-bottom:1.5rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+  <div>
+    <div style="font-size:1.25rem;font-weight:800;">Welcome back, Suhani 👋</div>
+    <div style="font-size:.82rem;opacity:.75;margin-top:.2rem;">{{ today|date:"l, d F Y" }} &nbsp;·&nbsp; Lumina AI ERP</div>
+  </div>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+    <a href="{% url 'admin_panel:analytics' %}" class="adm-btn btn-outline" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);">
+      <i class="bi bi-bar-chart-fill"></i> Analytics
+    </a>
+    <a href="{% url 'admin_panel:export_report' %}?section=orders&period=month" class="adm-btn btn-outline" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);">
+      <i class="bi bi-download"></i> Export Report
+    </a>
+  </div>
+</div>
+
+<!-- KPI Row 1 — Revenue -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-green"><i class="bi bi-currency-rupee"></i></div>
+      <div>
+        <div class="adm-kpi-label">Today Revenue</div>
+        <div class="adm-kpi-value">₹{{ today_revenue|floatformat:0 }}</div>
+        <div class="adm-kpi-sub">Delivered orders</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-purple"><i class="bi bi-graph-up-arrow"></i></div>
+      <div>
+        <div class="adm-kpi-label">Monthly Revenue</div>
+        <div class="adm-kpi-value">₹{{ month_revenue|floatformat:0 }}</div>
+        <div class="adm-kpi-sub">This month</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-gold"><i class="bi bi-trophy-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Yearly Revenue</div>
+        <div class="adm-kpi-value">₹{{ year_revenue|floatformat:0 }}</div>
+        <div class="adm-kpi-sub">{{ today.year }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-blue"><i class="bi bi-bag-check-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Today Orders</div>
+        <div class="adm-kpi-value">{{ today_orders }}</div>
+        <div class="adm-kpi-sub">{{ pending_orders }} pending</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-teal"><i class="bi bi-person-plus-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">New Users</div>
+        <div class="adm-kpi-value">{{ today_registrations }}</div>
+        <div class="adm-kpi-sub">{{ total_users }} total</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-red"><i class="bi bi-headset"></i></div>
+      <div>
+        <div class="adm-kpi-label">Open Tickets</div>
+        <div class="adm-kpi-value">{{ open_tickets }}</div>
+        <div class="adm-kpi-sub">{{ pending_refunds }} refunds</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Row 2 — Operations -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-purple"><i class="bi bi-funnel-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Today Leads</div>
+        <div class="adm-kpi-value">{{ today_leads }}</div>
+        <div class="adm-kpi-sub">{{ total_leads }} total</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-gold"><i class="bi bi-lightbulb-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Opportunities</div>
+        <div class="adm-kpi-value">{{ today_opps }}</div>
+        <div class="adm-kpi-sub">Today</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-teal"><i class="bi bi-telephone-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Today Calls</div>
+        <div class="adm-kpi-value">{{ today_calls }}</div>
+        <div class="adm-kpi-sub">All employees</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-green"><i class="bi bi-people-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Active Staff</div>
+        <div class="adm-kpi-value">{{ active_employees }}</div>
+        <div class="adm-kpi-sub">{{ today_attendance }} present</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-blue"><i class="bi bi-stars"></i></div>
+      <div>
+        <div class="adm-kpi-label">AI Scans Today</div>
+        <div class="adm-kpi-value">{{ ai_scans_today }}</div>
+        <div class="adm-kpi-sub">{{ ai_scans_month }} this month</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-xl-2">
+    <div class="adm-kpi">
+      <div class="adm-kpi-icon kpi-red"><i class="bi bi-envelope-fill"></i></div>
+      <div>
+        <div class="adm-kpi-label">Company Email</div>
+        <div class="adm-kpi-value" style="font-size:.7rem;word-break:break-all;">suhanimodi7090@gmail.com</div>
+        <div class="adm-kpi-sub">SMTP Active</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Revenue Chart
+const ctx = document.getElementById('revenueChart');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_months|safe }},
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: {{ chart_revenue|safe }},
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124,58,237,.08)',
+        tension: 0.4, fill: true, pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(0,0,0,.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}
+
+<!-- Charts Row -->
+<div class="row g-3 mb-3">
+  <div class="col-lg-8">
+    <div class="adm-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="adm-card-title mb-0">📈 Revenue Trend (6 Months)</div>
+        <a href="{% url 'admin_panel:analytics' %}" class="adm-btn btn-outline btn-sm">View All</a>
+      </div>
+      <div style="height:220px;"><canvas id="revenueChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">🎯 Lead Pipeline</div>
+      {% for item in lead_funnel %}
+      <div style="margin-bottom:.65rem;">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem;">
+          <span>{{ item.stage|title }}</span><span style="font-weight:700;">{{ item.c }}</span>
+        </div>
+        <div style="height:6px;background:var(--adm-border);border-radius:4px;overflow:hidden;">
+          <div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#7c3aed,#0d9488);width:{% if lead_funnel.0.c %}{% widthratio item.c lead_funnel.0.c 100 %}{% else %}0{% endif %}%;transition:width .5s;"></div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="color:var(--adm-muted);font-size:.82rem;">No lead data yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions + Recent Orders -->
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="adm-card">
+      <div class="adm-card-title">⚡ Quick Actions</div>
+      <div class="d-flex flex-column gap-2">
+        <a href="{% url 'admin_panel:emp_add' %}" class="adm-btn btn-primary"><i class="bi bi-person-plus"></i> Add Employee</a>
+        <a href="{% url 'employee:lead_create' %}" class="adm-btn btn-teal"><i class="bi bi-funnel"></i> Create Lead</a>
+        <a href="{% url 'employee:ticket_create' %}" class="adm-btn btn-outline"><i class="bi bi-ticket"></i> New Ticket</a>
+        <a href="{% url 'employee:campaign_create' %}" class="adm-btn btn-outline"><i class="bi bi-megaphone"></i> New Campaign</a>
+        <a href="{% url 'admin_panel:salary_add' %}" class="adm-btn btn-outline"><i class="bi bi-cash"></i> Add Salary</a>
+        <a href="{% url 'admin_panel:settings' %}" class="adm-btn btn-outline"><i class="bi bi-gear"></i> Settings</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="adm-table-wrap">
+      <div class="adm-table-head">
+        <h6>📦 Recent Orders</h6>
+        <a href="{% url 'admin_panel:order_list' %}" class="adm-btn btn-outline btn-sm">View All</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="adm-table">
+          <thead><tr>
+            <th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th>
+          </tr></thead>
+          <tbody>
+            {% for o in recent_orders %}
+            <tr>
+              <td><a href="{% url 'admin_panel:order_detail' order_id=o.order_id %}" style="color:var(--adm-accent);font-weight:600;text-decoration:none;">{{ o.order_id }}</a></td>
+              <td>{{ o.full_name }}</td>
+              <td style="font-weight:700;">₹{{ o.total }}</td>
+              <td>
+                <span class="adm-badge {% if o.status == 'delivered' %}badge-success{% elif o.status == 'cancelled' %}badge-danger{% elif o.status == 'pending' %}badge-warning{% else %}badge-info{% endif %}">
+                  {{ o.get_status_display }}
+                </span>
+              </td>
+              <td style="color:var(--adm-muted);">{{ o.created_at|date:"d M" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;color:var(--adm-muted);padding:2rem;">No orders yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Top Products + Recent Activity -->
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="adm-card">
+      <div class="adm-card-title">🛍 Top Products Ordered</div>
+      {% for p in top_products %}
+      <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--adm-border);">
+        <div style="width:30px;height:30px;border-radius:8px;background:rgba(124,58,237,.12);display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:var(--adm-accent);">{{ forloop.counter }}</div>
+        <div style="flex:1;font-size:.82rem;font-weight:600;">{{ p.name|truncatechars:40 }}</div>
+        <div><span class="adm-badge badge-purple">{{ p.cnt }} sold</span></div>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No data yet.</div>{% endfor %}
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="adm-card">
+      <div class="adm-card-title">🕒 Recent Admin Activity</div>
+      {% for act in recent_activity %}
+      <div style="display:flex;align-items:flex-start;gap:.65rem;padding:.45rem 0;border-bottom:1px solid var(--adm-border);">
+        <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="bi bi-{% if act.action == 'create' %}plus{% elif act.action == 'delete' %}trash{% elif act.action == 'export' %}download{% elif act.action == 'login' %}box-arrow-in-right{% else %}pencil{% endif %}" style="font-size:.65rem;color:var(--adm-accent);"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.78rem;font-weight:600;">{{ act.description|truncatechars:60 }}</div>
+          <div style="font-size:.68rem;color:var(--adm-muted);">{{ act.admin.username|default:'system' }} &nbsp;·&nbsp; {{ act.created_at|timesince }} ago</div>
+        </div>
+        <span class="adm-badge badge-{% if act.action == 'delete' %}danger{% elif act.action == 'create' %}success{% else %}gray{% endif %}" style="flex-shrink:0;">{{ act.action }}</span>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No activity yet.</div>{% endfor %}
+    </div>
+  </div>
+</div>

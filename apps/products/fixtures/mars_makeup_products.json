@@ -212,7 +212,7 @@
       "brand": "MARS",
       "category": "blush",
       "product_range": "makeup",
-      "description": "Liquid blusher with dewy finish. Available in 6 shades � Marshmallow, Coral Sorbet, Red Velvet, Rose Slush, Pink Mousse, Peach Pie.",
+      "description": "Liquid blusher with dewy finish. Available in 6 shades � Marshmallow, Coral Sorbet, Red Velvet, Rose Slush, Pink Mousse, Peach Pie.",
       "key_ingredients": "Jojoba Oil, Vitamin E, Mica",
       "full_ingredients": "",
       "price": "279.00",
@@ -271,10 +271,10 @@
     "fields": {
       "name": "12 Color Eyeshadow Palette Dance Of Joy",
       "brand": "MARS",
-      "category": "eyeshadow",
+      "category": "eyeshadow_palette",
       "product_range": "makeup",
-      "description": "12-shade ultra-pigmented eyeshadow palette with mix of matte and shimmer shades. Available in 2 variants.",
-      "key_ingredients": "Mica, Carnauba Wax, Vitamin E",
+      "description": "MARS Dance Of Joy 12 Shade Ultra Pigmented Smoky Eyes Eyeshadow Palette. Highly pigmented, silky-textured and incredibly soft formula with a mix of matte and shimmer finishes. Perfect for every eye look from day to night. Long-wearing formula that won\u2019t fade or crease. Compact size, easy to carry on the go.",
+      "key_ingredients": "Mica, Carnauba Wax, Vitamin E, Talc, Dimethicone",
       "full_ingredients": "",
       "price": "299.00",
       "sku": "MARS-EYE-001",
@@ -285,67 +285,91 @@
       "targets": [],
       "shades_available": [
         {
-          "shade": "Champagne",
-          "name": "Champagne",
-          "hex": "#F5DEB3"
+          "shade": "01",
+          "name": "Champagne Gold",
+          "hex": "#E8D5A3",
+          "finish": "shimmer",
+          "description": "Warm champagne gold shimmer — perfect as a lid or inner corner highlight"
         },
         {
-          "shade": "Rose Gold",
+          "shade": "02",
           "name": "Rose Gold",
-          "hex": "#B76E79"
+          "hex": "#B76E79",
+          "finish": "shimmer",
+          "description": "Dusty rose-gold metallic — flatters all skin tones as a lid shade"
         },
         {
-          "shade": "Copper",
+          "shade": "03",
           "name": "Copper",
-          "hex": "#B87333"
+          "hex": "#B87333",
+          "finish": "shimmer",
+          "description": "Rich warm copper shimmer — ideal for a sun-kissed smoky eye"
         },
         {
-          "shade": "Brown",
-          "name": "Brown",
-          "hex": "#8B5E3C"
-        },
-        {
-          "shade": "Burgundy",
-          "name": "Burgundy",
-          "hex": "#800020"
-        },
-        {
-          "shade": "Nude",
-          "name": "Nude",
-          "hex": "#E8C4A0"
-        },
-        {
-          "shade": "Coral",
-          "name": "Coral",
-          "hex": "#FF6B6B"
-        },
-        {
-          "shade": "Pink",
-          "name": "Pink",
-          "hex": "#FFB6C1"
-        },
-        {
-          "shade": "Bronze",
+          "shade": "04",
           "name": "Bronze",
-          "hex": "#CD7F32"
+          "hex": "#CD7F32",
+          "finish": "shimmer",
+          "description": "Deep bronze metallic — adds warmth and dimension to any eye look"
         },
         {
-          "shade": "Taupe",
-          "name": "Taupe",
-          "hex": "#8B7355"
+          "shade": "05",
+          "name": "Chocolate Brown",
+          "hex": "#5C3317",
+          "finish": "matte",
+          "description": "Deep matte chocolate brown — ideal for crease depth and definition"
         },
         {
-          "shade": "Black",
-          "name": "Black",
-          "hex": "#1A1A1A"
+          "shade": "06",
+          "name": "Terracotta",
+          "hex": "#C2724F",
+          "finish": "matte",
+          "description": "Warm terracotta matte — earthy tone for blending and transition"
         },
         {
-          "shade": "White Shimmer",
-          "name": "White Shimmer",
-          "hex": "#F8F8FF"
+          "shade": "07",
+          "name": "Peach",
+          "hex": "#FFAA80",
+          "finish": "matte",
+          "description": "Soft peachy matte — brightens the inner corner and brow bone"
+        },
+        {
+          "shade": "08",
+          "name": "Coral",
+          "hex": "#E8603C",
+          "finish": "matte",
+          "description": "Vibrant coral matte — adds a pop of warm colour to the lid"
+        },
+        {
+          "shade": "09",
+          "name": "Burgundy",
+          "hex": "#800020",
+          "finish": "matte",
+          "description": "Intense matte burgundy — for deep, dramatic smoky eye looks"
+        },
+        {
+          "shade": "10",
+          "name": "Plum",
+          "hex": "#7B2D8B",
+          "finish": "matte",
+          "description": "Rich matte plum — deep and sultry for evening looks"
+        },
+        {
+          "shade": "11",
+          "name": "Matte Black",
+          "hex": "#1A1A1A",
+          "finish": "matte",
+          "description": "Intense matte black — for liner-like definition and deep smoky eyes"
+        },
+        {
+          "shade": "12",
+          "name": "Cream Highlight",
+          "hex": "#FFF8F0",
+          "finish": "shimmer",
+          "description": "Pearlescent cream highlight — brightens the brow bone and inner corner"
         }
       ],
-      "undertone_match": "",
+      "undertone_match": "warm",
       "skin_tone_match": "",
       "coverage": "",
       "finish": "mixed",

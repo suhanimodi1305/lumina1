@@ -1,0 +1,150 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}📊 Reports & Analytics{% endblock %}
+{% block nav_reports %}active{% endblock %}
+
+{% block content %}
+<!-- Period Selector -->
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">
+  <div style="display:flex;gap:.4rem;background:var(--crm-card);border:1px solid var(--crm-border);border-radius:10px;padding:.3rem;">
+    {% for p,label in periods_list %}
+    <a href="?period={{ p }}" style="padding:.4rem 1rem;border-radius:7px;font-size:.78rem;font-weight:600;text-decoration:none;
+      {% if period == p %}background:#0d9488;color:#fff;{% else %}color:var(--crm-muted);{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <span style="font-size:.78rem;color:var(--crm-muted);align-self:center;">Export:</span>
+    <a href="{% url 'employee:export_excel' %}?section=orders&period={{ period }}" class="btn-crm-outline" style="padding:.3rem .7rem;font-size:.72rem;">📦 Orders</a>
+    <a href="{% url 'employee:export_excel' %}?section=leads&period={{ period }}" class="btn-crm-outline" style="padding:.3rem .7rem;font-size:.72rem;">🎯 Leads</a>
+    <a href="{% url 'employee:export_excel' %}?section=calls&period={{ period }}" class="btn-crm-outline" style="padding:.3rem .7rem;font-size:.72rem;">📞 Calls</a>
+    <a href="{% url 'employee:export_excel' %}?section=tickets&period={{ period }}" class="btn-crm-outline" style="padding:.3rem .7rem;font-size:.72rem;">🎫 Tickets</a>
+    <a href="{% url 'employee:export_excel' %}?section=attendance&period={{ period }}" class="btn-crm-outline" style="padding:.3rem .7rem;font-size:.72rem;">🕐 Attendance</a>
+    <a href="{% url 'employee:export_excel' %}?section=callbacks&period={{ period }}" class="btn-crm-outline" style="padding:.3rem .7rem;font-size:.72rem;">🔔 Callbacks</a>
+  </div>
+</div>
+
+<!-- KPI Stats -->
+<div class="crm-stat-grid">
+  <div class="crm-stat">
+    <div class="crm-stat-val">₹{{ revenue|floatformat:0 }}</div>
+    <div class="crm-stat-label">Revenue</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ order_cnt }}</div>
+    <div class="crm-stat-label">Orders</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">₹{{ avg_order|floatformat:0 }}</div>
+    <div class="crm-stat-label">Avg Order Value</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ lead_cnt }}</div>
+    <div class="crm-stat-label">Leads</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val" style="color:#0d9488;">{{ converted_leads }}</div>
+    <div class="crm-stat-label">Converted Leads</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ call_cnt }}</div>
+    <div class="crm-stat-label">Total Calls</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val">{{ ticket_cnt }}</div>
+    <div class="crm-stat-label">Tickets</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-val" style="color:#0d9488;">{{ resolved_tickets }}</div>
+    <div class="crm-stat-label">Resolved Tickets</div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Lead Funnel -->
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">🎯 Lead Funnel</div>
+      {% for item in lead_by_stage %}
+      <div style="margin-bottom:.6rem;">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem;">
+          <span style="font-weight:500;">{{ item.stage|title }}</span>
+          <span style="font-weight:700;color:#0d9488;">{{ item.c }}</span>
+        </div>
+        <div class="crm-progress">
+          <div class="crm-progress-bar" style="width:{% widthratio item.c lead_cnt 100 %}%;"></div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="color:var(--crm-subtle);font-size:.8rem;">No lead data for this period</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Call Outcome -->
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">📞 Call Outcomes</div>
+      {% for item in call_by_status %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--crm-border);">
+        <div style="font-size:.8rem;">{{ item.status|title }}</div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="background:var(--crm-border);height:6px;width:80px;border-radius:20px;overflow:hidden;">
+            <div style="background:#0d9488;height:100%;width:{% if call_cnt %}{% widthratio item.c call_cnt 100 %}{% else %}0{% endif %}%;"></div>
+          </div>
+          <span style="font-size:.78rem;font-weight:700;color:#0d9488;">{{ item.c }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <div style="color:var(--crm-subtle);font-size:.8rem;">No call data for this period</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Ticket Status -->
+  <div class="col-lg-4">
+    <div class="crm-card">
+      <div class="crm-card-title">🎫 Ticket Status</div>
+      {% for item in ticket_by_status %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--crm-border);">
+        <span class="badge-stage badge-{{ item.status }}" style="font-size:.7rem;">{{ item.status|title }}</span>
+        <span style="font-size:.8rem;font-weight:700;">{{ item.c }}</span>
+      </div>
+      {% empty %}
+      <div style="color:var(--crm-subtle);font-size:.8rem;">No ticket data</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Employee Performance -->
+  <div class="col-12">
+    <div class="crm-card">
+      <div class="crm-card-title">👨‍💼 Employee Performance — Top 10 by Calls</div>
+      <table class="crm-table">
+        <thead>
+          <tr><th>#</th><th>Employee</th><th>Calls Made</th><th>Performance Bar</th></tr>
+        </thead>
+        <tbody>
+          {% for emp in emp_perf %}
+          <tr>
+            <td style="font-size:.8rem;color:var(--crm-subtle);">{{ forloop.counter }}</td>
+            <td style="font-size:.85rem;font-weight:600;">{{ emp.employee__username }}</td>
+            <td style="font-size:.85rem;font-weight:700;color:#0d9488;">{{ emp.calls }}</td>
+            <td>
+              <div class="crm-progress" style="width:200px;">
+                {% if emp_perf.0.calls %}
+                <div class="crm-progress-bar" style="width:{% widthratio emp.calls emp_perf.0.calls 100 %}%;"></div>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;color:var(--crm-subtle);padding:1.5rem;">No data</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

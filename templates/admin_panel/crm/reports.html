@@ -1,0 +1,107 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}CRM Reports{% endblock %}
+{% block page_title %}CRM Reports & Analytics{% endblock %}
+{% block breadcrumb %}Admin / CRM / Reports{% endblock %}
+{% block content %}
+
+<!-- Period Filter -->
+<div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+  <span style="font-size:.8rem;font-weight:600;color:var(--adm-muted);">Period:</span>
+  {% for p,label in periods_list %}
+  <a href="?period={{ p }}" class="adm-btn {% if period == p %}btn-primary{% else %}btn-outline{% endif %} btn-sm">{{ label }}</a>
+  {% endfor %}
+  <div class="ms-auto d-flex gap-2 flex-wrap">
+    <a href="{% url 'admin_panel:export_report' %}?section=orders&period={{ period }}" class="adm-btn btn-outline btn-sm"><i class="bi bi-download"></i> Export Orders</a>
+    <a href="{% url 'admin_panel:export_report' %}?section=users&period={{ period }}" class="adm-btn btn-outline btn-sm"><i class="bi bi-download"></i> Export Users</a>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-green"><i class="bi bi-currency-rupee"></i></div><div><div class="adm-kpi-label">Revenue</div><div class="adm-kpi-value">₹{{ revenue|floatformat:0 }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-blue"><i class="bi bi-bag-check-fill"></i></div><div><div class="adm-kpi-label">Orders</div><div class="adm-kpi-value">{{ order_cnt }}</div><div class="adm-kpi-sub">Avg ₹{{ avg_order|floatformat:0 }}</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-purple"><i class="bi bi-person-lines-fill"></i></div><div><div class="adm-kpi-label">Leads</div><div class="adm-kpi-value">{{ lead_cnt }}</div><div class="adm-kpi-sub">{{ converted_leads }} converted</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="adm-kpi"><div class="adm-kpi-icon kpi-teal"><i class="bi bi-telephone-fill"></i></div><div><div class="adm-kpi-label">Calls</div><div class="adm-kpi-value">{{ call_cnt }}</div></div></div></div>
+</div>
+
+<div class="row g-3">
+  <!-- Lead Funnel -->
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">🎯 Lead Funnel</div>
+      {% for item in lead_by_stage %}
+      <div style="margin-bottom:.7rem;">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem;">
+          <span style="font-weight:600;text-transform:capitalize;">{{ item.stage|default:'—' }}</span>
+          <span style="font-weight:700;color:#7c3aed;">{{ item.c }}</span>
+        </div>
+        <div style="height:6px;background:var(--adm-border);border-radius:4px;overflow:hidden;">
+          <div style="height:100%;background:linear-gradient(90deg,#7c3aed,#0d9488);border-radius:4px;width:{% widthratio item.c lead_cnt 100 %}%;"></div>
+        </div>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No data for this period</div>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Call Outcomes -->
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">📞 Call Outcomes</div>
+      {% for item in call_by_status %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);">
+        <span style="font-size:.8rem;text-transform:capitalize;">{{ item.status|default:'—' }}</span>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="background:var(--adm-border);height:5px;width:80px;border-radius:20px;overflow:hidden;">
+            <div style="background:#0d9488;height:100%;width:{% widthratio item.c call_cnt 100 %}%;"></div>
+          </div>
+          <span style="font-size:.78rem;font-weight:700;color:#0d9488;">{{ item.c }}</span>
+        </div>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No data for this period</div>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Ticket Status -->
+  <div class="col-lg-4">
+    <div class="adm-card">
+      <div class="adm-card-title">🎫 Ticket Status</div>
+      {% for item in ticket_by_status %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);">
+        <span class="adm-badge {% if item.status == 'resolved' or item.status == 'closed' %}badge-success{% elif item.status == 'open' %}badge-warning{% else %}badge-info{% endif %}" style="font-size:.65rem;">{{ item.status|title }}</span>
+        <span style="font-size:.82rem;font-weight:700;">{{ item.c }}</span>
+      </div>
+      {% empty %}<div style="color:var(--adm-muted);font-size:.82rem;">No ticket data</div>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Employee Performance -->
+  <div class="col-12">
+    <div class="adm-card">
+      <div class="adm-card-title">👨‍💼 Employee Performance — Top 10 by Calls</div>
+      <div style="overflow-x:auto;">
+        <table class="adm-table">
+          <thead><tr><th>#</th><th>Employee</th><th>Calls Made</th><th>Performance</th></tr></thead>
+          <tbody>
+            {% for emp in emp_perf %}
+            <tr>
+              <td style="font-size:.8rem;color:var(--adm-muted);">{{ forloop.counter }}</td>
+              <td style="font-weight:600;">{{ emp.employee__username }}</td>
+              <td style="font-weight:700;color:#0d9488;">{{ emp.calls }}</td>
+              <td>
+                <div style="background:var(--adm-border);height:7px;width:200px;border-radius:20px;overflow:hidden;">
+                  {% if emp_perf.0.calls %}
+                  <div style="background:linear-gradient(90deg,#7c3aed,#0d9488);height:100%;width:{% widthratio emp.calls emp_perf.0.calls 100 %}%;border-radius:20px;"></div>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align:center;color:var(--adm-muted);padding:1.5rem;">No data for this period</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

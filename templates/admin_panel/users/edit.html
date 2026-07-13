@@ -1,0 +1,75 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Edit User — {{ target_user.username }}{% endblock %}
+{% block page_title %}Edit User{% endblock %}
+{% block breadcrumb %}Admin / Users / {{ target_user.username }} / Edit{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="adm-card">
+      <div class="adm-card-title">✏️ Edit User — {{ target_user.username }}</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="adm-label">First Name</label>
+            <input type="text" name="first_name" class="adm-input" value="{{ target_user.first_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Last Name</label>
+            <input type="text" name="last_name" class="adm-input" value="{{ target_user.last_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="adm-label">Email *</label>
+            <input type="email" name="email" class="adm-input" value="{{ target_user.email }}" required>
+          </div>
+          {% if profile %}
+          <div class="col-md-6">
+            <label class="adm-label">Membership Tier</label>
+            <select name="tier" class="adm-input">
+              {% for val,lbl in tier_choices %}<option value="{{ val }}" {% if profile.tier == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="col-12">
+            <label class="adm-label">New Password <span style="color:var(--adm-muted);font-size:.7rem;">(leave blank to keep current)</span></label>
+            <input type="password" name="new_password" class="adm-input" autocomplete="new-password" placeholder="Enter new password…">
+          </div>
+          <div class="col-12 d-flex gap-2 mt-2">
+            <button type="submit" class="adm-btn btn-primary"><i class="bi bi-check-lg"></i> Save Changes</button>
+            <a href="{% url 'admin_panel:user_detail' pk=target_user.pk %}" class="adm-btn btn-outline">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="adm-card">
+      <div class="adm-card-title">👤 Account Summary</div>
+      <div style="font-size:.82rem;">
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);">
+          <span style="color:var(--adm-muted);">Username</span>
+          <span style="font-weight:600;font-family:monospace;">{{ target_user.username }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);">
+          <span style="color:var(--adm-muted);">Status</span>
+          <span class="adm-badge {% if target_user.is_active %}badge-success{% else %}badge-danger{% endif %}">{% if target_user.is_active %}Active{% else %}Blocked{% endif %}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--adm-border);">
+          <span style="color:var(--adm-muted);">Joined</span>
+          <span>{{ target_user.date_joined|date:"d M Y" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;">
+          <span style="color:var(--adm-muted);">Last Login</span>
+          <span>{{ target_user.last_login|date:"d M Y H:i"|default:"Never" }}</span>
+        </div>
+      </div>
+      <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--adm-border);">
+        <a href="{% url 'admin_panel:user_detail' pk=target_user.pk %}" class="adm-btn btn-outline w-100 mb-2">
+          <i class="bi bi-eye"></i> View Full Profile
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

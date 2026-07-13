@@ -1,0 +1,58 @@
+{% extends 'employee/crm_base.html' %}
+{% block title %}New Ticket{% endblock %}
+{% block page_title %}New Support Ticket{% endblock %}
+{% block nav_ticket_new %}active{% endblock %}
+{% block nav_support_open %}open{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+  <a href="{% url 'employee:ticket_list' %}" style="color:var(--crm-muted);font-size:.8rem;text-decoration:none;display:block;margin-bottom:1rem;">← All Tickets</a>
+  <div class="crm-card">
+    <div class="crm-card-title">Create Support Ticket</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Customer Name *</label>
+          <input name="customer_name" required class="form-control form-control-sm"
+                 value="{{ request.GET.name|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Phone</label>
+          <input name="customer_phone" class="form-control form-control-sm"
+                 value="{{ request.GET.phone|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Email</label>
+          <input name="customer_email" type="email" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Channel</label>
+          <select name="channel" class="form-select form-select-sm">
+            {% for val,label in channel_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Priority</label>
+          <select name="priority" class="form-select form-select-sm">
+            {% for val,label in priority_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Subject *</label>
+          <input name="subject" required class="form-control form-control-sm" placeholder="Brief issue summary">
+        </div>
+        <div class="col-12">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:.3rem;">Description *</label>
+          <textarea name="description" required rows="4" class="form-control form-control-sm"
+                    placeholder="Detailed description of the issue..."></textarea>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn-crm-primary">Create Ticket</button>
+          <a href="{% url 'employee:ticket_list' %}" style="margin-left:.75rem;font-size:.8rem;color:var(--crm-muted);text-decoration:none;">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
