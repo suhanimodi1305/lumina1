@@ -7,13 +7,13 @@ Since this is a Django project, after pulling updates:
 1. Activate your virtual environment
 d:\lumina1\.venv-1\Scripts\activate.bat
 
-2. Install any new dependencies
+3. Install any new dependencies
 pip install -r requirements.txt
 
-3. Apply any new migrations
+5. Apply any new migrations
 python manage.py migrate
 
-4. Run the dev server
+7. Run the dev server
 python manage.py runserver
 
 Common situations
