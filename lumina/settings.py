@@ -235,6 +235,9 @@ ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif']
 MAX_CSV_UPLOAD_BYTES = 1 * 1024 * 1024
 
 # ── LOGGING ───────────────────────────────────────────────────────────────────
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -251,7 +254,7 @@ LOGGING = {
         },
         'security_file': {
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'security.log',
+            'filename': LOG_DIR / 'security.log',
             'formatter': 'verbose',
         },
     },
