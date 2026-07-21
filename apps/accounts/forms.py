@@ -51,15 +51,20 @@ class LuminaSignupForm(UserCreationForm):
 
 
 class LuminaLoginForm(AuthenticationForm):
-    """Custom login form with styled fields."""
+    """Login with a username or registered email address."""
     username = forms.CharField(
-        label='Username',
-        widget=forms.TextInput(attrs={**_TEXT_ATTRS, 'placeholder': 'Username', 'autofocus': True})
+        label='Username or email',
+        widget=forms.TextInput(attrs={**_TEXT_ATTRS, 'placeholder': 'Username or email', 'autofocus': True})
     )
     password = forms.CharField(
         label='Password',
         widget=forms.PasswordInput(attrs={**_PASS_ATTRS, 'placeholder': 'Password'})
     )
+
+    def clean_username(self):
+        identifier = self.cleaned_data['username'].strip()
+        email_user = User.objects.filter(email__iexact=identifier).first()
+        return email_user.username if email_user else identifier
 
 
 class LuminaPasswordResetForm(PasswordResetForm):

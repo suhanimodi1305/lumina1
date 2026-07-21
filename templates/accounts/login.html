@@ -302,7 +302,7 @@
         {% csrf_token %}
 
         <div class="lx-field">
-          <label class="lx-label" for="{{ form.username.id_for_label }}">Username</label>
+          <label class="lx-label" for="{{ form.username.id_for_label }}">Username or email</label>
           {{ form.username }}
           {% if form.username.errors %}
             <ul class="lx-field-error">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
