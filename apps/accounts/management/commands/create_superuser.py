@@ -1,8 +1,8 @@
 """
 Management command: python manage.py create_superuser
 
-Creates a Django superuser non-interactively, reading credentials from
-environment variables or falling back to safe defaults for local dev.
+Creates or updates a Django superuser non-interactively, reading credentials
+from environment variables or falling back to safe defaults for local dev.
 
 Usage
 -----
@@ -20,7 +20,7 @@ Usage
 Environment variables (all optional, each has a CLI equivalent):
   DJANGO_SUPERUSER_USERNAME   default: admin
   DJANGO_SUPERUSER_EMAIL      default: admin@lumina.com
-  DJANGO_SUPERUSER_PASSWORD   default: Admin@1234
+    DJANGO_SUPERUSER_PASSWORD   default: Admin@1234
   DJANGO_SUPERUSER_FIRSTNAME  default: (empty)
   DJANGO_SUPERUSER_LASTNAME   default: (empty)
 """
@@ -32,7 +32,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
-    help = "Create a superuser non-interactively (env vars or CLI args)."
+    help = "Create or update a superuser non-interactively (env vars or CLI args)."
 
     # ── Argument declaration ─────────────────────────────────────────────────
 
@@ -77,24 +77,29 @@ class Command(BaseCommand):
         if not password:
             raise CommandError("Password must not be empty.")
 
-        if User.objects.filter(username=username).exists():
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Superuser '{username}' already exists — skipping creation."
-                )
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            user = User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
             )
-            return
-
-        User.objects.create_superuser(
-            username=username,
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-        )
+            action = "created"
+        else:
+            user.email = email
+            user.first_name = first_name
+            user.last_name = last_name
+            user.is_active = True
+            user.is_staff = True
+            user.is_superuser = True
+            user.set_password(password)
+            user.save()
+            action = "updated"
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Superuser '{username}' created successfully."
+                f"Superuser '{username}' {action} successfully."
             )
         )
