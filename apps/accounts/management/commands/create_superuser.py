@@ -18,9 +18,9 @@ Usage
       --last-name User
 
 Environment variables (all optional, each has a CLI equivalent):
-  DJANGO_SUPERUSER_USERNAME   default: admin
-  DJANGO_SUPERUSER_EMAIL      default: admin@lumina.com
-    DJANGO_SUPERUSER_PASSWORD   default: Admin@1234
+    DJANGO_SUPERUSER_USERNAME   default: suhani
+    DJANGO_SUPERUSER_EMAIL      default: suhani@example.com
+    DJANGO_SUPERUSER_PASSWORD   default: suhani
   DJANGO_SUPERUSER_FIRSTNAME  default: (empty)
   DJANGO_SUPERUSER_LASTNAME   default: (empty)
 """
@@ -68,9 +68,9 @@ class Command(BaseCommand):
     # ── Main handler ─────────────────────────────────────────────────────────
 
     def handle(self, *args, **options):
-        username   = options["username"]   or os.environ.get("DJANGO_SUPERUSER_USERNAME", "admin")
-        email      = options["email"]      or os.environ.get("DJANGO_SUPERUSER_EMAIL",    "admin@lumina.com")
-        password   = options["password"]   or os.environ.get("DJANGO_SUPERUSER_PASSWORD", "Admin@1234")
+        username   = options["username"]   or os.environ.get("DJANGO_SUPERUSER_USERNAME", "suhani")
+        email      = options["email"]      or os.environ.get("DJANGO_SUPERUSER_EMAIL",    "suhani@example.com")
+        password   = options["password"]   or os.environ.get("DJANGO_SUPERUSER_PASSWORD", "suhani")
         first_name = options["first_name"] or os.environ.get("DJANGO_SUPERUSER_FIRSTNAME", "")
         last_name  = options["last_name"]  or os.environ.get("DJANGO_SUPERUSER_LASTNAME",  "")
 

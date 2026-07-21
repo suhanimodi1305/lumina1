@@ -1,1 +1,1 @@
-web: gunicorn lumina.wsgi --log-file -
+web: python manage.py migrate && python manage.py create_superuser && gunicorn lumina.wsgi --log-file -
