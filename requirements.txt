@@ -9,7 +9,7 @@ gunicorn==21.2.0
 # ── Image processing ──────────────────────────────────────────────────────
 pillow==11.3.0                  # Required by Django ImageField
 opencv-python-headless==4.8.1.78
-numpy==1.26.0
+numpy==1.26.4
 
 # ── Face & skin analysis ──────────────────────────────────────────────────
 mediapipe==0.10.14              # 468-landmark face mesh for geometry extraction
