@@ -20,7 +20,11 @@ SECRET_KEY = config('SECRET_KEY')
 # Defaults to False (safe); set DEBUG=True in .env for local development only.
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+configured_hosts = config('ALLOWED_HOSTS', default='localhost,127.0.0.1')
+render_hostname = config('RENDER_EXTERNAL_HOSTNAME', default='').strip()
+ALLOWED_HOSTS = [host.strip() for host in configured_hosts.split(',') if host.strip()]
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
 
 
 # Application definition
@@ -196,10 +200,15 @@ SESSION_SAVE_EVERY_REQUEST = True   # Sliding window: reset timer on each reques
 # CSRF
 CSRF_COOKIE_HTTPONLY = False   # Must be False so JS can read it for AJAX
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = config(
+configured_csrf_origins = config(
     'CSRF_TRUSTED_ORIGINS',
     default='http://localhost:8000,http://127.0.0.1:8000'
-).split(',')
+)
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in configured_csrf_origins.split(',') if origin.strip()]
+if render_hostname:
+    render_origin = f'https://{render_hostname}'
+    if render_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_origin)
 
 # Clickjacking protection (also set by XFrameOptionsMiddleware)
 X_FRAME_OPTIONS = 'DENY'
