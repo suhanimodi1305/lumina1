@@ -12,7 +12,7 @@ services:
       - key: DJANGO_SUPERUSER_USERNAME
         value: suhani
       - key: DJANGO_SUPERUSER_EMAIL
-        value: suhani@example.com
+        value: suhanimodi7090@gmail.com
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
       - key: DEBUG
