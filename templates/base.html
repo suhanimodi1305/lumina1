@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 {% load static %}
 <html lang="en" data-theme="light">
 <head>
@@ -225,9 +225,17 @@ body{
 }
 .lux-sidebar.collapsed .sb-premium-badge { opacity: 0; width: 0; padding: 0; }
 
-/* Sub-items (collapse expand) */
-.sb-sub { overflow: hidden; max-height: 0; transition: max-height .3s ease; }
-.sb-sub.open { max-height: 900px; }
+/* Sub-items (collapse expand with smooth 250-280ms slide animation) */
+.sb-sub {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease;
+}
+.sb-sub.open {
+  max-height: 900px;
+  opacity: 1;
+}
 .sb-sub-item {
   display: flex; align-items: center; gap: .6rem;
   padding: .42rem .9rem .42rem 2.7rem;
@@ -257,7 +265,10 @@ body{
   background: transparent !important;
 }
 .sb-item-profile-wrap .sb-item:hover { background: transparent !important; }
-.sb-profile-chevron { color: rgba(255,255,255,.35); transition: color .12s, transform .2s; }
+.sb-profile-chevron, #sb-profile-card-chevron, .sb-item .bi-chevron-down {
+  color: rgba(255,255,255,.35);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms ease !important;
+}
 .sb-profile-chevron:hover { color: rgba(255,255,255,.7); }
 .sb-sub.open ~ * .sb-profile-chevron,
 .sb-item-profile-wrap.open .sb-profile-chevron { transform: rotate(180deg); }
@@ -288,7 +299,7 @@ body{
   border-color: rgba(13,148,136,.35) !important;
 }
 
-/* ── Profile popup (above footer card) ── */
+/* ── Profile popup (above footer card — 250-280ms smooth slide animation) ── */
 .sb-profile-popup {
   position: absolute;
   bottom: 100%;
@@ -297,15 +308,26 @@ body{
   background: #18181f;
   border: 1px solid rgba(255,255,255,.1);
   border-radius: 12px;
-  padding: .5rem .4rem;
-  display: none;
+  padding: 0 .4rem;
+  display: flex;
   flex-direction: column;
   gap: .05rem;
   box-shadow: 0 -8px 32px rgba(0,0,0,.55);
   z-index: 10;
-  animation: ppFadeIn .18s ease;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translateY(8px);
+  transition: max-height 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease, transform 250ms ease, padding 250ms ease;
 }
-.sb-profile-popup.open { display: flex; }
+.sb-profile-popup.open {
+  max-height: 600px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  padding: .5rem .4rem;
+}
 @keyframes ppFadeIn {
   from { opacity:0; transform:translateY(6px); }
   to   { opacity:1; transform:translateY(0); }
@@ -946,59 +968,96 @@ document.querySelectorAll('.sb-item, .sb-sub-item').forEach(el => {
   el.addEventListener('click', () => { if (isMobile()) closeMobileSidebar(); });
 });
 
-// ── SUB-NAV TOGGLE
-document.querySelectorAll('[data-sb-toggle]').forEach(btn => {
-  btn.addEventListener('click', e => {
-    e.preventDefault();
-    const target = document.getElementById(btn.dataset.sbToggle);
-    if (target) {
-      target.classList.toggle('open');
-      // Rotate chevron inside the button
-      const chevron = btn.querySelector('.bi-chevron-down');
-      if (chevron) {
-        chevron.style.transform = target.classList.contains('open') ? 'rotate(180deg)' : '';
-      }
-    }
-  });
-  // Set initial chevron state
-  const target = document.getElementById(btn.dataset.sbToggle);
-  if (target && target.classList.contains('open')) {
-    const chevron = btn.querySelector('.bi-chevron-down');
-    if (chevron) chevron.style.transform = 'rotate(180deg)';
-  }
-});
-
-// ── PROFILE POPUP TOGGLE (footer card → account menu above)
+// ── SIDEBAR ACCORDION & PROFILE MENU (Single accordion behavior, collapsed by default, smooth 250-280ms slide)
 (function() {
-  const cardBtn  = document.getElementById('sb-profile-card-btn');
-  const popup    = document.getElementById('sb-profile-popup');
-  const chevron  = document.getElementById('sb-profile-card-chevron');
-  if (!cardBtn || !popup) return;
+  const popup          = document.getElementById('sb-profile-popup');
+  const cardBtn        = document.getElementById('sb-profile-card-btn');
+  const profileChevron = document.getElementById('sb-profile-card-chevron');
 
-  function openPopup() {
-    popup.classList.add('open');
-    if (chevron) chevron.style.transform = 'rotate(180deg)';
-  }
-  function closePopup() {
-    popup.classList.remove('open');
-    if (chevron) chevron.style.transform = '';
+  function closeAllSubNavs(exceptSubId = null) {
+    document.querySelectorAll('.sb-sub').forEach(sub => {
+      if (sub.id !== exceptSubId) {
+        sub.classList.remove('open');
+        const trigger = document.querySelector(`[data-sb-toggle="${sub.id}"]`);
+        if (trigger) {
+          const chv = trigger.querySelector('.bi-chevron-down');
+          if (chv) chv.style.transform = '';
+        }
+      }
+    });
   }
 
-  cardBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    popup.classList.contains('open') ? closePopup() : openPopup();
+  function closeProfilePopup() {
+    if (popup) {
+      popup.classList.remove('open');
+      if (profileChevron) profileChevron.style.transform = '';
+    }
+  }
+
+  function openProfilePopup() {
+    // Single accordion: close any open sub-navs when opening profile popup
+    closeAllSubNavs();
+    if (popup) {
+      popup.classList.add('open');
+      if (profileChevron) profileChevron.style.transform = 'rotate(180deg)';
+    }
+  }
+
+  // Account User Card Button toggle
+  if (cardBtn && popup) {
+    cardBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (popup.classList.contains('open')) {
+        closeProfilePopup();
+      } else {
+        openProfilePopup();
+      }
+    });
+  }
+
+  // Sub-nav toggles (data-sb-toggle)
+  document.querySelectorAll('[data-sb-toggle]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetId = btn.dataset.sbToggle;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      const isOpening = !target.classList.contains('open');
+
+      // Single accordion: close Account popup and all other sub-navs
+      closeProfilePopup();
+      closeAllSubNavs(isOpening ? targetId : null);
+
+      if (isOpening) {
+        target.classList.add('open');
+        const chevron = btn.querySelector('.bi-chevron-down');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      } else {
+        target.classList.remove('open');
+        const chevron = btn.querySelector('.bi-chevron-down');
+        if (chevron) chevron.style.transform = '';
+      }
+    });
   });
 
-  // Close when clicking anywhere outside
+  // Close popup and sub-navs when clicking anywhere outside
   document.addEventListener('click', function(e) {
-    if (!popup.contains(e.target) && e.target !== cardBtn) {
-      closePopup();
+    const sidebarEl = document.getElementById('lux-sidebar');
+    if (sidebarEl && !sidebarEl.contains(e.target)) {
+      closeProfilePopup();
+      closeAllSubNavs();
     }
   });
 
-  // Close when sidebar collapses
+  // Close popup and sub-navs when sidebar collapses on desktop
   document.getElementById('sb-toggle')?.addEventListener('click', function() {
-    if (sidebar && sidebar.classList.contains('collapsed')) closePopup();
+    const sidebarEl = document.getElementById('lux-sidebar');
+    if (sidebarEl && sidebarEl.classList.contains('collapsed')) {
+      closeProfilePopup();
+      closeAllSubNavs();
+    }
   });
 })();
 
@@ -1213,23 +1272,10 @@ themeBtn?.addEventListener('click', () => {
 
 // ── ACTIVE NAV HIGHLIGHT
 // Server-side Django template already sets .active on the correct item.
-// This JS block handles two cases the template can't cover:
-//   1. Auto-open the profile popup if the active page is one of its sub-items.
-//   2. Save/restore sidebar scroll position across page navigations.
+// This JS block handles saving/restoring sidebar scroll position across page navigations.
 
 (function() {
-  // ── 1. Auto-open profile popup when current page is inside it
-  const popup   = document.getElementById('sb-profile-popup');
-  const chevron = document.getElementById('sb-profile-card-chevron');
-  if (popup) {
-    const hasActiveChild = popup.querySelector('.sb-pp-item.active');
-    if (hasActiveChild) {
-      popup.classList.add('open');
-      if (chevron) chevron.style.transform = 'rotate(180deg)';
-    }
-  }
-
-  // ── 2. Sidebar scroll position persistence
+  // ── 1. Sidebar scroll position persistence
   const sbNav = document.querySelector('.sb-nav');
   if (sbNav) {
     // Restore saved scroll position
