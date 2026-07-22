@@ -1,17 +1,31 @@
-Django==4.2.16
-dj-database-url==2.3.0
-gunicorn==23.0.0
-whitenoise==6.7.0
-psycopg2-binary==2.9.12
+# ── Core Django ───────────────────────────────────────────────────────────
+django==4.2.16
 python-decouple==3.8
-requests==2.32.3
-numpy==1.26.4
-opencv-python-headless==4.8.1.78
-matplotlib==3.8.4
-mediapipe==0.10.14
-openai==2.46.0
-groq==1.5.0
-python-dateutil==2.9.0.post0
-pillow==10.4.0
+whitenoise==6.7.0
+gunicorn==23.0.0
+dj-database-url==2.3.0
+psycopg2-binary==2.9.12
 sqlparse==0.5.5
 asgiref==3.12.1
+
+# ── Django add-ons ────────────────────────────────────────────────────────
+python-dateutil==2.9.0.post0
+
+# ── Image processing ──────────────────────────────────────────────────────
+pillow==11.3.0                  # Required by Django ImageField
+opencv-python-headless==4.8.1.78
+numpy==1.26.4
+matplotlib==3.8.4
+
+# ── Face & skin analysis ──────────────────────────────────────────────────
+mediapipe==0.10.35              # 468-landmark face mesh for geometry extraction
+groq>=0.9.0                     # Groq Vision — skin analysis (acne/type/undertone)
+openai>=1.30.0                  # xAI Grok client (OpenAI-compatible) — face shape classification
+
+# ── HTTP utilities ────────────────────────────────────────────────────────
+requests==2.32.3                # Used in scanner management command (test_hf_apis)
+httpx==0.27.2                   # Async HTTP client used by HuggingFace inference calls
+
+# ── HuggingFace / AI inference ────────────────────────────────────────────
+huggingface-hub==0.25.2         # HF model hub client
+transformers==4.45.2            # Tokenizers & model pipelines for skin analysis
