@@ -21,11 +21,13 @@ SECRET_KEY = config('SECRET_KEY')
 # Defaults to False (safe); set DEBUG=True in .env for local development only.
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-configured_hosts = config('ALLOWED_HOSTS', default='localhost,127.0.0.1')
+configured_hosts = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.onrender.com')
 render_hostname = config('RENDER_EXTERNAL_HOSTNAME', default='').strip()
 ALLOWED_HOSTS = [host.strip() for host in configured_hosts.split(',') if host.strip()]
 if render_hostname and render_hostname not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(render_hostname)
+if '.onrender.com' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('.onrender.com')
 
 
 # Application definition
@@ -207,13 +209,18 @@ CSRF_COOKIE_HTTPONLY = False   # Must be False so JS can read it for AJAX
 CSRF_COOKIE_SAMESITE = 'Lax'
 configured_csrf_origins = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:8000,http://127.0.0.1:8000'
+    default='http://localhost:8000,http://127.0.0.1:8000,https://*.onrender.com'
 )
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in configured_csrf_origins.split(',') if origin.strip()]
 if render_hostname:
     render_origin = f'https://{render_hostname}'
     if render_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(render_origin)
+if 'https://*.onrender.com' not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append('https://*.onrender.com')
+
+# Proxy SSL header (REQUIRED for PaaS like Render where SSL is terminated at reverse proxy)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Clickjacking protection (also set by XFrameOptionsMiddleware)
 X_FRAME_OPTIONS = 'DENY'

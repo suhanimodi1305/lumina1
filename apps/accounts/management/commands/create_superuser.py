@@ -68,11 +68,11 @@ class Command(BaseCommand):
     # ── Main handler ─────────────────────────────────────────────────────────
 
     def handle(self, *args, **options):
-        username   = options["username"]   or os.environ.get("DJANGO_SUPERUSER_USERNAME", "suhani")
-        email      = options["email"]      or os.environ.get("DJANGO_SUPERUSER_EMAIL",    "suhani@example.com")
-        password   = options["password"]   or os.environ.get("DJANGO_SUPERUSER_PASSWORD", "Lumina@2025")
-        first_name = options["first_name"] or os.environ.get("DJANGO_SUPERUSER_FIRSTNAME", "")
-        last_name  = options["last_name"]  or os.environ.get("DJANGO_SUPERUSER_LASTNAME",  "")
+        username   = options["username"]   or os.environ.get("DJANGO_SUPERUSER_USERNAME") or "suhani"
+        email      = options["email"]      or os.environ.get("DJANGO_SUPERUSER_EMAIL")    or "suhani@example.com"
+        password   = options["password"]   or os.environ.get("DJANGO_SUPERUSER_PASSWORD") or "Lumina@2025"
+        first_name = options["first_name"] or os.environ.get("DJANGO_SUPERUSER_FIRSTNAME") or ""
+        last_name  = options["last_name"]  or os.environ.get("DJANGO_SUPERUSER_LASTNAME")  or ""
 
         if not password:
             raise CommandError("Password must not be empty.")
