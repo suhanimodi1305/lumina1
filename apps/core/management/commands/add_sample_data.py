@@ -268,8 +268,9 @@ class Command(BaseCommand):
         return objs
 
     def _create_products(self):
-        """Create 5 products across different categories"""
+        """Create reference products and auto-load all Indian makeup & skincare fixtures"""
         from apps.products.models import Product, SkinConcern
+        from django.core.management import call_command
 
         concerns_data = [
             {'name': 'Acne',         'slug': 'acne',         'icon': '🔴', 'description': 'Pimples and breakouts'},
@@ -280,6 +281,23 @@ class Command(BaseCommand):
         ]
         for c in concerns_data:
             SkinConcern.objects.get_or_create(slug=c['slug'], defaults=c)
+
+        # Load fixture data for Indian Makeup (MARS, Nykaa, Maybelline, MAC), Ayurvedic, & K-beauty
+        fixtures = [
+            'mars_makeup_products',
+            'maybelline_mac_nykaa_products',
+            'sp_ayurved_products',
+            'sas_korean_products',
+            'korean_products',
+            'makeup_products',
+            'skin_concerns',
+        ]
+        for fx in fixtures:
+            try:
+                call_command('loaddata', fx, verbosity=0)
+                self.stdout.write(f'  Loaded fixture: {fx}')
+            except Exception as fe:
+                self.stdout.write(f'  Fixture {fx} note: {fe}')
 
         products_data = [
             {
@@ -343,8 +361,6 @@ class Command(BaseCommand):
                     'is_featured': p.get('is_featured', False),
                 }
             )
-            if created:
-                self.stdout.write(f'  Product: {obj.name}')
             objs.append(obj)
         return objs
 
