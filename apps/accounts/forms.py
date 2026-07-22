@@ -51,7 +51,7 @@ class LuminaSignupForm(UserCreationForm):
 
 
 class LuminaLoginForm(AuthenticationForm):
-    """Login with a username or registered email address."""
+    """Allow users to sign in with either username or account email."""
     username = forms.CharField(
         label='Username or email',
         widget=forms.TextInput(attrs={**_TEXT_ATTRS, 'placeholder': 'Username or email', 'autofocus': True})
@@ -62,9 +62,12 @@ class LuminaLoginForm(AuthenticationForm):
     )
 
     def clean_username(self):
+        """Normalize typed credentials before Django authenticates them."""
         identifier = self.cleaned_data['username'].strip()
-        email_user = User.objects.filter(email__iexact=identifier).first()
-        return email_user.username if email_user else identifier
+        user = User.objects.filter(email__iexact=identifier).order_by('pk').first()
+        if user:
+            return user.get_username()
+        return identifier
 
 
 class LuminaPasswordResetForm(PasswordResetForm):
