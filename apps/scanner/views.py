@@ -465,10 +465,8 @@ def upload(request):
             request.session['latest_scan_id'] = scan.id
             
             logger.info(f"Scan completed successfully: ID={scan.id}")
-            messages.success(request, 'Your skin analysis is complete!')
-            
-            # Scan done → go straight to Smart AI Quiz
-            return redirect('diagnostic:smart_start')
+            # Scan done → go straight to Results page (bypassing questionnaire as requested)
+            return redirect('results:detail', scan_id=scan.id)
             
         except Exception as e:
             # Log the full error
@@ -508,7 +506,7 @@ def upload(request):
             
             request.session['latest_scan_id'] = scan.id
             messages.success(request, 'Your skin analysis is complete!')
-            return redirect('diagnostic:smart_start')
+            return redirect('results:detail', scan_id=scan.id)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
