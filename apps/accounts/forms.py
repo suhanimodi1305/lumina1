@@ -65,6 +65,8 @@ class LuminaLoginForm(AuthenticationForm):
         """Normalize typed credentials before Django authenticates them."""
         identifier = self.cleaned_data['username'].strip()
         user = User.objects.filter(email__iexact=identifier).order_by('pk').first()
+        if not user:
+            user = User.objects.filter(username__iexact=identifier).order_by('pk').first()
         if user:
             return user.get_username()
         return identifier
