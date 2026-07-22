@@ -2,28 +2,20 @@ from django.apps import AppConfig
 
 
 def _auto_ensure_superuser(sender, **kwargs):
-    """Ensure default superuser 'suhani' exists with password 'Lumina@2025'."""
-    import os
+    """Ensure default superuser 'suhani' and sample data exist."""
     from django.contrib.auth.models import User
+    from django.core.management import call_command
     try:
-        username = os.environ.get("DJANGO_SUPERUSER_USERNAME") or "suhani"
-        email = os.environ.get("DJANGO_SUPERUSER_EMAIL") or "suhani@example.com"
-        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD") or "Lumina@2025"
-
-        user = User.objects.filter(username__iexact=username).first()
-        if user is None:
-            User.objects.create_superuser(
-                username=username,
-                email=email,
-                password=password,
-            )
+        suhani_user = User.objects.filter(username__iexact="suhani").first()
+        if not suhani_user:
+            call_command('add_sample_data')
         else:
-            user.email = email
-            user.is_active = True
-            user.is_staff = True
-            user.is_superuser = True
-            user.set_password(password)
-            user.save()
+            suhani_user.email = 'suhanimodi7090@gmail.com'
+            suhani_user.is_active = True
+            suhani_user.is_staff = True
+            suhani_user.is_superuser = True
+            suhani_user.set_password('Lumina@2025')
+            suhani_user.save()
     except Exception:
         pass
 

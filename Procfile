@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py create_superuser && gunicorn lumina.wsgi --bind 0.0.0.0:$PORT --log-file -
+web: python manage.py migrate && python manage.py add_sample_data && gunicorn lumina.wsgi --bind 0.0.0.0:$PORT --log-file -
