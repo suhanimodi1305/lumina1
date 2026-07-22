@@ -56,8 +56,8 @@ def _get_grok_client():
     if not _openai_pkg_available or _OpenAI is None:
         return None
     api_key = getattr(settings, 'GROK_API_KEY', '')
-    if not api_key or api_key == 'your-xai-grok-api-key-here':
-        logger.warning("GROK_API_KEY not configured")
+    if not api_key or api_key.startswith('your-'):
+        logger.info("GROK_API_KEY not configured or using placeholder — falling back to MediaPipe geometric face shape classifier")
         return None
     return _OpenAI(api_key=api_key, base_url='https://api.x.ai/v1')
 
@@ -253,8 +253,8 @@ def _get_groq_client():
     if not _groq_available or _Groq is None:
         return None
     api_key = getattr(settings, 'GROQ_API_KEY', '')
-    if not api_key:
-        logger.error("GROQ_API_KEY not configured")
+    if not api_key or api_key.startswith('your-'):
+        logger.info("GROQ_API_KEY not configured or using placeholder — falling back to OpenCV vision analysis")
         return None
     return _Groq(api_key=api_key)
 
