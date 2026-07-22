@@ -43,6 +43,9 @@ EMPLOYEES = [
 ]
 
 CUSTOMERS = [
+    dict(username='suhani',   first_name='Suhani', last_name='',
+         email='suhani@example.com', password='Lumina@2025', city='Delhi',
+         phone='9870005555', tier='vip'),
     dict(username='aanya_k',  first_name='Aanya',  last_name='Kapoor',
          email='aanya@gmail.com',   password='User@1234', city='Mumbai',
          phone='9870001111', tier='vip'),
@@ -224,7 +227,7 @@ class Command(BaseCommand):
     help = 'Seeds the entire Lumina database with demo data for all sections'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.MIGRATE_HEADING('\n══ Lumina Full Database Seeder ══\n'))
+        self.stdout.write(self.style.MIGRATE_HEADING('\n== Lumina Full Database Seeder ==\n'))
         now = timezone.now()
 
         # ── Step 1: Core reference data ───────────────────────────────────────

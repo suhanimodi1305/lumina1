@@ -70,7 +70,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         username   = options["username"]   or os.environ.get("DJANGO_SUPERUSER_USERNAME", "suhani")
         email      = options["email"]      or os.environ.get("DJANGO_SUPERUSER_EMAIL",    "suhani@example.com")
-        password   = options["password"]   or os.environ.get("DJANGO_SUPERUSER_PASSWORD", "suhani")
+        password   = options["password"]   or os.environ.get("DJANGO_SUPERUSER_PASSWORD", "Lumina@2025")
         first_name = options["first_name"] or os.environ.get("DJANGO_SUPERUSER_FIRSTNAME", "")
         last_name  = options["last_name"]  or os.environ.get("DJANGO_SUPERUSER_LASTNAME",  "")
 
